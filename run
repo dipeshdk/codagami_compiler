@@ -1,0 +1,3 @@
+flex grammar.l
+yacc -dvt grammar.y
+gcc lex.yy.c y.tab.c -lfl 
