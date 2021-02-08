@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+#lexer
+bin/lexer
+
+#obj
+obj/*
