@@ -17,5 +17,5 @@ This project is aimed to make a compiler of our own as a group project of the co
 
   ```console
   $ make clean && make
-  $ bin/lexer test/test1.c
+  $ bin/lexer tests/test1.c
   ``` 
