@@ -1,3 +1,4 @@
+//  Test case containing all the minimum features required.
 struct node{
     int val;
     struct node* right;
@@ -25,5 +26,28 @@ int main(){
     root->left = lchild;
     root->right = rchild;
 
+    int n = 0;
+    scanf("%d",&n);
+    char a[n];
+    int step = 5;
+    while(n > 0){
+        for(int i = 0 ; i < n ;i += step){
+            a[i] = (int)'a'+(((int)a[i] + i - (int)'a') % 26);
+        }
+        n-=10;
+    }
+
+    int x = 9;
+    int y = sqrt(9);
+
+    char s1[] = "coda";
+    char s2[] = "gami";
+    char s3[] = strcat(s1,s2);
+    if(s3[1] = 'o'){
+        printf("YES\n");
+    }else{
+        printf("NO");
+    }
+    return 0;
     
 }
