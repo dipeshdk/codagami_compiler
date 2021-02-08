@@ -1,7 +1,5 @@
 #!/bin/bash
 
-g++ -o compare compare.cpp
-
 test () {
 
 	# Remove old output files if any
