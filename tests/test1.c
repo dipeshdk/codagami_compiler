@@ -1,4 +1,4 @@
-//  Test case containing all the minimum features required.
+/*  Test case containing all the minimum features required. */
 struct node{
     int val;
     struct node* right;
