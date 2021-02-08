@@ -6,6 +6,10 @@
 *.lo
 *.o
 *.obj
+/obj/lex.yy.c
+/obj/y.output
+/obj/y.tab.h
+/obj/y.tab.c
 
 # Precompiled Headers
 *.gch
@@ -30,3 +34,4 @@
 *.exe
 *.out
 *.app
+/bin/lexer
