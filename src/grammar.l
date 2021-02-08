@@ -9,12 +9,11 @@ IS			(u|U|l|L)*
 #include <stdio.h>
 #include "y.tab.h"
 
-void error() {
-    printf("ERROR: line: %d column: %d\nexiting....\n", line+1, prevCol+1);
-    exit(0);
-}
 
 void count();
+void error();
+int check_type();
+int comment();
 %}
 
 %%
@@ -118,13 +117,19 @@ L?\"(\\.|[^\\"])*\"	{ count(); return(STRING_LITERAL); }
 
 %%
 
-yywrap()
+int yywrap()
 {
 	return(1);
 }
 
+int prevCol = 0,  column = 0, line = 0;
 
-comment()
+void error() {
+    printf("ERROR: line: %d column: %d\nexiting....\n", line+1, prevCol+1);
+    exit(0);
+}
+
+int comment()
 {
 	char c, c1;
 
@@ -142,9 +147,7 @@ loop:
 		putchar(c1);
 }
 
-int prevCol = 0;
-int column = 0;
-int line = 0;
+
 
 void count()
 {
