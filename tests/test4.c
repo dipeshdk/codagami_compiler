@@ -13,7 +13,7 @@ void printLinkedList(struct node* head){
 
 int main() {
     int n = 10;
-    struct node* head = NULL;// = (struct node*)malloc(sizeof(node));
+    struct node* head = NULL;
     struct node* prev = NULL;
     for(int i = 0;i<n;i++){
         struct node* curr = (struct node*)malloc(sizeof(node));
