@@ -258,7 +258,7 @@ void getTokenName(int ind, char c[]) {
 void printTable(int token) {
     char c[20];
     getTokenName(token,c);
-    printf("    %-10s\t\t %-12s\t\t %8d\t %8d\n", c, yytext, line+1, prevCol+1);
+    printf("    %-15s\t\t %-12s\t\t %8d\t %8d\n", c, yytext, line+1, prevCol+1);
 }
 
 int main(int ac, char **av) {
@@ -272,7 +272,7 @@ int main(int ac, char **av) {
             return (-1);
         }
         yyset_in(fd);
-        printf("    %-10s\t\t %-12s\t\t %8s\t %8s\n\n", "Token", "Lexeme", "Line#", "Column#");
+        printf("    %-15s\t\t %-12s\t\t %8s\t %8s\n\n", "Token", "Lexeme", "Line#", "Column#");
         while((val=yylex()) > 0) {
             printTable(val);
         }
