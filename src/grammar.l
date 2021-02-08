@@ -9,6 +9,11 @@ IS			(u|U|l|L)*
 #include <stdio.h>
 #include "y.tab.h"
 
+void error() {
+    printf("ERROR: line: %d column: %d\nexiting....\n", line+1, prevCol+1);
+    exit(0);
+}
+
 void count();
 %}
 
@@ -109,7 +114,7 @@ L?\"(\\.|[^\\"])*\"	{ count(); return(STRING_LITERAL); }
 "?"			{ count(); return('?'); }
 
 [ \t\v\n\f]		{ count(); }
-.			{ /* ignore bad characters */ }
+.			{ count(); error(); }
 
 %%
 
@@ -268,7 +273,6 @@ int main(int ac, char **av) {
         while((val=yylex()) > 0) {
             printTable(val);
         }
-        // yylex();
         fclose(fd);
     }
     else
