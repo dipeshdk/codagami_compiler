@@ -16,8 +16,6 @@ This project is aimed to make a compiler of our own as a group project of the co
 ## Usage example
 
   ```console
-  $ cd src
   $ make
-  $ cd .
   $ bin/lexer test/test1.c
   ``` 
