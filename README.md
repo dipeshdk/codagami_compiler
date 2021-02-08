@@ -20,3 +20,8 @@ This project is aimed to make a compiler of our own as a group project of the co
   $ make clean && make
   $ bin/lexer tests/test1.c
   ``` 
+## Running tests all at once
+ ```console
+ $ cd ./tests/runTests
+ $ ./runTests.sh
+ ```

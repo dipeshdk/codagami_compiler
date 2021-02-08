@@ -135,16 +135,30 @@ int comment()
 
 loop:
 	while ((c = input()) != '*' && c != 0)
+<<<<<<< HEAD
 		putchar(c);
 
 	if ((c1 = input()) != '/' && c != 0)
 	{
 		unput(c1);
+=======
+		//putchar(c);
+        ;
+
+	if ((c1 = input()) != '/' && c != 0)
+	{
+		//unput(c1);
+>>>>>>> 5e560e5670db387a4635a801d4ca6573c63b7468
 		goto loop;
 	}
 
 	if (c != 0)
+<<<<<<< HEAD
 		putchar(c1);
+=======
+		//putchar(c1);
+        ;
+>>>>>>> 5e560e5670db387a4635a801d4ca6573c63b7468
 }
 
 
@@ -258,7 +272,11 @@ void getTokenName(int ind, char c[]) {
 void printTable(int token) {
     char c[20];
     getTokenName(token,c);
+<<<<<<< HEAD
     printf("    %-10s\t\t %-12s\t\t %8d\t %8d\n", c, yytext, line+1, prevCol+1);
+=======
+    printf("    %-15s\t\t %-35s\t\t %8d\t %8d\n", c, yytext, line+1, prevCol+1);
+>>>>>>> 5e560e5670db387a4635a801d4ca6573c63b7468
 }
 
 int main(int ac, char **av) {
@@ -272,7 +290,7 @@ int main(int ac, char **av) {
             return (-1);
         }
         yyset_in(fd);
-        printf("    %-10s\t\t %-12s\t\t %8s\t %8s\n\n", "Token", "Lexeme", "Line#", "Column#");
+        printf("    %-15s\t\t %-35s\t\t %8s\t %8s\n\n", "Token", "Lexeme", "Line#", "Column#");
         while((val=yylex()) > 0) {
             printTable(val);
         }

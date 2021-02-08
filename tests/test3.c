@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // Test case for input/output, control structures
+=======
+/* Test case for input/output, control structures*/
+>>>>>>> 5e560e5670db387a4635a801d4ca6573c63b7468
 int main(){
     int x = 0;
     scanf("Give a number between 1-9: %d",&x);
