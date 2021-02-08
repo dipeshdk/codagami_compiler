@@ -12,7 +12,7 @@ test () {
 	
 	
 	# Compare the content of expected and generated output file.
-	./compare "../ActualOutput/output$1.txt" "../Expected_outputs/test$1"
+	../../bin/compare "../ActualOutput/output$1.txt" "../Expected_outputs/test$1"
 	
 	# If both are equal the test is passed.
 	if [[ $? -eq 0 ]]
@@ -25,10 +25,10 @@ test () {
 }
 
 # Cleanup old executable 
-[ -f compare ] && rm compare
+[ -f ../../bin/compare ] && rm ../../bin/compare
 
 # Compile
-g++ -o compare compare.cpp
+g++ -o ../../bin/compare compare.cpp
 
 test 1
 test 2
