@@ -7,8 +7,7 @@ This project is aimed to make a compiler of our own as a group project of the co
 - [Dipesh Khandelwal (180249)](https://github.com/dipeshdk)
 - [Rythm Agarwal (180636)](https://github.com/Rythmag)
 - [Sakshi (180653)](https://github.com/Sakshisak)
-- [Sarthak Dubey (180674)](https://github.com/
-srthkdb)
+- [Sarthak Dubey (180674)](https://github.com/srthkdb)
 
 ## Implementation details
  - Implementation language: C
