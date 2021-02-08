@@ -18,6 +18,6 @@ srthkdb)
 ## Usage example
 
   ```console
-  $ make
-  $ bin/lexer test/test1.c
+  $ make clean && make
+  $ bin/lexer tests/test1.c
   ``` 
