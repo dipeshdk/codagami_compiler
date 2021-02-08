@@ -32,7 +32,10 @@
 *.app
 
 #lexer
-bin/lexer
+/bin/lexer
 
 #obj
-obj/*
+/obj/lex.yy.c
+/obj/y.tab.h
+/obj/y.tab.c
+/obj/y.output

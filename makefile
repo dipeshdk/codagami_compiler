@@ -4,6 +4,7 @@ BIN=bin
 OBJ=obj
 LEX=flex
 YACC=yacc 
+objfiles = lex.yy.c y.output y.tab.c y.tab.h
 
 all: $(BIN)/lexer
 
@@ -20,6 +21,6 @@ $(OBJ)/y.tab.h: $(SRC)/grammar.y
 	$(YACC) -o $(OBJ)/y.tab.h -dvt $(SRC)/grammar.y
 
 clean: 
-	$(RM) $(OBJ)/* $(BIN)/*
+	$(RM) $(OBJ)/$(objfiles) $(BIN)/*
 
 
