@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-//  Test case containing all the minimum features required.
-=======
 /*  Test case containing all the minimum features required. */
->>>>>>> 5e560e5670db387a4635a801d4ca6573c63b7468
 struct node{
     int val;
     struct node* right;
