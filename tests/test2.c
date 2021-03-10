@@ -1,5 +1,9 @@
 int main() {
-    int x = 5;
-    double z = 5.0 + x * (6/5 + 4);
+    char s[] = "Programming is fun";
+    int i;
+
+    for (i = 0; s[i] != '\0'; ++i);
+    
+    printf("Length of the string: %d", i);
     return 0;
 }
