@@ -1,13 +1,3 @@
-Nonterminals useless in grammar
-
-    start
-
-
-Rules useless in grammar
-
-  212 start: translation_unit
-
-
 State 333 conflicts: 1 shift/reduce
 
 
@@ -382,193 +372,193 @@ Nonterminals, with rules where they appear
 
     $accept (85)
         on left: 0
-    primary_expression (86)
+    primary_expression <nodes> (86)
         on left: 1 2 3 4
         on right: 5
-    postfix_expression (87)
+    postfix_expression <nodes> (87)
         on left: 5 6 7 8 9 10 11 12
         on right: 6 7 8 9 10 11 12 15
-    argument_expression_list (88)
+    argument_expression_list <nodes> (88)
         on left: 13 14
         on right: 8 14
-    unary_expression (89)
+    unary_expression <nodes> (89)
         on left: 15 16 17 18 19 20
         on right: 16 17 19 27 60
-    unary_operator (90)
+    unary_operator <nodes> (90)
         on left: 21 22 23 24 25 26
         on right: 18
-    cast_expression (91)
+    cast_expression <nodes> (91)
         on left: 27 28
         on right: 18 28 29 30 31 32
-    multiplicative_expression (92)
+    multiplicative_expression <nodes> (92)
         on left: 29 30 31 32
         on right: 30 31 32 33 34 35
-    additive_expression (93)
+    additive_expression <nodes> (93)
         on left: 33 34 35
         on right: 34 35 36 37 38
-    shift_expression (94)
+    shift_expression <nodes> (94)
         on left: 36 37 38
         on right: 37 38 39 40 41 42 43
-    relational_expression (95)
+    relational_expression <nodes> (95)
         on left: 39 40 41 42 43
         on right: 40 41 42 43 44 45 46
-    equality_expression (96)
+    equality_expression <nodes> (96)
         on left: 44 45 46
         on right: 45 46 47 48
-    and_expression (97)
+    and_expression <nodes> (97)
         on left: 47 48
         on right: 48 49 50
-    exclusive_or_expression (98)
+    exclusive_or_expression <nodes> (98)
         on left: 49 50
         on right: 50 51 52
-    inclusive_or_expression (99)
+    inclusive_or_expression <nodes> (99)
         on left: 51 52
         on right: 52 53 54
-    logical_and_expression (100)
+    logical_and_expression <nodes> (100)
         on left: 53 54
         on right: 54 55 56
-    logical_or_expression (101)
+    logical_or_expression <nodes> (101)
         on left: 55 56
         on right: 56 57 58
-    conditional_expression (102)
+    conditional_expression <nodes> (102)
         on left: 57 58
         on right: 58 59 74
-    assignment_expression (103)
+    assignment_expression <nodes> (103)
         on left: 59 60
         on right: 13 14 60 72 73 168
-    assignment_operator (104)
+    assignment_operator <nodes> (104)
         on left: 61 62 63 64 65 66 67 68 69 70 71
         on right: 60
-    expression (105)
+    expression <nodes> (105)
         on left: 72 73
         on right: 4 6 58 73 191 192 193 194 195 196 198 203
-    constant_expression (106)
+    constant_expression <nodes> (106)
         on left: 74
         on right: 119 120 127 134 161 163 180
-    declaration (107)
+    declaration <nodes> (107)
         on left: 75 76
         on right: 186 187 207
-    declaration_specifiers (108)
+    declaration_specifiers <nodes> (108)
         on left: 77 78 79 80 81 82
         on right: 75 76 78 80 82 149 150 151 208 209
-    init_declarator_list (109)
+    init_declarator_list <nodes> (109)
         on left: 83 84
         on right: 76 84
-    init_declarator (110)
+    init_declarator <nodes> (110)
         on left: 85 86
         on right: 83 84
-    storage_class_specifier (111)
+    storage_class_specifier <nodes> (111)
         on left: 87 88 89 90 91
         on right: 77 78
-    type_specifier (112)
+    type_specifier <nodes> (112)
         on left: 92 93 94 95 96 97 98 99 100 101 102 103
         on right: 79 80 112 113
-    struct_or_union_specifier (113)
+    struct_or_union_specifier <nodes> (113)
         on left: 104 105 106
         on right: 101
-    struct_or_union (114)
+    struct_or_union <nodes> (114)
         on left: 107 108
         on right: 104 105 106
-    struct_declaration_list (115)
+    struct_declaration_list <nodes> (115)
         on left: 109 110
         on right: 104 105 110
-    struct_declaration (116)
+    struct_declaration <nodes> (116)
         on left: 111
         on right: 109 110
-    specifier_qualifier_list (117)
+    specifier_qualifier_list <nodes> (117)
         on left: 112 113 114 115
         on right: 111 112 114 154 155
-    struct_declarator_list (118)
+    struct_declarator_list <nodes> (118)
         on left: 116 117
         on right: 111 117
-    struct_declarator (119)
+    struct_declarator <nodes> (119)
         on left: 118 119 120
         on right: 116 117
-    enum_specifier (120)
+    enum_specifier <nodes> (120)
         on left: 121 122 123
         on right: 102
-    enumerator_list (121)
+    enumerator_list <nodes> (121)
         on left: 124 125
         on right: 121 122 125
-    enumerator (122)
+    enumerator <nodes> (122)
         on left: 126 127
         on right: 124 125
-    type_qualifier (123)
+    type_qualifier <nodes> (123)
         on left: 128 129
         on right: 81 82 114 115 143 144
-    declarator (124)
+    declarator <nodes> (124)
         on left: 130 131
         on right: 85 86 118 120 133 149 208 209 210 211
-    direct_declarator (125)
+    direct_declarator <nodes> (125)
         on left: 132 133 134 135 136 137 138
         on right: 130 131 134 135 136 137 138
-    pointer (126)
+    pointer <nodes> (126)
         on left: 139 140 141 142
         on right: 130 141 142 156 158
-    type_qualifier_list (127)
+    type_qualifier_list <nodes> (127)
         on left: 143 144
         on right: 140 142 144
-    parameter_type_list (128)
+    parameter_type_list <nodes> (128)
         on left: 145 146
         on right: 136 165 167
-    parameter_list (129)
+    parameter_list <nodes> (129)
         on left: 147 148
         on right: 145 146 148
-    parameter_declaration (130)
+    parameter_declaration <nodes> (130)
         on left: 149 150 151
         on right: 147 148
-    identifier_list (131)
+    identifier_list <nodes> (131)
         on left: 152 153
         on right: 137 153
-    type_name (132)
+    type_name <nodes> (132)
         on left: 154 155
         on right: 20 28
-    abstract_declarator (133)
+    abstract_declarator <nodes> (133)
         on left: 156 157 158
         on right: 150 155 159
-    direct_abstract_declarator (134)
+    direct_abstract_declarator <nodes> (134)
         on left: 159 160 161 162 163 164 165 166 167
         on right: 157 158 162 163 166 167
-    initializer (135)
+    initializer <nodes> (135)
         on left: 168 169 170
         on right: 86 171 172
-    initializer_list (136)
+    initializer_list <nodes> (136)
         on left: 171 172
         on right: 169 170 172
-    statement (137)
+    statement <nodes> (137)
         on left: 173 174 175 176 177 178
         on right: 179 180 181 188 189 192 193 194 195 196 197 198
-    labeled_statement (138)
+    labeled_statement <nodes> (138)
         on left: 179 180 181
         on right: 173
-    compound_statement (139)
+    compound_statement <nodes> (139)
         on left: 182 183 184 185
         on right: 174 208 209 210 211
-    declaration_list (140)
+    declaration_list <nodes> (140)
         on left: 186 187
         on right: 184 185 187 208 210
-    statement_list (141)
+    statement_list <nodes> (141)
         on left: 188 189
         on right: 183 185 189
-    expression_statement (142)
+    expression_statement <nodes> (142)
         on left: 190 191
         on right: 175 197 198
-    selection_statement (143)
+    selection_statement <nodes> (143)
         on left: 192 193 194
         on right: 176
-    iteration_statement (144)
+    iteration_statement <nodes> (144)
         on left: 195 196 197 198
         on right: 177
-    jump_statement (145)
+    jump_statement <nodes> (145)
         on left: 199 200 201 202 203
         on right: 178
-    translation_unit (146)
+    translation_unit <nodes> (146)
         on left: 204 205
         on right: 0 205
-    external_declaration (147)
+    external_declaration <nodes> (147)
         on left: 206 207
         on right: 204 205
-    function_definition (148)
+    function_definition <nodes> (148)
         on left: 208 209 210 211
         on right: 206
 

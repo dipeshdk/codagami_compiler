@@ -1,1520 +1,324 @@
 y.tab.c: In function ‘yyparse’:
-y.tab.c:1823:16: warning: implicit declaration of function ‘yylex’ [-Wimplicit-function-declaration]
- 1823 |       yychar = yylex ();
+y.tab.c:1835:16: warning: implicit declaration of function ‘yylex’ [-Wimplicit-function-declaration]
+ 1835 |       yychar = yylex ();
       |                ^~~~~
-grammar.y:39:40: warning: implicit declaration of function ‘strdup’ [-Wimplicit-function-declaration]
-   39 |  : IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                        ^~~~~~
-grammar.y:39:40: warning: incompatible implicit declaration of built-in function ‘strdup’
-grammar.y:39:29: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   39 |  : IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                             ^
-grammar.y:40:43: warning: incompatible implicit declaration of built-in function ‘strdup’
-   40 |  | CONSTANT {$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                           ^~~~~~
-grammar.y:40:32: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   40 |  | CONSTANT {$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                ^
-grammar.y:41:44: warning: incompatible implicit declaration of built-in function ‘strdup’
-   41 |  | STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                            ^~~~~~
-grammar.y:41:33: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   41 |  | STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                 ^
-grammar.y:58:81: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-   58 |  | argument_expression_list ',' assignment_expression { makeSibling($3, $1); $$ = $1; }
-      |                                                                            ~~~~~^~~
-      |                                                                                 |
-      |                                                                                 YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:58:91: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-   58 |  | argument_expression_list ',' assignment_expression { makeSibling($3, $1); $$ = $1; }
-      |                                                                                      ~~   ^   
-      |                                                                                           |
-      |                                                                                           YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:63:53: warning: incompatible implicit declaration of built-in function ‘strdup’
-   63 |  | INC_OP unary_expression {$$ = makeNode(strdup("INC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                     ^~~~~~
-grammar.y:63:91: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   63 |  | INC_OP unary_expression {$$ = makeNode(strdup("INC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                                                      ~~~~~^~~
-      |                                                                                           |
-      |                                                                                           YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:63:42: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   63 |  | INC_OP unary_expression {$$ = makeNode(strdup("INC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                          ^
-grammar.y:64:53: warning: incompatible implicit declaration of built-in function ‘strdup’
-   64 |  | DEC_OP unary_expression {$$ = makeNode(strdup("DEC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                     ^~~~~~
-grammar.y:64:91: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   64 |  | DEC_OP unary_expression {$$ = makeNode(strdup("DEC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                                                      ~~~~~^~~
-      |                                                                                           |
-      |                                                                                           YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:64:42: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   64 |  | DEC_OP unary_expression {$$ = makeNode(strdup("DEC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                          ^
-grammar.y:65:58: warning: passing argument 1 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-   65 |  | unary_operator cast_expression { addChild($1, $2); $$ = $1; }
-      |                                                     ~~~~~^~~~
-      |                                                          |
-      |                                                          YYSTYPE {aka int}
-grammar.y:33:22: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                ~~~~~~^~~~~~
-grammar.y:65:69: warning: passing argument 2 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-   65 |  | unary_operator cast_expression { addChild($1, $2); $$ = $1; }
-      |                                                                ~    ^  
-      |                                                                     |
-      |                                                                     YYSTYPE {aka int}
-grammar.y:33:36: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                              ~~~~~~^~~~~
-grammar.y:66:53: warning: incompatible implicit declaration of built-in function ‘strdup’
-   66 |  | SIZEOF unary_expression {$$ = makeNode(strdup("SIZEOF"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                     ^~~~~~
-grammar.y:66:91: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   66 |  | SIZEOF unary_expression {$$ = makeNode(strdup("SIZEOF"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                                                      ~~~~~^~~
-      |                                                                                           |
-      |                                                                                           YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:66:42: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   66 |  | SIZEOF unary_expression {$$ = makeNode(strdup("SIZEOF"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                          ^
-grammar.y:67:53: warning: incompatible implicit declaration of built-in function ‘strdup’
-   67 |  | SIZEOF '(' type_name ')'{$$ = makeNode(strdup("SIZEOF"), strdup(""), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                     ^~~~~~
-grammar.y:67:91: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   67 |  | SIZEOF '(' type_name ')'{$$ = makeNode(strdup("SIZEOF"), strdup(""), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                                                      ~~~~~^~~~
-      |                                                                                           |
-      |                                                                                           YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:67:42: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   67 |  | SIZEOF '(' type_name ')'{$$ = makeNode(strdup("SIZEOF"), strdup(""), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                          ^
-grammar.y:71:33: warning: incompatible implicit declaration of built-in function ‘strdup’
-   71 |  : '&' {$$ = makeNode(strdup("&"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                 ^~~~~~
-grammar.y:71:22: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   71 |  : '&' {$$ = makeNode(strdup("&"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                      ^
-grammar.y:72:33: warning: incompatible implicit declaration of built-in function ‘strdup’
-   72 |  | '*' {$$ = makeNode(strdup("*"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                 ^~~~~~
-grammar.y:72:22: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   72 |  | '*' {$$ = makeNode(strdup("*"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                      ^
-grammar.y:73:33: warning: incompatible implicit declaration of built-in function ‘strdup’
-   73 |  | '+' {$$ = makeNode(strdup("+"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                 ^~~~~~
-grammar.y:73:22: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   73 |  | '+' {$$ = makeNode(strdup("+"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                      ^
-grammar.y:74:33: warning: incompatible implicit declaration of built-in function ‘strdup’
-   74 |  | '-' {$$ = makeNode(strdup("-"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                 ^~~~~~
-grammar.y:74:22: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   74 |  | '-' {$$ = makeNode(strdup("-"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                      ^
-grammar.y:75:33: warning: incompatible implicit declaration of built-in function ‘strdup’
-   75 |  | '~' {$$ = makeNode(strdup("~"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                 ^~~~~~
-grammar.y:75:22: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   75 |  | '~' {$$ = makeNode(strdup("~"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                      ^
-grammar.y:76:33: warning: incompatible implicit declaration of built-in function ‘strdup’
-   76 |  | '!' {$$ = makeNode(strdup("!"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                 ^~~~~~
-grammar.y:76:22: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   76 |  | '!' {$$ = makeNode(strdup("!"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                      ^
-grammar.y:81:64: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-   81 |  | '(' type_name ')' cast_expression { makeSibling($2, $1); $$ = $1; }
-      |                                                           ~~~~~^~~~
-      |                                                                |
-      |                                                                YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:81:75: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-   81 |  | '(' type_name ')' cast_expression { makeSibling($2, $1); $$ = $1; }
-      |                                                                      ~    ^   
-      |                                                                           |
-      |                                                                           YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:86:76: warning: incompatible implicit declaration of built-in function ‘strdup’
-   86 |  | multiplicative_expression '*' cast_expression { $$ = makeNode(strdup("*"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                            ^~~~~~
-grammar.y:86:109: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   86 |  | multiplicative_expression '*' cast_expression { $$ = makeNode(strdup("*"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                        ~~~~~^~~~
-      |                                                                                                             |
-      |                                                                                                             YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:86:120: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   86 |  | multiplicative_expression '*' cast_expression { $$ = makeNode(strdup("*"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                   ~~~~~^~~
-      |                                                                                                                        |
-      |                                                                                                                        YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:86:65: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   86 |  | multiplicative_expression '*' cast_expression { $$ = makeNode(strdup("*"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                 ^
-grammar.y:87:76: warning: incompatible implicit declaration of built-in function ‘strdup’
-   87 |  | multiplicative_expression '/' cast_expression { $$ = makeNode(strdup("/"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                            ^~~~~~
-grammar.y:87:109: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   87 |  | multiplicative_expression '/' cast_expression { $$ = makeNode(strdup("/"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                        ~~~~~^~~~
-      |                                                                                                             |
-      |                                                                                                             YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:87:120: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   87 |  | multiplicative_expression '/' cast_expression { $$ = makeNode(strdup("/"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                   ~~~~~^~~
-      |                                                                                                                        |
-      |                                                                                                                        YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:87:65: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   87 |  | multiplicative_expression '/' cast_expression { $$ = makeNode(strdup("/"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                 ^
-grammar.y:88:76: warning: incompatible implicit declaration of built-in function ‘strdup’
-   88 |  | multiplicative_expression '%' cast_expression { $$ = makeNode(strdup("%"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                            ^~~~~~
-grammar.y:88:109: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   88 |  | multiplicative_expression '%' cast_expression { $$ = makeNode(strdup("%"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                        ~~~~~^~~~
-      |                                                                                                             |
-      |                                                                                                             YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:88:120: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   88 |  | multiplicative_expression '%' cast_expression { $$ = makeNode(strdup("%"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                   ~~~~~^~~
-      |                                                                                                                        |
-      |                                                                                                                        YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:88:65: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   88 |  | multiplicative_expression '%' cast_expression { $$ = makeNode(strdup("%"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                 ^
-grammar.y:93:80: warning: incompatible implicit declaration of built-in function ‘strdup’
-   93 |  | additive_expression '+' multiplicative_expression { $$ = makeNode(strdup("+"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                ^~~~~~
-grammar.y:93:113: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   93 |  | additive_expression '+' multiplicative_expression { $$ = makeNode(strdup("+"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                            ~~~~~^~~~
-      |                                                                                                                 |
-      |                                                                                                                 YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:93:124: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   93 |  | additive_expression '+' multiplicative_expression { $$ = makeNode(strdup("+"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                       ~~~~~^~~
-      |                                                                                                                            |
-      |                                                                                                                            YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:93:69: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   93 |  | additive_expression '+' multiplicative_expression { $$ = makeNode(strdup("+"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                     ^
-grammar.y:94:80: warning: incompatible implicit declaration of built-in function ‘strdup’
-   94 |  | additive_expression '-' multiplicative_expression { $$ = makeNode(strdup("-"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                ^~~~~~
-grammar.y:94:113: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   94 |  | additive_expression '-' multiplicative_expression { $$ = makeNode(strdup("-"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                            ~~~~~^~~~
-      |                                                                                                                 |
-      |                                                                                                                 YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:94:124: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   94 |  | additive_expression '-' multiplicative_expression { $$ = makeNode(strdup("-"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                       ~~~~~^~~
-      |                                                                                                                            |
-      |                                                                                                                            YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:94:69: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   94 |  | additive_expression '-' multiplicative_expression { $$ = makeNode(strdup("-"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                     ^
-grammar.y:99:75: warning: incompatible implicit declaration of built-in function ‘strdup’
-   99 |  | shift_expression LEFT_OP additive_expression { $$ = makeNode(strdup("LEFT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                           ^~~~~~
-grammar.y:99:114: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   99 |  | shift_expression LEFT_OP additive_expression { $$ = makeNode(strdup("LEFT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                             ~~~~~^~~~
-      |                                                                                                                  |
-      |                                                                                                                  YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:99:125: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-   99 |  | shift_expression LEFT_OP additive_expression { $$ = makeNode(strdup("LEFT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                        ~~~~~^~~
-      |                                                                                                                             |
-      |                                                                                                                             YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:99:64: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-   99 |  | shift_expression LEFT_OP additive_expression { $$ = makeNode(strdup("LEFT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                ^
-grammar.y:100:76: warning: incompatible implicit declaration of built-in function ‘strdup’
-  100 |  | shift_expression RIGHT_OP additive_expression { $$ = makeNode(strdup("RIGHT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                            ^~~~~~
-grammar.y:100:116: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  100 |  | shift_expression RIGHT_OP additive_expression { $$ = makeNode(strdup("RIGHT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                               ~~~~~^~~~
-      |                                                                                                                    |
-      |                                                                                                                    YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:100:127: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  100 |  | shift_expression RIGHT_OP additive_expression { $$ = makeNode(strdup("RIGHT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                          ~~~~~^~~
-      |                                                                                                                               |
-      |                                                                                                                               YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:100:65: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  100 |  | shift_expression RIGHT_OP additive_expression { $$ = makeNode(strdup("RIGHT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                 ^
-grammar.y:105:73: warning: incompatible implicit declaration of built-in function ‘strdup’
-  105 |  | relational_expression '<' shift_expression { $$ = makeNode(strdup("<"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                         ^~~~~~
-grammar.y:105:106: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  105 |  | relational_expression '<' shift_expression { $$ = makeNode(strdup("<"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                     ~~~~~^~~~
-      |                                                                                                          |
-      |                                                                                                          YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:105:117: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  105 |  | relational_expression '<' shift_expression { $$ = makeNode(strdup("<"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                ~~~~~^~~
-      |                                                                                                                     |
-      |                                                                                                                     YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:105:62: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  105 |  | relational_expression '<' shift_expression { $$ = makeNode(strdup("<"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                              ^
-grammar.y:106:73: warning: incompatible implicit declaration of built-in function ‘strdup’
-  106 |  | relational_expression '>' shift_expression { $$ = makeNode(strdup(">"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                         ^~~~~~
-grammar.y:106:106: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  106 |  | relational_expression '>' shift_expression { $$ = makeNode(strdup(">"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                     ~~~~~^~~~
-      |                                                                                                          |
-      |                                                                                                          YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:106:117: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  106 |  | relational_expression '>' shift_expression { $$ = makeNode(strdup(">"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                ~~~~~^~~
-      |                                                                                                                     |
-      |                                                                                                                     YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:106:62: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  106 |  | relational_expression '>' shift_expression { $$ = makeNode(strdup(">"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                              ^
-grammar.y:107:75: warning: incompatible implicit declaration of built-in function ‘strdup’
-  107 |  | relational_expression LE_OP shift_expression { $$ = makeNode(strdup("LE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                           ^~~~~~
-grammar.y:107:112: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  107 |  | relational_expression LE_OP shift_expression { $$ = makeNode(strdup("LE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                           ~~~~~^~~~
-      |                                                                                                                |
-      |                                                                                                                YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:107:123: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  107 |  | relational_expression LE_OP shift_expression { $$ = makeNode(strdup("LE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                      ~~~~~^~~
-      |                                                                                                                           |
-      |                                                                                                                           YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:107:64: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  107 |  | relational_expression LE_OP shift_expression { $$ = makeNode(strdup("LE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                ^
-grammar.y:108:75: warning: incompatible implicit declaration of built-in function ‘strdup’
-  108 |  | relational_expression GE_OP shift_expression { $$ = makeNode(strdup("GE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                           ^~~~~~
-grammar.y:108:112: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  108 |  | relational_expression GE_OP shift_expression { $$ = makeNode(strdup("GE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                           ~~~~~^~~~
-      |                                                                                                                |
-      |                                                                                                                YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:108:123: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  108 |  | relational_expression GE_OP shift_expression { $$ = makeNode(strdup("GE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                      ~~~~~^~~
-      |                                                                                                                           |
-      |                                                                                                                           YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:108:64: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  108 |  | relational_expression GE_OP shift_expression { $$ = makeNode(strdup("GE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                ^
-grammar.y:113:78: warning: incompatible implicit declaration of built-in function ‘strdup’
-  113 |  | equality_expression EQ_OP relational_expression { $$ = makeNode(strdup("EQ_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                              ^~~~~~
-grammar.y:113:115: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  113 |  | equality_expression EQ_OP relational_expression { $$ = makeNode(strdup("EQ_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                              ~~~~~^~~~
-      |                                                                                                                   |
-      |                                                                                                                   YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:113:126: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  113 |  | equality_expression EQ_OP relational_expression { $$ = makeNode(strdup("EQ_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                         ~~~~~^~~
-      |                                                                                                                              |
-      |                                                                                                                              YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:113:67: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  113 |  | equality_expression EQ_OP relational_expression { $$ = makeNode(strdup("EQ_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                   ^
-grammar.y:114:78: warning: incompatible implicit declaration of built-in function ‘strdup’
-  114 |  | equality_expression NE_OP relational_expression { $$ = makeNode(strdup("NE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                              ^~~~~~
-grammar.y:114:115: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  114 |  | equality_expression NE_OP relational_expression { $$ = makeNode(strdup("NE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                              ~~~~~^~~~
-      |                                                                                                                   |
-      |                                                                                                                   YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:114:126: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  114 |  | equality_expression NE_OP relational_expression { $$ = makeNode(strdup("NE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                         ~~~~~^~~
-      |                                                                                                                              |
-      |                                                                                                                              YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:114:67: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  114 |  | equality_expression NE_OP relational_expression { $$ = makeNode(strdup("NE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                   ^
-grammar.y:119:69: warning: incompatible implicit declaration of built-in function ‘strdup’
-  119 |  | and_expression '&' equality_expression { $$ = makeNode(strdup("&"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                     ^~~~~~
-grammar.y:119:102: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  119 |  | and_expression '&' equality_expression { $$ = makeNode(strdup("&"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                 ~~~~~^~~~
-      |                                                                                                      |
-      |                                                                                                      YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:119:113: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  119 |  | and_expression '&' equality_expression { $$ = makeNode(strdup("&"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                            ~~~~~^~~
-      |                                                                                                                 |
-      |                                                                                                                 YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:119:58: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  119 |  | and_expression '&' equality_expression { $$ = makeNode(strdup("&"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                          ^
-grammar.y:124:73: warning: incompatible implicit declaration of built-in function ‘strdup’
-  124 |  | exclusive_or_expression '^' and_expression { $$ = makeNode(strdup("^"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                         ^~~~~~
-grammar.y:124:106: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  124 |  | exclusive_or_expression '^' and_expression { $$ = makeNode(strdup("^"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                     ~~~~~^~~~
-      |                                                                                                          |
-      |                                                                                                          YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:124:117: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  124 |  | exclusive_or_expression '^' and_expression { $$ = makeNode(strdup("^"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                ~~~~~^~~
-      |                                                                                                                     |
-      |                                                                                                                     YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:124:62: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  124 |  | exclusive_or_expression '^' and_expression { $$ = makeNode(strdup("^"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                              ^
-grammar.y:129:82: warning: incompatible implicit declaration of built-in function ‘strdup’
-  129 |  | inclusive_or_expression '|' exclusive_or_expression { $$ = makeNode(strdup("|"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                  ^~~~~~
-grammar.y:129:115: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  129 |  | inclusive_or_expression '|' exclusive_or_expression { $$ = makeNode(strdup("|"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                              ~~~~~^~~~
-      |                                                                                                                   |
-      |                                                                                                                   YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:129:126: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  129 |  | inclusive_or_expression '|' exclusive_or_expression { $$ = makeNode(strdup("|"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                         ~~~~~^~~
-      |                                                                                                                              |
-      |                                                                                                                              YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:129:71: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  129 |  | inclusive_or_expression '|' exclusive_or_expression { $$ = makeNode(strdup("|"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                       ^
-grammar.y:134:84: warning: incompatible implicit declaration of built-in function ‘strdup’
-  134 |  | logical_and_expression AND_OP inclusive_or_expression { $$ = makeNode(strdup("AND_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                    ^~~~~~
-grammar.y:134:122: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  134 |  | logical_and_expression AND_OP inclusive_or_expression { $$ = makeNode(strdup("AND_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                     ~~~~~^~~~
-      |                                                                                                                          |
-      |                                                                                                                          YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:134:133: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  134 |  | logical_and_expression AND_OP inclusive_or_expression { $$ = makeNode(strdup("AND_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                                ~~~~~^~~
-      |                                                                                                                                     |
-      |                                                                                                                                     YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:134:73: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  134 |  | logical_and_expression AND_OP inclusive_or_expression { $$ = makeNode(strdup("AND_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                         ^
-grammar.y:139:81: warning: incompatible implicit declaration of built-in function ‘strdup’
-  139 |  | logical_or_expression OR_OP logical_and_expression { $$ = makeNode(strdup("OR_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                 ^~~~~~
-grammar.y:139:118: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  139 |  | logical_or_expression OR_OP logical_and_expression { $$ = makeNode(strdup("OR_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                 ~~~~~^~~~
-      |                                                                                                                      |
-      |                                                                                                                      YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:139:129: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  139 |  | logical_or_expression OR_OP logical_and_expression { $$ = makeNode(strdup("OR_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                                            ~~~~~^~~
-      |                                                                                                                                 |
-      |                                                                                                                                 YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:139:70: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  139 |  | logical_or_expression OR_OP logical_and_expression { $$ = makeNode(strdup("OR_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                      ^
-grammar.y:144:94: warning: incompatible implicit declaration of built-in function ‘strdup’
-  144 |  | logical_or_expression '?' expression ':' conditional_expression { $$ = makeNode(strdup("?:"), strdup(""), 0, $1, $3, $5, (node*)NULL); }
-      |                                                                                              ^~~~~~
-grammar.y:144:128: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  144 |  | logical_or_expression '?' expression ':' conditional_expression { $$ = makeNode(strdup("?:"), strdup(""), 0, $1, $3, $5, (node*)NULL); }
-      |                                                                                                                           ~~~~~^~~~
-      |                                                                                                                                |
-      |                                                                                                                                YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:144:139: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  144 |  | logical_or_expression '?' expression ':' conditional_expression { $$ = makeNode(strdup("?:"), strdup(""), 0, $1, $3, $5, (node*)NULL); }
-      |                                                                                                                                      ~~~~~^   
-      |                                                                                                                                           |
-      |                                                                                                                                           YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:144:150: warning: passing argument 6 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  144 |  | logical_or_expression '?' expression ':' conditional_expression { $$ = makeNode(strdup("?:"), strdup(""), 0, $1, $3, $5, (node*)NULL); }
-      |                                                                                                                                                      ^  
-      |                                                                                                                                                      |
-      |                                                                                                                                                      YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:144:83: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  144 |  | logical_or_expression '?' expression ':' conditional_expression { $$ = makeNode(strdup("?:"), strdup(""), 0, $1, $3, $5, (node*)NULL); }
-      |                                                                                   ^
-grammar.y:149:86: warning: passing argument 1 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  149 |  | unary_expression assignment_operator assignment_expression { addChild($2, $1); addChild($2, $3); $$ = $2; }
-      |                                                                                 ~~~~~^~~~
-      |                                                                                      |
-      |                                                                                      YYSTYPE {aka int}
-grammar.y:33:22: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                ~~~~~~^~~~~~
-grammar.y:149:97: warning: passing argument 2 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  149 |  | unary_expression assignment_operator assignment_expression { addChild($2, $1); addChild($2, $3); $$ = $2; }
-      |                                                                                            ~~~~~^~~~
-      |                                                                                                 |
-      |                                                                                                 YYSTYPE {aka int}
-grammar.y:33:36: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                              ~~~~~~^~~~~
-grammar.y:149:118: warning: passing argument 1 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  149 |  | unary_expression assignment_operator assignment_expression { addChild($2, $1); addChild($2, $3); $$ = $2; }
-      |                                                                                                                      ^   
-      |                                                                                                                      |
-      |                                                                                                                      YYSTYPE {aka int}
-grammar.y:33:22: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                ~~~~~~^~~~~~
-grammar.y:149:129: warning: passing argument 2 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  149 |  | unary_expression assignment_operator assignment_expression { addChild($2, $1); addChild($2, $3); $$ = $2; }
-      |                                                                                                                                 ^  
-      |                                                                                                                                 |
-      |                                                                                                                                 YYSTYPE {aka int}
-grammar.y:33:36: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                              ~~~~~~^~~~~
-grammar.y:153:33: warning: incompatible implicit declaration of built-in function ‘strdup’
-  153 |  : '=' {$$ = makeNode(strdup("="), strdup("="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                 ^~~~~~
-grammar.y:153:22: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  153 |  : '=' {$$ = makeNode(strdup("="), strdup("="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                      ^
-grammar.y:154:41: warning: incompatible implicit declaration of built-in function ‘strdup’
-  154 |  | MUL_ASSIGN { $$ = makeNode(strdup("MUL_ASSIGN"), strdup("*="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                         ^~~~~~
-grammar.y:154:30: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  154 |  | MUL_ASSIGN { $$ = makeNode(strdup("MUL_ASSIGN"), strdup("*="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                              ^
-grammar.y:155:41: warning: incompatible implicit declaration of built-in function ‘strdup’
-  155 |  | DIV_ASSIGN { $$ = makeNode(strdup("DIV_ASSIGN"), strdup("/="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                         ^~~~~~
-grammar.y:155:30: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  155 |  | DIV_ASSIGN { $$ = makeNode(strdup("DIV_ASSIGN"), strdup("/="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                              ^
-grammar.y:156:41: warning: incompatible implicit declaration of built-in function ‘strdup’
-  156 |  | MOD_ASSIGN { $$ = makeNode(strdup("MOD_ASSIGN"), strdup("%="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                         ^~~~~~
-grammar.y:156:30: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  156 |  | MOD_ASSIGN { $$ = makeNode(strdup("MOD_ASSIGN"), strdup("%="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                              ^
-grammar.y:157:41: warning: incompatible implicit declaration of built-in function ‘strdup’
-  157 |  | ADD_ASSIGN { $$ = makeNode(strdup("ADD_ASSIGN"), strdup("+="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                         ^~~~~~
-grammar.y:157:30: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  157 |  | ADD_ASSIGN { $$ = makeNode(strdup("ADD_ASSIGN"), strdup("+="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                              ^
-grammar.y:158:41: warning: incompatible implicit declaration of built-in function ‘strdup’
-  158 |  | SUB_ASSIGN { $$ = makeNode(strdup("SUB_ASSIGN"), strdup("-="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                         ^~~~~~
-grammar.y:158:30: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  158 |  | SUB_ASSIGN { $$ = makeNode(strdup("SUB_ASSIGN"), strdup("-="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                              ^
-grammar.y:159:42: warning: incompatible implicit declaration of built-in function ‘strdup’
-  159 |  | LEFT_ASSIGN { $$ = makeNode(strdup("LEFT_ASSIGN"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                          ^~~~~~
-grammar.y:159:31: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  159 |  | LEFT_ASSIGN { $$ = makeNode(strdup("LEFT_ASSIGN"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                               ^
-grammar.y:160:43: warning: incompatible implicit declaration of built-in function ‘strdup’
-  160 |  | RIGHT_ASSIGN { $$ = makeNode(strdup("RIGHT_ASSIGN"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                           ^~~~~~
-grammar.y:160:32: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  160 |  | RIGHT_ASSIGN { $$ = makeNode(strdup("RIGHT_ASSIGN"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                ^
-grammar.y:161:41: warning: incompatible implicit declaration of built-in function ‘strdup’
-  161 |  | AND_ASSIGN { $$ = makeNode(strdup("AND_ASSIGN"), strdup("&="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                         ^~~~~~
-grammar.y:161:30: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  161 |  | AND_ASSIGN { $$ = makeNode(strdup("AND_ASSIGN"), strdup("&="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                              ^
-grammar.y:162:41: warning: incompatible implicit declaration of built-in function ‘strdup’
-  162 |  | XOR_ASSIGN { $$ = makeNode(strdup("XOR_ASSIGN"), strdup("^="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                         ^~~~~~
-grammar.y:162:30: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  162 |  | XOR_ASSIGN { $$ = makeNode(strdup("XOR_ASSIGN"), strdup("^="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                              ^
-grammar.y:163:40: warning: incompatible implicit declaration of built-in function ‘strdup’
-  163 |  | OR_ASSIGN { $$ = makeNode(strdup("OR_ASSIGN"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                        ^~~~~~
-grammar.y:163:29: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  163 |  | OR_ASSIGN { $$ = makeNode(strdup("OR_ASSIGN"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                             ^
-grammar.y:168:67: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  168 |  | expression ',' assignment_expression { makeSibling($3, $1); $$ = $1;}
-      |                                                              ~~~~~^~~
-      |                                                                   |
-      |                                                                   YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:168:77: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  168 |  | expression ',' assignment_expression { makeSibling($3, $1); $$ = $1;}
-      |                                                                        ~    ^   
-      |                                                                             |
-      |                                                                             YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:176:46: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  176 |  : declaration_specifiers ';' { $$ = (node*)NULL; }
-      |                                              ^
-grammar.y:191:71: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  191 |  | init_declarator_list ',' init_declarator { makeSibling($3, $1); $$ = $1;}
-      |                                                                  ~~~~~^~~
-      |                                                                       |
-      |                                                                       YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:191:81: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  191 |  | init_declarator_list ',' init_declarator { makeSibling($3, $1); $$ = $1;}
-      |                                                                            ~    ^   
-      |                                                                                 |
-      |                                                                                 YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:196:57: warning: incompatible implicit declaration of built-in function ‘strdup’
-  196 |  | declarator '=' initializer { $$ = makeNode(strdup("="), strdup("="), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                         ^~~~~~
-grammar.y:196:91: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  196 |  | declarator '=' initializer { $$ = makeNode(strdup("="), strdup("="), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                      ~~~~~^~~~
-      |                                                                                           |
-      |                                                                                           YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:196:102: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  196 |  | declarator '=' initializer { $$ = makeNode(strdup("="), strdup("="), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                                                                                 ~~~~~^~~
-      |                                                                                                      |
-      |                                                                                                      YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:196:46: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  196 |  | declarator '=' initializer { $$ = makeNode(strdup("="), strdup("="), 0, $1, $3, (node*)NULL, (node*)NULL); }
-      |                                              ^
-grammar.y:208:34: warning: incompatible implicit declaration of built-in function ‘strdup’
-  208 |  : VOID {$$ = makeNode(strdup("VOID"), strdup("void"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                  ^~~~~~
-grammar.y:208:23: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  208 |  : VOID {$$ = makeNode(strdup("VOID"), strdup("void"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                       ^
-grammar.y:209:34: warning: incompatible implicit declaration of built-in function ‘strdup’
-  209 |  | CHAR {$$ = makeNode(strdup("CHAR"), strdup("char"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                  ^~~~~~
-grammar.y:209:23: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  209 |  | CHAR {$$ = makeNode(strdup("CHAR"), strdup("char"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                       ^
-grammar.y:210:35: warning: incompatible implicit declaration of built-in function ‘strdup’
-  210 |  | SHORT {$$ = makeNode(strdup("SHORT"), strdup("short"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                   ^~~~~~
-grammar.y:210:24: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  210 |  | SHORT {$$ = makeNode(strdup("SHORT"), strdup("short"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                        ^
-grammar.y:211:33: warning: incompatible implicit declaration of built-in function ‘strdup’
-  211 |  | INT {$$ = makeNode(strdup("INT"), strdup("int"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                 ^~~~~~
-grammar.y:211:22: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  211 |  | INT {$$ = makeNode(strdup("INT"), strdup("int"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                      ^
-grammar.y:212:34: warning: incompatible implicit declaration of built-in function ‘strdup’
-  212 |  | LONG {$$ = makeNode(strdup("LONG"), strdup("long"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                  ^~~~~~
-grammar.y:212:23: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  212 |  | LONG {$$ = makeNode(strdup("LONG"), strdup("long"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                       ^
-grammar.y:213:35: warning: incompatible implicit declaration of built-in function ‘strdup’
-  213 |  | FLOAT {$$ = makeNode(strdup("FLOAT"), strdup("float"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                   ^~~~~~
-grammar.y:213:24: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  213 |  | FLOAT {$$ = makeNode(strdup("FLOAT"), strdup("float"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                        ^
-grammar.y:214:36: warning: incompatible implicit declaration of built-in function ‘strdup’
-  214 |  | DOUBLE {$$ = makeNode(strdup("DOUBLE"), strdup("double"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                    ^~~~~~
-grammar.y:214:25: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  214 |  | DOUBLE {$$ = makeNode(strdup("DOUBLE"), strdup("double"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                         ^
-grammar.y:215:36: warning: incompatible implicit declaration of built-in function ‘strdup’
-  215 |  | SIGNED {$$ = makeNode(strdup("SIGNED"), strdup("signed"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                    ^~~~~~
-grammar.y:215:25: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  215 |  | SIGNED {$$ = makeNode(strdup("SIGNED"), strdup("signed"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                         ^
-grammar.y:216:38: warning: incompatible implicit declaration of built-in function ‘strdup’
-  216 |  | UNSIGNED {$$ = makeNode(strdup("UNSIGNED"), strdup("unsigned"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                      ^~~~~~
-grammar.y:216:27: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  216 |  | UNSIGNED {$$ = makeNode(strdup("UNSIGNED"), strdup("unsigned"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                           ^
-grammar.y:217:44: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  217 |  | struct_or_union_specifier {$$ = (node*)NULL;}
-      |                                            ^
-grammar.y:219:39: warning: incompatible implicit declaration of built-in function ‘strdup’
-  219 |  | TYPE_NAME {$$ = makeNode(strdup("TYPE_NAME"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                       ^~~~~~
-grammar.y:219:28: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  219 |  | TYPE_NAME {$$ = makeNode(strdup("TYPE_NAME"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                            ^
-grammar.y:229:36: warning: incompatible implicit declaration of built-in function ‘strdup’
-  229 |  : STRUCT {$$ = makeNode(strdup("STRUCT"), strdup("struct"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                    ^~~~~~
-grammar.y:229:25: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  229 |  : STRUCT {$$ = makeNode(strdup("STRUCT"), strdup("struct"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                         ^
-grammar.y:230:35: warning: incompatible implicit declaration of built-in function ‘strdup’
-  230 |  | UNION {$$ = makeNode(strdup("UNION"), strdup("union"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                   ^~~~~~
-grammar.y:230:24: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  230 |  | UNION {$$ = makeNode(strdup("UNION"), strdup("union"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                        ^
-grammar.y:235:73: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  235 |  | struct_declaration_list struct_declaration { makeSibling($2, $1); $$ = $1; }
-      |                                                                    ~~~~~^~~
-      |                                                                         |
-      |                                                                         YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:235:83: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  235 |  | struct_declaration_list struct_declaration { makeSibling($2, $1); $$ = $1; }
-      |                                                                              ~~   ^   
-      |                                                                                   |
-      |                                                                                   YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:243:70: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  243 |  : type_specifier specifier_qualifier_list { makeSibling($2, $1); $$ = $1; }
-      |                                                                 ~~~~~^~~
-      |                                                                      |
-      |                                                                      YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:243:80: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  243 |  : type_specifier specifier_qualifier_list { makeSibling($2, $1); $$ = $1; }
-      |                                                                           ~~   ^   
-      |                                                                                |
-      |                                                                                YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:245:70: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  245 |  | type_qualifier specifier_qualifier_list { makeSibling($2, $1); $$ = $1; }
-      |                                                                 ~~~~~^~~
-      |                                                                      |
-      |                                                                      YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:245:80: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  245 |  | type_qualifier specifier_qualifier_list { makeSibling($2, $1); $$ = $1; }
-      |                                                                           ~~   ^   
-      |                                                                                |
-      |                                                                                YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:261:58: warning: incompatible implicit declaration of built-in function ‘strdup’
-  261 |  : ENUM '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup(""), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                          ^~~~~~
-grammar.y:261:94: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  261 |  : ENUM '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup(""), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                                                         ~~~~~^~~~
-      |                                                                                              |
-      |                                                                                              YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:261:47: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  261 |  : ENUM '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup(""), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                               ^
-grammar.y:262:69: warning: incompatible implicit declaration of built-in function ‘strdup’
-  262 |  | ENUM IDENTIFIER '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 0, $4, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                                     ^~~~~~
-grammar.y:262:151: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  262 |  | ENUM IDENTIFIER '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 0, $4, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                                                                                                                  ~~~~~^~~~
-      |                                                                                                                                                       |
-      |                                                                                                                                                       YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:262:58: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  262 |  | ENUM IDENTIFIER '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 0, $4, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                          ^
-grammar.y:263:34: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  263 |  | ENUM IDENTIFIER {$$ = (node*)NULL;}
-      |                                  ^
-grammar.y:268:61: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  268 |  | enumerator_list ',' enumerator { makeSibling($3, $1); $$ = $1;}
-      |                                                        ~~~~~^~~
-      |                                                             |
-      |                                                             YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:268:71: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  268 |  | enumerator_list ',' enumerator { makeSibling($3, $1); $$ = $1;}
-      |                                                                  ~    ^   
-      |                                                                       |
-      |                                                                       YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:272:40: warning: incompatible implicit declaration of built-in function ‘strdup’
-  272 |  : IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                        ^~~~~~
-grammar.y:272:29: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  272 |  : IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                             ^
-grammar.y:273:64: warning: incompatible implicit declaration of built-in function ‘strdup’
-  273 |  | IDENTIFIER '=' constant_expression {$$ = makeNode(strdup("="),strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
-      |                                                                ^~~~~~
-grammar.y:273:195: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  273 |  | IDENTIFIER '=' constant_expression {$$ = makeNode(strdup("="),strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
-      |                                                                                                                                                                                              ~~~~~^~~
-      |                                                                                                                                                                                                   |
-      |                                                                                                                                                                                                   YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:273:53: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  273 |  | IDENTIFIER '=' constant_expression {$$ = makeNode(strdup("="),strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
-      |                                                     ^
-grammar.y:287:41: warning: incompatible implicit declaration of built-in function ‘strdup’
-  287 |  : IDENTIFIER { $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                         ^~~~~~
-grammar.y:287:30: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  287 |  : IDENTIFIER { $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                              ^
-grammar.y:297:33: warning: incompatible implicit declaration of built-in function ‘strdup’
-  297 |  : '*' {$$ = makeNode(strdup("*"), strdup("*"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                 ^~~~~~
-grammar.y:297:22: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  297 |  : '*' {$$ = makeNode(strdup("*"), strdup("*"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                      ^
-grammar.y:298:53: warning: incompatible implicit declaration of built-in function ‘strdup’
-  298 |  | '*' type_qualifier_list {$$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                                     ^~~~~~
-grammar.y:298:87: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  298 |  | '*' type_qualifier_list {$$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                                                                  ~~~~~^~~
-      |                                                                                       |
-      |                                                                                       YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:298:42: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  298 |  | '*' type_qualifier_list {$$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                          ^
-grammar.y:299:41: warning: incompatible implicit declaration of built-in function ‘strdup’
-  299 |  | '*' pointer {$$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                         ^~~~~~
-grammar.y:299:75: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  299 |  | '*' pointer {$$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                                                                      ~~~~~^~~
-      |                                                                           |
-      |                                                                           YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:299:30: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  299 |  | '*' pointer {$$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
-      |                              ^
-grammar.y:305:65: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  305 |  | type_qualifier_list type_qualifier { makeSibling($2, $1); $$ = $1;}
-      |                                                            ~~~~~^~~
-      |                                                                 |
-      |                                                                 YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:305:75: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  305 |  | type_qualifier_list type_qualifier { makeSibling($2, $1); $$ = $1;}
-      |                                                                      ~    ^   
-      |                                                                           |
-      |                                                                           YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:311:62: warning: incompatible implicit declaration of built-in function ‘strdup’
-  311 |  | parameter_list ',' ELLIPSIS { makeSibling(makeNode(strdup("ELLIPSIS"), strdup("..."), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
-      |                                                              ^~~~~~
-grammar.y:311:158: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  311 |  | parameter_list ',' ELLIPSIS { makeSibling(makeNode(strdup("ELLIPSIS"), strdup("..."), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
-      |                                                                                                                                                         ~~~~~^~  
-      |                                                                                                                                                              |
-      |                                                                                                                                                              YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:316:71: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  316 |  | parameter_list ',' parameter_declaration { makeSibling($3, $1); $$ = $1;}
-      |                                                                  ~~~~~^~~
-      |                                                                       |
-      |                                                                       YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:316:81: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  316 |  | parameter_list ',' parameter_declaration { makeSibling($3, $1); $$ = $1;}
-      |                                                                            ~    ^   
-      |                                                                                 |
-      |                                                                                 YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:322:42: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  322 |  | declaration_specifiers { $$ = (node*)NULL; }
-      |                                          ^
-grammar.y:326:40: warning: incompatible implicit declaration of built-in function ‘strdup’
-  326 |  : IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                        ^~~~~~
-grammar.y:326:29: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  326 |  : IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                             ^
-grammar.y:327:65: warning: incompatible implicit declaration of built-in function ‘strdup’
-  327 |  | identifier_list ',' IDENTIFIER { makeSibling(makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
-      |                                                                 ^~~~~~
-grammar.y:327:160: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  327 |  | identifier_list ',' IDENTIFIER { makeSibling(makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
-      |                                                                                                                                                           ~~~~~^~  
-      |                                                                                                                                                                |
-      |                                                                                                                                                                YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:361:62: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  361 |  | initializer_list ',' initializer {makeSibling($2, $1); $$ = $1;}
-      |                                                         ~~~~~^~~~
-      |                                                              |
-      |                                                              YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:361:73: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  361 |  | initializer_list ',' initializer {makeSibling($2, $1); $$ = $1;}
-      |                                                                         ^   
-      |                                                                         |
-      |                                                                         YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:374:54: warning: incompatible implicit declaration of built-in function ‘strdup’
-  374 |  : IDENTIFIER ':' statement {$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
-      |                                                      ^~~~~~
-grammar.y:374:187: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  374 |  : IDENTIFIER ':' statement {$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
-      |                                                                                                                                                                                      ~~~~~^~~
-      |                                                                                                                                                                                           |
-      |                                                                                                                                                                                           YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:374:43: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  374 |  : IDENTIFIER ':' statement {$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
-      |                                           ^
-grammar.y:375:69: warning: incompatible implicit declaration of built-in function ‘strdup’
-  375 |  | CASE constant_expression ':' statement { $$ = makeNode(strdup("CASE"), strdup("case"), 0, $2, $4, (node*)NULL, (node*)NULL); }
-      |                                                                     ^~~~~~
-grammar.y:375:109: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  375 |  | CASE constant_expression ':' statement { $$ = makeNode(strdup("CASE"), strdup("case"), 0, $2, $4, (node*)NULL, (node*)NULL); }
-      |                                                                                                        ~~~~~^~~~
-      |                                                                                                             |
-      |                                                                                                             YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:375:120: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  375 |  | CASE constant_expression ':' statement { $$ = makeNode(strdup("CASE"), strdup("case"), 0, $2, $4, (node*)NULL, (node*)NULL); }
-      |                                                                                                                   ~~~~~^~~
-      |                                                                                                                        |
-      |                                                                                                                        YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:375:58: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  375 |  | CASE constant_expression ':' statement { $$ = makeNode(strdup("CASE"), strdup("case"), 0, $2, $4, (node*)NULL, (node*)NULL); }
-      |                                                          ^
-grammar.y:376:51: warning: incompatible implicit declaration of built-in function ‘strdup’
-  376 |  | DEFAULT ':' statement {$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("DEFAULT"), strdup("default"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
-      |                                                   ^~~~~~
-grammar.y:376:188: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  376 |  | DEFAULT ':' statement {$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("DEFAULT"), strdup("default"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
-      |                                                                                                                                                                                       ~~~~~^~~
-      |                                                                                                                                                                                            |
-      |                                                                                                                                                                                            YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:376:40: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  376 |  | DEFAULT ':' statement {$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("DEFAULT"), strdup("default"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
-      |                                        ^
-grammar.y:380:27: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  380 |  : '{' '}' { $$ = (node*)NULL; }
-      |                           ^
-grammar.y:382:44: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  382 |  | '{' declaration_list '}' { $$ = (node*)NULL; }
-      |                                            ^
-grammar.y:388:58: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  388 |  | declaration_list declaration {makeSibling($2, $1); $$ = $1; }
-      |                                                     ~~~~~^~~
-      |                                                          |
-      |                                                          YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:388:68: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  388 |  | declaration_list declaration {makeSibling($2, $1); $$ = $1; }
-      |                                                               ~~   ^   
-      |                                                                    |
-      |                                                                    YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:393:55: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  393 |  | statement_list statement { makeSibling($2, $1); $$ = $1; }
-      |                                                  ~~~~~^~~
-      |                                                       |
-      |                                                       YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:393:65: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  393 |  | statement_list statement { makeSibling($2, $1); $$ = $1; }
-      |                                                            ~~   ^   
-      |                                                                 |
-      |                                                                 YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:397:33: warning: incompatible implicit declaration of built-in function ‘strdup’
-  397 |  : ';' {$$ = makeNode(strdup(";"), strdup(";"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                 ^~~~~~
-grammar.y:397:22: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  397 |  : ';' {$$ = makeNode(strdup(";"), strdup(";"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                      ^
-grammar.y:398:48: warning: incompatible implicit declaration of built-in function ‘strdup’
-  398 |  | expression ';' {makeSibling(makeNode(strdup(";"), strdup(";"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
+grammar.y:64:48: warning: implicit declaration of function ‘strdup’ [-Wimplicit-function-declaration]
+   64 |  : IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
       |                                                ^~~~~~
-grammar.y:398:135: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  398 |  | expression ';' {makeSibling(makeNode(strdup(";"), strdup(";"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
-      |                                                                                                                                  ~~~~~^~  
-      |                                                                                                                                       |
-      |                                                                                                                                       YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:402:61: warning: incompatible implicit declaration of built-in function ‘strdup’
-  402 |  : IF '(' expression ')' statement {$$ = makeNode(strdup("IF"), strdup("if"),0, $3, $5, (node*)NULL, (node*)NULL);}
-      |                                                             ^~~~~~
-grammar.y:402:96: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  402 |  : IF '(' expression ')' statement {$$ = makeNode(strdup("IF"), strdup("if"),0, $3, $5, (node*)NULL, (node*)NULL);}
-      |                                                                                           ~~~~~^~~~
-      |                                                                                                |
-      |                                                                                                YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:402:107: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  402 |  : IF '(' expression ')' statement {$$ = makeNode(strdup("IF"), strdup("if"),0, $3, $5, (node*)NULL, (node*)NULL);}
-      |                                                                                                      ~~~~~^~~
-      |                                                                                                           |
-      |                                                                                                           YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:402:50: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  402 |  : IF '(' expression ')' statement {$$ = makeNode(strdup("IF"), strdup("if"),0, $3, $5, (node*)NULL, (node*)NULL);}
-      |                                                  ^
-grammar.y:403:76: warning: incompatible implicit declaration of built-in function ‘strdup’
-  403 |  | IF '(' expression ')' statement ELSE statement {$$ = makeNode(strdup("IF_ELSE"), strdup(""),0, $3, $5, $7, (node*)NULL);}
-      |                                                                            ^~~~~~
-grammar.y:403:114: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  403 |  | IF '(' expression ')' statement ELSE statement {$$ = makeNode(strdup("IF_ELSE"), strdup(""),0, $3, $5, $7, (node*)NULL);}
-      |                                                                                                             ~~~~~^~~~
-      |                                                                                                                  |
-      |                                                                                                                  YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:403:125: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  403 |  | IF '(' expression ')' statement ELSE statement {$$ = makeNode(strdup("IF_ELSE"), strdup(""),0, $3, $5, $7, (node*)NULL);}
-      |                                                                                                                        ~~~~~^   
-      |                                                                                                                             |
-      |                                                                                                                             YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:403:136: warning: passing argument 6 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  403 |  | IF '(' expression ')' statement ELSE statement {$$ = makeNode(strdup("IF_ELSE"), strdup(""),0, $3, $5, $7, (node*)NULL);}
-      |                                                                                                                                        ^  
-      |                                                                                                                                        |
-      |                                                                                                                                        YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:403:65: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  403 |  | IF '(' expression ')' statement ELSE statement {$$ = makeNode(strdup("IF_ELSE"), strdup(""),0, $3, $5, $7, (node*)NULL);}
-      |                                                                 ^
-grammar.y:404:65: warning: incompatible implicit declaration of built-in function ‘strdup’
-  404 |  | SWITCH '(' expression ')' statement {$$ = makeNode(strdup("SWITCH"), strdup(""),0, $3, $5, (node*)NULL, (node*)NULL);}
-      |                                                                 ^~~~~~
-grammar.y:404:102: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  404 |  | SWITCH '(' expression ')' statement {$$ = makeNode(strdup("SWITCH"), strdup(""),0, $3, $5, (node*)NULL, (node*)NULL);}
-      |                                                                                                 ~~~~~^~~~
-      |                                                                                                      |
-      |                                                                                                      YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:404:113: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  404 |  | SWITCH '(' expression ')' statement {$$ = makeNode(strdup("SWITCH"), strdup(""),0, $3, $5, (node*)NULL, (node*)NULL);}
-      |                                                                                                            ~~~~~^~~
-      |                                                                                                                 |
-      |                                                                                                                 YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:404:54: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  404 |  | SWITCH '(' expression ')' statement {$$ = makeNode(strdup("SWITCH"), strdup(""),0, $3, $5, (node*)NULL, (node*)NULL);}
-      |                                                      ^
-grammar.y:408:64: warning: incompatible implicit declaration of built-in function ‘strdup’
-  408 |  : WHILE '(' expression ')' statement {$$ = makeNode(strdup("WHILE"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
-      |                                                                ^~~~~~
-grammar.y:408:101: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  408 |  : WHILE '(' expression ')' statement {$$ = makeNode(strdup("WHILE"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
-      |                                                                                                ~~~~~^~~~
-      |                                                                                                     |
-      |                                                                                                     YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:408:112: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  408 |  : WHILE '(' expression ')' statement {$$ = makeNode(strdup("WHILE"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
-      |                                                                                                           ~~~~~^~~~
-      |                                                                                                                |
-      |                                                                                                                YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:408:53: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  408 |  : WHILE '(' expression ')' statement {$$ = makeNode(strdup("WHILE"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
-      |                                                     ^
-grammar.y:409:71: warning: incompatible implicit declaration of built-in function ‘strdup’
-  409 |  | DO statement WHILE '(' expression ')' ';' {$$ = makeNode(strdup("DO WHILE"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
-      |                                                                       ^~~~~~
-grammar.y:409:111: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  409 |  | DO statement WHILE '(' expression ')' ';' {$$ = makeNode(strdup("DO WHILE"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
-      |                                                                                                          ~~~~~^~~~
-      |                                                                                                               |
-      |                                                                                                               YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:409:122: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  409 |  | DO statement WHILE '(' expression ')' ';' {$$ = makeNode(strdup("DO WHILE"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
-      |                                                                                                                     ~~~~~^~~~
-      |                                                                                                                          |
-      |                                                                                                                          YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:409:60: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  409 |  | DO statement WHILE '(' expression ')' ';' {$$ = makeNode(strdup("DO WHILE"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
-      |                                                            ^
-grammar.y:410:93: warning: incompatible implicit declaration of built-in function ‘strdup’
-  410 |  | FOR '(' expression_statement expression_statement ')' statement {$$ = makeNode(strdup("FOR"), strdup(""),0, $3, $4, $6, (node*)NULL);}
-      |                                                                                             ^~~~~~
-grammar.y:410:127: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  410 |  | FOR '(' expression_statement expression_statement ')' statement {$$ = makeNode(strdup("FOR"), strdup(""),0, $3, $4, $6, (node*)NULL);}
-      |                                                                                                                          ~~~~~^~~~
-      |                                                                                                                               |
-      |                                                                                                                               YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:410:138: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  410 |  | FOR '(' expression_statement expression_statement ')' statement {$$ = makeNode(strdup("FOR"), strdup(""),0, $3, $4, $6, (node*)NULL);}
-      |                                                                                                                                     ~~~~~^   
-      |                                                                                                                                          |
-      |                                                                                                                                          YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:410:149: warning: passing argument 6 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  410 |  | FOR '(' expression_statement expression_statement ')' statement {$$ = makeNode(strdup("FOR"), strdup(""),0, $3, $4, $6, (node*)NULL);}
-      |                                                                                                                                                     ^  
-      |                                                                                                                                                     |
-      |                                                                                                                                                     YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:410:82: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  410 |  | FOR '(' expression_statement expression_statement ')' statement {$$ = makeNode(strdup("FOR"), strdup(""),0, $3, $4, $6, (node*)NULL);}
-      |                                                                                  ^
-grammar.y:411:104: warning: incompatible implicit declaration of built-in function ‘strdup’
-  411 |  | FOR '(' expression_statement expression_statement expression ')' statement {$$ = makeNode(strdup("FOR"), strdup(""),0, $3, $4, $5, $7);}
-      |                                                                                                        ^~~~~~
-grammar.y:411:138: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  411 |  | FOR '(' expression_statement expression_statement expression ')' statement {$$ = makeNode(strdup("FOR"), strdup(""),0, $3, $4, $5, $7);}
-      |                                                                                                                                     ~~~~~^~  
-      |                                                                                                                                          |
-      |                                                                                                                                          YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:411:149: warning: passing argument 5 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  411 |  | FOR '(' expression_statement expression_statement expression ')' statement {$$ = makeNode(strdup("FOR"), strdup(""),0, $3, $4, $5, $7);}
-      |                                                                                                                                                     ^   
-      |                                                                                                                                                     |
-      |                                                                                                                                                     YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:411:160: warning: passing argument 6 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  411 |  | FOR '(' expression_statement expression_statement expression ')' statement {$$ = makeNode(strdup("FOR"), strdup(""),0, $3, $4, $5, $7);}
-      |                                                                                                                                                                ^   
-      |                                                                                                                                                                |
-      |                                                                                                                                                                YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:411:171: warning: passing argument 7 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  411 |  | FOR '(' expression_statement expression_statement expression ')' statement {$$ = makeNode(strdup("FOR"), strdup(""),0, $3, $4, $5, $7);}
-      |                                                                                                                                                                           ^  
-      |                                                                                                                                                                           |
-      |                                                                                                                                                                           YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:411:93: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  411 |  | FOR '(' expression_statement expression_statement expression ')' statement {$$ = makeNode(strdup("FOR"), strdup(""),0, $3, $4, $5, $7);}
-      |                                                                                             ^
-grammar.y:415:49: warning: incompatible implicit declaration of built-in function ‘strdup’
-  415 |  : GOTO IDENTIFIER ';' {$$ = makeNode(strdup("GOTO"), strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                 ^~~~~~
-grammar.y:415:38: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  415 |  : GOTO IDENTIFIER ';' {$$ = makeNode(strdup("GOTO"), strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                      ^
-grammar.y:416:42: warning: incompatible implicit declaration of built-in function ‘strdup’
-  416 |  | CONTINUE ';'{ $$ = makeNode(strdup("CONTINUE"), strdup(""),1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                          ^~~~~~
-grammar.y:416:31: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  416 |  | CONTINUE ';'{ $$ = makeNode(strdup("CONTINUE"), strdup(""),1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                               ^
-grammar.y:417:40: warning: incompatible implicit declaration of built-in function ‘strdup’
-  417 |  | BREAK ';' { $$ = makeNode(strdup("BREAK"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                        ^~~~~~
-grammar.y:417:29: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  417 |  | BREAK ';' { $$ = makeNode(strdup("BREAK"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                             ^
-grammar.y:418:41: warning: incompatible implicit declaration of built-in function ‘strdup’
-  418 |  | RETURN ';' { $$ = makeNode(strdup("CONTINUE"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                         ^~~~~~
-grammar.y:418:30: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  418 |  | RETURN ';' { $$ = makeNode(strdup("CONTINUE"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                              ^
-grammar.y:419:52: warning: incompatible implicit declaration of built-in function ‘strdup’
-  419 |  | RETURN expression ';' { $$ = makeNode(strdup("RETURN"), strdup(""), 0, $1, (node*)NULL, (node*)NULL, (node*)NULL);}
+grammar.y:64:48: warning: incompatible implicit declaration of built-in function ‘strdup’
+grammar.y:65:72: warning: incompatible implicit declaration of built-in function ‘strdup’
+   65 |  | CONSTANT {printf("CONSTANT\n");$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);printf("CONSTANT2\n");}
+      |                                                                        ^~~~~~
+grammar.y:66:52: warning: incompatible implicit declaration of built-in function ‘strdup’
+   66 |  | STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
       |                                                    ^~~~~~
-grammar.y:419:90: warning: passing argument 4 of ‘makeNode’ makes pointer from integer without a cast [-Wint-conversion]
-  419 |  | RETURN expression ';' { $$ = makeNode(strdup("RETURN"), strdup(""), 0, $1, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                                                                     ~~~~~^~~~
-      |                                                                                          |
-      |                                                                                          YYSTYPE {aka int}
-grammar.y:31:9: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   31 |   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-      |         ^~~~~~~~
-grammar.y:419:41: warning: assignment to ‘YYSTYPE’ {aka ‘int’} from ‘node *’ {aka ‘struct node *’} makes integer from pointer without a cast [-Wint-conversion]
-  419 |  | RETURN expression ';' { $$ = makeNode(strdup("RETURN"), strdup(""), 0, $1, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                         ^
-grammar.y:424:67: warning: passing argument 1 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  424 |  | translation_unit external_declaration {makeSibling($1,$2); $$=$1;}
-      |                                                              ~~~~~^~~ 
-      |                                                                   |
-      |                                                                   YYSTYPE {aka int}
-grammar.y:32:25: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                   ~~~~~~^~~~
-grammar.y:424:77: warning: passing argument 2 of ‘makeSibling’ makes pointer from integer without a cast [-Wint-conversion]
-  424 |  | translation_unit external_declaration {makeSibling($1,$2); $$=$1;}
-      |                                                                             ^  
-      |                                                                             |
-      |                                                                             YYSTYPE {aka int}
-grammar.y:32:37: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   32 |  void makeSibling(node* root, node* childList);
-      |                               ~~~~~~^~~~~~~~~
-grammar.y:433:97: warning: passing argument 1 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  433 |  : declaration_specifiers declarator declaration_list compound_statement { addChild($2, $3); addChild($2, $4); $$ = $2; }
-      |                                                                                            ~~~~~^~~~
-      |                                                                                                 |
-      |                                                                                                 YYSTYPE {aka int}
-grammar.y:33:22: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                ~~~~~~^~~~~~
-grammar.y:433:108: warning: passing argument 2 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  433 |  : declaration_specifiers declarator declaration_list compound_statement { addChild($2, $3); addChild($2, $4); $$ = $2; }
-      |                                                                                                       ~~~~~^~~~
-      |                                                                                                            |
-      |                                                                                                            YYSTYPE {aka int}
-grammar.y:33:36: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                              ~~~~~~^~~~~
-grammar.y:433:129: warning: passing argument 1 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  433 |  : declaration_specifiers declarator declaration_list compound_statement { addChild($2, $3); addChild($2, $4); $$ = $2; }
-      |                                                                                                                                 ^   
-      |                                                                                                                                 |
-      |                                                                                                                                 YYSTYPE {aka int}
-grammar.y:33:22: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                ~~~~~~^~~~~~
-grammar.y:433:140: warning: passing argument 2 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  433 |  : declaration_specifiers declarator declaration_list compound_statement { addChild($2, $3); addChild($2, $4); $$ = $2; }
-      |                                                                                                                                            ^  
-      |                                                                                                                                            |
-      |                                                                                                                                            YYSTYPE {aka int}
-grammar.y:33:36: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                              ~~~~~~^~~~~
-grammar.y:434:80: warning: passing argument 1 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  434 |  | declaration_specifiers declarator compound_statement { addChild($2, $3); $$ = $2; }
-      |                                                                           ~~~~~^~~~
-      |                                                                                |
-      |                                                                                YYSTYPE {aka int}
-grammar.y:33:22: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                ~~~~~~^~~~~~
-grammar.y:434:91: warning: passing argument 2 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  434 |  | declaration_specifiers declarator compound_statement { addChild($2, $3); $$ = $2; }
-      |                                                                                      ~    ^  
-      |                                                                                           |
-      |                                                                                           YYSTYPE {aka int}
-grammar.y:33:36: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                              ~~~~~~^~~~~
-grammar.y:435:74: warning: passing argument 1 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  435 |  | declarator declaration_list compound_statement { addChild($1, $2); addChild($1, $3); $$ = $1; }
-      |                                                                     ~~~~~^~~~
-      |                                                                          |
-      |                                                                          YYSTYPE {aka int}
-grammar.y:33:22: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                ~~~~~~^~~~~~
-grammar.y:435:85: warning: passing argument 2 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  435 |  | declarator declaration_list compound_statement { addChild($1, $2); addChild($1, $3); $$ = $1; }
-      |                                                                                ~~~~~^~~~
-      |                                                                                     |
-      |                                                                                     YYSTYPE {aka int}
-grammar.y:33:36: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                              ~~~~~~^~~~~
-grammar.y:435:106: warning: passing argument 1 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  435 |  | declarator declaration_list compound_statement { addChild($1, $2); addChild($1, $3); $$ = $1; }
-      |                                                                                                          ^   
-      |                                                                                                          |
-      |                                                                                                          YYSTYPE {aka int}
-grammar.y:33:22: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                ~~~~~~^~~~~~
-grammar.y:435:117: warning: passing argument 2 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  435 |  | declarator declaration_list compound_statement { addChild($1, $2); addChild($1, $3); $$ = $1; }
-      |                                                                                                                     ^  
-      |                                                                                                                     |
-      |                                                                                                                     YYSTYPE {aka int}
-grammar.y:33:36: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                              ~~~~~~^~~~~
-grammar.y:436:57: warning: passing argument 1 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  436 |  | declarator compound_statement { addChild($1, $2); $$ = $1; }
-      |                                                    ~~~~~^~~~
-      |                                                         |
-      |                                                         YYSTYPE {aka int}
-grammar.y:33:22: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                ~~~~~~^~~~~~
-grammar.y:436:68: warning: passing argument 2 of ‘addChild’ makes pointer from integer without a cast [-Wint-conversion]
-  436 |  | declarator compound_statement { addChild($1, $2); $$ = $1; }
-      |                                                               ~    ^  
-      |                                                                    |
-      |                                                                    YYSTYPE {aka int}
-grammar.y:33:36: note: expected ‘node *’ {aka ‘struct node *’} but argument is of type ‘YYSTYPE’ {aka ‘int’}
-   33 |  void addChild(node* parent, node* child);
-      |                              ~~~~~~^~~~~
-y.tab.c:2994:7: warning: implicit declaration of function ‘yyerror’; did you mean ‘yyerrok’? [-Wimplicit-function-declaration]
- 2994 |       yyerror (YY_("syntax error"));
+grammar.y:75:115: warning: incompatible implicit declaration of built-in function ‘strdup’
+   75 |  | postfix_expression '.' IDENTIFIER { printf("postfix_expression IDENTIFIER \n");$$ = makeNode(strdup("."), strdup(""), 0, $1, makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
+      |                                                                                                                   ^~~~~~
+grammar.y:76:124: warning: incompatible implicit declaration of built-in function ‘strdup’
+   76 |  | postfix_expression PTR_OP IDENTIFIER {printf("postfix_expression PTR_OP IDENTIFIER \n");$$ = makeNode(strdup("PTR_OP"), strdup(""), 0, $1, makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
+      |                                                                                                                            ^~~~~~
+grammar.y:77:114: warning: incompatible implicit declaration of built-in function ‘strdup’
+   77 |  | postfix_expression INC_OP {printf("postfix_expression INC_OP \n");addChild($1, makeNode(strdup("INC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL));$$ = $1;}
+      |                                                                                                                  ^~~~~~
+grammar.y:78:114: warning: incompatible implicit declaration of built-in function ‘strdup’
+   78 |  | postfix_expression DEC_OP {printf("postfix_expression DEC_OP \n");addChild($1, makeNode(strdup("DEC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL)); $$ = $1;}
+      |                                                                                                                  ^~~~~~
+grammar.y:88:61: warning: incompatible implicit declaration of built-in function ‘strdup’
+   88 |  | INC_OP unary_expression {$$ = makeNode(strdup("INC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                             ^~~~~~
+grammar.y:89:61: warning: incompatible implicit declaration of built-in function ‘strdup’
+   89 |  | DEC_OP unary_expression {$$ = makeNode(strdup("DEC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                             ^~~~~~
+grammar.y:91:61: warning: incompatible implicit declaration of built-in function ‘strdup’
+   91 |  | SIZEOF unary_expression {$$ = makeNode(strdup("SIZEOF"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                             ^~~~~~
+grammar.y:92:61: warning: incompatible implicit declaration of built-in function ‘strdup’
+   92 |  | SIZEOF '(' type_name ')'{$$ = makeNode(strdup("SIZEOF"), strdup(""), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                             ^~~~~~
+grammar.y:96:41: warning: incompatible implicit declaration of built-in function ‘strdup’
+   96 |  : '&' {$$ = makeNode(strdup("&"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                         ^~~~~~
+grammar.y:97:41: warning: incompatible implicit declaration of built-in function ‘strdup’
+   97 |  | '*' {$$ = makeNode(strdup("*"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                         ^~~~~~
+grammar.y:98:41: warning: incompatible implicit declaration of built-in function ‘strdup’
+   98 |  | '+' {$$ = makeNode(strdup("+"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                         ^~~~~~
+grammar.y:99:41: warning: incompatible implicit declaration of built-in function ‘strdup’
+   99 |  | '-' {$$ = makeNode(strdup("-"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                         ^~~~~~
+grammar.y:100:41: warning: incompatible implicit declaration of built-in function ‘strdup’
+  100 |  | '~' {$$ = makeNode(strdup("~"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                         ^~~~~~
+grammar.y:101:41: warning: incompatible implicit declaration of built-in function ‘strdup’
+  101 |  | '!' {$$ = makeNode(strdup("!"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                         ^~~~~~
+grammar.y:111:84: warning: incompatible implicit declaration of built-in function ‘strdup’
+  111 |  | multiplicative_expression '*' cast_expression { $$ = makeNode(strdup("*"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                    ^~~~~~
+grammar.y:112:84: warning: incompatible implicit declaration of built-in function ‘strdup’
+  112 |  | multiplicative_expression '/' cast_expression { $$ = makeNode(strdup("/"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                    ^~~~~~
+grammar.y:113:84: warning: incompatible implicit declaration of built-in function ‘strdup’
+  113 |  | multiplicative_expression '%' cast_expression { $$ = makeNode(strdup("%"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                    ^~~~~~
+grammar.y:118:88: warning: incompatible implicit declaration of built-in function ‘strdup’
+  118 |  | additive_expression '+' multiplicative_expression { $$ = makeNode(strdup("+"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                        ^~~~~~
+grammar.y:119:88: warning: incompatible implicit declaration of built-in function ‘strdup’
+  119 |  | additive_expression '-' multiplicative_expression { $$ = makeNode(strdup("-"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                        ^~~~~~
+grammar.y:124:83: warning: incompatible implicit declaration of built-in function ‘strdup’
+  124 |  | shift_expression LEFT_OP additive_expression { $$ = makeNode(strdup("LEFT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                   ^~~~~~
+grammar.y:125:84: warning: incompatible implicit declaration of built-in function ‘strdup’
+  125 |  | shift_expression RIGHT_OP additive_expression { $$ = makeNode(strdup("RIGHT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                    ^~~~~~
+grammar.y:130:81: warning: incompatible implicit declaration of built-in function ‘strdup’
+  130 |  | relational_expression '<' shift_expression { $$ = makeNode(strdup("<"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                 ^~~~~~
+grammar.y:131:81: warning: incompatible implicit declaration of built-in function ‘strdup’
+  131 |  | relational_expression '>' shift_expression { $$ = makeNode(strdup(">"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                 ^~~~~~
+grammar.y:132:83: warning: incompatible implicit declaration of built-in function ‘strdup’
+  132 |  | relational_expression LE_OP shift_expression { $$ = makeNode(strdup("LE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                   ^~~~~~
+grammar.y:133:83: warning: incompatible implicit declaration of built-in function ‘strdup’
+  133 |  | relational_expression GE_OP shift_expression { $$ = makeNode(strdup("GE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                   ^~~~~~
+grammar.y:138:146: warning: incompatible implicit declaration of built-in function ‘strdup’
+  138 |  | equality_expression EQ_OP relational_expression { printf("equality_expression EQ_OP relational_expression\n");$$ = makeNode(strdup("EQ_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                                                                                  ^~~~~~
+grammar.y:139:86: warning: incompatible implicit declaration of built-in function ‘strdup’
+  139 |  | equality_expression NE_OP relational_expression { $$ = makeNode(strdup("NE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                      ^~~~~~
+grammar.y:144:77: warning: incompatible implicit declaration of built-in function ‘strdup’
+  144 |  | and_expression '&' equality_expression { $$ = makeNode(strdup("&"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                             ^~~~~~
+grammar.y:149:81: warning: incompatible implicit declaration of built-in function ‘strdup’
+  149 |  | exclusive_or_expression '^' and_expression { $$ = makeNode(strdup("^"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                 ^~~~~~
+grammar.y:154:90: warning: incompatible implicit declaration of built-in function ‘strdup’
+  154 |  | inclusive_or_expression '|' exclusive_or_expression { $$ = makeNode(strdup("|"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                          ^~~~~~
+grammar.y:159:92: warning: incompatible implicit declaration of built-in function ‘strdup’
+  159 |  | logical_and_expression AND_OP inclusive_or_expression { $$ = makeNode(strdup("AND_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                            ^~~~~~
+grammar.y:164:89: warning: incompatible implicit declaration of built-in function ‘strdup’
+  164 |  | logical_or_expression OR_OP logical_and_expression { $$ = makeNode(strdup("OR_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+      |                                                                                         ^~~~~~
+grammar.y:169:140: warning: incompatible implicit declaration of built-in function ‘strdup’
+  169 |  | logical_or_expression '?' expression ':' conditional_expression { printf("logical_or_expression '?'\n");$$ = makeNode(strdup("?:"), strdup(""), 0, $1, $3, $5, (node*)NULL); }
+      |                                                                                                                                            ^~~~~~
+grammar.y:178:41: warning: incompatible implicit declaration of built-in function ‘strdup’
+  178 |  : '=' {$$ = makeNode(strdup("="), strdup("="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                         ^~~~~~
+grammar.y:179:49: warning: incompatible implicit declaration of built-in function ‘strdup’
+  179 |  | MUL_ASSIGN { $$ = makeNode(strdup("MUL_ASSIGN"), strdup("*="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+      |                                                 ^~~~~~
+grammar.y:180:49: warning: incompatible implicit declaration of built-in function ‘strdup’
+  180 |  | DIV_ASSIGN { $$ = makeNode(strdup("DIV_ASSIGN"), strdup("/="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+      |                                                 ^~~~~~
+grammar.y:181:49: warning: incompatible implicit declaration of built-in function ‘strdup’
+  181 |  | MOD_ASSIGN { $$ = makeNode(strdup("MOD_ASSIGN"), strdup("%="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+      |                                                 ^~~~~~
+grammar.y:182:49: warning: incompatible implicit declaration of built-in function ‘strdup’
+  182 |  | ADD_ASSIGN { $$ = makeNode(strdup("ADD_ASSIGN"), strdup("+="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+      |                                                 ^~~~~~
+grammar.y:183:49: warning: incompatible implicit declaration of built-in function ‘strdup’
+  183 |  | SUB_ASSIGN { $$ = makeNode(strdup("SUB_ASSIGN"), strdup("-="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+      |                                                 ^~~~~~
+grammar.y:184:50: warning: incompatible implicit declaration of built-in function ‘strdup’
+  184 |  | LEFT_ASSIGN { $$ = makeNode(strdup("LEFT_ASSIGN"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+      |                                                  ^~~~~~
+grammar.y:185:51: warning: incompatible implicit declaration of built-in function ‘strdup’
+  185 |  | RIGHT_ASSIGN { $$ = makeNode(strdup("RIGHT_ASSIGN"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+      |                                                   ^~~~~~
+grammar.y:186:49: warning: incompatible implicit declaration of built-in function ‘strdup’
+  186 |  | AND_ASSIGN { $$ = makeNode(strdup("AND_ASSIGN"), strdup("&="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+      |                                                 ^~~~~~
+grammar.y:187:49: warning: incompatible implicit declaration of built-in function ‘strdup’
+  187 |  | XOR_ASSIGN { $$ = makeNode(strdup("XOR_ASSIGN"), strdup("^="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+      |                                                 ^~~~~~
+grammar.y:188:48: warning: incompatible implicit declaration of built-in function ‘strdup’
+  188 |  | OR_ASSIGN { $$ = makeNode(strdup("OR_ASSIGN"), strdup("/="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+      |                                                ^~~~~~
+grammar.y:221:64: warning: format ‘%d’ expects argument of type ‘int’, but argument 2 has type ‘struct node *’ [-Wformat=]
+  221 |  | declarator '=' initializer { printf("init\n");printf("hello = %d\n",$1);$$ = makeNode(strdup("="), strdup("="), 0, $1, $3, (node*)NULL, (node*)NULL); printf("init2\n");}
+      |                                                                ^~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~~
+      |                                                                                         |
+      |                                                                                         struct node *
+grammar.y:221:123: warning: incompatible implicit declaration of built-in function ‘strdup’
+  221 |  | declarator '=' initializer { printf("init\n");printf("hello = %d\n",$1);$$ = makeNode(strdup("="), strdup("="), 0, $1, $3, (node*)NULL, (node*)NULL); printf("init2\n");}
+      |                                                                                                                           ^~~~~~
+grammar.y:225:45: warning: incompatible implicit declaration of built-in function ‘strdup’
+  225 |  : TYPEDEF {$$ = makeNode(strdup("TYPEDEF"), strdup("typedef"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                             ^~~~~~
+grammar.y:226:44: warning: incompatible implicit declaration of built-in function ‘strdup’
+  226 |  | EXTERN {$$ = makeNode(strdup("EXTERN"), strdup("extern"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                            ^~~~~~
+grammar.y:227:44: warning: incompatible implicit declaration of built-in function ‘strdup’
+  227 |  | STATIC {$$ = makeNode(strdup("STATIC"), strdup("static"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                            ^~~~~~
+grammar.y:228:42: warning: incompatible implicit declaration of built-in function ‘strdup’
+  228 |  | AUTO {$$ = makeNode(strdup("AUTO"), strdup("auto"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                          ^~~~~~
+grammar.y:229:46: warning: incompatible implicit declaration of built-in function ‘strdup’
+  229 |  | REGISTER {$$ = makeNode(strdup("REGISTER"), strdup("register"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                              ^~~~~~
+grammar.y:233:42: warning: incompatible implicit declaration of built-in function ‘strdup’
+  233 |  : VOID {$$ = makeNode(strdup("VOID"), strdup("void"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                          ^~~~~~
+grammar.y:234:42: warning: incompatible implicit declaration of built-in function ‘strdup’
+  234 |  | CHAR {$$ = makeNode(strdup("CHAR"), strdup("char"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                          ^~~~~~
+grammar.y:235:43: warning: incompatible implicit declaration of built-in function ‘strdup’
+  235 |  | SHORT {$$ = makeNode(strdup("SHORT"), strdup("short"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                           ^~~~~~
+grammar.y:236:41: warning: incompatible implicit declaration of built-in function ‘strdup’
+  236 |  | INT {$$ = makeNode(strdup("INT"), strdup("int"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                         ^~~~~~
+grammar.y:237:42: warning: incompatible implicit declaration of built-in function ‘strdup’
+  237 |  | LONG {$$ = makeNode(strdup("LONG"), strdup("long"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                          ^~~~~~
+grammar.y:238:43: warning: incompatible implicit declaration of built-in function ‘strdup’
+  238 |  | FLOAT {$$ = makeNode(strdup("FLOAT"), strdup("float"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                           ^~~~~~
+grammar.y:239:44: warning: incompatible implicit declaration of built-in function ‘strdup’
+  239 |  | DOUBLE {$$ = makeNode(strdup("DOUBLE"), strdup("double"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                            ^~~~~~
+grammar.y:240:44: warning: incompatible implicit declaration of built-in function ‘strdup’
+  240 |  | SIGNED {$$ = makeNode(strdup("SIGNED"), strdup("signed"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                            ^~~~~~
+grammar.y:241:46: warning: incompatible implicit declaration of built-in function ‘strdup’
+  241 |  | UNSIGNED {$$ = makeNode(strdup("UNSIGNED"), strdup("unsigned"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                              ^~~~~~
+grammar.y:244:47: warning: incompatible implicit declaration of built-in function ‘strdup’
+  244 |  | TYPE_NAME {$$ = makeNode(strdup("TYPE_NAME"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                               ^~~~~~
+grammar.y:254:44: warning: incompatible implicit declaration of built-in function ‘strdup’
+  254 |  : STRUCT {$$ = makeNode(strdup("STRUCT"), strdup("struct"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                            ^~~~~~
+grammar.y:255:43: warning: incompatible implicit declaration of built-in function ‘strdup’
+  255 |  | UNION {$$ = makeNode(strdup("UNION"), strdup("union"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                           ^~~~~~
+grammar.y:286:66: warning: incompatible implicit declaration of built-in function ‘strdup’
+  286 |  : ENUM '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup(""), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                                  ^~~~~~
+grammar.y:287:77: warning: incompatible implicit declaration of built-in function ‘strdup’
+  287 |  | ENUM IDENTIFIER '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 0, $4, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                                             ^~~~~~
+grammar.y:297:48: warning: incompatible implicit declaration of built-in function ‘strdup’
+  297 |  : IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                ^~~~~~
+grammar.y:298:72: warning: incompatible implicit declaration of built-in function ‘strdup’
+  298 |  | IDENTIFIER '=' constant_expression {$$ = makeNode(strdup("="),strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
+      |                                                                        ^~~~~~
+grammar.y:302:43: warning: incompatible implicit declaration of built-in function ‘strdup’
+  302 |  : CONST {$$ = makeNode(strdup("CONST"), strdup("const"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                           ^~~~~~
+grammar.y:303:46: warning: incompatible implicit declaration of built-in function ‘strdup’
+  303 |  | VOLATILE {$$ = makeNode(strdup("VOLATILE"), strdup("volatile"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                              ^~~~~~
+grammar.y:312:80: warning: incompatible implicit declaration of built-in function ‘strdup’
+  312 |  : IDENTIFIER { printf("direct_declarator\n"); $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); printf("hi2\n"); }
+      |                                                                                ^~~~~~
+grammar.y:322:60: warning: incompatible implicit declaration of built-in function ‘strdup’
+  322 |  : '*' {printf("poiner\n");$$ = makeNode(strdup("*"), strdup("*"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                            ^~~~~~
+grammar.y:323:96: warning: incompatible implicit declaration of built-in function ‘strdup’
+  323 |  | '*' type_qualifier_list {printf(" * type_qualifier_list\n");$$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
+      |                                                                                                ^~~~~~
+grammar.y:324:72: warning: incompatible implicit declaration of built-in function ‘strdup’
+  324 |  | '*' pointer {printf(" * pointer\n");$$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
+      |                                                                        ^~~~~~
+grammar.y:325:112: warning: incompatible implicit declaration of built-in function ‘strdup’
+  325 |  | '*' type_qualifier_list pointer {printf(" * type_qualifier_list pointer\n");$$ = makeNode(strdup("*"), strdup("*"), 0, $2, $3, (node*)NULL,(node*)NULL );}
+      |                                                                                                                ^~~~~~
+grammar.y:336:62: warning: incompatible implicit declaration of built-in function ‘strdup’
+  336 |  | parameter_list ',' ELLIPSIS { makeSibling(makeNode(strdup("ELLIPSIS"), strdup("..."), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
+      |                                                              ^~~~~~
+grammar.y:351:48: warning: incompatible implicit declaration of built-in function ‘strdup’
+  351 |  : IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                ^~~~~~
+grammar.y:352:65: warning: incompatible implicit declaration of built-in function ‘strdup’
+  352 |  | identifier_list ',' IDENTIFIER { makeSibling(makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
+      |                                                                 ^~~~~~
+grammar.y:399:62: warning: incompatible implicit declaration of built-in function ‘strdup’
+  399 |  : IDENTIFIER ':' statement {$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
+      |                                                              ^~~~~~
+grammar.y:400:77: warning: incompatible implicit declaration of built-in function ‘strdup’
+  400 |  | CASE constant_expression ':' statement { $$ = makeNode(strdup("CASE"), strdup("case"), 0, $2, $4, (node*)NULL, (node*)NULL); }
+      |                                                                             ^~~~~~
+grammar.y:401:59: warning: incompatible implicit declaration of built-in function ‘strdup’
+  401 |  | DEFAULT ':' statement {$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("DEFAULT"), strdup("default"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
+      |                                                           ^~~~~~
+grammar.y:423:41: warning: incompatible implicit declaration of built-in function ‘strdup’
+  423 |  : ';' {$$ = makeNode(strdup(";"), strdup(";"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                         ^~~~~~
+grammar.y:424:48: warning: incompatible implicit declaration of built-in function ‘strdup’
+  424 |  | expression ';' {makeSibling(makeNode(strdup(";"), strdup(";"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
+      |                                                ^~~~~~
+grammar.y:428:69: warning: incompatible implicit declaration of built-in function ‘strdup’
+  428 |  : IF '(' expression ')' statement {$$ = makeNode(strdup("IF"), strdup("if"),0, $3, $5, (node*)NULL, (node*)NULL);}
+      |                                                                     ^~~~~~
+grammar.y:429:84: warning: incompatible implicit declaration of built-in function ‘strdup’
+  429 |  | IF '(' expression ')' statement ELSE statement {$$ = makeNode(strdup("IF_ELSE"), strdup(""),0, $3, $5, $7, (node*)NULL);}
+      |                                                                                    ^~~~~~
+grammar.y:430:73: warning: incompatible implicit declaration of built-in function ‘strdup’
+  430 |  | SWITCH '(' expression ')' statement {$$ = makeNode(strdup("SWITCH"), strdup(""),0, $3, $5, (node*)NULL, (node*)NULL);}
+      |                                                                         ^~~~~~
+grammar.y:434:72: warning: incompatible implicit declaration of built-in function ‘strdup’
+  434 |  : WHILE '(' expression ')' statement {$$ = makeNode(strdup("WHILE"), strdup(""), 0, $3, $5, (node*)NULL, (node*)NULL);}
+      |                                                                        ^~~~~~
+grammar.y:435:79: warning: incompatible implicit declaration of built-in function ‘strdup’
+  435 |  | DO statement WHILE '(' expression ')' ';' {$$ = makeNode(strdup("DO WHILE"), strdup(""), 0, $2, $5, (node*)NULL, (node*)NULL);}
+      |                                                                               ^~~~~~
+grammar.y:436:101: warning: incompatible implicit declaration of built-in function ‘strdup’
+  436 |  | FOR '(' expression_statement expression_statement ')' statement {$$ = makeNode(strdup("FOR"), strdup(""),0, $3, $4, $6, (node*)NULL);}
+      |                                                                                                     ^~~~~~
+grammar.y:437:112: warning: incompatible implicit declaration of built-in function ‘strdup’
+  437 |  | FOR '(' expression_statement expression_statement expression ')' statement {$$ = makeNode(strdup("FOR"), strdup(""),0, $3, $4, $5, $7);}
+      |                                                                                                                ^~~~~~
+grammar.y:441:57: warning: incompatible implicit declaration of built-in function ‘strdup’
+  441 |  : GOTO IDENTIFIER ';' {$$ = makeNode(strdup("GOTO"), strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                         ^~~~~~
+grammar.y:442:50: warning: incompatible implicit declaration of built-in function ‘strdup’
+  442 |  | CONTINUE ';'{ $$ = makeNode(strdup("CONTINUE"), strdup(""),1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                  ^~~~~~
+grammar.y:443:48: warning: incompatible implicit declaration of built-in function ‘strdup’
+  443 |  | BREAK ';' { $$ = makeNode(strdup("BREAK"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                ^~~~~~
+grammar.y:444:49: warning: incompatible implicit declaration of built-in function ‘strdup’
+  444 |  | RETURN ';' { $$ = makeNode(strdup("RETURN"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                 ^~~~~~
+grammar.y:445:60: warning: incompatible implicit declaration of built-in function ‘strdup’
+  445 |  | RETURN expression ';' { $$ = makeNode(strdup("RETURN"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
+      |                                                            ^~~~~~
+y.tab.c:3229:7: warning: implicit declaration of function ‘yyerror’; did you mean ‘yyerrok’? [-Wimplicit-function-declaration]
+ 3229 |       yyerror (YY_("syntax error"));
       |       ^~~~~~~
       |       yyerrok
 grammar.y: In function ‘main’:
-grammar.y:491:20: warning: incompatible implicit declaration of built-in function ‘strdup’
-  491 |  char * fileName = strdup("graph.dot");
-      |                    ^~~~~~
+grammar.y:532:18: warning: incompatible implicit declaration of built-in function ‘strdup’
+  532 |  root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
+      |                  ^~~~~~
 grammar.y: In function ‘makeNode’:
-grammar.y:500:46: warning: implicit declaration of function ‘strlen’ [-Wimplicit-function-declaration]
-  500 |  newNode->name = (char*)malloc(sizeof(char)*(strlen(name)+1));
+grammar.y:544:46: warning: implicit declaration of function ‘strlen’ [-Wimplicit-function-declaration]
+  544 |  newNode->name = (char*)malloc(sizeof(char)*(strlen(name)+1));
       |                                              ^~~~~~
-grammar.y:500:46: warning: incompatible implicit declaration of built-in function ‘strlen’
-grammar.y:441:1: note: include ‘<string.h>’ or provide a declaration of ‘strlen’
-  440 |  : translation_unit { $$ = makeNode(strdup("ROOT"), strdup("root"), 0, $1, (node*)NULL, (node*)NULL, (node*)NULL);  root = $$; }
+grammar.y:544:46: warning: incompatible implicit declaration of built-in function ‘strlen’
+grammar.y:466:1: note: include ‘<string.h>’ or provide a declaration of ‘strlen’
+  465 | 
   +++ |+#include <string.h>
-  441 | %%
-grammar.y:502:2: warning: implicit declaration of function ‘strcpy’ [-Wimplicit-function-declaration]
-  502 |  strcpy(newNode->name, name);
+  466 | %%
+grammar.y:546:2: warning: implicit declaration of function ‘strcpy’ [-Wimplicit-function-declaration]
+  546 |  strcpy(newNode->name, name);
       |  ^~~~~~
-grammar.y:502:2: warning: incompatible implicit declaration of built-in function ‘strcpy’
-grammar.y:502:2: note: include ‘<string.h>’ or provide a declaration of ‘strcpy’
+grammar.y:546:2: warning: incompatible implicit declaration of built-in function ‘strcpy’
+grammar.y:546:2: note: include ‘<string.h>’ or provide a declaration of ‘strcpy’
 grammar.y: At top level:
-grammar.y:534:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
-  534 | yyerror(s)
+grammar.y:578:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+  578 | yyerror(s)
       | ^~~~~~~
