@@ -23,24 +23,15 @@
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
 
-// %type<id> IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
-// 			PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
-// 			AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
-// 			SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN 
-// 			XOR_ASSIGN OR_ASSIGN TYPE_NAME
-// 			TYPEDEF EXTERN STATIC AUTO REGISTER
-// 			CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
-// 			STRUCT UNION ENUM ELLIPSIS
-// 			CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
+
 // Prototypes
 %{
 	#include <stdio.h>
+	#include <string.h>
   #include <stdlib.h>
   
-//   #include <node.h>
-//   #include "generateDot.c"
-// extern struct node;
-// typedef struct node node;
+void yyerror(const char *s);
+int yylex();
 extern char yytext[];
 typedef struct node{
 	// int type;
@@ -501,24 +492,31 @@ void generateDot(node* root, char* fileName) {
     fprintf(fp,"}\n");
     fclose(fp);
 }
-// extern struct node;
-// typedef struct node{
-// 	// int type;
-// 	int id;
-// 	char* name;
-// 	char* lexeme;
-// 	int isLeaf;
-// 	node* next;
-// 	node* childList;
-// }node;
-
-
 
 int main(int ac, char **av) {
-	yyparse();
-	root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
-	char * fileName = strdup("graph.dot");
-   	generateDot(root,fileName);
+	int val;
+    FILE    *fd;
+    if (ac >= 2)
+    {
+        if (!(fd = fopen(av[1], "r")))
+        {
+            perror("Error: ");
+            return (-1);
+        }
+        yyset_in(fd);
+        
+		yyparse();
+		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
+		char * fileName = strdup("graph.dot");
+		if(ac == 3) fileName = av[2];
+
+		generateDot(root,fileName);
+
+        fclose(fd);
+    }
+    else
+        printf("Usage: a.out input_filename [optional]ouput.dot \n");
+	
 	return 0; 
 }
 

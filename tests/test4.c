@@ -1,32 +1,10 @@
-struct node{
-    int val;
-    struct node* next;
-}node;
-
-void printLinkedList(struct node* head){
-    if (head == NULL) {
-        return;
-    }
-    printf("%d\n", head->val);
-    printLinkedList(head->next);
+int fibonacci(int n) {
+    if(n == 0){return 0;}
+    if(n == 1){return 1;}
+    return fibonacci(n-1) + fibonacci(n-2);
 }
 
-int main() {
+int main(){
     int n = 10;
-    struct node* head = NULL;
-    struct node* prev = NULL;
-    for(int i = 0;i<n;i++){
-        struct node* curr = (struct node*)malloc(sizeof(node));
-        curr->val = i;
-        curr->next = NULL;  
-        if (prev == NULL) {
-            head = curr;
-            prev = curr;
-        } else {
-            prev->next = curr;
-        }
-        prev = curr;
-    }
-    printLinkedList(head);
-    return 0;
+    printf("fibonacci(%d) = %d", n, fibonacci(n));
 }

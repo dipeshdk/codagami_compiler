@@ -1,7 +1,5 @@
-/* Test case for Native data types, variables and expressions */
-int main(){
-    int x = 56;
-    int add = x + 74;
-    char c = 'a';
+int main() {
+    int x = 5;
+    double z = 5.0 + x * (6/5 + 4);
     return 0;
-}n
+}

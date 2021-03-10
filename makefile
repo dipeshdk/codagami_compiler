@@ -5,10 +5,10 @@ OBJ=obj
 LEX=flex
 YACC=yacc 
 
-all: $(BIN)/lexer
+all: $(BIN)/parser
 
-$(BIN)/lexer: $(OBJ)/lex.yy.c $(OBJ)/y.tab.c
-	$(CC) -o $(BIN)/lexer $< -lfl
+$(BIN)/parser: $(OBJ)/lex.yy.c $(OBJ)/y.tab.c
+	$(CC) -o $(BIN)/parser $(OBJ)/lex.yy.c $(OBJ)/y.tab.c -lfl
 
 $(OBJ)/y.tab.c: $(SRC)/grammar.y
 	$(YACC) -o $(OBJ)/y.tab.c -vt $(SRC)/grammar.y
