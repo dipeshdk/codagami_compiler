@@ -1,4 +1,4 @@
-			[0-9]
+D			[0-9]
 L			[a-zA-Z_]
 H			[a-fA-F0-9]
 E			[Ee][+-]?{D}+
@@ -125,7 +125,7 @@ int yywrap()
 int prevCol = 0,  column = 0, line = 0;
 
 void error() {
-   h printf("ERROR: line: %d column: %d\nexiting....\n", line+1, prevCol+1);
+    printf("ERROR: line: %d column: %d\nexiting....\n", line+1, prevCol+1);
     exit(0);
 }
 
