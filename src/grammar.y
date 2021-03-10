@@ -62,20 +62,20 @@ node* root;
 
 primary_expression
 	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| CONSTANT	{printf("CONSTANT\n");$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);printf("CONSTANT2\n");}
+	| CONSTANT	{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '(' expression ')' { $$ = $2; }
 	;
 
 postfix_expression
-	: primary_expression { printf("primary_expression\n");$$ = $1; printf("primary_expression2\n");  }
-	| postfix_expression '[' expression ']' {printf("postfix_expression [ \n");addChild($1,$3);$$ = $1;}
+	: primary_expression { $$ = $1; }
+	| postfix_expression '[' expression ']' {addChild($1,$3);$$ = $1;}
 	| postfix_expression '(' ')' {$$ = $1;}
-	| postfix_expression '(' argument_expression_list ')' {printf("postfix_expression ( arg )\n");addChild($1,$3);$$ = $1;}
-	| postfix_expression '.' IDENTIFIER { printf("postfix_expression IDENTIFIER \n");$$ = makeNode(strdup("."), strdup(""), 0, $1, makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
-	| postfix_expression PTR_OP IDENTIFIER {printf("postfix_expression PTR_OP IDENTIFIER \n");$$ = makeNode(strdup("PTR_OP"), strdup(""), 0, $1, makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
-	| postfix_expression INC_OP {printf("postfix_expression INC_OP \n");addChild($1, makeNode(strdup("INC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL));$$ = $1;}
-	| postfix_expression DEC_OP {printf("postfix_expression DEC_OP \n");addChild($1, makeNode(strdup("DEC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL)); $$ = $1;}
+	| postfix_expression '(' argument_expression_list ')' {addChild($1,$3);$$ = $1;}
+	| postfix_expression '.' IDENTIFIER { $$ = makeNode(strdup("."), strdup(""), 0, $1, makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
+	| postfix_expression PTR_OP IDENTIFIER {$$ = makeNode(strdup("PTR_OP"), strdup(""), 0, $1, makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
+	| postfix_expression INC_OP {addChild($1, makeNode(strdup("INC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL));$$ = $1;}
+	| postfix_expression DEC_OP {addChild($1, makeNode(strdup("DEC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL)); $$ = $1;}
 	;
 
 argument_expression_list
@@ -84,7 +84,7 @@ argument_expression_list
 	;
 
 unary_expression
-	: postfix_expression {printf("postfix_expression\n");$$ = $1; }
+	: postfix_expression {$$ = $1; }
 	| INC_OP unary_expression {$$ = makeNode(strdup("INC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| DEC_OP unary_expression {$$ = makeNode(strdup("DEC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| unary_operator cast_expression { addChild($1, $2); $$ = $1; }
@@ -134,8 +134,8 @@ relational_expression
 	;
 
 equality_expression
-	: relational_expression {printf("relational_expression\n"); $$ = $1; }
-	| equality_expression EQ_OP relational_expression { printf("equality_expression EQ_OP relational_expression\n");$$ = makeNode(strdup("EQ_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	: relational_expression { $$ = $1; }
+	| equality_expression EQ_OP relational_expression { $$ = makeNode(strdup("EQ_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	| equality_expression NE_OP relational_expression { $$ = makeNode(strdup("NE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
@@ -160,18 +160,18 @@ logical_and_expression
 	;
 
 logical_or_expression
-	: logical_and_expression { printf("logical_and_expression\n");$$ = $1; }
+	: logical_and_expression { $$ = $1; }
 	| logical_or_expression OR_OP logical_and_expression { $$ = makeNode(strdup("OR_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
 conditional_expression
-	: logical_or_expression { printf("logical_or_expression\n");$$ = $1; }
-	| logical_or_expression '?' expression ':' conditional_expression { printf("logical_or_expression '?'\n");$$ = makeNode(strdup("?:"), strdup(""), 0, $1, $3, $5, (node*)NULL); }
+	: logical_or_expression { $$ = $1; }
+	| logical_or_expression '?' expression ':' conditional_expression { $$ = makeNode(strdup("?:"), strdup(""), 0, $1, $3, $5, (node*)NULL); }
 	;
 
 assignment_expression
-	: conditional_expression { printf("cond_exp\n");$$ = $1; }
-	| unary_expression assignment_operator assignment_expression { printf("assignment--unar\n");addChild($2, $1); addChild($2, $3); $$ = $2; }
+	: conditional_expression { $$ = $1; }
+	| unary_expression assignment_operator assignment_expression { addChild($2, $1); addChild($2, $3); $$ = $2; }
 	;
 
 assignment_operator
@@ -199,26 +199,26 @@ constant_expression
 
 declaration
 	: declaration_specifiers ';' { $$ = $1; }
-	| declaration_specifiers init_declarator_list ';' { printf("init_decl start\n"); if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; printf("init_decl\n");}
+	| declaration_specifiers init_declarator_list ';' { if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; }
 	;
 
 declaration_specifiers
 	: storage_class_specifier {$$ = $1;}
 	| storage_class_specifier declaration_specifiers {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
-	| type_specifier {printf("type_specifier\n");$$ = $1; printf("type_specifier2\n");}
+	| type_specifier {$$ = $1;}
 	| type_specifier declaration_specifiers {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
 	| type_qualifier {$$ = $1;}
 	| type_qualifier declaration_specifiers {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
 	;
 
 init_declarator_list
-	: init_declarator { printf("init_declarator\n");$$ = $1; printf("init_declarator2\n"); }
+	: init_declarator { $$ = $1;  }
 	| init_declarator_list ',' init_declarator { if($1){makeSibling($3,$1);$$ = $1;} else $$ = $3;} 
 	;
 
 init_declarator
 	: declarator { $$ = $1; }
-	| declarator '=' initializer { printf("init\n");printf("hello = %d\n",$1);$$ = makeNode(strdup("="), strdup("="), 0, $1, $3, (node*)NULL, (node*)NULL); printf("init2\n");}
+	| declarator '=' initializer { $$ = makeNode(strdup("="), strdup("="), 0, $1, $3, (node*)NULL, (node*)NULL);}
 	;
 
 storage_class_specifier
@@ -309,7 +309,7 @@ declarator
 	;
 
 direct_declarator
-	: IDENTIFIER { printf("direct_declarator\n"); $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); printf("hi2\n"); }
+	: IDENTIFIER { $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
 	| '(' declarator ')' { $$ = $2;}
 	| direct_declarator '[' constant_expression ']' { $$ = $1; }
 	| direct_declarator '[' ']' {$$ = $1; }
@@ -319,10 +319,10 @@ direct_declarator
 	;
 
 pointer
-	: '*' {printf("poiner\n");$$ = makeNode(strdup("*"), strdup("*"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| '*' type_qualifier_list {printf(" * type_qualifier_list\n");$$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
-	| '*' pointer {printf(" * pointer\n");$$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
-	| '*' type_qualifier_list pointer {printf(" * type_qualifier_list pointer\n");$$ = makeNode(strdup("*"), strdup("*"), 0, $2, $3, (node*)NULL,(node*)NULL );}
+	: '*' { $$ = makeNode(strdup("*"), strdup("*"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| '*' type_qualifier_list { $$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
+	| '*' pointer { $$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
+	| '*' type_qualifier_list pointer { $$ = makeNode(strdup("*"), strdup("*"), 0, $2, $3, (node*)NULL,(node*)NULL );}
 	;
 
 type_qualifier_list
@@ -383,16 +383,16 @@ initializer
 
 initializer_list
 	: initializer { $$ = $1; }
-	| initializer_list ',' initializer {printf("init_lis\n");if($1){makeSibling($3,$1);$$ = $1;} else $$ = $3;}
+	| initializer_list ',' initializer {if($1){makeSibling($3,$1);$$ = $1;} else $$ = $3;}
 	;
 
 statement
-	: labeled_statement {printf("---- labeled statement\n"); $$ = $1; }
-	| compound_statement {printf("---- compound_statement\n");$$ = $1; }
-	| expression_statement {printf("----- expression statement\n"); $$ = $1; }
-	| selection_statement { printf("----- selection_statement\n");$$ = $1; }
-	| iteration_statement { printf("iteration_statement\n");$$ = $1; }
-	| jump_statement { printf("----- jump_statement\n");$$ = $1; }
+	: labeled_statement { $$ = $1; }
+	| compound_statement {$$ = $1; }
+	| expression_statement { $$ = $1; }
+	| selection_statement { $$ = $1; }
+	| iteration_statement { $$ = $1; }
+	| jump_statement { $$ = $1; }
 	;
 
 labeled_statement
@@ -514,25 +514,10 @@ void generateDot(node* root, char* fileName) {
 
 
 
-// extern void generateDot(node*, char*);
-void dfs(node* root){
-	if(!root) return;
-	node* childList = root->childList;
-	printf("%s\n", root->name );
-    while(childList) {
-        dfs(childList);
-        childList = childList->next;
-    }
-}
-
 int main(int ac, char **av) {
-	printf("hhi\n");
 	yyparse();
-	printf("parse ended\n");
 	root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
-	// dfs(root);
 	char * fileName = strdup("graph.dot");
-	printf("parse ended1\n");
    	generateDot(root,fileName);
 	return 0; 
 }

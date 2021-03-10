@@ -1916,7 +1916,7 @@ yyreduce:
 
   case 3:
 #line 65 "grammar.y"
-                        {printf("CONSTANT\n");(yyval.nodes) = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);printf("CONSTANT2\n");}
+                        {(yyval.nodes) = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 #line 1921 "y.tab.c"
     break;
 
@@ -1934,13 +1934,13 @@ yyreduce:
 
   case 6:
 #line 71 "grammar.y"
-                             { printf("primary_expression\n");(yyval.nodes) = (yyvsp[0].nodes); printf("primary_expression2\n");  }
+                             { (yyval.nodes) = (yyvsp[0].nodes); }
 #line 1939 "y.tab.c"
     break;
 
   case 7:
 #line 72 "grammar.y"
-                                                {printf("postfix_expression [ \n");addChild((yyvsp[-3].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-3].nodes);}
+                                                {addChild((yyvsp[-3].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-3].nodes);}
 #line 1945 "y.tab.c"
     break;
 
@@ -1952,31 +1952,31 @@ yyreduce:
 
   case 9:
 #line 74 "grammar.y"
-                                                              {printf("postfix_expression ( arg )\n");addChild((yyvsp[-3].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-3].nodes);}
+                                                              {addChild((yyvsp[-3].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-3].nodes);}
 #line 1957 "y.tab.c"
     break;
 
   case 10:
 #line 75 "grammar.y"
-                                            { printf("postfix_expression IDENTIFIER \n");(yyval.nodes) = makeNode(strdup("."), strdup(""), 0, (yyvsp[-2].nodes), makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
+                                            { (yyval.nodes) = makeNode(strdup("."), strdup(""), 0, (yyvsp[-2].nodes), makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
 #line 1963 "y.tab.c"
     break;
 
   case 11:
 #line 76 "grammar.y"
-                                               {printf("postfix_expression PTR_OP IDENTIFIER \n");(yyval.nodes) = makeNode(strdup("PTR_OP"), strdup(""), 0, (yyvsp[-2].nodes), makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
+                                               {(yyval.nodes) = makeNode(strdup("PTR_OP"), strdup(""), 0, (yyvsp[-2].nodes), makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
 #line 1969 "y.tab.c"
     break;
 
   case 12:
 #line 77 "grammar.y"
-                                    {printf("postfix_expression INC_OP \n");addChild((yyvsp[-1].nodes), makeNode(strdup("INC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL));(yyval.nodes) = (yyvsp[-1].nodes);}
+                                    {addChild((yyvsp[-1].nodes), makeNode(strdup("INC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL));(yyval.nodes) = (yyvsp[-1].nodes);}
 #line 1975 "y.tab.c"
     break;
 
   case 13:
 #line 78 "grammar.y"
-                                    {printf("postfix_expression DEC_OP \n");addChild((yyvsp[-1].nodes), makeNode(strdup("DEC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL)); (yyval.nodes) = (yyvsp[-1].nodes);}
+                                    {addChild((yyvsp[-1].nodes), makeNode(strdup("DEC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL)); (yyval.nodes) = (yyvsp[-1].nodes);}
 #line 1981 "y.tab.c"
     break;
 
@@ -1994,7 +1994,7 @@ yyreduce:
 
   case 16:
 #line 87 "grammar.y"
-                             {printf("postfix_expression\n");(yyval.nodes) = (yyvsp[0].nodes); }
+                             {(yyval.nodes) = (yyvsp[0].nodes); }
 #line 1999 "y.tab.c"
     break;
 
@@ -2168,13 +2168,13 @@ yyreduce:
 
   case 45:
 #line 137 "grammar.y"
-                                {printf("relational_expression\n"); (yyval.nodes) = (yyvsp[0].nodes); }
+                                { (yyval.nodes) = (yyvsp[0].nodes); }
 #line 2173 "y.tab.c"
     break;
 
   case 46:
 #line 138 "grammar.y"
-                                                          { printf("equality_expression EQ_OP relational_expression\n");(yyval.nodes) = makeNode(strdup("EQ_OP"), strdup(""), 0, (yyvsp[-2].nodes), (yyvsp[0].nodes), (node*)NULL, (node*)NULL); }
+                                                          { (yyval.nodes) = makeNode(strdup("EQ_OP"), strdup(""), 0, (yyvsp[-2].nodes), (yyvsp[0].nodes), (node*)NULL, (node*)NULL); }
 #line 2179 "y.tab.c"
     break;
 
@@ -2234,7 +2234,7 @@ yyreduce:
 
   case 56:
 #line 163 "grammar.y"
-                                 { printf("logical_and_expression\n");(yyval.nodes) = (yyvsp[0].nodes); }
+                                 { (yyval.nodes) = (yyvsp[0].nodes); }
 #line 2239 "y.tab.c"
     break;
 
@@ -2246,25 +2246,25 @@ yyreduce:
 
   case 58:
 #line 168 "grammar.y"
-                                { printf("logical_or_expression\n");(yyval.nodes) = (yyvsp[0].nodes); }
+                                { (yyval.nodes) = (yyvsp[0].nodes); }
 #line 2251 "y.tab.c"
     break;
 
   case 59:
 #line 169 "grammar.y"
-                                                                          { printf("logical_or_expression '?'\n");(yyval.nodes) = makeNode(strdup("?:"), strdup(""), 0, (yyvsp[-4].nodes), (yyvsp[-2].nodes), (yyvsp[0].nodes), (node*)NULL); }
+                                                                          { (yyval.nodes) = makeNode(strdup("?:"), strdup(""), 0, (yyvsp[-4].nodes), (yyvsp[-2].nodes), (yyvsp[0].nodes), (node*)NULL); }
 #line 2257 "y.tab.c"
     break;
 
   case 60:
 #line 173 "grammar.y"
-                                 { printf("cond_exp\n");(yyval.nodes) = (yyvsp[0].nodes); }
+                                 { (yyval.nodes) = (yyvsp[0].nodes); }
 #line 2263 "y.tab.c"
     break;
 
   case 61:
 #line 174 "grammar.y"
-                                                                     { printf("assignment--unar\n");addChild((yyvsp[-1].nodes), (yyvsp[-2].nodes)); addChild((yyvsp[-1].nodes), (yyvsp[0].nodes)); (yyval.nodes) = (yyvsp[-1].nodes); }
+                                                                     { addChild((yyvsp[-1].nodes), (yyvsp[-2].nodes)); addChild((yyvsp[-1].nodes), (yyvsp[0].nodes)); (yyval.nodes) = (yyvsp[-1].nodes); }
 #line 2269 "y.tab.c"
     break;
 
@@ -2360,7 +2360,7 @@ yyreduce:
 
   case 77:
 #line 202 "grammar.y"
-                                                          { printf("init_decl start\n"); if((yyvsp[-2].nodes)){makeSibling((yyvsp[-1].nodes),(yyvsp[-2].nodes));(yyval.nodes) = (yyvsp[-2].nodes);} else (yyval.nodes) = (yyvsp[-1].nodes); printf("init_decl\n");}
+                                                          { if((yyvsp[-2].nodes)){makeSibling((yyvsp[-1].nodes),(yyvsp[-2].nodes));(yyval.nodes) = (yyvsp[-2].nodes);} else (yyval.nodes) = (yyvsp[-1].nodes); }
 #line 2365 "y.tab.c"
     break;
 
@@ -2378,7 +2378,7 @@ yyreduce:
 
   case 80:
 #line 208 "grammar.y"
-                         {printf("type_specifier\n");(yyval.nodes) = (yyvsp[0].nodes); printf("type_specifier2\n");}
+                         {(yyval.nodes) = (yyvsp[0].nodes);}
 #line 2383 "y.tab.c"
     break;
 
@@ -2402,7 +2402,7 @@ yyreduce:
 
   case 84:
 #line 215 "grammar.y"
-                          { printf("init_declarator\n");(yyval.nodes) = (yyvsp[0].nodes); printf("init_declarator2\n"); }
+                          { (yyval.nodes) = (yyvsp[0].nodes);  }
 #line 2407 "y.tab.c"
     break;
 
@@ -2420,7 +2420,7 @@ yyreduce:
 
   case 87:
 #line 221 "grammar.y"
-                                     { printf("init\n");printf("hello = %d\n",(yyvsp[-2].nodes));(yyval.nodes) = makeNode(strdup("="), strdup("="), 0, (yyvsp[-2].nodes), (yyvsp[0].nodes), (node*)NULL, (node*)NULL); printf("init2\n");}
+                                     { (yyval.nodes) = makeNode(strdup("="), strdup("="), 0, (yyvsp[-2].nodes), (yyvsp[0].nodes), (node*)NULL, (node*)NULL);}
 #line 2425 "y.tab.c"
     break;
 
@@ -2696,7 +2696,7 @@ yyreduce:
 
   case 133:
 #line 312 "grammar.y"
-                     { printf("direct_declarator\n"); (yyval.nodes) = makeNode(strdup("IDENTIFIER"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); printf("hi2\n"); }
+                     { (yyval.nodes) = makeNode(strdup("IDENTIFIER"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
 #line 2701 "y.tab.c"
     break;
 
@@ -2738,25 +2738,25 @@ yyreduce:
 
   case 140:
 #line 322 "grammar.y"
-              {printf("poiner\n");(yyval.nodes) = makeNode(strdup("*"), strdup("*"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+              { (yyval.nodes) = makeNode(strdup("*"), strdup("*"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 #line 2743 "y.tab.c"
     break;
 
   case 141:
 #line 323 "grammar.y"
-                                  {printf(" * type_qualifier_list\n");(yyval.nodes) = makeNode(strdup("*"), strdup("*"), 0, (yyvsp[0].nodes), (node*)NULL, (node*)NULL, (node*)NULL); }
+                                  { (yyval.nodes) = makeNode(strdup("*"), strdup("*"), 0, (yyvsp[0].nodes), (node*)NULL, (node*)NULL, (node*)NULL); }
 #line 2749 "y.tab.c"
     break;
 
   case 142:
 #line 324 "grammar.y"
-                      {printf(" * pointer\n");(yyval.nodes) = makeNode(strdup("*"), strdup("*"), 0, (yyvsp[0].nodes), (node*)NULL, (node*)NULL, (node*)NULL); }
+                      { (yyval.nodes) = makeNode(strdup("*"), strdup("*"), 0, (yyvsp[0].nodes), (node*)NULL, (node*)NULL, (node*)NULL); }
 #line 2755 "y.tab.c"
     break;
 
   case 143:
 #line 325 "grammar.y"
-                                          {printf(" * type_qualifier_list pointer\n");(yyval.nodes) = makeNode(strdup("*"), strdup("*"), 0, (yyvsp[-1].nodes), (yyvsp[0].nodes), (node*)NULL,(node*)NULL );}
+                                          { (yyval.nodes) = makeNode(strdup("*"), strdup("*"), 0, (yyvsp[-1].nodes), (yyvsp[0].nodes), (node*)NULL,(node*)NULL );}
 #line 2761 "y.tab.c"
     break;
 
@@ -2936,43 +2936,43 @@ yyreduce:
 
   case 173:
 #line 386 "grammar.y"
-                                           {printf("init_lis\n");if((yyvsp[-2].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-2].nodes));(yyval.nodes) = (yyvsp[-2].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
+                                           {if((yyvsp[-2].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-2].nodes));(yyval.nodes) = (yyvsp[-2].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
 #line 2941 "y.tab.c"
     break;
 
   case 174:
 #line 390 "grammar.y"
-                            {printf("---- labeled statement\n"); (yyval.nodes) = (yyvsp[0].nodes); }
+                            { (yyval.nodes) = (yyvsp[0].nodes); }
 #line 2947 "y.tab.c"
     break;
 
   case 175:
 #line 391 "grammar.y"
-                             {printf("---- compound_statement\n");(yyval.nodes) = (yyvsp[0].nodes); }
+                             {(yyval.nodes) = (yyvsp[0].nodes); }
 #line 2953 "y.tab.c"
     break;
 
   case 176:
 #line 392 "grammar.y"
-                               {printf("----- expression statement\n"); (yyval.nodes) = (yyvsp[0].nodes); }
+                               { (yyval.nodes) = (yyvsp[0].nodes); }
 #line 2959 "y.tab.c"
     break;
 
   case 177:
 #line 393 "grammar.y"
-                              { printf("----- selection_statement\n");(yyval.nodes) = (yyvsp[0].nodes); }
+                              { (yyval.nodes) = (yyvsp[0].nodes); }
 #line 2965 "y.tab.c"
     break;
 
   case 178:
 #line 394 "grammar.y"
-                              { printf("iteration_statement\n");(yyval.nodes) = (yyvsp[0].nodes); }
+                              { (yyval.nodes) = (yyvsp[0].nodes); }
 #line 2971 "y.tab.c"
     break;
 
   case 179:
 #line 395 "grammar.y"
-                         { printf("----- jump_statement\n");(yyval.nodes) = (yyvsp[0].nodes); }
+                         { (yyval.nodes) = (yyvsp[0].nodes); }
 #line 2977 "y.tab.c"
     break;
 
@@ -3460,25 +3460,10 @@ void generateDot(node* root, char* fileName) {
 
 
 
-// extern void generateDot(node*, char*);
-void dfs(node* root){
-	if(!root) return;
-	node* childList = root->childList;
-	printf("%s\n", root->name );
-    while(childList) {
-        dfs(childList);
-        childList = childList->next;
-    }
-}
-
 int main(int ac, char **av) {
-	printf("hhi\n");
 	yyparse();
-	printf("parse ended\n");
 	root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
-	// dfs(root);
 	char * fileName = strdup("graph.dot");
-	printf("parse ended1\n");
    	generateDot(root,fileName);
 	return 0; 
 }
