@@ -34,38 +34,36 @@ typedef struct node{
 	struct node* childList;
 }node;
 
-void printDeclarations(node* root) {
+void printDeclarations(node* root, FILE *fp) {
     if(!root) return;
-    printf("%d [label=\"%s\"];\n", root->id, root->name);
+    fprintf(fp, "%d [label=\"%s\"];\n", root->id, root->name);
     node* childList = root->childList;
     while(childList) {
-        printDeclarations(childList);
+        printDeclarations(childList, fp);
         childList = childList->next;
     }
 }        
 
-void printEdges(node* root) {
+void printEdges(node* root, FILE *fp) {
     node* child = root->childList;
     while(child) {
-        printf("%d -> %d\n", root->id, child->id);
-        printEdges(child);
+        fprintf(fp, "%d -> %d\n", root->id, child->id);
+        printEdges(child, fp);
         child = child->next;
     }
 }
 
-void generateDot(node* root) {
-    printf("strict digraph AST {\n");
-    printDeclarations(root);
-    printEdges(root);
-    printf("}\n");
-
+void generateDot(node* root, char* fileName) {
+    FILE *fp;
+    fp = fopen(fileName, "w");
+    fprintf(fp,"strict digraph AST {\n");
+    printDeclarations(root, fp);
+    printEdges(root, fp);
+    fprintf(fp,"}\n");
+    fclose(fp);
 }
 
 int main() {
-    FILE *fp;
-    fp = fopen("/tmp/test.txt", "w+");
-    // fprintf(fp, "This is testing for fprintf...\n");
-    // fputs("This is testing for fputs...\n", fp);
 
     //example graph
     /*
@@ -97,7 +95,6 @@ int main() {
    c->name = strdup("c");
    d->name = strdup("d");
    e->name = strdup("e");
-
-   generateDot(a);
-   fclose(fp);
+    char * fileName = strdup("graph.dot"); 
+   generateDot(a,fileName);
 }
