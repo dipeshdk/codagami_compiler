@@ -1,7 +1,0 @@
-rm a.out
-flex grammar.l
-yacc -dvt grammar.y
-rm log
-gcc  lex.yy.c y.tab.c -lfl > log 2>&1
-./a.out < ../tests/milestone2_tests/test4.c
-dot -Tps graph.dot -o ../tests/milestone2_output/graph44.ps
