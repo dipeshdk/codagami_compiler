@@ -13,7 +13,10 @@
 %start translation_unit
 // Prototypes
 %{
-	node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
+	#include<stdio.h>
+  #include<stdlib.h>
+  #include "generateDot.c"
+  node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
 	void makeSibling(node* node, node* childList);
 	void addChild(node* parent, node* child);
 %}
@@ -422,7 +425,7 @@ function_definition
 	;
 
 start
-	: translation_unit { $$ = makeNode(strdup("ROOT"), strdup("root"), 0, $1, NULL, NULL, NULL); }
+	: translation_unit { $$ = makeNode(strdup("ROOT"), strdup("root"), 0, $1, NULL, NULL, NULL);  root = $$; }
 %%
 #include <stdio.h>
 int id = 0;
