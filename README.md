@@ -21,8 +21,3 @@ This project is aimed to make a compiler of our own as a group project of the co
   $ bin/parser tests/test1.c [optional]output.dot
   $ dot -Tps output.dot -o output.ps
   ``` 
-## Running tests all at once
- ```console
- $ cd ./tests/runTests
- $ ./runTests.sh
- ```
