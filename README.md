@@ -14,15 +14,13 @@ This project is aimed to make a compiler of our own as a group project of the co
  - Target language: MIPS Assembly
  - Source language: C (fixed)
 
+## Abstract Syntax Tree
+The project parses input C file and outputs an abstract syntax tree as a DOT script. This DOT script can be processed to view the AST in graphical form.
+
 ## Usage example
 
   ```console
   $ make clean && make
   $ bin/parser tests/test1.c [optional]output.dot
-  $ dot -Tps ouput.dot -o output.ps
+  $ dot -Tps output.dot -o output.ps
   ``` 
-## Running tests all at once
- ```console
- $ cd ./tests/runTests
- $ ./runTests.sh
- ```
