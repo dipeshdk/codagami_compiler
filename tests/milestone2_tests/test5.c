@@ -15,7 +15,8 @@ int main() {
     int n = 10;
     struct node* head = NULL;
     struct node* prev = NULL;
-    for(int i = 0;i<n;i++){
+    int i;
+    for(i = 0;i<n;i++){
         struct node* curr = (struct node*)malloc(sizeof(node));
         curr->val = i;
         curr->next = NULL;  

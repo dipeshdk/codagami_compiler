@@ -3,5 +3,5 @@ flex grammar.l
 yacc -dvt grammar.y
 rm log
 gcc  lex.yy.c y.tab.c -lfl > log 2>&1
-./a.out < ../tests/milestone2_tests/test2.c
-dot -Tps graph.dot -o ../tests/milestone2_output/graph2.ps
+./a.out < ../tests/milestone2_tests/test5.c
+dot -Tps graph.dot -o ../tests/milestone2_output/graph5.ps

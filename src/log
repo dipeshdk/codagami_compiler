@@ -167,36 +167,6 @@ grammar.y:228:42: warning: incompatible implicit declaration of built-in functio
 grammar.y:229:46: warning: incompatible implicit declaration of built-in function ‘strdup’
   229 |  | REGISTER {$$ = makeNode(strdup("REGISTER"), strdup("register"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
       |                                              ^~~~~~
-grammar.y:233:42: warning: incompatible implicit declaration of built-in function ‘strdup’
-  233 |  : VOID {$$ = makeNode(strdup("VOID"), strdup("void"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                          ^~~~~~
-grammar.y:234:42: warning: incompatible implicit declaration of built-in function ‘strdup’
-  234 |  | CHAR {$$ = makeNode(strdup("CHAR"), strdup("char"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                          ^~~~~~
-grammar.y:235:43: warning: incompatible implicit declaration of built-in function ‘strdup’
-  235 |  | SHORT {$$ = makeNode(strdup("SHORT"), strdup("short"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                           ^~~~~~
-grammar.y:236:41: warning: incompatible implicit declaration of built-in function ‘strdup’
-  236 |  | INT {$$ = makeNode(strdup("INT"), strdup("int"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                         ^~~~~~
-grammar.y:237:42: warning: incompatible implicit declaration of built-in function ‘strdup’
-  237 |  | LONG {$$ = makeNode(strdup("LONG"), strdup("long"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                          ^~~~~~
-grammar.y:238:43: warning: incompatible implicit declaration of built-in function ‘strdup’
-  238 |  | FLOAT {$$ = makeNode(strdup("FLOAT"), strdup("float"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                           ^~~~~~
-grammar.y:239:44: warning: incompatible implicit declaration of built-in function ‘strdup’
-  239 |  | DOUBLE {$$ = makeNode(strdup("DOUBLE"), strdup("double"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                            ^~~~~~
-grammar.y:240:44: warning: incompatible implicit declaration of built-in function ‘strdup’
-  240 |  | SIGNED {$$ = makeNode(strdup("SIGNED"), strdup("signed"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                            ^~~~~~
-grammar.y:241:46: warning: incompatible implicit declaration of built-in function ‘strdup’
-  241 |  | UNSIGNED {$$ = makeNode(strdup("UNSIGNED"), strdup("unsigned"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                              ^~~~~~
-grammar.y:244:47: warning: incompatible implicit declaration of built-in function ‘strdup’
-  244 |  | TYPE_NAME {$$ = makeNode(strdup("TYPE_NAME"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-      |                                               ^~~~~~
 grammar.y:254:44: warning: incompatible implicit declaration of built-in function ‘strdup’
   254 |  : STRUCT {$$ = makeNode(strdup("STRUCT"), strdup("struct"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
       |                                            ^~~~~~
@@ -254,6 +224,24 @@ grammar.y:400:77: warning: incompatible implicit declaration of built-in functio
 grammar.y:401:59: warning: incompatible implicit declaration of built-in function ‘strdup’
   401 |  | DEFAULT ':' statement {$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("DEFAULT"), strdup("default"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
       |                                                           ^~~~~~
+grammar.y:408:100: warning: incompatible implicit declaration of built-in function ‘strdup’
+  408 |  | '{' declaration_list statement_list '}' { if($2){$$ = makeNode(strdup("BODY"), strdup(""), 0, $2, $3, (node*)NULL, (node*)NULL);} else{
+      |                                                                                                    ^~~~~~
+grammar.y:414:46: warning: implicit declaration of function ‘strcmp’ [-Wimplicit-function-declaration]
+  414 |  | declaration_list declaration { if(!strcmp(($1 -> name), "DECL_LIST")){$$ = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);} else $$ = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
+      |                                              ^~~~~~
+grammar.y:414:121: warning: incompatible implicit declaration of built-in function ‘strdup’
+  414 |  | declaration_list declaration { if(!strcmp(($1 -> name), "DECL_LIST")){$$ = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);} else $$ = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
+      |                                                                                                                         ^~~~~~
+grammar.y:414:265: warning: incompatible implicit declaration of built-in function ‘strdup’
+  414 |  | declaration_list declaration { if(!strcmp(($1 -> name), "DECL_LIST")){$$ = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);} else $$ = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
+      |                                                                                                                                                                                                                                                                         ^     
+grammar.y:419:117: warning: incompatible implicit declaration of built-in function ‘strdup’
+  419 |  | statement_list statement { if(!strcmp(($1 -> name), "STMT_LIST")){$$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);} else $$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
+      |                                                                                                                     ^~~~~~
+grammar.y:419:261: warning: incompatible implicit declaration of built-in function ‘strdup’
+  419 |  | statement_list statement { if(!strcmp(($1 -> name), "STMT_LIST")){$$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);} else $$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
+      |                                                                                                                                                                                                                                                                     ^     
 grammar.y:423:41: warning: incompatible implicit declaration of built-in function ‘strdup’
   423 |  : ';' {$$ = makeNode(strdup(";"), strdup(";"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
       |                                         ^~~~~~
@@ -319,6 +307,6 @@ grammar.y:546:2: warning: implicit declaration of function ‘strcpy’ [-Wimpli
 grammar.y:546:2: warning: incompatible implicit declaration of built-in function ‘strcpy’
 grammar.y:546:2: note: include ‘<string.h>’ or provide a declaration of ‘strcpy’
 grammar.y: At top level:
-grammar.y:578:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
-  578 | yyerror(s)
+grammar.y:579:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+  579 | yyerror(s)
       | ^~~~~~~

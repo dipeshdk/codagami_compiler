@@ -1988,7 +1988,7 @@ yyreduce:
 
   case 15:
 #line 83 "grammar.y"
-                                                             { makeSibling((yyvsp[0].nodes), (yyvsp[-2].nodes)); (yyval.nodes) = (yyvsp[-2].nodes); }
+                                                             { if((yyvsp[-2].nodes)){makeSibling((yyvsp[0].nodes), (yyvsp[-2].nodes)); (yyval.nodes) = (yyvsp[-2].nodes);} else (yyval.nodes) = (yyvsp[0].nodes); }
 #line 1993 "y.tab.c"
     break;
 
@@ -2072,7 +2072,7 @@ yyreduce:
 
   case 29:
 #line 106 "grammar.y"
-                                            { makeSibling((yyvsp[0].nodes), (yyvsp[-2].nodes)); (yyval.nodes) = (yyvsp[-2].nodes); }
+                                            { if((yyvsp[-2].nodes)){makeSibling((yyvsp[0].nodes), (yyvsp[-2].nodes)); (yyval.nodes) = (yyvsp[-2].nodes);} else {(yyval.nodes) = (yyvsp[0].nodes);} }
 #line 2077 "y.tab.c"
     break;
 
@@ -2342,7 +2342,7 @@ yyreduce:
 
   case 74:
 #line 193 "grammar.y"
-                                               { makeSibling((yyvsp[0].nodes), (yyvsp[-2].nodes)); (yyval.nodes) = (yyvsp[-2].nodes);}
+                                               { if((yyvsp[-2].nodes)){makeSibling((yyvsp[0].nodes), (yyvsp[-2].nodes)); (yyval.nodes) = (yyvsp[-2].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
 #line 2347 "y.tab.c"
     break;
 
@@ -2360,7 +2360,7 @@ yyreduce:
 
   case 77:
 #line 202 "grammar.y"
-                                                          { printf("init_decl start\n"); makeSibling((yyvsp[-1].nodes),(yyvsp[-2].nodes));(yyval.nodes) = (yyvsp[-2].nodes); printf("init_decl\n");}
+                                                          { printf("init_decl start\n"); if((yyvsp[-2].nodes)){makeSibling((yyvsp[-1].nodes),(yyvsp[-2].nodes));(yyval.nodes) = (yyvsp[-2].nodes);} else (yyval.nodes) = (yyvsp[-1].nodes); printf("init_decl\n");}
 #line 2365 "y.tab.c"
     break;
 
@@ -2372,7 +2372,7 @@ yyreduce:
 
   case 79:
 #line 207 "grammar.y"
-                                                         {makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-1].nodes);}
+                                                         {if((yyvsp[-1].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-1].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
 #line 2377 "y.tab.c"
     break;
 
@@ -2384,7 +2384,7 @@ yyreduce:
 
   case 81:
 #line 209 "grammar.y"
-                                                {makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-1].nodes);}
+                                                {if((yyvsp[-1].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-1].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
 #line 2389 "y.tab.c"
     break;
 
@@ -2396,7 +2396,7 @@ yyreduce:
 
   case 83:
 #line 211 "grammar.y"
-                                                {makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-1].nodes);}
+                                                {if((yyvsp[-1].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-1].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
 #line 2401 "y.tab.c"
     break;
 
@@ -2408,7 +2408,7 @@ yyreduce:
 
   case 85:
 #line 216 "grammar.y"
-                                                   { makeSibling((yyvsp[0].nodes), (yyvsp[-2].nodes)); (yyval.nodes) = (yyvsp[-2].nodes);}
+                                                   { if((yyvsp[-2].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-2].nodes));(yyval.nodes) = (yyvsp[-2].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
 #line 2413 "y.tab.c"
     break;
 
@@ -2456,55 +2456,55 @@ yyreduce:
 
   case 93:
 #line 233 "grammar.y"
-               {(yyval.nodes) = makeNode(strdup("VOID"), strdup("void"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+               {(yyval.nodes) = NULL;}
 #line 2461 "y.tab.c"
     break;
 
   case 94:
 #line 234 "grammar.y"
-               {(yyval.nodes) = makeNode(strdup("CHAR"), strdup("char"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+               {(yyval.nodes) = NULL;}
 #line 2467 "y.tab.c"
     break;
 
   case 95:
 #line 235 "grammar.y"
-                {(yyval.nodes) = makeNode(strdup("SHORT"), strdup("short"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+                {(yyval.nodes) = NULL;}
 #line 2473 "y.tab.c"
     break;
 
   case 96:
 #line 236 "grammar.y"
-              {(yyval.nodes) = makeNode(strdup("INT"), strdup("int"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+              {(yyval.nodes) = NULL;}
 #line 2479 "y.tab.c"
     break;
 
   case 97:
 #line 237 "grammar.y"
-               {(yyval.nodes) = makeNode(strdup("LONG"), strdup("long"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+               {(yyval.nodes) = NULL;}
 #line 2485 "y.tab.c"
     break;
 
   case 98:
 #line 238 "grammar.y"
-                {(yyval.nodes) = makeNode(strdup("FLOAT"), strdup("float"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+                {(yyval.nodes) = NULL;}
 #line 2491 "y.tab.c"
     break;
 
   case 99:
 #line 239 "grammar.y"
-                 {(yyval.nodes) = makeNode(strdup("DOUBLE"), strdup("double"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+                 {(yyval.nodes) = NULL;}
 #line 2497 "y.tab.c"
     break;
 
   case 100:
 #line 240 "grammar.y"
-                 {(yyval.nodes) = makeNode(strdup("SIGNED"), strdup("signed"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+                 {(yyval.nodes) = NULL;}
 #line 2503 "y.tab.c"
     break;
 
   case 101:
 #line 241 "grammar.y"
-                   {(yyval.nodes) = makeNode(strdup("UNSIGNED"), strdup("unsigned"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+                   {(yyval.nodes) = NULL;}
 #line 2509 "y.tab.c"
     break;
 
@@ -2522,7 +2522,7 @@ yyreduce:
 
   case 104:
 #line 244 "grammar.y"
-                    {(yyval.nodes) = makeNode(strdup("TYPE_NAME"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+                    {(yyval.nodes) = NULL;}
 #line 2527 "y.tab.c"
     break;
 
@@ -2564,7 +2564,7 @@ yyreduce:
 
   case 111:
 #line 260 "grammar.y"
-                                                     { makeSibling((yyvsp[0].nodes), (yyvsp[-1].nodes)); (yyval.nodes) = (yyvsp[-1].nodes); }
+                                                     { if((yyvsp[-1].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-1].nodes);} else (yyval.nodes) = (yyvsp[0].nodes); }
 #line 2569 "y.tab.c"
     break;
 
@@ -2576,7 +2576,7 @@ yyreduce:
 
   case 113:
 #line 268 "grammar.y"
-                                                  { makeSibling((yyvsp[0].nodes), (yyvsp[-1].nodes)); (yyval.nodes) = (yyvsp[-1].nodes); }
+                                                  {if((yyvsp[-1].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-1].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
 #line 2581 "y.tab.c"
     break;
 
@@ -2588,7 +2588,7 @@ yyreduce:
 
   case 115:
 #line 270 "grammar.y"
-                                                  { makeSibling((yyvsp[0].nodes), (yyvsp[-1].nodes)); (yyval.nodes) = (yyvsp[-1].nodes); }
+                                                  {if((yyvsp[-1].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-1].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
 #line 2593 "y.tab.c"
     break;
 
@@ -2654,7 +2654,7 @@ yyreduce:
 
   case 126:
 #line 293 "grammar.y"
-                                         { makeSibling((yyvsp[0].nodes), (yyvsp[-2].nodes)); (yyval.nodes) = (yyvsp[-2].nodes);}
+                                         { if((yyvsp[-2].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-2].nodes));(yyval.nodes) = (yyvsp[-2].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
 #line 2659 "y.tab.c"
     break;
 
@@ -2768,7 +2768,7 @@ yyreduce:
 
   case 145:
 #line 330 "grammar.y"
-                                             { makeSibling((yyvsp[0].nodes), (yyvsp[-1].nodes)); (yyval.nodes) = (yyvsp[-1].nodes);}
+                                             { if((yyvsp[-1].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-1].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
 #line 2773 "y.tab.c"
     break;
 
@@ -2792,7 +2792,7 @@ yyreduce:
 
   case 149:
 #line 341 "grammar.y"
-                                                   { makeSibling((yyvsp[0].nodes), (yyvsp[-2].nodes)); (yyval.nodes) = (yyvsp[-2].nodes);}
+                                                   { if((yyvsp[-2].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-2].nodes));(yyval.nodes) = (yyvsp[-2].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
 #line 2797 "y.tab.c"
     break;
 
@@ -2834,7 +2834,7 @@ yyreduce:
 
   case 156:
 #line 357 "grammar.y"
-                                                       {makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes)); (yyval.nodes) = (yyvsp[-1].nodes); }
+                                                       {if((yyvsp[-1].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-1].nodes);} else (yyval.nodes) = (yyvsp[0].nodes); }
 #line 2839 "y.tab.c"
     break;
 
@@ -2852,7 +2852,7 @@ yyreduce:
 
   case 159:
 #line 363 "grammar.y"
-                                             {makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes)); (yyval.nodes) = (yyvsp[-1].nodes);}
+                                             {if((yyvsp[-1].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-1].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
 #line 2857 "y.tab.c"
     break;
 
@@ -2936,7 +2936,7 @@ yyreduce:
 
   case 173:
 #line 386 "grammar.y"
-                                           {printf("init_lis\n");makeSibling((yyvsp[0].nodes), (yyvsp[-2].nodes)); (yyval.nodes) = (yyvsp[-2].nodes);}
+                                           {printf("init_lis\n");if((yyvsp[-2].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-2].nodes));(yyval.nodes) = (yyvsp[-2].nodes);} else (yyval.nodes) = (yyvsp[0].nodes);}
 #line 2941 "y.tab.c"
     break;
 
@@ -3014,7 +3014,7 @@ yyreduce:
 
   case 186:
 #line 408 "grammar.y"
-                                                  { if((yyvsp[-2].nodes)){makeSibling((yyvsp[-1].nodes),(yyvsp[-2].nodes)); (yyval.nodes) = (yyvsp[-2].nodes);} else{
+                                                  { if((yyvsp[-2].nodes)){(yyval.nodes) = makeNode(strdup("BODY"), strdup(""), 0, (yyvsp[-2].nodes), (yyvsp[-1].nodes), (node*)NULL, (node*)NULL);} else{
 		(yyval.nodes) = (yyvsp[-1].nodes);	} }
 #line 3020 "y.tab.c"
     break;
@@ -3027,7 +3027,7 @@ yyreduce:
 
   case 188:
 #line 414 "grammar.y"
-                                       {if((yyvsp[0].nodes)){ makeSibling((yyvsp[0].nodes), (yyvsp[-1].nodes)); (yyval.nodes) = (yyvsp[-1].nodes); } else {(yyval.nodes) = (yyvsp[0].nodes);}}
+                                       { if(!strcmp(((yyvsp[-1].nodes) -> name), "DECL_LIST")){(yyval.nodes) = makeNode(strdup("DECL_LIST"), strdup(""), 0, (yyvsp[-1].nodes) -> childList, (yyvsp[0].nodes), (node*)NULL, (node*)NULL);} else (yyval.nodes) = makeNode(strdup("DECL_LIST"), strdup(""), 0, (yyvsp[-1].nodes), (yyvsp[0].nodes), (node*)NULL, (node*)NULL);}
 #line 3032 "y.tab.c"
     break;
 
@@ -3039,7 +3039,7 @@ yyreduce:
 
   case 190:
 #line 419 "grammar.y"
-                                   { makeSibling((yyvsp[0].nodes), (yyvsp[-1].nodes)); (yyval.nodes) = (yyvsp[-1].nodes); }
+                                   { if(!strcmp(((yyvsp[-1].nodes) -> name), "STMT_LIST")){(yyval.nodes) = makeNode(strdup("STMT_LIST"), strdup(""), 0, (yyvsp[-1].nodes) -> childList, (yyvsp[0].nodes), (node*)NULL, (node*)NULL);} else (yyval.nodes) = makeNode(strdup("STMT_LIST"), strdup(""), 0, (yyvsp[-1].nodes), (yyvsp[0].nodes), (node*)NULL, (node*)NULL);}
 #line 3044 "y.tab.c"
     break;
 
@@ -3135,7 +3135,7 @@ yyreduce:
 
   case 206:
 #line 450 "grammar.y"
-                                                {makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes)=(yyvsp[-1].nodes); root = (yyval.nodes); }
+                                                {if((yyvsp[-1].nodes)){makeSibling((yyvsp[0].nodes),(yyvsp[-1].nodes));(yyval.nodes) = (yyvsp[-1].nodes);} else (yyval.nodes) = (yyvsp[0].nodes); root = (yyval.nodes); }
 #line 3140 "y.tab.c"
     break;
 
@@ -3501,6 +3501,7 @@ node* makeNode(char* name, char* lexeme, int isLeaf,
 
 void makeSibling(node* root, node* childList){
 	if(!root) return;
+	if(!childList) return;
 	node* curr  = childList;
 	node* prev  = (node*)NULL;
 	while(curr){

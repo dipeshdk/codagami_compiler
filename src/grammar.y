@@ -80,7 +80,7 @@ postfix_expression
 
 argument_expression_list
 	: assignment_expression { $$ = $1; }
-	| argument_expression_list ',' assignment_expression { makeSibling($3, $1); $$ = $1; }
+	| argument_expression_list ',' assignment_expression { if($1){makeSibling($3, $1); $$ = $1;} else $$ = $3; }
 	;
 
 unary_expression
@@ -103,7 +103,7 @@ unary_operator
 
 cast_expression
 	: unary_expression {$$ = $1; }
-	| '(' type_name ')' cast_expression { makeSibling($4, $2); $$ = $2; }
+	| '(' type_name ')' cast_expression { if($2){makeSibling($4, $2); $$ = $2;} else {$$ = $4;} }
 	;
 
 multiplicative_expression
@@ -190,7 +190,7 @@ assignment_operator
 
 expression
 	: assignment_expression { $$ = $1; }
-	| expression ',' assignment_expression { makeSibling($3, $1); $$ = $1;} 
+	| expression ',' assignment_expression { if($1){makeSibling($3, $1); $$ = $1;} else $$ = $3;} 
 	;
 
 constant_expression
@@ -199,21 +199,21 @@ constant_expression
 
 declaration
 	: declaration_specifiers ';' { $$ = $1; }
-	| declaration_specifiers init_declarator_list ';' { printf("init_decl start\n"); makeSibling($2,$1);$$ = $1; printf("init_decl\n");}
+	| declaration_specifiers init_declarator_list ';' { printf("init_decl start\n"); if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; printf("init_decl\n");}
 	;
 
 declaration_specifiers
 	: storage_class_specifier {$$ = $1;}
-	| storage_class_specifier declaration_specifiers {makeSibling($2,$1);$$ = $1;}
+	| storage_class_specifier declaration_specifiers {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
 	| type_specifier {printf("type_specifier\n");$$ = $1; printf("type_specifier2\n");}
-	| type_specifier declaration_specifiers {makeSibling($2,$1);$$ = $1;}
+	| type_specifier declaration_specifiers {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
 	| type_qualifier {$$ = $1;}
-	| type_qualifier declaration_specifiers {makeSibling($2,$1);$$ = $1;}
+	| type_qualifier declaration_specifiers {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
 	;
 
 init_declarator_list
 	: init_declarator { printf("init_declarator\n");$$ = $1; printf("init_declarator2\n"); }
-	| init_declarator_list ',' init_declarator { makeSibling($3, $1); $$ = $1;} 
+	| init_declarator_list ',' init_declarator { if($1){makeSibling($3,$1);$$ = $1;} else $$ = $3;} 
 	;
 
 init_declarator
@@ -230,18 +230,18 @@ storage_class_specifier
 	;
 
 type_specifier
-	: VOID {$$ = makeNode(strdup("VOID"), strdup("void"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| CHAR {$$ = makeNode(strdup("CHAR"), strdup("char"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| SHORT {$$ = makeNode(strdup("SHORT"), strdup("short"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| INT {$$ = makeNode(strdup("INT"), strdup("int"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| LONG {$$ = makeNode(strdup("LONG"), strdup("long"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| FLOAT {$$ = makeNode(strdup("FLOAT"), strdup("float"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| DOUBLE {$$ = makeNode(strdup("DOUBLE"), strdup("double"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| SIGNED {$$ = makeNode(strdup("SIGNED"), strdup("signed"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| UNSIGNED {$$ = makeNode(strdup("UNSIGNED"), strdup("unsigned"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	: VOID {$$ = NULL;}
+	| CHAR {$$ = NULL;}
+	| SHORT {$$ = NULL;}
+	| INT {$$ = NULL;}
+	| LONG {$$ = NULL;}
+	| FLOAT {$$ = NULL;}
+	| DOUBLE {$$ = NULL;}
+	| SIGNED {$$ = NULL;}
+	| UNSIGNED {$$ = NULL;}
 	| struct_or_union_specifier {$$ = $1;}
 	| enum_specifier {$$ = $1;}
-	| TYPE_NAME {$$ = makeNode(strdup("TYPE_NAME"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| TYPE_NAME {$$ = NULL;}
 	;
 
 struct_or_union_specifier
@@ -257,7 +257,7 @@ struct_or_union
 
 struct_declaration_list
 	: struct_declaration { $$ = $1; }
-	| struct_declaration_list struct_declaration { makeSibling($2, $1); $$ = $1; }
+	| struct_declaration_list struct_declaration { if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; }
 	;
 
 struct_declaration
@@ -265,9 +265,9 @@ struct_declaration
 	;
 
 specifier_qualifier_list
-	: type_specifier specifier_qualifier_list { makeSibling($2, $1); $$ = $1; }
+	: type_specifier specifier_qualifier_list {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
 	| type_specifier { $$ = $1; }
-	| type_qualifier specifier_qualifier_list { makeSibling($2, $1); $$ = $1; }
+	| type_qualifier specifier_qualifier_list {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
 	| type_qualifier { $$ = $1; }
 	;
 
@@ -290,7 +290,7 @@ enum_specifier
 
 enumerator_list
 	: enumerator { $$ = $1; }
-	| enumerator_list ',' enumerator { makeSibling($3, $1); $$ = $1;} 
+	| enumerator_list ',' enumerator { if($1){makeSibling($3,$1);$$ = $1;} else $$ = $3;} 
 	;
 
 enumerator
@@ -327,7 +327,7 @@ pointer
 
 type_qualifier_list
 	: type_qualifier { $$ = $1; }
-	| type_qualifier_list type_qualifier { makeSibling($2, $1); $$ = $1;}
+	| type_qualifier_list type_qualifier { if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
 	;
 
 
@@ -338,7 +338,7 @@ parameter_type_list
 
 parameter_list
 	: parameter_declaration { $$ = $1; }
-	| parameter_list ',' parameter_declaration { makeSibling($3, $1); $$ = $1;}
+	| parameter_list ',' parameter_declaration { if($1){makeSibling($3,$1);$$ = $1;} else $$ = $3;}
 	;
 
 parameter_declaration
@@ -354,13 +354,13 @@ identifier_list
 
 type_name
 	: specifier_qualifier_list { $$ = $1; }
-	| specifier_qualifier_list abstract_declarator {makeSibling($2,$1); $$ = $1; }
+	| specifier_qualifier_list abstract_declarator {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; }
 	;
 
 abstract_declarator
 	: pointer { $$ = $1; }
 	| direct_abstract_declarator { $$ = $1; }
-	| pointer direct_abstract_declarator {makeSibling($2,$1); $$ = $1;}
+	| pointer direct_abstract_declarator {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
 	;
 
 direct_abstract_declarator
@@ -383,7 +383,7 @@ initializer
 
 initializer_list
 	: initializer { $$ = $1; }
-	| initializer_list ',' initializer {printf("init_lis\n");makeSibling($3, $1); $$ = $1;}
+	| initializer_list ',' initializer {printf("init_lis\n");if($1){makeSibling($3,$1);$$ = $1;} else $$ = $3;}
 	;
 
 statement
@@ -405,18 +405,18 @@ compound_statement
 	: '{' '}' { $$ = (node*)NULL; }
 	| '{' statement_list '}' { $$ = $2; }
 	| '{' declaration_list '}' { $$ = $2; }
-	| '{' declaration_list statement_list '}' { if($2){makeSibling($3,$2); $$ = $2;} else{
+	| '{' declaration_list statement_list '}' { if($2){$$ = makeNode(strdup("BODY"), strdup(""), 0, $2, $3, (node*)NULL, (node*)NULL);} else{
 		$$ = $3;	} }
 	;
 
 declaration_list
 	: declaration { $$ = $1; }
-	| declaration_list declaration {if($2){ makeSibling($2, $1); $$ = $1; } else {$$ = $2;}}
+	| declaration_list declaration { if(!strcmp(($1 -> name), "DECL_LIST")){$$ = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);} else $$ = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
 	;
 
 statement_list
 	: statement { $$ = $1; }
-	| statement_list statement { makeSibling($2, $1); $$ = $1; }
+	| statement_list statement { if(!strcmp(($1 -> name), "STMT_LIST")){$$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);} else $$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
 	;
 
 expression_statement
@@ -447,7 +447,7 @@ jump_statement
 
 translation_unit
 	: external_declaration { $$ = $1; root = $$; }
-	| translation_unit external_declaration {makeSibling($2,$1);$$=$1; root = $$; }
+	| translation_unit external_declaration {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; root = $$; }
 	;
 
 external_declaration
@@ -555,6 +555,7 @@ node* makeNode(char* name, char* lexeme, int isLeaf,
 
 void makeSibling(node* root, node* childList){
 	if(!root) return;
+	if(!childList) return;
 	node* curr  = childList;
 	node* prev  = (node*)NULL;
 	while(curr){
