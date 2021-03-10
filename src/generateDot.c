@@ -63,38 +63,38 @@ void generateDot(node* root, char* fileName) {
     fclose(fp);
 }
 
-int main() {
+// int main() {
 
-    //example graph
-    /*
-               a
-             /   \
-            b     c
-          /   \
-         d     e
-    */
-    node *a = (node*) malloc(sizeof(node));
-    node *b = (node*) malloc(sizeof(node));
-    node *c = (node*) malloc(sizeof(node));
-    node *d = (node*) malloc(sizeof(node));
-    node *e = (node*) malloc(sizeof(node));
+//     //example graph
+//     /*
+//                a
+//              /   \
+//             b     c
+//           /   \
+//          d     e
+//     */
+//     node *a = (node*) malloc(sizeof(node));
+//     node *b = (node*) malloc(sizeof(node));
+//     node *c = (node*) malloc(sizeof(node));
+//     node *d = (node*) malloc(sizeof(node));
+//     node *e = (node*) malloc(sizeof(node));
 
-    a->childList = b;
-    b->next = c;
-    b->childList = d;
-    d->next = e;
+//     a->childList = b;
+//     b->next = c;
+//     b->childList = d;
+//     d->next = e;
 
-   a->id=0;
-   b->id=1;
-   c->id=2;
-   d->id=3;
-   e->id=4;
+//    a->id=0;
+//    b->id=1;
+//    c->id=2;
+//    d->id=3;
+//    e->id=4;
 
-   a->name = strdup("a");
-   b->name = strdup("b");
-   c->name = strdup("c");
-   d->name = strdup("d");
-   e->name = strdup("e");
-    char * fileName = strdup("graph.dot"); 
-   generateDot(a,fileName);
-}
+//    a->name = strdup("a");
+//    b->name = strdup("b");
+//    c->name = strdup("c");
+//    d->name = strdup("d");
+//    e->name = strdup("e");
+//     char * fileName = strdup("graph.dot"); 
+//    generateDot(a,fileName);
+// }

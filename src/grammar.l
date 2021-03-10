@@ -263,25 +263,25 @@ void printTable(int token) {
     printf("    %-15s\t\t %-35s\t\t %8d\t %8d\n", c, yytext, line+1, prevCol+1);
 }
 
-int main(int ac, char **av) {
-    int val;
-    FILE    *fd;
-     if (ac == 2)
-    {
-        if (!(fd = fopen(av[1], "r")))
-        {
-            perror("Error: ");
-            return (-1);
-        }
-        yyset_in(fd);
-        printf("    %-15s\t\t %-35s\t\t %8s\t %8s\n\n", "Token", "Lexeme", "Line#", "Column#");
-        while((val=yylex()) > 0) {
-            printTable(val);
-        }
-        fclose(fd);
-    }
-    else
-        printf("Usage: a.out filename\n");
-    return (0);
+// int main(int ac, char **av) {
+//     int val;
+//     FILE    *fd;
+//      if (ac == 2)
+//     {
+//         if (!(fd = fopen(av[1], "r")))
+//         {
+//             perror("Error: ");
+//             return (-1);
+//         }
+//         yyset_in(fd);
+//         printf("    %-15s\t\t %-35s\t\t %8s\t %8s\n\n", "Token", "Lexeme", "Line#", "Column#");
+//         while((val=yylex()) > 0) {
+//             printTable(val);
+//         }
+//         fclose(fd);
+//     }
+//     else
+//         printf("Usage: a.out filename\n");
+//     return (0);
     
-}
+// }

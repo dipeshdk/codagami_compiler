@@ -1,0 +1,4 @@
+flex grammar.l
+yacc -dvt grammar.y
+rm log
+gcc  lex.yy.c y.tab.c -lfl > log 2>&1
