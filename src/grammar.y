@@ -21,9 +21,9 @@
 %%
 
 primary_expression
-	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), lookup(yylval), 1, NULL, NULL, NULL, NULL);}
-	| CONSTANT	{$$ = makeNode(strdup("CONSTANT"), lookup(yylval), 1, NULL, NULL, NULL, NULL);}
-	| STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), lookup(yylval), 1, NULL, NULL, NULL, NULL);}
+	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL);}
+	| CONSTANT	{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, NULL, NULL, NULL, NULL);}
+	| STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(""), 1, NULL, NULL, NULL, NULL);}
 	| '(' expression ')' { $$ = $2; }
 	;
 
@@ -45,8 +45,8 @@ argument_expression_list
 
 unary_expression
 	: postfix_expression {$$ = $1; }
-	| INC_OP unary_expression {$$ = makeNode(strdup("INC_OP"), lookup(yylval), 0, $2, NULL, NULL, NULL);}
-	| DEC_OP unary_expression {$$ = makeNode(strdup("DEC_OP"), lookup(yylval), 0, $2, NULL, NULL, NULL);}
+	| INC_OP unary_expression {$$ = makeNode(strdup("INC_OP"), strdup(""), 0, $2, NULL, NULL, NULL);}
+	| DEC_OP unary_expression {$$ = makeNode(strdup("DEC_OP"), strdup(""), 0, $2, NULL, NULL, NULL);}
 	| unary_operator cast_expression { addChild($1, $2); $$ = $1; }
 	| SIZEOF unary_expression {$$ = makeNode(strdup("SIZEOF"), strdup(""), 0, $2, NULL, NULL, NULL);}
 	| SIZEOF '(' type_name ')'{$$ = makeNode(strdup("SIZEOF"), strdup(""), 0, $3, NULL, NULL, NULL);}
@@ -199,8 +199,8 @@ type_specifier
 	| DOUBLE {$$ = makeNode(strdup("DOUBLE"), strdup("double"), 0, NULL, NULL, NULL, NULL);}
 	| SIGNED {$$ = makeNode(strdup("SIGNED"), strdup("signed"), 0, NULL, NULL, NULL, NULL);}
 	| UNSIGNED {$$ = makeNode(strdup("UNSIGNED"), strdup("unsigned"), 0, NULL, NULL, NULL, NULL);}
-	| struct_or_union_specifier
-	| enum_specifier
+	| struct_or_union_specifier {$$ = NULL;}
+	| enum_specifier {$$ = $1;}
 	| TYPE_NAME {$$ = makeNode(strdup("TYPE_NAME"), strdup(""), 0, NULL, NULL, NULL, NULL);}
 	;
 
@@ -225,9 +225,9 @@ struct_declaration
 	;
 
 specifier_qualifier_list
-	: type_specifier specifier_qualifier_list
+	: type_specifier specifier_qualifier_list { makeSibling($2, $1); $$ = $1; }
 	| type_specifier { $$ = $1; }
-	| type_qualifier specifier_qualifier_list
+	| type_qualifier specifier_qualifier_list { makeSibling($2, $1); $$ = $1; }
 	| type_qualifier { $$ = $1; }
 	;
 
@@ -244,7 +244,7 @@ struct_declarator
 
 enum_specifier
 	: ENUM '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup(""), 0, $3, NULL, NULL, NULL);}
-	| ENUM IDENTIFIER '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup(""), 0, makeNode(strdup("IDENTIFIER"), lookup(yylval), 0, $4, NULL, NULL, NULL), NULL, NULL, NULL);}
+	| ENUM IDENTIFIER '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 0, $4, NULL, NULL, NULL), NULL, NULL, NULL);}
 	| ENUM IDENTIFIER {$$ = NULL}
 	;
 
@@ -254,8 +254,8 @@ enumerator_list
 	;
 
 enumerator
-	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), lookup(yylval), 1, NULL, NULL, NULL, NULL);}
-	| IDENTIFIER '=' constant_expression {$$ = makeNode(strdup("="),strdup(""), 0, makeNode(strdup("IDENTIFIER"), lookup(yylval), 1, NULL, NULL, NULL, NULL), $3, NULL, NULL);}
+	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL);}
+	| IDENTIFIER '=' constant_expression {$$ = makeNode(strdup("="),strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), $3, NULL, NULL);}
 	;
 
 type_qualifier
@@ -264,18 +264,18 @@ type_qualifier
 	;
 
 declarator
-	: pointer direct_declarator 
+	: pointer direct_declarator  { $$ = $1; }
 	| direct_declarator { $$ = $1; }
 	;
 
 direct_declarator
-	: IDENTIFIER
-	| '(' declarator ')'
-	| direct_declarator '[' constant_expression ']'
-	| direct_declarator '[' ']'
-	| direct_declarator '(' parameter_type_list ')'
-	| direct_declarator '(' identifier_list ')'
-	| direct_declarator '(' ')'
+	: IDENTIFIER { $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 0, NULL, NULL, NULL, NULL); }
+	| '(' declarator ')' { $$ = $2;}
+	| direct_declarator '[' constant_expression ']' { $$ = $1; }
+	| direct_declarator '[' ']' {$$ = $1; }
+	| direct_declarator '(' parameter_type_list ')' { $$ = $1; }
+	| direct_declarator '(' identifier_list ')' { $$ = $1; }
+	| direct_declarator '(' ')' { $$ = $1; }
 	;
 
 pointer
@@ -302,14 +302,14 @@ parameter_list
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator
-	| declaration_specifiers abstract_declarator
-	| declaration_specifiers { $$ = $1; }
+	: declaration_specifiers declarator { $$ = $2; }
+	| declaration_specifiers abstract_declarator { $$ = $2; }
+	| declaration_specifiers { $$ = NULL; }
 	;
 
 identifier_list
-	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), lookup(yylval), 1, NULL, NULL, NULL, NULL);}
-	| identifier_list ',' IDENTIFIER { makeSibling(makeNode(strdup("IDENTIFIER"), lookup(yylval), 1, NULL, NULL, NULL, NULL), $1); $$ = $1;}
+	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL);}
+	| identifier_list ',' IDENTIFIER { makeSibling(makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), $1); $$ = $1;}
 	;
 
 type_name
@@ -356,8 +356,8 @@ statement
 	;
 
 labeled_statement
-	: IDENTIFIER ':' statement {$$ = makeNode(strdup(":"), strdup(:), 0, makeNode(strdup("IDENTIFIER"), lookup(yylval), 1, NULL, NULL, NULL, NULL), $3, NULL, NULL);}
-	| CASE constant_expression ':' statement
+	: IDENTIFIER ':' statement {$$ = makeNode(strdup(":"), strdup(:), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), $3, NULL, NULL);}
+	| CASE constant_expression ':' statement { $$ = makeNode(strdup("CASE"), strdup("case"), 0, $2, $4, NULL, NULL); }
 	| DEFAULT ':' statement {$$ = makeNode(strdup(":"), strdup(:), 0, makeNode(strdup("DEFAULT"), strdup("default"), 1, NULL, NULL, NULL, NULL), $3, NULL, NULL);}
 	;
 
@@ -397,7 +397,7 @@ iteration_statement
 	;
 
 jump_statement
-	: GOTO IDENTIFIER ';' {$$ = makeNode(strdup("GOTO"), strdup(""), 0, makeNode(strdup("IDENTIFIER"), lookup(yylval), 1, NULL, NULL, NULL, NULL), NULL, NULL, NULL);}
+	: GOTO IDENTIFIER ';' {$$ = makeNode(strdup("GOTO"), strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL, NULL);}
 	| CONTINUE ';'{ $$ = makeNode(strdup("CONTINUE"), strdup(""), NULL, NULL, NULL, NULL);}
 	| BREAK ';' { $$ = makeNode(strdup("BREAK"), strdup(""), 1, NULL, NULL, NULL, NULL);}
 	| RETURN ';' { $$ = makeNode(strdup("CONTINUE"), strdup(""), 1, NULL, NULL, NULL, NULL);}
@@ -415,13 +415,14 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement { $$ = makeNode(strdup("function_definition"), strdup(""), 0, $1, $2, $3, $4);}
-	| declaration_specifiers declarator compound_statement { $$ = makeNode(strdup("function_definition"), strdup(""), 0, $1, $2, $3, NULL);}
-	| declarator declaration_list compound_statement { $$ = makeNode(strdup("function_definition"), strdup(""), 0, $1, $2, $3, NULL);}
-	| declarator compound_statement { $$ = makeNode(strdup("function_definition"), strdup(""), 0, $1, $2, NULL, NULL);}
+	: declaration_specifiers declarator declaration_list compound_statement { addChild($2, $3); addChild($2, $4); $$ = $2; }
+	| declaration_specifiers declarator compound_statement { addChild($2, $3); $$ = $2; }
+	| declarator declaration_list compound_statement { addChild($1, $2); addChild($1, $3); $$ = $1; }
+	| declarator compound_statement { addChild($1, $2); $$ = $1; }
 	;
 
-
+start
+	: translation_unit { $$ = makeNode(strdup("ROOT"), strdup("root"), 0, $1, NULL, NULL, NULL); }
 %%
 #include <stdio.h>
 int id = 0;
@@ -435,6 +436,8 @@ typedef struct node{
 	node* next;
 	node* childList;
 }node;
+
+node* root;
 
 node* makeNode(char* name, char* lexeme, int isLeaf, 
 			node*c1, node*c2, node*c3, node* c4){
