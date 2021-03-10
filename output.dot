@@ -1,9 +1,0 @@
-strict digraph AST {
-3 [label="ROOT"];
-0 [label="IDENTIFIER"];
-2 [label="RETURN"];
-1 [label="CONSTANT"];
-3 -> 0
-0 -> 2
-2 -> 1
-}

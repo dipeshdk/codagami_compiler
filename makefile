@@ -20,6 +20,6 @@ $(OBJ)/lex.yy.c : $(SRC)/grammar.l $(OBJ)/y.tab.h $(OBJ)/y.tab.c
 	$(LEX) -o $(OBJ)/lex.yy.c $(SRC)/grammar.l
 
 clean: 
-	$(RM) $(OBJ)/* $(BIN)/*
+	$(RM) $(OBJ)/* $(BIN)/* ./*.dot ./*.ps
 
 
