@@ -29,19 +29,28 @@
 	#include <stdio.h>
 	#include <string.h>
   #include <stdlib.h>
-  
+  #include "symbolTable.h"
+
+extern "C"
+{
+	// int yyparse (void);
+	int yylex(void);  
+	int yywrap();
+	void yyset_in  ( FILE * _in_str  );
+}
+
 void yyerror(const char *s);
-int yylex();
+// int yylex();
 extern char yytext[];
-typedef struct node{
-	// int type;
-	int id;
-	char* name;
-	char* lexeme;
-	int isLeaf;
-	struct node* next;
-	struct node* childList;
-}node;
+// typedef struct node{
+// 	// int type;
+// 	int id;
+// 	char* name;
+// 	char* lexeme;
+// 	int isLeaf;
+// 	struct node* next;
+// 	struct node* childList;
+// }node;
 
 node* root;
   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
@@ -559,8 +568,7 @@ void addChild(node* parent, node* child){
 
 
 extern int column;
-yyerror(s)
-char *s;
+void yyerror(const char* s)
 {
 	fflush(stdout);
 	printf("\n%*s\n%*s\n", column, "^", column, s);

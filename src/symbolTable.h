@@ -37,13 +37,13 @@ struct symbolTableNode* insertSymbolTableChild(symbolTable* st){
 
 
 //changes
-typedef struct ASTnode{
+typedef struct node{
 	// int type;
 	int id;
 	char* name;
 	char* lexeme;
 	int isLeaf;
-	struct ASTnode* next;
-	struct ASTnode* childList;
+	struct node* next;
+	struct node* childList;
     struct symbolTableNode* st;
 }node;
