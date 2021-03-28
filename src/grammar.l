@@ -11,7 +11,7 @@ IS			(u|U|l|L)*
 
 
 void count();
-void error();
+void erryor();
 int check_type();
 int comment();
 %}

@@ -11,7 +11,7 @@
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
 %start translation_unit
-%union{struct node* nodes; char* id;}
+%union{ty* nodes; char* id;}
 %type<nodes> primary_expression postfix_expression argument_expression_list unary_expression unary_operator
 			cast_expression  multiplicative_expression additive_expression shift_expression relational_expression
 			equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression
@@ -199,7 +199,13 @@ constant_expression
 
 declaration
 	: declaration_specifiers ';' { $$ = $1; }
-	| declaration_specifiers init_declarator_list ';' { if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; }
+	| declaration_specifiers init_declarator_list ';' { 
+		if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;
+		// Add details to symbol table entries corresponding to init_declarator_list
+		// Symbol table entry to be made in init_declarator
+
+
+		}
 	;
 
 declaration_specifiers
@@ -299,8 +305,8 @@ enumerator
 	;
 
 type_qualifier
-	: CONST {$$ = makeNode(strdup("CONST"), strdup("const"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| VOLATILE {$$ = makeNode(strdup("VOLATILE"), strdup("volatile"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	: CONST {$$ = makeNode(strdup("CONST"), strdup("const"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	;
 
 declarator

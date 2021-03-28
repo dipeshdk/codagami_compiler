@@ -1,8 +1,9 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 #define FNode 1
 using namespace std;
 
-struct symbolTableNode {
+struct symbolTableNode
+{
     int type;
     int lineNo;
     string name;
@@ -10,40 +11,58 @@ struct symbolTableNode {
     vector<string> argList; //C compatible
 };
 
-typedef struct symbolTable {
+typedef struct symbolTable
+{
     map<string, struct symbolTableNode> symbolTable;
-    struct symbolTable* parent;
-    vector<struct symbolTable*> childList;
-}symbolTable;
+    struct symbolTable *parent;
+    vector<struct symbolTable *> childList;
+} symbolTable;
 
+int insertSymbol(symbolTable *st, string type, int lineNo, string name, string attr, vector<string> argList);
+// return 0 if successful, otherwise errorCode
 
-int insertSymbol(symbolTable* st,string type,int lineNo,string name,string attr, vector<string> argList);
-    // return 0 if successful, otherwise errorCode
-
-
-struct symbolTableNode* lookUp(symbolTable* st, string name, int &errorCode) {
+struct symbolTableNode *lookUp(symbolTable *st, string name, int &errorCode)
+{
     // goes to parent if does not find in st
     //returns node otherwise null
 }
 
-struct symbolTableNode* getNewSymbolTable(struct symbolTableNode* parent){
+struct symbolTableNode *getNewSymbolTable(struct symbolTableNode *parent)
+{
     // malloc
 }
 
-struct symbolTableNode* insertSymbolTableChild(symbolTable* st){
+struct symbolTableNode *insertSymbolTableChild(symbolTable *st)
+{
     //return st->childList.push_back(getNewSymbolTable(st));
 }
 
+enum StorageClassSpecifiers {
+    TYPEDEF,
+    EXTERN,
+    STATIC,
+    AUTO,
+    REGISTER
+};
 
+typedef struct declSpec
+{
+    char *type;
+    StorageClassSpecifiers storageClassSpecifier;
+    int isConst; //bool
+    int isVolatile; //bool
+} declSpec;
 
 //changes
-typedef struct node{
-	// int type;
-	int id;
-	char* name;
-	char* lexeme;
-	int isLeaf;
-	struct node* next;
-	struct node* childList;
-    struct symbolTableNode* st;
-}node;
+typedef struct node
+{
+    // int type;
+    int id;
+    char *name;
+    char *lexeme;
+    int isLeaf;
+    struct node *next;
+    struct node *childList;
+    struct symbolTableNode *st;
+    struct declSpec *declSp;
+} node;
