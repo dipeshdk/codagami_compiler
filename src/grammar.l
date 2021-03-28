@@ -189,7 +189,7 @@ int check_type()
 /*
 *	it actually will only return IDENTIFIER
 */
-
+    yylval.id = strdup(yytext);
 	return(IDENTIFIER);
 }
 

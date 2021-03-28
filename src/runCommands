@@ -1,0 +1,4 @@
+lex grammar.l
+yacc --verbose --debug -d grammar.y
+gcc -c lex.yy.c
+g++ lex.yy.o y.tab.c
