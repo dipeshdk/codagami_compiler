@@ -1,4 +1,5 @@
 #include<bits/stdc++.h>
+
 #define FNode 1
 using namespace std;
 
@@ -21,18 +22,17 @@ int insertSymbol(symbolTable* st,string type,int lineNo,string name,string attr,
     // return 0 if successful, otherwise errorCode
 
 
-struct symbolTableNode* lookUp(symbolTable* st, string name, int &errorCode) {
+struct symbolTableNode* lookUp(symbolTable* st, string name, int &errorCode);
     // goes to parent if does not find in st
     //returns node otherwise null
-}
 
-struct symbolTableNode* getNewSymbolTable(struct symbolTableNode* parent){
+
+struct symbolTableNode* getNewSymbolTable(struct symbolTableNode* parent);
     // malloc
-}
 
-struct symbolTableNode* insertSymbolTableChild(symbolTable* st){
+
+struct symbolTableNode* insertSymbolTableChild(symbolTable* st);
     //return st->childList.push_back(getNewSymbolTable(st));
-}
 
 
 
