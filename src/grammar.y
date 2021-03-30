@@ -68,9 +68,14 @@ node* root;
 
 primary_expression
 	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); printf("i am here \n"); printf("identifier = %s\n",yylval.id);}
-	| CONSTANT	{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| constant	{$$ = $1;}
 	| STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '(' expression ')' { $$ = $2; }
+	;
+
+constant
+	: I_CONSTANT{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| F_CONSTANT{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	;
 
 postfix_expression

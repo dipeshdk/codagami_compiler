@@ -14,6 +14,7 @@ void count();
 void error();
 int check_type();
 int comment();
+int set_yylval();
 %}
 
 %%
@@ -52,18 +53,18 @@ int comment();
 "volatile"		{ count(); return(VOLATILE); }
 "while"			{ count(); return(WHILE); }
 
-{L}({L}|{D})*		{ count(); return(check_type()); }
+{L}({L}|{D})*		{ count();set_yylval('S'); return(check_type()); }
 
-0[xX]{H}+{IS}?		{ count(); return(CONSTANT); }
-0{D}+{IS}?		{ count(); return(CONSTANT); }
-{D}+{IS}?		{ count(); return(CONSTANT); }
-L?'(\\.|[^\\'])+'	{ count(); return(CONSTANT); }
+0[xX]{H}+{IS}?		{ count();set_yylval('I'); return(CONSTANT); }
+0{D}+{IS}?		{ count();set_yylval('I'); return(CONSTANT); }
+{D}+{IS}?		{ count();set_yylval('I'); return(CONSTANT); }
+L?'(\\.|[^\\'])+'	{ count();set_yylval('I'); return(CONSTANT); }
 
-{D}+{E}{FS}?		{ count(); return(CONSTANT); }
-{D}*"."{D}+({E})?{FS}?	{ count(); return(CONSTANT); }
-{D}+"."{D}*({E})?{FS}?	{ count(); return(CONSTANT); }
+{D}+{E}{FS}?		{ count();set_yylval('F'); return(CONSTANT); }
+{D}*"."{D}+({E})?{FS}?	{ count();set_yylval('F'); return(CONSTANT); }
+{D}+"."{D}*({E})?{FS}?	{ count();set_yylval('F'); return(CONSTANT); }
 
-L?\"(\\.|[^\\"])*\"	{ count(); return(STRING_LITERAL); }
+L?\"(\\.|[^\\"])*\"	{ count(); set_yylval('S'); return(STRING_LITERAL); }
 
 "..."			{ count(); return(ELLIPSIS); }
 ">>="			{ count(); return(RIGHT_ASSIGN); }
@@ -174,7 +175,7 @@ void count()
 	// ECHO;
 }
 
-
+// TODO:
 int check_type()
 {
 /*
@@ -189,7 +190,6 @@ int check_type()
 /*
 *	it actually will only return IDENTIFIER
 */
-    yylval.id = strdup(yytext);
 	return(IDENTIFIER);
 }
 
@@ -263,6 +263,21 @@ void printTable(int token) {
     printf("    %-15s\t\t %-35s\t\t %8d\t %8d\n", c, yytext, line+1, prevCol+1);
 }
 
+int set_yylval(char id){
+    switch id{
+        case 'I':
+            yylval.ival = atoi(yytext);
+            break;
+        case 'F':
+            yylval.fval = atof(yytext);
+            break;
+        case 'S':
+            yylval.sval = strdup(yytext);
+            break; 
+        default:
+            break;
+    }   
+}
 // int main(int ac, char **av) {
 //     int val;
 //     FILE    *fd;
