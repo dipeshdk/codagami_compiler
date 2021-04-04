@@ -50,10 +50,10 @@ struct symbolTableNode *insertSymbolTableChild(symbolTable *st)
 // TODO: write a function in grammar.y to check types like int double should not come together
 typedef struct declSpec
 {
-    vector<int> type;
+    vector<int> type; // check validity of vector short double 
     int ptrLevel; // **a =2
     string lexeme; // union or struct or enum
-    vector<int> storageClassSpecifier;
+    vector<int> storageClassSpecifier; // int or vector<int> ? check later
     bool isConst; //bool
     bool isVolatile; //bool
 } declSpec;
