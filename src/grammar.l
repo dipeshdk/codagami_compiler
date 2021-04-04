@@ -55,14 +55,14 @@ int set_yylval();
 
 {L}({L}|{D})*		{ count();set_yylval('S'); return(check_type()); }
 
-0[xX]{H}+{IS}?		{ count();set_yylval('I'); return(CONSTANT); }
-0{D}+{IS}?		{ count();set_yylval('I'); return(CONSTANT); }
-{D}+{IS}?		{ count();set_yylval('I'); return(CONSTANT); }
-L?'(\\.|[^\\'])+'	{ count();set_yylval('I'); return(CONSTANT); }
+0[xX]{H}+{IS}?		{ count();set_yylval('I'); return(I_CONSTANT); }
+0{D}+{IS}?		{ count();set_yylval('I'); return(I_CONSTANT); }
+{D}+{IS}?		{ count();set_yylval('I'); return(I_CONSTANT); }
+L?'(\\.|[^\\'])+'	{ count();set_yylval('I'); return(I_CONSTANT); }
 
-{D}+{E}{FS}?		{ count();set_yylval('F'); return(CONSTANT); }
-{D}*"."{D}+({E})?{FS}?	{ count();set_yylval('F'); return(CONSTANT); }
-{D}+"."{D}*({E})?{FS}?	{ count();set_yylval('F'); return(CONSTANT); }
+{D}+{E}{FS}?		{ count();set_yylval('F'); return(F_CONSTANT); }
+{D}*"."{D}+({E})?{FS}?	{ count();set_yylval('F'); return(F_CONSTANT); }
+{D}+"."{D}*({E})?{FS}?	{ count();set_yylval('F'); return(F_CONSTANT); }
 
 L?\"(\\.|[^\\"])*\"	{ count(); set_yylval('S'); return(STRING_LITERAL); }
 
@@ -267,6 +267,7 @@ int set_yylval(char id){
     switch id{
         case 'I':
             yylval.ival = atoi(yytext);
+            // yylval.sval = strdup(yytext);
             break;
         case 'F':
             yylval.fval = atof(yytext);
@@ -278,6 +279,7 @@ int set_yylval(char id){
             break;
     }   
 }
+
 // int main(int ac, char **av) {
 //     int val;
 //     FILE    *fd;

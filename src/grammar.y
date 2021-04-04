@@ -14,8 +14,8 @@
 %union {
 	struct node* nodes;
 	char* sval;
-	int ival;
-	float fval;
+	long ival;
+	double fval;
 }
 %type<nodes> primary_expression postfix_expression argument_expression_list unary_expression unary_operator
 			cast_expression  multiplicative_expression additive_expression shift_expression relational_expression
