@@ -49,8 +49,8 @@ typedef struct declSpec
 {
     char *type;
     StorageClassSpecifiers storageClassSpecifier;
-    int isConst; //bool
-    int isVolatile; //bool
+    bool isConst; //bool
+    bool isVolatile; //bool
 } declSpec;
 
 //changes
