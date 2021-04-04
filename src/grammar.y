@@ -22,14 +22,15 @@
 			pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
-
+%type<sval> IDENTIFIER STRING_LITERAL
+// TODO:terminal type declaration
 
 // Prototypes
 %{
 	#include <stdio.h>
 	#include <string.h>
-  #include <stdlib.h>
-  #include "symbolTable.h"
+	#include <stdlib.h>
+	#include "symbolTable.h"
 
 extern "C"
 {
@@ -61,10 +62,15 @@ node* root;
 %%
 
 primary_expression
-	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| CONSTANT	{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); printf("i am here \n"); printf("identifier = %s\n",yylval.id);}
+	| constant	{$$ = $1;}
 	| STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '(' expression ')' { $$ = $2; }
+	;
+
+constant
+	: I_CONSTANT{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| F_CONSTANT{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	;
 
 postfix_expression
