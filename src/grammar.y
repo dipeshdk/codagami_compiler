@@ -11,7 +11,7 @@
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
 %start translation_unit
-%union{struct node* nodes; char* id;}
+%union{ty* nodes; char* id;}
 %type<nodes> primary_expression postfix_expression argument_expression_list unary_expression unary_operator
 			cast_expression  multiplicative_expression additive_expression shift_expression relational_expression
 			equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression
@@ -22,15 +22,16 @@
 			pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
-
+%type<sval> IDENTIFIER STRING_LITERAL
+// TODO:terminal type declaration
 
 // Prototypes
 %{
 	#include <stdio.h>
 	#include <string.h>
-  #include <stdlib.h>
-  #include "symbolTable.h"
-	#include<bits/stdc++.h>
+	#include <stdlib.h>
+	#include "symbolTable.h"
+
 extern "C"
 {
 	// int yyparse (void);
@@ -61,10 +62,15 @@ node* root;
 %%
 
 primary_expression
-	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| CONSTANT	{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); printf("i am here \n"); printf("identifier = %s\n",yylval.id);}
+	| constant	{$$ = $1;}
 	| STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '(' expression ')' { $$ = $2; }
+	;
+
+constant
+	: I_CONSTANT{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| F_CONSTANT{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	;
 
 postfix_expression
@@ -199,7 +205,13 @@ constant_expression
 
 declaration
 	: declaration_specifiers ';' { $$ = $1; }
-	| declaration_specifiers init_declarator_list ';' { if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; }
+	| declaration_specifiers init_declarator_list ';' { 
+		if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;
+		// Add details to symbol table entries corresponding to init_declarator_list
+		// Symbol table entry to be made in init_declarator
+
+
+		}
 	;
 
 declaration_specifiers
@@ -299,8 +311,8 @@ enumerator
 	;
 
 type_qualifier
-	: CONST {$$ = makeNode(strdup("CONST"), strdup("const"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| VOLATILE {$$ = makeNode(strdup("VOLATILE"), strdup("volatile"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	: CONST {$$ = makeNode(strdup("CONST"), strdup("const"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	;
 
 declarator
@@ -501,6 +513,42 @@ void generateDot(node* root, char* fileName) {
     printEdges(root, fp);
     fprintf(fp,"}\n");
     fclose(fp);
+}
+
+int main(int ac, char **av) {
+	int val;
+    FILE    *fd;
+    if (ac >= 2)
+    {
+        if (!(fd = fopen(av[1], "r")))
+        {
+            perror("Error: ");
+            return (-1);
+        }
+        yyset_in(fd);
+        
+		// Make the first symbol table with global scope
+		gSymTable = new symbolTable();
+		if(!gSymTable) {
+			printf("ERROR: Cannot allocate global symbol table\n");
+			return 1;
+		}
+		gSymTable->scope = gScope++;
+		gSymTable->parent = nullptr;
+
+		yyparse();
+		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
+		char * fileName = strdup("graph.dot");
+		if(ac == 3) fileName = av[2];
+
+		generateDot(root,fileName);
+
+        fclose(fd);
+    }
+    else
+        printf("Usage: a.out input_filename [optional]ouput.dot \n");
+	
+	return 0; 
 }
 
 node* makeNode(char* name, char* lexeme, int isLeaf, 

@@ -1,0 +1,30 @@
+200: declaration_specifiers init_declarator_list
+
+    scopeST = getScopeST(declaration_specifiers);
+    type = getType(declaration_specifiers);
+    attributes = getAttributes(declaration_specifiers);
+    for variableName, value in init_declarator_list->variable_list {
+        if(value && !isSameType(value, type)) {
+            //typecast AST node
+        }
+        addEntryToST(scopeST, variableName, type, attributes);
+    }
+
+const int x,y,z;
+
+
+214: $$.appendVariable(init_declarator)
+
+221: $$.addVariableInitializer(initializer)
+
+224: $$.addAttribute()
+
+232: $$.addType()
+
+247, 253, 263: //handle later struct
+
+301: $$.addAttribute()
+
+306: $$.copyLexeme(direct_declarator)
+
+
