@@ -1,7 +1,12 @@
 #include<bits/stdc++.h>
 
 #define FNode 1
+#define SYMBOL_ALREADY_EXISTS 2
+#define ALLOCATION_ERROR 3
 using namespace std;
+
+extern int gScope=0;
+extern symbolTable* gSymTable; 
 
 struct param{
     struct declSpec *declSp;
@@ -14,38 +19,17 @@ struct symbolTableNode {
     int scope; // global variable
     int arraySize;
     int paramSize;
-    param* paramList;
+    vector<param> paramList;
     string name;
     struct declSpec *declSp;
-    vector<string> argList; //C compatible
 };
 
-typedef struct symbolTable
-{
-    map<string, struct symbolTableNode> symbolTable;
+typedef struct symbolTable{
+    map<string, struct symbolTableNode*> symbolTableMap; // <lexeme, struct>
     struct symbolTable *parent;
+    int scope;
     vector<struct symbolTable *> childList;
 } symbolTable;
-
-
-int insertSymbol(symbolTable* st, int lineNo, string name, string attr, vector<string> argList);
-    // return 0 if successful, otherwise errorCode
-
-
-struct symbolTableNode* lookUp(symbolTable* st, string name, int &errorCode) {
-    // goes to parent if does not find in st
-    //returns node otherwise null
-}
-
-struct symbolTableNode *getNewSymbolTable(struct symbolTableNode *parent)
-{
-    // malloc
-}
-
-struct symbolTableNode *insertSymbolTableChild(symbolTable *st)
-{
-    //return st->childList.push_back(getNewSymbolTable(st));
-}
 
 // TODO: write a function in grammar.y to check types like int double should not come together
 typedef struct declSpec
@@ -58,7 +42,6 @@ typedef struct declSpec
     bool isVolatile; //bool
 } declSpec;
 
-//changes
 typedef struct node
 {
     int id;
@@ -70,3 +53,11 @@ typedef struct node
     struct symbolTableNode *st;
     struct declSpec *declSp;
 } node;
+
+
+struct symbolTableNode* lookUp(symbolTable* st, string name);
+
+int insertSymbol(symbolTable* st, int lineNo, string name);
+
+struct symbolTable* addChildSymbolTable(struct symbolTable *parent);
+

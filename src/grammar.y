@@ -526,6 +526,15 @@ int main(int ac, char **av) {
         }
         yyset_in(fd);
         
+		// Make the first symbol table with global scope
+		gSymTable = new symbolTable();
+		if(!gSymTable) {
+			printf("ERROR: Cannot allocate global symbol table\n");
+			return 1;
+		}
+		gSymTable->scope = gScope++;
+		gSymTable->parent = nullptr;
+
 		yyparse();
 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
 		char * fileName = strdup("graph.dot");
