@@ -1,15 +1,13 @@
 #include <stdio.h>
 
-a();
 
-int a(int b)
-{
-    printf("inside func a\n");
-    return 1; 
+int a(int b) {
+    return 1;
 }
+
 
 int main() {
-    int b;
+    int b = 10;
     printf("ret value: %d\n", a(b));
     return 0;
-}
+} 
