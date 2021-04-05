@@ -474,7 +474,6 @@ function_definition
 	| declarator compound_statement { addChild($1, $2); $$ = $1; }
 	;
 
-
 %%
 #include <stdio.h>
 

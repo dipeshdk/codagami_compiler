@@ -10,16 +10,17 @@ extern symbolTable* gSymTable;
 
 struct param{
     struct declSpec *declSp;
-    string paramName;
+    // string paramName;
 };
 
 struct symbolTableNode {
     int infoType; // normal, func, array
     int lineNo;
-    int scope; // global variable
     int arraySize;
     int paramSize;
-    vector<param> paramList;
+    vector<param> paramList; //in lookup, search the paramList also
+    // or add parameters to corresponding symbol table, helpful in lookup
+    // also verify whether params come in symbol table or not
     string name;
     struct declSpec *declSp;
 };
