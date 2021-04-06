@@ -51,7 +51,6 @@ typedef struct node
     int isLeaf;
     struct node *next;
     struct node *childList;
-    struct symbolTableNode *st;
     struct declSpec *declSp;
 } node;
 
