@@ -1,8 +1,24 @@
 #include<bits/stdc++.h>
 
-#define FNode 1
-#define SYMBOL_ALREADY_EXISTS 2
-#define ALLOCATION_ERROR 3
+#define FNode 100
+#define SYMBOL_ALREADY_EXISTS 102
+#define ALLOCATION_ERROR 103
+
+#define TYPE_CHAR 1
+#define TYPE_SHORT 2
+#define TYPE_INT 3 
+#define TYPE_LONG 4
+#define TYPE_FLOAT 5
+#define TYPE_DOUBLE 6
+#define TYPE_SIGNED 7
+#define TYPE_UNSIGNED 8
+#define TYPE_VOID 9
+#define TYPE_STRUCT 10
+#define TYPE_UNION 11
+#define TYPE_ENUM 12
+
+#define DEAD_NODE 2
+
 using namespace std;
 
 // extern int gScope=0;
@@ -15,14 +31,12 @@ struct param{
 };
 
 struct symbolTableNode {
-    int infoType; // normal, func, array
+    int infoType; // normal, func, array, struct, union
     int lineNo;
     int arraySize;
     int paramSize;
     int isDefined; //for functions
-    vector<struct param> paramList; //in lookup, search the paramList also
-    // or add parameters to corresponding symbol table, helpful in lookup
-    // also verify whether params come in symbol table or not
+    vector<struct param> paramList; //for functions, struct and union
     string name;
     struct declSpec *declSp;
 };
@@ -50,7 +64,7 @@ typedef struct node
     int id;
     char *name;
     char *lexeme;
-    int isLeaf;
+    int isLeaf; // DEAD_NODE if declaration node so not ot be printed in AST
     struct node *next;
     struct node *childList;
     struct declSpec *declSp;

@@ -33,6 +33,7 @@ int insertSymbol(symbolTable* st, int lineNo, string name){
 }
 
 
+
 struct symbolTable* addChildSymbolTable(struct symbolTable *parent)
 {
     symbolTable* node = new symbolTable();

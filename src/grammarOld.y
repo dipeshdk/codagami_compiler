@@ -45,6 +45,7 @@ extern "C"
 void yyerror(const char *s);
 // int yylex();
 extern char yytext[];
+
 // typedef struct node{
 // 	// int type;
 // 	int id;
@@ -56,16 +57,35 @@ extern char yytext[];
 // }node;
 
 node* root;
-  node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
-	void makeSibling(node* root, node* childList);
-	void addChild(node* parent, node* child);
+node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
+void makeSibling(node* root, node* childList);
+void addChild(node* parent, node* child);
+node* makeTypeNode(int type);
+node* makeDeadNode();
+#define UNDECLARED_SYMBOL 1
+#define STRUCT_INFO_TYPE 2
+
+void error(string var, int error_code) {
+	string str;
+	switch(error_code) {
+		case UNDECLARED_SYMBOL:
+			str = "Undeclared symbol ";
+			str += var;
+			break;
+		default:
+			break;
+	}
+	cout << "\nERROR: " << str << " on line number: " << line+1 << endl;
+	exit(error_code);
+}
 %}
 
 %%
 
 primary_expression
-	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); printf("%s",yylval.id);}
-	| CONSTANT	{printf("I am constant here\n"); $$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);printf("%s",yylval.id);}
+	// assuming identifier is not included in declaration. It must be declared before
+	: IDENTIFIER { if(!lookUp(gSymTable, yylval.id)) { error(yylval.id, UNDECLARED_SYMBOL);	}; $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+	| CONSTANT	{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '(' expression ')' { $$ = $2; }
 	;
@@ -233,29 +253,49 @@ storage_class_specifier
 	;
 
 type_specifier
-	: VOID {$$ = NULL;}
-	| CHAR {$$ = NULL;}
-	| SHORT {$$ = NULL;}
-	| INT {$$ = NULL;}
-	| LONG {$$ = NULL;}
-	| FLOAT {$$ = NULL;}
-	| DOUBLE {$$ = NULL;}
-	| SIGNED {$$ = NULL;}
-	| UNSIGNED {$$ = NULL;}
+	: VOID { $$ = makeTypeNode(TYPE_VOID);	}
+	| CHAR {$$ = makeTypeNode(TYPE_CHAR);}
+	| SHORT {$$ = makeTypeNode(TYPE_SHORT);}
+	| INT {$$ = makeTypeNode(TYPE_INT);}
+	| LONG {$$ = makeTypeNode(TYPE_LONG);}
+	| FLOAT {$$ = makeTypeNode(TYPE_FLOAT);}
+	| DOUBLE {$$ = makeTypeNode(TYPE_DOUBLE);}
+	| SIGNED {$$ = makeTypeNode(TYPE_SIGNED);}
+	| UNSIGNED {$$ = makeTypeNode( TYPE_UNSIGNED);}
 	| struct_or_union_specifier {$$ = $1;}
 	| enum_specifier {$$ = $1;}
-	| TYPE_NAME {$$ = NULL;}
+	| TYPE_NAME {$$ = NULL;} //TODO: unkown use
 	;
 
 struct_or_union_specifier
-	: struct_or_union IDENTIFIER '{' struct_declaration_list '}' {$$ = NULL;} 
+	: struct_or_union IDENTIFIER '{' struct_declaration_list '}' {
+		int retVal = insertSymbol(gSymTable, line+1, yylval.id);
+		if(retVal) {
+			error("", retVal);
+		}
+		symbolTableNode* stNode = lookUp(gSymTable, yylval.id);
+		if(!stNode) {
+			error(yylval.id, UNDECLARED_SYMBOL);	
+		}
+		stNode->infoType = STRUCT_INFO_TYPE;
+		$$ = NULL;
+		} 
 	| struct_or_union '{' struct_declaration_list '}' {$$ = NULL;}
 	| struct_or_union IDENTIFIER {$$ = NULL;}
 	;
 
 struct_or_union
-	: STRUCT {$$ = makeNode(strdup("STRUCT"), strdup("struct"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| UNION {$$ = makeNode(strdup("UNION"), strdup("union"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	: STRUCT {
+		node* temp = makeNode(strdup("STRUCT"), strdup("struct"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		temp->declSp = new declSpec();
+		temp->declSp->type.push_back(TYPE_STRUCT);
+	 	$$ = temp;}
+	 
+	| UNION {
+		node* temp = makeNode(strdup("UNION"), strdup("union"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		temp->declSp = new declSpec();
+		temp->declSp->type.push_back(TYPE_UNION);
+		$$=temp;}
 	;
 
 struct_declaration_list
@@ -312,6 +352,7 @@ declarator
 	;
 
 direct_declarator
+	// can be both in struct, or a declaration
 	: IDENTIFIER { insertSymbol(gSymTable, line+1, yylval.id);printf("I am here  %d, scope = %d\n", line+1, gSymTable->scope);printf("%s\n", yylval.id); $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
 	| '(' declarator ')' { $$ = $2;}
 	| direct_declarator '[' constant_expression ']' { $$ = $1; }
@@ -405,11 +446,11 @@ labeled_statement
 	;
 
 compound_statement
-	: scope_marker '{' '}' { $$ = (node*)NULL; }
-	| scope_marker '{' statement_list '}' { $$ = $3; }
-	| scope_marker '{' declaration_list '}' { $$ = $3; }
+	: scope_marker '{' '}' { $$ = (node*)NULL; gSymTable = gSymTable->parent;}
+	| scope_marker '{' statement_list '}' { $$ = $3; gSymTable = gSymTable->parent;}
+	| scope_marker '{' declaration_list '}' { $$ = $3; gSymTable = gSymTable->parent;}
 	| scope_marker '{' declaration_list statement_list '}' { if($3){$$ = makeNode(strdup("BODY"), strdup(""), 0, $3, $4, (node*)NULL, (node*)NULL);} else{
-		$$ = $4;	} }
+		$$ = $4;} gSymTable = gSymTable->parent;}
 	;
 
 scope_marker
@@ -475,7 +516,7 @@ int id = 0;
 
 
 void printDeclarations(node* root, FILE *fp) {
-    if(!root) return;
+    if(!root || root->isLeaf == DEAD_NODE) return;
 	if(root->isLeaf){
 		fprintf(fp, "%d [label=\"%s\"];\n", root->id, root->name);
 	} else {
@@ -566,7 +607,7 @@ int main(int ac, char **av) {
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
 
-		generateDot(root,fileName);
+		// generateDot(root,fileName);
 
         fclose(fd);
     }
@@ -589,6 +630,21 @@ node* makeNode(char* name, char* lexeme, int isLeaf,
 	makeSibling(c2,newNode->childList);
 	makeSibling(c3,newNode->childList);
 	makeSibling(c4,newNode->childList);
+	return newNode;
+}
+
+node* makeDeadNode(){
+	node* newNode = new node();
+	newNode->isLeaf=DEAD_NODE;
+	newNode->declSp = new declSpec();
+    newNode->childList = NULL;
+    newNode->next = NULL;
+	return newNode;
+}
+
+node* makeTypeNode(int tp){
+	node* newNode = makeDeadNode();
+	newNode->declSp->type.push_back(tp); //check validity of type
 	return newNode;
 }
 

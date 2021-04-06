@@ -5,9 +5,8 @@ int main(){
         int c = 10;
 
     }
-
-
     {
         int e = 50;
     }
+    return 0;
 }
