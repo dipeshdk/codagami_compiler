@@ -9,109 +9,107 @@ IS			(u|U|l|L)*
 #include <stdio.h>
 #include "y.tab.h"
 
-
 void count();
-void erryor();
+void error();
 int check_type();
 int comment();
-int set_yylval();
 %}
 
 %%
 "/*"			{ comment(); }
 
-"auto"			{ count(); return(AUTO); }
-"break"			{ count(); return(BREAK); }
-"case"			{ count(); return(CASE); }
-"char"			{ count(); return(CHAR); }
-"const"			{ count(); return(CONST); }
-"continue"		{ count(); return(CONTINUE); }
-"default"		{ count(); return(DEFAULT); }
-"do"			{ count(); return(DO); }
-"double"		{ count(); return(DOUBLE); }
-"else"			{ count(); return(ELSE); }
-"enum"			{ count(); return(ENUM); }
-"extern"		{ count(); return(EXTERN); }
-"float"			{ count(); return(FLOAT); }
-"for"			{ count(); return(FOR); }
-"goto"			{ count(); return(GOTO); }
-"if"			{ count(); return(IF); }
-"int"			{ count(); return(INT); }
-"long"			{ count(); return(LONG); }
-"register"		{ count(); return(REGISTER); }
-"return"		{ count(); return(RETURN); }
-"short"			{ count(); return(SHORT); }
-"signed"		{ count(); return(SIGNED); }
-"sizeof"		{ count(); return(SIZEOF); }
-"static"		{ count(); return(STATIC); }
-"struct"		{ count(); return(STRUCT); }
-"switch"		{ count(); return(SWITCH); }
-"typedef"		{ count(); return(TYPEDEF); }
-"union"			{ count(); return(UNION); }
-"unsigned"		{ count(); return(UNSIGNED); }
-"void"			{ count(); return(VOID); }
-"volatile"		{ count(); return(VOLATILE); }
-"while"			{ count(); return(WHILE); }
+"auto"			{ count();  return(AUTO); }
+"break"			{ count();  return(BREAK); }
+"case"			{ count();  return(CASE); }
+"char"			{ count();  return(CHAR); }
+"const"			{ count();  return(CONST); }
+"continue"		{ count();  return(CONTINUE); }
+"default"		{ count();  return(DEFAULT); }
+"do"			{ count();  return(DO); }
+"double"		{ count();  return(DOUBLE); }
+"else"			{ count();  return(ELSE); }
+"enum"			{ count();  return(ENUM); }
+"extern"		{ count();  return(EXTERN); }
+"float"			{ count();  return(FLOAT); }
+"for"			{ count();  return(FOR); }
+"goto"			{ count();  return(GOTO); }
+"if"			{ count();  return(IF); }
+"int"			{ count();  return(INT); }
+"long"			{ count();  return(LONG); }
+"register"		{ count();  return(REGISTER); }
+"return"		{ count();  return(RETURN); }
+"short"			{ count();  return(SHORT); }
+"signed"		{ count();  return(SIGNED); }
+"sizeof"		{ count();  return(SIZEOF); }
+"static"		{ count();  return(STATIC); }
+"struct"		{ count();  return(STRUCT); }
+"switch"		{ count();  return(SWITCH); }
+"typedef"		{ count();  return(TYPEDEF); }
+"union"			{ count();  return(UNION); }
+"unsigned"		{ count();  return(UNSIGNED); }
+"void"			{ count();  return(VOID); }
+"volatile"		{ count();  return(VOLATILE); }
+"while"			{ count();  return(WHILE); }
 
-{L}({L}|{D})*		{ count();set_yylval('S'); return(check_type()); }
+{L}({L}|{D})*		{ count(); yylval.id = strdup(yytext); return(check_type()); }
 
-0[xX]{H}+{IS}?		{ count();set_yylval('I'); return(I_CONSTANT); }
-0{D}+{IS}?		{ count();set_yylval('I'); return(I_CONSTANT); }
-{D}+{IS}?		{ count();set_yylval('I'); return(I_CONSTANT); }
-L?'(\\.|[^\\'])+'	{ count();set_yylval('I'); return(I_CONSTANT); }
+0[xX]{H}+{IS}?		{ count();yylval.id = strdup(yytext); return(CONSTANT); }
+0{D}+{IS}?		{ count();yylval.id = strdup(yytext); return(CONSTANT); }
+{D}+{IS}?		{ count();yylval.id = strdup(yytext); return(CONSTANT); }
+L?'(\\.|[^\\'])+'	{ count();yylval.id = strdup(yytext); return(CONSTANT); }
 
-{D}+{E}{FS}?		{ count();set_yylval('F'); return(F_CONSTANT); }
-{D}*"."{D}+({E})?{FS}?	{ count();set_yylval('F'); return(F_CONSTANT); }
-{D}+"."{D}*({E})?{FS}?	{ count();set_yylval('F'); return(F_CONSTANT); }
+{D}+{E}{FS}?		{ count();yylval.id = strdup(yytext); return(CONSTANT); }
+{D}*"."{D}+({E})?{FS}?	{ count();yylval.id = strdup(yytext); return(CONSTANT); }
+{D}+"."{D}*({E})?{FS}?	{ count();yylval.id = strdup(yytext); return(CONSTANT); }
 
-L?\"(\\.|[^\\"])*\"	{ count(); set_yylval('S'); return(STRING_LITERAL); }
+L?\"(\\.|[^\\"])*\"	{ count(); yylval.id = strdup(yytext); return(STRING_LITERAL); }
 
-"..."			{ count(); return(ELLIPSIS); }
-">>="			{ count(); return(RIGHT_ASSIGN); }
-"<<="			{ count(); return(LEFT_ASSIGN); }
-"+="			{ count(); return(ADD_ASSIGN); }
-"-="			{ count(); return(SUB_ASSIGN); }
-"*="			{ count(); return(MUL_ASSIGN); }
-"/="			{ count(); return(DIV_ASSIGN); }
-"%="			{ count(); return(MOD_ASSIGN); }
-"&="			{ count(); return(AND_ASSIGN); }
-"^="			{ count(); return(XOR_ASSIGN); }
-"|="			{ count(); return(OR_ASSIGN); }
-">>"			{ count(); return(RIGHT_OP); }
-"<<"			{ count(); return(LEFT_OP); }
-"++"			{ count(); return(INC_OP); }
-"--"			{ count(); return(DEC_OP); }
-"->"			{ count(); return(PTR_OP); }
-"&&"			{ count(); return(AND_OP); }
-"||"			{ count(); return(OR_OP); }
-"<="			{ count(); return(LE_OP); }
-">="			{ count(); return(GE_OP); }
-"=="			{ count(); return(EQ_OP); }
-"!="			{ count(); return(NE_OP); }
-";"			{ count(); return(';'); }
-("{"|"<%")		{ count(); return('{'); }
-("}"|"%>")		{ count(); return('}'); }
-","			{ count(); return(','); }
-":"			{ count(); return(':'); }
-"="			{ count(); return('='); }
-"("			{ count(); return('('); }
-")"			{ count(); return(')'); }
-("["|"<:")		{ count(); return('['); }
-("]"|":>")		{ count(); return(']'); }
-"."			{ count(); return('.'); }
-"&"			{ count(); return('&'); }
-"!"			{ count(); return('!'); }
-"~"			{ count(); return('~'); }
-"-"			{ count(); return('-'); }
-"+"			{ count(); return('+'); }
-"*"			{ count(); return('*'); }
-"/"			{ count(); return('/'); }
-"%"			{ count(); return('%'); }
-"<"			{ count(); return('<'); }
-">"			{ count(); return('>'); }
-"^"			{ count(); return('^'); }
-"|"			{ count(); return('|'); }
-"?"			{ count(); return('?'); }
+"..."			{ count();  return(ELLIPSIS); }
+">>="			{ count();  return(RIGHT_ASSIGN); }
+"<<="			{ count();  return(LEFT_ASSIGN); }
+"+="			{ count();  return(ADD_ASSIGN); }
+"-="			{ count();  return(SUB_ASSIGN); }
+"*="			{ count();  return(MUL_ASSIGN); }
+"/="			{ count();  return(DIV_ASSIGN); }
+"%="			{ count();  return(MOD_ASSIGN); }
+"&="			{ count();  return(AND_ASSIGN); }
+"^="			{ count();  return(XOR_ASSIGN); }
+"|="			{ count();  return(OR_ASSIGN); }
+">>"			{ count();  return(RIGHT_OP); }
+"<<"			{ count();  return(LEFT_OP); }
+"++"			{ count();  return(INC_OP); }
+"--"			{ count();  return(DEC_OP); }
+"->"			{ count();  return(PTR_OP); }
+"&&"			{ count();  return(AND_OP); }
+"||"			{ count();  return(OR_OP); }
+"<="			{ count();  return(LE_OP); }
+">="			{ count();  return(GE_OP); }
+"=="			{ count();  return(EQ_OP); }
+"!="			{ count();  return(NE_OP); }
+";"			{ count();  return(';'); }
+("{"|"<%")		{ count();  return('{'); }
+("}"|"%>")		{ count();  return('}'); }
+","			{ count();  return(','); }
+":"			{ count();  return(':'); }
+"="			{ count();  return('='); }
+"("			{ count();  return('('); }
+")"			{ count();  return(')'); }
+("["|"<:")		{ count();  return('['); }
+("]"|":>")		{ count();  return(']'); }
+"."			{ count();  return('.'); }
+"&"			{ count();  return('&'); }
+"!"			{ count();  return('!'); }
+"~"			{ count();  return('~'); }
+"-"			{ count();  return('-'); }
+"+"			{ count();  return('+'); }
+"*"			{ count();  return('*'); }
+"/"			{ count();  return('/'); }
+"%"			{ count();  return('%'); }
+"<"			{ count();  return('<'); }
+">"			{ count();  return('>'); }
+"^"			{ count();  return('^'); }
+"|"			{ count();  return('|'); }
+"?"			{ count();  return('?'); }
 
 [ \t\v\n\f]		{ count(); }
 .			{ count(); error(); }
@@ -263,22 +261,22 @@ void printTable(int token) {
     printf("    %-15s\t\t %-35s\t\t %8d\t %8d\n", c, yytext, line+1, prevCol+1);
 }
 
-int set_yylval(char id){
-    switch id{
-        case 'I':
-            yylval.ival = atoi(yytext);
-            // yylval.sval = strdup(yytext);
-            break;
-        case 'F':
-            yylval.fval = atof(yytext);
-            break;
-        case 'S':
-            yylval.sval = strdup(yytext);
-            break; 
-        default:
-            break;
-    }   
-}
+// int yylval.id = strdup(yytext)(char id){
+//     switch id{
+//         case 'I':
+//             yylval.ival = atoi(yytext);
+//             // yylval.sval = strdup(yytext);
+//             break;
+//         case 'F':
+//             yylval.fval = atof(yytext);
+//             break;
+//         case 'S':
+//             yylval.sval = strdup(yytext);
+//             break; 
+//         default:
+//             break;
+//     }   
+// }
 
 // int main(int ac, char **av) {
 //     int val;

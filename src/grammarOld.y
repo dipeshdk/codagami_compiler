@@ -23,9 +23,6 @@
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
 
-// %type<id> IDENTIFIER STRING_LITERAL
-// TODO:terminal type declaration
-
 // Prototypes
 %{
 	#include <stdio.h>
@@ -63,16 +60,11 @@ node* root;
 %%
 
 primary_expression
-	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); printf("i am here \n"); printf("identifier = %s\n",yylval.id);}
-	| CONSTANT	{$$ = $1; printf("in constant\n");}
+	: IDENTIFIER {printf("I am here\n");$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); printf("%s",yylval.id);}
+	| CONSTANT	{printf("I am constant here\n"); $$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);printf("%s",yylval.id);}
 	| STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '(' expression ')' { $$ = $2; }
 	;
-
-// constant
-// 	: I_CONSTANT{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-// 	| F_CONSTANT{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-// 	;
 
 postfix_expression
 	: primary_expression { $$ = $1; }
@@ -206,13 +198,7 @@ constant_expression
 
 declaration
 	: declaration_specifiers ';' { $$ = $1; }
-	| declaration_specifiers init_declarator_list ';' { 
-		if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;
-		// Add details to symbol table entries corresponding to init_declarator_list
-		// Symbol table entry to be made in init_declarator
-
-
-		}
+	| declaration_specifiers init_declarator_list ';' { if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; }
 	;
 
 declaration_specifiers
@@ -297,8 +283,8 @@ struct_declarator
 
 enum_specifier
 	: ENUM '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup(""), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| ENUM IDENTIFIER '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 0, $4, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
-	| ENUM IDENTIFIER {$$ = (node*)NULL;}
+	| ENUM IDENTIFIER '{' enumerator_list '}' { $$ = makeNode(strdup("ENUM"), strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 0, $4, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
+	| ENUM IDENTIFIER { $$ = (node*)NULL;}
 	;
 
 enumerator_list
@@ -312,8 +298,8 @@ enumerator
 	;
 
 type_qualifier
-	| VOLATILE {$$ = makeNode(strdup("VOLATILE"), strdup("volatile"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	: CONST {$$ = makeNode(strdup("CONST"), strdup("const"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| VOLATILE {$$ = makeNode(strdup("VOLATILE"), strdup("volatile"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	;
 
 declarator
@@ -322,7 +308,7 @@ declarator
 	;
 
 direct_declarator
-	: IDENTIFIER { $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+	: IDENTIFIER { printf("%s\n", yylval.id); $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
 	| '(' declarator ')' { $$ = $2;}
 	| direct_declarator '[' constant_expression ']' { $$ = $1; }
 	| direct_declarator '[' ']' {$$ = $1; }
@@ -459,8 +445,8 @@ jump_statement
 	;
 
 translation_unit
-	: external_declaration { $$ = $1; root = $$; }
-	| translation_unit external_declaration {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; root = $$; }
+	: external_declaration { $$ = $1; root = $$; printf("start\n"); }
+	| translation_unit external_declaration {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; root = $$; printf("start1\n");}
 	;
 
 external_declaration
@@ -469,20 +455,16 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator function_scope declaration_list compound_statement { addChild($2, $3); addChild($2, $4); $$ = $2; }
+	: declaration_specifiers declarator declaration_list compound_statement { addChild($2, $3); addChild($2, $4); $$ = $2; }
 	| declaration_specifiers declarator compound_statement { addChild($2, $3); $$ = $2; }
 	| declarator declaration_list compound_statement { addChild($1, $2); addChild($1, $3); $$ = $1; }
-	| declarator compound_statement { addChild($1, $2); $$ = $1; 
-									  makeNewScope = 0;
-									  // Add Scope, add function name to global symbol table
-									}
+	| declarator compound_statement { addChild($1, $2); $$ = $1; }
 	;
+
 
 %%
 #include <stdio.h>
-using namespace std;
 int id = 0;
-int makeNewScope = 1;
 
 
 void printDeclarations(node* root, FILE *fp) {
@@ -519,6 +501,34 @@ void generateDot(node* root, char* fileName) {
     fclose(fp);
 }
 
+// int main(int ac, char **av) {
+// 	int val;
+//     FILE    *fd;
+//     if (ac >= 2)
+//     {
+//         if (!(fd = fopen(av[1], "r")))
+//         {
+//             perror("Error: ");
+//             return (-1);
+//         }
+//         yyset_in(fd);
+        
+// 		yyparse();
+// 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
+// 		char * fileName = strdup("graph.dot");
+// 		if(ac == 3) fileName = av[2];
+
+// 		generateDot(root,fileName);
+
+//         fclose(fd);
+//     }
+//     else
+//         printf("Usage: a.out input_filename [optional]ouput.dot \n");
+	
+// 	return 0; 
+// }
+
+using namespace std;
 int main(int ac, char **av) {
 	int val;
     FILE    *fd;
@@ -531,15 +541,6 @@ int main(int ac, char **av) {
         }
         yyset_in(fd);
         
-		// Make the first symbol table with global scope
-		// gSymTable = new symbolTable();
-		// if(!gSymTable) {
-		// 	printf("ERROR: Cannot allocate global symbol table\n");
-		// 	return 1;
-		// }
-		// gSymTable->scope = gScope++;
-		// gSymTable->parent = nullptr;
-
 		yyparse();
 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
 		char * fileName = strdup("graph.dot");
@@ -551,7 +552,7 @@ int main(int ac, char **av) {
     }
     else
         printf("Usage: a.out input_filename [optional]ouput.dot \n");
-	
+
 	return 0; 
 }
 

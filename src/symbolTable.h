@@ -5,8 +5,9 @@
 #define ALLOCATION_ERROR 3
 using namespace std;
 
-extern int gScope=0;
-extern symbolTable* gSymTable; 
+int gScope = 0;
+// gScope = 0;
+struct symbolTable* gSymTable; 
 
 struct param{
     struct declSpec *declSp;
@@ -18,7 +19,8 @@ struct symbolTableNode {
     int lineNo;
     int arraySize;
     int paramSize;
-    vector<param> paramList; //in lookup, search the paramList also
+    int isDefined; //for functions
+    vector<struct param> paramList; //in lookup, search the paramList also
     // or add parameters to corresponding symbol table, helpful in lookup
     // also verify whether params come in symbol table or not
     string name;
