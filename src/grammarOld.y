@@ -28,7 +28,11 @@
 	#include <stdio.h>
 	#include <string.h>
 	#include <stdlib.h>
-	// #include "symbolTable.h"
+	#include "symbolTable.h"
+    extern int gScope;
+    extern symbolTable* gSymTable;
+    extern int line;
+
 
 extern "C"
 {
@@ -41,15 +45,15 @@ extern "C"
 void yyerror(const char *s);
 // int yylex();
 extern char yytext[];
-typedef struct node{
-	// int type;
-	int id;
-	char* name;
-	char* lexeme;
-	int isLeaf;
-	struct node* next;
-	struct node* childList;
-}node;
+// typedef struct node{
+// 	// int type;
+// 	int id;
+// 	char* name;
+// 	char* lexeme;
+// 	int isLeaf;
+// 	struct node* next;
+// 	struct node* childList;
+// }node;
 
 node* root;
   node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
@@ -60,7 +64,7 @@ node* root;
 %%
 
 primary_expression
-	: IDENTIFIER {printf("I am here\n");$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); printf("%s",yylval.id);}
+	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); printf("%s",yylval.id);}
 	| CONSTANT	{printf("I am constant here\n"); $$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);printf("%s",yylval.id);}
 	| STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '(' expression ')' { $$ = $2; }
@@ -308,7 +312,7 @@ declarator
 	;
 
 direct_declarator
-	: IDENTIFIER { printf("%s\n", yylval.id); $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+	: IDENTIFIER { insertSymbol(gSymTable, line+1, yylval.id);printf("I am here  %d, scope = %d\n", line+1, gSymTable->scope);printf("%s\n", yylval.id); $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
 	| '(' declarator ')' { $$ = $2;}
 	| direct_declarator '[' constant_expression ']' { $$ = $1; }
 	| direct_declarator '[' ']' {$$ = $1; }
@@ -347,8 +351,8 @@ parameter_declaration
 	;
 
 identifier_list
-	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| identifier_list ',' IDENTIFIER { makeSibling(makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
+	: IDENTIFIER {insertSymbol(gSymTable, line+1, yylval.id);printf("I am here  %d\n", line+1); $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| identifier_list ',' IDENTIFIER { insertSymbol(gSymTable, line+1, yylval.id);printf("I am here  %d\n", line+1); makeSibling(makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
 	;
 
 type_name
@@ -401,12 +405,15 @@ labeled_statement
 	;
 
 compound_statement
-	: '{' '}' { $$ = (node*)NULL; }
-	| '{' statement_list '}' { $$ = $2; }
-	| '{' declaration_list '}' { $$ = $2; }
-	| '{' declaration_list statement_list '}' { if($2){$$ = makeNode(strdup("BODY"), strdup(""), 0, $2, $3, (node*)NULL, (node*)NULL);} else{
-		$$ = $3;	} }
+	: scope_marker '{' '}' { $$ = (node*)NULL; }
+	| scope_marker '{' statement_list '}' { $$ = $3; }
+	| scope_marker '{' declaration_list '}' { $$ = $3; }
+	| scope_marker '{' declaration_list statement_list '}' { if($3){$$ = makeNode(strdup("BODY"), strdup(""), 0, $3, $4, (node*)NULL, (node*)NULL);} else{
+		$$ = $4;	} }
 	;
+
+scope_marker
+    : { gSymTable = addChildSymbolTable(gSymTable);}
 
 declaration_list
 	: declaration { $$ = $1; }
@@ -529,6 +536,10 @@ void generateDot(node* root, char* fileName) {
 // }
 
 using namespace std;
+// extern int gScope;
+// extern symbolTable* gSymTable;
+// extern int line;
+
 int main(int ac, char **av) {
 	int val;
     FILE    *fd;
@@ -541,7 +552,16 @@ int main(int ac, char **av) {
         }
         yyset_in(fd);
         
-		yyparse();
+        // Make the first symbol table with global scope
+		gSymTable = new symbolTable();
+		if(!gSymTable) {
+			printf("ERROR: Cannot allocate global symbol table\n");
+			return 1;
+		}
+		gSymTable->scope = gScope++;
+		gSymTable->parent = nullptr;
+		
+        yyparse();
 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];

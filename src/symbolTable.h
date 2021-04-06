@@ -5,9 +5,9 @@
 #define ALLOCATION_ERROR 3
 using namespace std;
 
-int gScope = 0;
+// extern int gScope=0;
 // gScope = 0;
-struct symbolTable* gSymTable; 
+// struct symbolTable* gSymTable; 
 
 struct param{
     struct declSpec *declSp;

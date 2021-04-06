@@ -1,7 +1,8 @@
 #include<bits/stdc++.h>
 #include "symbolTable.h"
 using namespace std;
-
+int gScope=0;
+struct symbolTable* gSymTable;
 // grammar.y check if nullptr then it is error.
 struct symbolTableNode* lookUp(symbolTable* st, string name) {
     // goes to parent if does not find in st
