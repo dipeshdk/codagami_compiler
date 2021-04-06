@@ -468,16 +468,20 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement { addChild($2, $3); addChild($2, $4); $$ = $2; }
+	: declaration_specifiers declarator function_scope declaration_list compound_statement { addChild($2, $3); addChild($2, $4); $$ = $2; }
 	| declaration_specifiers declarator compound_statement { addChild($2, $3); $$ = $2; }
 	| declarator declaration_list compound_statement { addChild($1, $2); addChild($1, $3); $$ = $1; }
-	| declarator compound_statement { addChild($1, $2); $$ = $1; }
+	| declarator compound_statement { addChild($1, $2); $$ = $1; 
+									  makeNewScope = 0;
+									  // Add Scope, add function name to global symbol table
+									}
 	;
 
 %%
 #include <stdio.h>
 
 int id = 0;
+int makeNewScope = 1;
 
 
 void printDeclarations(node* root, FILE *fp) {
