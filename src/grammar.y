@@ -479,7 +479,7 @@ function_definition
 
 %%
 #include <stdio.h>
-
+using namespace std;
 int id = 0;
 int makeNewScope = 1;
 
@@ -597,33 +597,4 @@ void yyerror(const char* s)
 {
 	fflush(stdout);
 	printf("\n%*s\n%*s\n", column, "^", column, s);
-}
-
-
-using namespace std;
-int main(int ac, char **av) {
-	// int val;
-    // FILE    *fd;
-    // if (ac >= 2)
-    // {
-    //     if (!(fd = fopen(av[1], "r")))
-    //     {
-    //         perror("Error: ");
-    //         return (-1);
-    //     }
-    //     yyset_in(fd);
-        
-	// 	yyparse();
-	// 	root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
-	// 	char * fileName = strdup("graph.dot");
-	// 	if(ac == 3) fileName = av[2];
-
-	// 	generateDot(root,fileName);
-
-    //     fclose(fd);
-    // }
-    // else
-    //     printf("Usage: a.out input_filename [optional]ouput.dot \n");
-
-	return 0; 
 }
