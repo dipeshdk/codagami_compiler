@@ -2,7 +2,8 @@ D			[0-9]
 L			[a-zA-Z_]
 H			[a-fA-F0-9]
 E			[Ee][+-]?{D}+
-FS			(f|F|l|L)
+FS			(f|F)
+LS          (l|L)
 IS			(u|U|l|L)*
 
 %{
@@ -53,14 +54,18 @@ int comment();
 
 {L}({L}|{D})*		{ count(); yylval.id = strdup(yytext); return(check_type()); }
 
-0[xX]{H}+{IS}?		{ count();yylval.id = strdup(yytext); return(CONSTANT); }
-0{D}+{IS}?		{ count();yylval.id = strdup(yytext); return(CONSTANT); }
-{D}+{IS}?		{ count();yylval.id = strdup(yytext); return(CONSTANT); }
-L?'(\\.|[^\\'])+'	{ count();yylval.id = strdup(yytext); return(CONSTANT); }
+0[xX]{H}+{IS}?		{ count();yylval.id = strdup(yytext); return(I_CONSTANT); }
+0{D}+{IS}?		{ count();yylval.id = strdup(yytext); return(I_CONSTANT); }
+{D}+{IS}?		{ count();yylval.id = strdup(yytext); return(I_CONSTANT); }
+L?'(\\.|[^\\'])+'	{ count();yylval.id = strdup(yytext); return(I_CONSTANT); }
 
-{D}+{E}{FS}?		{ count();yylval.id = strdup(yytext); return(CONSTANT); }
-{D}*"."{D}+({E})?{FS}?	{ count();yylval.id = strdup(yytext); return(CONSTANT); }
-{D}+"."{D}*({E})?{FS}?	{ count();yylval.id = strdup(yytext); return(CONSTANT); }
+{D}+{E}{FS}?		{ count();yylval.id = strdup(yytext); return(F_CONSTANT); }
+{D}*"."{D}+({E})?{FS}?	{ count();yylval.id = strdup(yytext); return(F_CONSTANT); }
+{D}+"."{D}*({E})?{FS}?	{ count();yylval.id = strdup(yytext); return(F_CONSTANT); }
+
+{D}+{E}{LS}?		{ count();yylval.id = strdup(yytext); return(I_CONSTANT); }
+{D}*"."{D}+({E})?{LS}?	{ count();yylval.id = strdup(yytext); return(I_CONSTANT); }
+{D}+"."{D}*({E})?{LS}?	{ count();yylval.id = strdup(yytext); return(I_CONSTANT); }
 
 L?\"(\\.|[^\\"])*\"	{ count(); yylval.id = strdup(yytext); return(STRING_LITERAL); }
 
@@ -194,7 +199,7 @@ int check_type()
 void getTokenName(int ind, char c[]) {
     switch(ind) {
         case IDENTIFIER: strcpy(c, "IDENTIFIER\0"); break;
-        case CONSTANT: strcpy(c, "CONSTANT\0"); break;
+        // case CONSTANT: strcpy(c, "CONSTANT\0"); break;
         case STRING_LITERAL: strcpy(c, "STRING_LITERAL\0"); break;
         case SIZEOF: strcpy(c, "SIZEOF\0"); break;
         case PTR_OP: strcpy(c, "PTR_OP\0"); break;

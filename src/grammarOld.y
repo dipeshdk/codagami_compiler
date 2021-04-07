@@ -1,4 +1,4 @@
-%token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
+%token IDENTIFIER I_CONSTANT F_CONSTANT STRING_LITERAL SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
@@ -22,7 +22,7 @@
 			pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
-
+			constant
 // Prototypes
 %{
 	#include <stdio.h>
@@ -32,6 +32,7 @@
     extern int gScope;
     extern symbolTable* gSymTable;
     extern int line;
+	int funcDecl = 0;
 
 
 extern "C"
@@ -62,8 +63,7 @@ void makeSibling(node* root, node* childList);
 void addChild(node* parent, node* child);
 node* makeTypeNode(int type);
 node* makeDeadNode();
-#define UNDECLARED_SYMBOL 1
-#define STRUCT_INFO_TYPE 2
+
 
 void error(string var, int error_code) {
 	string str;
@@ -72,22 +72,70 @@ void error(string var, int error_code) {
 			str = "Undeclared symbol ";
 			str += var;
 			break;
+		case INVALID_ARGS:
+			str = "Invalid arguments passed to the function ";
+			str+= var;
+			break;
+		case CONFLICTING_TYPES:
+			str = "Conflicting type of declaration ";
+			str+=var;
+			break;
+		case SYMBOL_ALREADY_EXISTS:
+			str+= "SYMBOL_ALREADY_EXISTS";
+			str+=var;
+			break;
+		case ALLOCATION_ERROR:
+			str += "ALLOCATION_ERROR";
+			str += var;
+			break;
+		case TYPE_ERROR:
+			str += "TYPE_ERROR";
+			str += var;
+			break;
 		default:
 			break;
 	}
 	cout << "\nERROR: " << str << " on line number: " << line+1 << endl;
 	exit(error_code);
 }
+
+// set<vector<int> > int_type_check;
+// int_type_check.insert(TYPE_INT, );
+
+int check_type_array(vector<int> &v){
+	
+	for(auto &u: v ){
+		
+	}
+	// TODO: check the type to be int or long
+	// double gives error in ansi C, don't typecaste it.
+	return 0;
+}
+
 %}
 
 %%
 
 primary_expression
 	// assuming identifier is not included in declaration. It must be declared before
-	: IDENTIFIER { if(!lookUp(gSymTable, yylval.id)) { error(yylval.id, UNDECLARED_SYMBOL);	}; $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
-	| CONSTANT	{$$ = makeNode(strdup("CONSTANT"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	: IDENTIFIER { if(!lookUp(gSymTable, yylval.id)) { error(yylval.id, UNDECLARED_SYMBOL);	}; $$ = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+	| constant	{$$ = $1;}
+	| STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '(' expression ')' { $$ = $2; }
+	;
+
+constant
+	: I_CONSTANT {
+		string s = yylval.id;
+		node* temp = makeNode(strdup("CONSTANT"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+		addIVal(temp, yylval.id);
+		$$ = temp;
+	}
+	| F_CONSTANT {
+		string s = yylval.id;
+		node* temp = makeNode(strdup("CONSTANT"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+		addFVal(temp, yylval.id);
+		$$ = temp;}
 	;
 
 postfix_expression
@@ -222,16 +270,64 @@ constant_expression
 
 declaration
 	: declaration_specifiers ';' { $$ = $1; }
-	| declaration_specifiers init_declarator_list ';' { if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; }
+	| declaration_specifiers init_declarator_list ';' {
+		node* curr = $2;
+		while(curr){
+			node* temp = curr;
+			string s(curr->name);
+			if(s == "="){
+				temp = curr->childList;
+			}
+			
+			if(!temp) continue;
+			string lex = temp->lexeme;
+			
+			int retVal = insertSymbol(gSymTable, temp->lineNo, lex);
+			if(retVal) {
+				error(temp->lexeme, retVal);
+			}
+			
+			struct symbolTableNode* sym_node = gSymTable->symbolTableMap[lex];
+			if(!sym_node){
+				error(lex, ALLOCATION_ERROR);
+			}
+			
+			if(temp->infoType == INFO_TYPE_ARRAY){
+				sym_node->infoType = INFO_TYPE_ARRAY;
+				sym_node->arraySize = temp->arraySize;
+				sym_node->declSp = $1->declSp;
+			}
+			else {
+				// sym_node->infoType = INFO_TYPE_NORMAL;
+				sym_node->declSp = $1->declSp;
+			} 
+			
+			curr = curr->next;
+		}
+		if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;   
+	}
 	;
 
 declaration_specifiers
 	: storage_class_specifier {$$ = $1;}
 	| storage_class_specifier declaration_specifiers {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
-	| type_specifier {$$ = $1;}
-	| type_specifier declaration_specifiers {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
+	| type_specifier {$$ = $1;} //Segfault here
+	| type_specifier declaration_specifiers {
+		node *temp = $2;
+		vector<int> v = $1->declSp->type;
+		int err = addTypeToDeclSpec(temp, v);
+		if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
+		$$ = temp;
+	}
 	| type_qualifier {$$ = $1;}
-	| type_qualifier declaration_specifiers {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
+	| type_qualifier declaration_specifiers {
+		node *temp = $2;
+		vector<int> v = $1->declSp->type;
+		int err = addTypeToDeclSpec(temp, v);
+		if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
+		mergeConstVolatile(temp, $1);
+		$$ = temp;
+	}
 	;
 
 init_declarator_list
@@ -277,7 +373,7 @@ struct_or_union_specifier
 		if(!stNode) {
 			error(yylval.id, UNDECLARED_SYMBOL);	
 		}
-		stNode->infoType = STRUCT_INFO_TYPE;
+		stNode->infoType = INFO_TYPE_STRUCT;
 		$$ = NULL;
 		} 
 	| struct_or_union '{' struct_declaration_list '}' {$$ = NULL;}
@@ -310,7 +406,11 @@ struct_declaration
 specifier_qualifier_list
 	: type_specifier specifier_qualifier_list {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
 	| type_specifier { $$ = $1; }
-	| type_qualifier specifier_qualifier_list {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
+	| type_qualifier specifier_qualifier_list {
+		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;
+		mergeConstVolatile($2, $1);
+		$$ = $2;
+	}
 	| type_qualifier { $$ = $1; }
 	;
 
@@ -338,40 +438,109 @@ enumerator_list
 
 enumerator
 	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| IDENTIFIER '=' constant_expression {$$ = makeNode(strdup("="),strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
+	| IDENTIFIER '=' constant_expression {$$ = makeNode(strdup("="),strdup(""), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
 	;
 
 type_qualifier
-	: CONST {$$ = makeNode(strdup("CONST"), strdup("const"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| VOLATILE {$$ = makeNode(strdup("VOLATILE"), strdup("volatile"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	: CONST {
+		node* temp = makeNode(strdup("CONST"), strdup("const"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		temp->declSp = new declSpec();
+		temp->declSp->isConst = true;
+		$$ = temp;
+	}
+	| VOLATILE {
+		node* temp = makeNode(strdup("VOLATILE"), strdup("volatile"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		temp->declSp = new declSpec();
+		temp->declSp->isVolatile = true;
+		$$ = temp;
+	}
 	;
 
 declarator
-	: pointer direct_declarator  { $$ = $2; }
+	: pointer direct_declarator  { 
+		$$ = $2;
+		// TODO: pointer level setting
+	}
 	| direct_declarator { $$ = $1; }
 	;
 
 direct_declarator
 	// can be both in struct, or a declaration
-	: IDENTIFIER { insertSymbol(gSymTable, line+1, yylval.id);printf("I am here  %d, scope = %d\n", line+1, gSymTable->scope);printf("%s\n", yylval.id); $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+	: IDENTIFIER { 
+		// insertSymbol(gSymTable, line+1, yylval.id);
+		printf("I am here  %d, scope = %d\n", line+1, gSymTable->scope);
+		printf("%s\n", yylval.id);
+		$$ = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		$$-> infoType = INFO_TYPE_NORMAL;
+		$$->lineNo = line+1;
+	}
 	| '(' declarator ')' { $$ = $2;}
-	| direct_declarator '[' constant_expression ']' { $$ = $1; }
+	| direct_declarator '[' constant_expression ']' {
+		node* temp = $1;
+		int asize = 0;
+		switch($3->valType){
+			case TYPE_INT: 
+				asize = $3->ival;
+				break;
+			case TYPE_LONG: 
+				asize = $3->lval;
+				break;
+			case TYPE_FLOAT:
+			case TYPE_DOUBLE:
+				error($3->name, TYPE_ERROR);
+				break;
+			default:
+				break; 
+		}
+		temp->infoType = INFO_TYPE_ARRAY;
+		temp->arraySize = asize;
+		$$ = temp;
+	}
 	| direct_declarator '[' ']' {$$ = $1; }
-	| direct_declarator '(' parameter_type_list ')' { $$ = $1; }
-	| direct_declarator '(' identifier_list ')' { $$ = $1; }
+	| direct_declarator '(' parameter_type_list ')' { 
+		$$ = $1;
+		// TODO: Add parameters to symbol table with appropriate types, also add to function arguments
+
+	}
+	| direct_declarator '(' identifier_list ')' { 
+		// TODO: Add to symbol table with appropriate type??, also add to function arguments
+		$$ = $1;
+	}
 	| direct_declarator '(' ')' { $$ = $1; }
 	;
 
 pointer
 	: '*' { $$ = makeNode(strdup("*"), strdup("*"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| '*' type_qualifier_list { $$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
-	| '*' pointer { $$ = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL); }
-	| '*' type_qualifier_list pointer { $$ = makeNode(strdup("*"), strdup("*"), 0, $2, $3, (node*)NULL,(node*)NULL );}
+	| '*' type_qualifier_list { 
+		node* temp = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
+		int retval = incrementPointerLevel(temp, $2);
+		mergeConstVolatile(temp, $2);
+		$$ =  temp;
+		}
+	| '*' pointer { 
+		node* temp = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
+		int retval = incrementPointerLevel(temp, $2);
+		mergeConstVolatile(temp, $2);
+		$$ = temp;
+	}
+	| '*' type_qualifier_list pointer { 
+		node* temp  = makeNode(strdup("*"), strdup("*"), 0, $2, $3, (node*)NULL,(node*)NULL );
+		int retval = incrementPointerLevel(temp, $3);
+		mergeConstVolatile($3,$2);
+		mergeConstVolatile(temp, $3);
+		$$ = temp;
+		printf("'*' type_qualifier_list pointer \n");
+		}
 	;
 
 type_qualifier_list
 	: type_qualifier { $$ = $1; }
-	| type_qualifier_list type_qualifier { if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
+	| type_qualifier_list type_qualifier { 
+		// if($1){ makeSibling($2,$1);$$ = $1;} else $$ = $2;
+		node* temp = $1;
+		mergeConstVolatile(temp, $2);
+		$$ = temp;
+	}
 	;
 
 
@@ -392,8 +561,8 @@ parameter_declaration
 	;
 
 identifier_list
-	: IDENTIFIER {insertSymbol(gSymTable, line+1, yylval.id);printf("I am here  %d\n", line+1); $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| identifier_list ',' IDENTIFIER { insertSymbol(gSymTable, line+1, yylval.id);printf("I am here  %d\n", line+1); makeSibling(makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
+	: IDENTIFIER {insertSymbol(gSymTable, line+1, yylval.id);printf("501 I am here  %d\n", line+1); $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| identifier_list ',' IDENTIFIER { insertSymbol(gSymTable, line+1, yylval.id);printf("502 I am here  %d\n", line+1); makeSibling(makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
 	;
 
 type_name
@@ -454,7 +623,9 @@ compound_statement
 	;
 
 scope_marker
-    : { gSymTable = addChildSymbolTable(gSymTable);}
+    : { if(funcDecl == 0) gSymTable = addChildSymbolTable(gSymTable);
+		else funcDecl = 0;
+	}
 
 declaration_list
 	: declaration { $$ = $1; }
@@ -503,11 +674,32 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement { addChild($2, $3); addChild($2, $4); $$ = $2; }
-	| declaration_specifiers declarator compound_statement { addChild($2, $3); $$ = $2; }
-	| declarator declaration_list compound_statement { addChild($1, $2); addChild($1, $3); $$ = $1; }
-	| declarator compound_statement { addChild($1, $2); $$ = $1; }
+	: declaration_specifiers declarator func_marker declaration_list compound_statement { 
+		addChild($2, $4); 
+		addChild($2, $5); 
+	 	$$ = $2;
+	}
+	| declaration_specifiers declarator func_marker compound_statement { 
+		addChild($2, $4);
+		$$ = $2;
+	}
+	| declarator func_marker declaration_list compound_statement { 
+		addChild($1, $3); 
+		addChild($1, $4);
+		$$ = $1;
+	}
+	| declarator func_marker compound_statement { 
+		addChild($1, $3);
+		$$ = $1;
+	}
 	;
+
+func_marker
+	: {
+		// TODO: Send type from declaration specifier to function name
+		funcDecl = 1;
+		gSymTable = addChildSymbolTable(gSymTable);
+	}
 
 
 %%
@@ -515,13 +707,13 @@ function_definition
 int id = 0;
 
 
+
 void printDeclarations(node* root, FILE *fp) {
-    if(!root || root->isLeaf == DEAD_NODE) return;
+    if(!root || root->isLeaf == DEAD_NODE ) return;
 	if(root->isLeaf){
 		fprintf(fp, "%d [label=\"%s\"];\n", root->id, root->name);
 	} else {
 		fprintf(fp, "%d [label=\"%s\"];\n", root->id, root->name);
-
 	}
     node* childList = root->childList;
     while(childList) {
@@ -531,8 +723,13 @@ void printDeclarations(node* root, FILE *fp) {
 }        
 
 void printEdges(node* root, FILE *fp) {
+	if(root->isLeaf == DEAD_NODE) return;
     node* child = root->childList;
     while(child) {
+		if(child->isLeaf == DEAD_NODE) {
+			child = child->next;
+			continue;
+		}
         fprintf(fp, "%d -> %d\n", root->id, child->id);
         printEdges(child, fp);
         child = child->next;
@@ -607,7 +804,9 @@ int main(int ac, char **av) {
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
 
-		// generateDot(root,fileName);
+		generateDot(root,fileName);
+
+		printSymbolTable(gSymTable);
 
         fclose(fd);
     }
@@ -639,6 +838,7 @@ node* makeDeadNode(){
 	newNode->declSp = new declSpec();
     newNode->childList = NULL;
     newNode->next = NULL;
+	newNode->name = strdup("Dead Node");
 	return newNode;
 }
 

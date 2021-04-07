@@ -1,0 +1,47 @@
+strict digraph AST {
+28 [label="ROOT"];
+2 [label="="];
+0 [label="IDENTIFIER"];
+1 [label="CONSTANT"];
+3 [label="IDENTIFIER"];
+27 [label="BODY"];
+7 [label="="];
+5 [label="IDENTIFIER"];
+6 [label="CONSTANT"];
+26 [label="STMT_LIST"];
+19 [label="DECL_LIST"];
+10 [label="IDENTIFIER"];
+14 [label="="];
+12 [label="IDENTIFIER"];
+13 [label="CONSTANT"];
+18 [label="="];
+16 [label="IDENTIFIER"];
+17 [label="CONSTANT"];
+22 [label="="];
+20 [label="IDENTIFIER"];
+21 [label="CONSTANT"];
+25 [label="RETURN"];
+24 [label="CONSTANT"];
+28 -> 2
+2 -> 0
+2 -> 1
+28 -> 3
+3 -> 27
+27 -> 7
+7 -> 5
+7 -> 6
+27 -> 26
+26 -> 19
+19 -> 10
+19 -> 14
+14 -> 12
+14 -> 13
+19 -> 18
+18 -> 16
+18 -> 17
+26 -> 22
+22 -> 20
+22 -> 21
+26 -> 25
+25 -> 24
+}

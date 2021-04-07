@@ -3,6 +3,10 @@
 #define FNode 100
 #define SYMBOL_ALREADY_EXISTS 102
 #define ALLOCATION_ERROR 103
+#define INVALID_ARGS 104
+#define CONFLICTING_TYPES 105
+#define UNDECLARED_SYMBOL 106
+#define TYPE_ERROR 107
 
 #define TYPE_CHAR 1
 #define TYPE_SHORT 2
@@ -19,6 +23,12 @@
 
 #define DEAD_NODE 2
 
+#define INFO_TYPE_NORMAL 201
+#define INFO_TYPE_FUNC 202
+#define INFO_TYPE_ARRAY 203
+#define INFO_TYPE_STRUCT 204
+
+
 using namespace std;
 
 // extern int gScope=0;
@@ -31,12 +41,12 @@ struct param{
 };
 
 struct symbolTableNode {
-    int infoType; // normal, func, array, struct, union
+    int infoType; // normal, func, array, struct/union
     int lineNo;
     int arraySize;
     int paramSize;
     int isDefined; //for functions
-    vector<struct param> paramList; //for functions, struct and union
+    vector<struct param*> paramList; //for functions, struct and union
     string name;
     struct declSpec *declSp;
 };
@@ -57,6 +67,8 @@ typedef struct declSpec
     vector<int> storageClassSpecifier; // int or vector<int> ? check later
     bool isConst; //bool
     bool isVolatile; //bool
+
+    declSpec() : ptrLevel(0), isConst(0), isVolatile(0)  { }
 } declSpec;
 
 typedef struct node
@@ -64,12 +76,27 @@ typedef struct node
     int id;
     char *name;
     char *lexeme;
+    int valType; //in which variable is constant stored
+    long lval;
+    int ival;
+    float fval;
+    double dval;
     int isLeaf; // DEAD_NODE if declaration node so not ot be printed in AST
     struct node *next;
     struct node *childList;
     struct declSpec *declSp;
+
+    // symtable node
+    int infoType = INFO_TYPE_NORMAL;
+    int lineNo;
+    int arraySize = 0;
+    int paramSize;
+    
 } node;
 
+int addIVal(node* temp, string s);
+
+int addFVal(node* temp, string s);
 
 struct symbolTableNode* lookUp(symbolTable* st, string name);
 
@@ -77,3 +104,10 @@ int insertSymbol(symbolTable* st, int lineNo, string name);
 
 struct symbolTable* addChildSymbolTable(struct symbolTable *parent);
 
+int addTypeToDeclSpec(node *temp, vector<int>&v);
+
+void printSymbolTable(symbolTable *st);
+
+int mergeConstVolatile(node* temp, node* from);
+
+int incrementPointerLevel(node* temp, node* from);
