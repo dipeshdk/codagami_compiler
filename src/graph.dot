@@ -1,47 +1,59 @@
 strict digraph AST {
-28 [label="ROOT"];
-2 [label="="];
-0 [label="IDENTIFIER"];
-1 [label="CONSTANT"];
-3 [label="IDENTIFIER"];
-27 [label="BODY"];
-7 [label="="];
-5 [label="IDENTIFIER"];
-6 [label="CONSTANT"];
-26 [label="STMT_LIST"];
-19 [label="DECL_LIST"];
-10 [label="IDENTIFIER"];
-14 [label="="];
+43 [label="ROOT"];
+3 [label="="];
+1 [label="IDENTIFIER"];
+2 [label="CONSTANT"];
+4 [label="IDENTIFIER"];
+9 [label="DECL_LIST"];
+7 [label="IDENTIFIER"];
+8 [label="IDENTIFIER"];
+11 [label="RETURN"];
+10 [label="CONSTANT"];
 12 [label="IDENTIFIER"];
-13 [label="CONSTANT"];
-18 [label="="];
-16 [label="IDENTIFIER"];
-17 [label="CONSTANT"];
-22 [label="="];
-20 [label="IDENTIFIER"];
-21 [label="CONSTANT"];
-25 [label="RETURN"];
-24 [label="CONSTANT"];
-28 -> 2
-2 -> 0
-2 -> 1
-28 -> 3
-3 -> 27
-27 -> 7
-7 -> 5
-7 -> 6
-27 -> 26
-26 -> 19
-19 -> 10
-19 -> 14
-14 -> 12
-14 -> 13
-19 -> 18
-18 -> 16
-18 -> 17
-26 -> 22
-22 -> 20
-22 -> 21
+42 [label="BODY"];
+16 [label="="];
+14 [label="IDENTIFIER"];
+15 [label="CONSTANT"];
+41 [label="STMT_LIST"];
+31 [label="DECL_LIST"];
+19 [label="IDENTIFIER"];
+26 [label="="];
+24 [label="IDENTIFIER"];
+25 [label="CONSTANT"];
+30 [label="="];
+28 [label="IDENTIFIER"];
+29 [label="CONSTANT"];
+37 [label="="];
+35 [label="IDENTIFIER"];
+36 [label="CONSTANT"];
+40 [label="RETURN"];
+39 [label="CONSTANT"];
+43 -> 3
+3 -> 1
+3 -> 2
+43 -> 4
+4 -> 9
+9 -> 7
+9 -> 8
+4 -> 11
+11 -> 10
+43 -> 12
+12 -> 42
+42 -> 16
+16 -> 14
+16 -> 15
+42 -> 41
+41 -> 31
+31 -> 19
+31 -> 26
+26 -> 24
 26 -> 25
-25 -> 24
+31 -> 30
+30 -> 28
+30 -> 29
+41 -> 37
+37 -> 35
+37 -> 36
+41 -> 40
+40 -> 39
 }

@@ -63,13 +63,17 @@ void makeSibling(node* root, node* childList);
 void addChild(node* parent, node* child);
 node* makeTypeNode(int type);
 node* makeDeadNode();
-
+node* makeStorageClassNode(int storageClass, char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
 
 void error(string var, int error_code) {
 	string str;
 	switch(error_code) {
-		case UNDECLARED_SYMBOL:
-			str = "Undeclared symbol ";
+		case SYMBOL_ALREADY_EXISTS:
+			str = "SYMBOL_ALREADY_EXISTS";
+			str+=var;
+			break;
+		case ALLOCATION_ERROR:
+			str = "ALLOCATION_ERROR";
 			str += var;
 			break;
 		case INVALID_ARGS:
@@ -80,18 +84,20 @@ void error(string var, int error_code) {
 			str = "Conflicting type of declaration ";
 			str+=var;
 			break;
-		case SYMBOL_ALREADY_EXISTS:
-			str+= "SYMBOL_ALREADY_EXISTS";
-			str+=var;
-			break;
-		case ALLOCATION_ERROR:
-			str += "ALLOCATION_ERROR";
+		case UNDECLARED_SYMBOL:
+			str = "Undeclared symbol ";
 			str += var;
-			break;
+			break;		
 		case TYPE_ERROR:
-			str += "TYPE_ERROR";
+			str = "TYPE_ERROR";
 			str += var;
 			break;
+		case ARRAY_SIZE_NOT_CONSTANT:
+			str = "Array size should be a constant ";
+			str+=var;
+		case ARRAY_SIZE_SHOULD_BE_INT:
+			str = "Array size should be a integer ";
+			str+=var;
 		default:
 			break;
 	}
@@ -99,18 +105,9 @@ void error(string var, int error_code) {
 	exit(error_code);
 }
 
-// set<vector<int> > int_type_check;
-// int_type_check.insert(TYPE_INT, );
 
-int check_type_array(vector<int> &v){
-	
-	for(auto &u: v ){
-		
-	}
-	// TODO: check the type to be int or long
-	// double gives error in ansi C, don't typecaste it.
-	return 0;
-}
+
+
 
 %}
 
@@ -291,15 +288,26 @@ declaration
 			if(!sym_node){
 				error(lex, ALLOCATION_ERROR);
 			}
-			
+			if(funcDecl){
+				// printf("Func Decl, param name = ");
+				// cout << lex << endl;
+				param* paramter = new param();
+				paramter-> declSp = declSpCopy($1->declSp);
+				paramter->paramName = lex;
+				$1->paramList.push_back(paramter);
+			}
 			if(temp->infoType == INFO_TYPE_ARRAY){
 				sym_node->infoType = INFO_TYPE_ARRAY;
 				sym_node->arraySize = temp->arraySize;
-				sym_node->declSp = $1->declSp;
+				sym_node->declSp = declSpCopy($1->declSp);
+				if(temp->declSp)
+					sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
 			}
 			else {
 				// sym_node->infoType = INFO_TYPE_NORMAL;
-				sym_node->declSp = $1->declSp;
+				sym_node->declSp = declSpCopy($1->declSp);
+				if(temp->declSp)
+					sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
 			} 
 			
 			curr = curr->next;
@@ -310,8 +318,15 @@ declaration
 
 declaration_specifiers
 	: storage_class_specifier {$$ = $1;}
-	| storage_class_specifier declaration_specifiers {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
-	| type_specifier {$$ = $1;} //Segfault here
+	| storage_class_specifier declaration_specifiers {
+		if($1){makeSibling($2,$1);$$ = $1;} 
+		node *temp = $2;
+		vector<int> v = $1->declSp->storageClassSpecifier;
+		int err = addStorageClassToDeclSpec(temp, v);
+		if(err) error("addStorageClassToDeclSpec", err); //Error handling according to error code passed
+		$$ = temp;
+	}
+	| type_specifier {$$ = $1;} 
 	| type_specifier declaration_specifiers {
 		node *temp = $2;
 		vector<int> v = $1->declSp->type;
@@ -322,9 +337,10 @@ declaration_specifiers
 	| type_qualifier {$$ = $1;}
 	| type_qualifier declaration_specifiers {
 		node *temp = $2;
-		vector<int> v = $1->declSp->type;
-		int err = addTypeToDeclSpec(temp, v);
-		if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
+		//TODO: Verify correctness, code to merge types commented out
+		// vector<int> v = $1->declSp->type;
+		// int err = addTypeToDeclSpec(temp, v);
+		// if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
 		mergeConstVolatile(temp, $1);
 		$$ = temp;
 	}
@@ -332,20 +348,26 @@ declaration_specifiers
 
 init_declarator_list
 	: init_declarator { $$ = $1;  }
-	| init_declarator_list ',' init_declarator { if($1){makeSibling($3,$1);$$ = $1;} else $$ = $3;} 
+	| init_declarator_list ',' init_declarator { 
+		if($1){makeSibling($3,$1);$$ = $1;} else $$ = $3;
+	} 
 	;
 
 init_declarator
 	: declarator { $$ = $1; }
-	| declarator '=' initializer { $$ = makeNode(strdup("="), strdup("="), 0, $1, $3, (node*)NULL, (node*)NULL);}
+	| declarator '=' initializer { 
+		$$ = makeNode(strdup("="), strdup("="), 0, $1, $3, (node*)NULL, (node*)NULL);
+		// if($1->declSp)
+			// printf("346 pointer level: %d\n", $1->declSp->ptrLevel);
+	}
 	;
 
 storage_class_specifier
-	: TYPEDEF {$$ = makeNode(strdup("TYPEDEF"), strdup("typedef"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| EXTERN {$$ = makeNode(strdup("EXTERN"), strdup("extern"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| STATIC {$$ = makeNode(strdup("STATIC"), strdup("static"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| AUTO {$$ = makeNode(strdup("AUTO"), strdup("auto"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| REGISTER {$$ = makeNode(strdup("REGISTER"), strdup("register"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	: TYPEDEF {$$ = makeStorageClassNode(TYPE_TYPEDEF, strdup("TYPEDEF"), strdup("typedef"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| EXTERN {$$ = makeStorageClassNode(TYPE_EXTERN, strdup("EXTERN"), strdup("extern"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| STATIC {$$ = makeStorageClassNode(TYPE_STATIC, strdup("STATIC"), strdup("static"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| AUTO {$$ = makeStorageClassNode(TYPE_AUTO, strdup("AUTO"), strdup("auto"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| REGISTER {$$ = makeStorageClassNode(TYPE_REGISTER, strdup("REGISTER"), strdup("register"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	;
 
 type_specifier
@@ -404,7 +426,9 @@ struct_declaration
 	;
 
 specifier_qualifier_list
-	: type_specifier specifier_qualifier_list {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
+	: type_specifier specifier_qualifier_list {
+		if($1){makeSibling($2,$1);}
+		}
 	| type_specifier { $$ = $1; }
 	| type_qualifier specifier_qualifier_list {
 		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;
@@ -458,8 +482,11 @@ type_qualifier
 
 declarator
 	: pointer direct_declarator  { 
-		$$ = $2;
-		// TODO: pointer level setting
+		node *temp = $2;
+		mergeConstVolatile(temp, $1);
+		copyPtrLevel(temp, $1);
+
+		$$ = temp;
 	}
 	| direct_declarator { $$ = $1; }
 	;
@@ -498,9 +525,14 @@ direct_declarator
 	}
 	| direct_declarator '[' ']' {$$ = $1; }
 	| direct_declarator '(' parameter_type_list ')' { 
-		$$ = $1;
+		node* direct_declarator = $1;	
+		node* parameter_type_list = $3;	
 		// TODO: Add parameters to symbol table with appropriate types, also add to function arguments
 
+		direct_declarator->paramList = parameter_type_list->paramList;
+		direct_declarator->paramSize = parameter_type_list->paramSize;
+		direct_declarator->infoType = INFO_TYPE_FUNC;
+		$$=direct_declarator;
 	}
 	| direct_declarator '(' identifier_list ')' { 
 		// TODO: Add to symbol table with appropriate type??, also add to function arguments
@@ -510,7 +542,11 @@ direct_declarator
 	;
 
 pointer
-	: '*' { $$ = makeNode(strdup("*"), strdup("*"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	: '*' { 
+		node* temp = makeNode(strdup("*"), strdup("*"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		incrementPointerLevel(temp, NULL);
+		$$ = temp;
+	}
 	| '*' type_qualifier_list { 
 		node* temp = makeNode(strdup("*"), strdup("*"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
 		int retval = incrementPointerLevel(temp, $2);
@@ -545,19 +581,100 @@ type_qualifier_list
 
 
 parameter_type_list
-	: parameter_list { $$ = $1; }
-	| parameter_list ',' ELLIPSIS { makeSibling(makeNode(strdup("ELLIPSIS"), strdup("..."), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
+	: parameter_list { 
+		node* parameter_list = $1;
+		parameter_list->paramSize = parameter_list->paramList.size();
+		$$ = parameter_list;
+	 }
+	| parameter_list ',' ELLIPSIS { 
+		makeSibling(makeNode(strdup("ELLIPSIS"), strdup("..."), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1);
+		node* parameter_list = $1;
+		parameter_list->paramSize = INF_PARAM_LIST;
+		$$ = parameter_list;
+	}
 	;
+
 
 parameter_list
 	: parameter_declaration { $$ = $1; }
-	| parameter_list ',' parameter_declaration { if($1){makeSibling($3,$1);$$ = $1;} else $$ = $3;}
+	| parameter_list ',' parameter_declaration { 
+		if($1){makeSibling($3,$1);}
+		node* parameter_list = $1;
+		node* parameter_declaration = $3;
+		for(auto& u: parameter_declaration->paramList)
+			parameter_list->paramList.push_back(u);
+		$$ = parameter_list;
+	}
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator { $$ = $2; }
-	| declaration_specifiers abstract_declarator { $$ = $2; }
-	| declaration_specifiers { $$ = (node*)NULL; }
+	: declaration_specifiers declarator { 
+		node* declaration_specifiers = $1;
+		node* declarator = $2;
+
+		param *parameter = new param();
+		if(!parameter->declSp) {
+			parameter->declSp = new declSpec();
+		}
+		if(declaration_specifiers->declSp) {
+			parameter->declSp = declSpCopy(declaration_specifiers->declSp);
+		}
+		if(declarator->declSp) {
+			parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
+		}
+		parameter->paramName = declarator->lexeme;
+		declarator->paramList.push_back(parameter);
+
+		$$ = declarator; 
+	}
+	| declaration_specifiers abstract_declarator { 
+		//TODO: difference in abstract_declarator and declarator
+		node* declaration_specifiers = $1;
+		node* declarator = $2;
+
+		param *parameter = new param();
+		if(!parameter->declSp) {
+			parameter->declSp = new declSpec();
+		}
+		if(declaration_specifiers->declSp) {
+			parameter->declSp = declSpCopy(declaration_specifiers->declSp);
+		}
+		if(declarator->declSp) {
+			parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
+		}
+		parameter->paramName = declarator->lexeme;
+
+		declarator->paramList.push_back(parameter);
+
+		$$ = declarator; 
+	 }
+	| declaration_specifiers { 
+		// if(funcDecl){
+		// 	// TODO: Error
+			
+		// }
+
+
+		printf("In decl spec\n");
+		// $$ = $1;
+		node* declaration_specifiers = $1;
+		// node* declarator = new node();
+
+		param *parameter = new param();
+		if(!parameter->declSp) {
+			parameter->declSp = new declSpec();
+		}
+		if(declaration_specifiers->declSp) {
+			parameter->declSp = declSpCopy(declaration_specifiers->declSp);
+		}
+		// if(declarator->declSp) {
+		// 	parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
+		// }
+		parameter->paramName = "111NoParamName111";
+		declaration_specifiers->paramList.push_back(parameter);
+
+		$$ = declaration_specifiers; 
+	}
 	;
 
 identifier_list
@@ -573,7 +690,15 @@ type_name
 abstract_declarator
 	: pointer { $$ = $1; }
 	| direct_abstract_declarator { $$ = $1; }
-	| pointer direct_abstract_declarator {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;}
+	| pointer direct_abstract_declarator {
+		//assuming ptr level of direct_abstract_declarator is zero
+		node* temp = $2;
+		mergeConstVolatile(temp, $1);
+		copyPtrLevel(temp, $1);
+		$$ = temp;
+		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;
+
+	}
 	;
 
 direct_abstract_declarator
@@ -628,8 +753,26 @@ scope_marker
 	}
 
 declaration_list
-	: declaration { $$ = $1; }
-	| declaration_list declaration { if(!strcmp(($1 -> name), "DECL_LIST")){$$ = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);} else $$ = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
+	: declaration { $$ = $1;}
+	| declaration_list declaration { 
+		node* temp;
+		if(!strcmp(($1 -> name), "DECL_LIST")){
+			temp = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);
+		} else 
+			temp = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);
+
+		for(auto &u : $2->paramList){
+			cout << "Here" << endl;
+			temp->paramList.push_back(u);
+		}
+
+		for(auto &u : $1->paramList){
+			cout << "Here" << endl;
+			temp->paramList.push_back(u);
+		}
+		$$ = temp;
+	}
+
 	;
 
 statement_list
@@ -677,19 +820,42 @@ function_definition
 	: declaration_specifiers declarator func_marker declaration_list compound_statement { 
 		addChild($2, $4); 
 		addChild($2, $5); 
-	 	$$ = $2;
+	 	
+		node* declaration_specifiers = $1; // type
+		node* declarator = $2; // func , param list
+		
+		
+		for(auto &u: $4->paramList){
+			cout << "IN func adding param" << endl;
+			$2->paramList.push_back(u);
+		}
+		addFunctionSymbol( declaration_specifiers, declarator);
+		$$ = $2;
 	}
 	| declaration_specifiers declarator func_marker compound_statement { 
 		addChild($2, $4);
+		node* declaration_specifiers = $1; // type
+		node* declarator = $2; // func , param list
+		addFunctionSymbol(declaration_specifiers, declarator);
+
 		$$ = $2;
 	}
 	| declarator func_marker declaration_list compound_statement { 
 		addChild($1, $3); 
 		addChild($1, $4);
+		node* declarator = $1; // func , param list
+		
+		for(auto &u: $3->paramList){
+			cout << "IN func adding param" << endl;
+			$1->paramList.push_back(u);
+		}
+		addFunctionSymbol(NULL, declarator);
 		$$ = $1;
 	}
 	| declarator func_marker compound_statement { 
 		addChild($1, $3);
+		node* declarator = $1; // func , param list
+		addFunctionSymbol(NULL, declarator);
 		$$ = $1;
 	}
 	;
@@ -700,8 +866,6 @@ func_marker
 		funcDecl = 1;
 		gSymTable = addChildSymbolTable(gSymTable);
 	}
-
-
 %%
 #include <stdio.h>
 int id = 0;
@@ -779,6 +943,7 @@ using namespace std;
 // extern int line;
 
 int main(int ac, char **av) {
+	insert_into_sets();
 	int val;
     FILE    *fd;
     if (ac >= 2)
@@ -844,7 +1009,16 @@ node* makeDeadNode(){
 
 node* makeTypeNode(int tp){
 	node* newNode = makeDeadNode();
-	newNode->declSp->type.push_back(tp); //check validity of type
+	newNode->declSp->type.push_back(tp); //TODO: check validity of type
+	return newNode;
+}
+
+node* makeStorageClassNode(int storageClass, char* name, char* lexeme, int isLeaf, 
+			node*c1, node*c2, node*c3, node* c4){
+	node* newNode = makeNode(name, lexeme, isLeaf, 
+			c1,c2, c3, c4);
+	newNode->declSp = new declSpec();
+	newNode->declSp->storageClassSpecifier.push_back(storageClass); //TODO: check validity of storage class
 	return newNode;
 }
 

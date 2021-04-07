@@ -1,0 +1,225 @@
+I am here  1, scope = 0
+hhh
+start
+I am here  2, scope = 0
+fun
+start1
+I am here  5, scope = 0
+main
+I am here  6, scope = 2
+l
+I am here  8, scope = 3
+x
+I am here  9, scope = 3
+a
+I am here  10, scope = 3
+b
+I am here  14, scope = 4
+e
+start1
+
+
+=============Printing symbol table (scope: 0)====================
+
+
+---------------------------------------
+fun 
+name: fun 
+infoType: 202 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    INT 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+---------------------------------------
+hhh 
+name: hhh 
+infoType: 0 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    DOUBLE 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+---------------------------------------
+main 
+name: main 
+infoType: 202 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    INT 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+=================================================
+
+
+=============Printing symbol table (scope: 1)====================
+
+
+=================================================
+
+
+=============Printing symbol table (scope: 2)====================
+
+
+---------------------------------------
+l 
+name: l 
+infoType: 0 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 1  
+    isVolatile: 0  
+
+     type: 
+    INT 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+=================================================
+
+
+=============Printing symbol table (scope: 3)====================
+
+
+---------------------------------------
+a 
+name: a 
+infoType: 0 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 1 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    INT SHORT 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+---------------------------------------
+b 
+name: b 
+infoType: 0 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    UNSIGNED INT 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+---------------------------------------
+x 
+name: x 
+infoType: 203 
+arraySize: 90 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 1  
+    isVolatile: 1  
+
+     type: 
+    DOUBLE LONG 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+=================================================
+
+
+=============Printing symbol table (scope: 4)====================
+
+
+---------------------------------------
+e 
+name: e 
+infoType: 0 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 3 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    FLOAT 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+=================================================

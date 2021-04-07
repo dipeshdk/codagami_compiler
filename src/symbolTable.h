@@ -7,6 +7,8 @@
 #define CONFLICTING_TYPES 105
 #define UNDECLARED_SYMBOL 106
 #define TYPE_ERROR 107
+#define ARRAY_SIZE_NOT_CONSTANT 108
+#define ARRAY_SIZE_SHOULD_BE_INT 109
 
 #define TYPE_CHAR 1
 #define TYPE_SHORT 2
@@ -20,6 +22,11 @@
 #define TYPE_STRUCT 10
 #define TYPE_UNION 11
 #define TYPE_ENUM 12
+#define TYPE_TYPEDEF 13
+#define TYPE_EXTERN 14
+#define TYPE_STATIC 15
+#define TYPE_AUTO 16
+#define TYPE_REGISTER 17
 
 #define DEAD_NODE 2
 
@@ -28,6 +35,7 @@
 #define INFO_TYPE_ARRAY 203
 #define INFO_TYPE_STRUCT 204
 
+#define INF_PARAM_LIST INT_MAX
 
 using namespace std;
 
@@ -35,10 +43,13 @@ using namespace std;
 // gScope = 0;
 // struct symbolTable* gSymTable; 
 
-struct param{
-    struct declSpec *declSp;
-    // string paramName;
-};
+// struct param{
+//     struct declSpec *declSp;
+//     string paramName;
+//     param() {
+//         declSp = new declSpec();
+//     }
+// };
 
 struct symbolTableNode {
     int infoType; // normal, func, array, struct/union
@@ -71,6 +82,14 @@ typedef struct declSpec
     declSpec() : ptrLevel(0), isConst(0), isVolatile(0)  { }
 } declSpec;
 
+struct param{
+    struct declSpec *declSp;
+    string paramName;
+    param() {
+        declSp = new declSpec();
+    }
+};
+
 typedef struct node
 {
     int id;
@@ -90,10 +109,11 @@ typedef struct node
     int infoType = INFO_TYPE_NORMAL;
     int lineNo;
     int arraySize = 0;
-    int paramSize;
-    
+    int paramSize = 0;
+    vector<struct param*> paramList;
 } node;
 
+void insert_into_sets();
 int addIVal(node* temp, string s);
 
 int addFVal(node* temp, string s);
@@ -111,3 +131,15 @@ void printSymbolTable(symbolTable *st);
 int mergeConstVolatile(node* temp, node* from);
 
 int incrementPointerLevel(node* temp, node* from);
+
+int copyPtrLevel(node* temp, node* from);
+
+int addFunctionSymbol(node* declaration_specifiers, node* declarator);
+
+declSpec* declSpCopy(declSpec* ds);
+
+int checkValidType(declSpec* declSp);
+
+int check_type_array(vector<int> &v);
+
+int addStorageClassToDeclSpec(node *temp, vector<int>&v);
