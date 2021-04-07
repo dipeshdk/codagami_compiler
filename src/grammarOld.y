@@ -70,42 +70,40 @@ void error(string var, int error_code) {
 	switch(error_code) {
 		case SYMBOL_ALREADY_EXISTS:
 			str = "SYMBOL_ALREADY_EXISTS";
-			str+=var;
 			break;
 		case ALLOCATION_ERROR:
 			str = "ALLOCATION_ERROR";
-			str += var;
 			break;
 		case INVALID_ARGS:
 			str = "Invalid arguments passed to the function ";
-			str+= var;
 			break;
 		case CONFLICTING_TYPES:
 			str = "Conflicting type of declaration ";
-			str+=var;
 			break;
 		case UNDECLARED_SYMBOL:
 			str = "Undeclared symbol ";
-			str += var;
 			break;		
 		case TYPE_ERROR:
 			str = "TYPE_ERROR";
-			str += var;
 			break;
 		case ARRAY_SIZE_NOT_CONSTANT:
 			str = "Array size should be a constant ";
-			str+=var;
+			break;
 		case ARRAY_SIZE_SHOULD_BE_INT:
 			str = "Array size should be a integer ";
-			str+=var;
+			break;
+		case INVALID_STORAGE_CLASS:
+			str = "Conflicting type of storage class ";
+			break;
+		case SYMBOL_NOT_FOUND:
+			str = "Symbol used before declaration ";
 		default:
 			break;
 	}
+	str+=var;
 	cout << "\nERROR: " << str << " on line number: " << line+1 << endl;
 	exit(error_code);
 }
-
-
 
 
 
@@ -278,7 +276,7 @@ declaration
 			
 			if(!temp) continue;
 			string lex = temp->lexeme;
-			
+			cout << "inserting symbol " << lex << " in scope " << gSymTable->scope << endl;
 			int retVal = insertSymbol(gSymTable, temp->lineNo, lex);
 			if(retVal) {
 				error(temp->lexeme, retVal);
@@ -289,8 +287,6 @@ declaration
 				error(lex, ALLOCATION_ERROR);
 			}
 			if(funcDecl){
-				// printf("Func Decl, param name = ");
-				// cout << lex << endl;
 				param* paramter = new param();
 				paramter-> declSp = declSpCopy($1->declSp);
 				paramter->paramName = lex;
@@ -357,8 +353,6 @@ init_declarator
 	: declarator { $$ = $1; }
 	| declarator '=' initializer { 
 		$$ = makeNode(strdup("="), strdup("="), 0, $1, $3, (node*)NULL, (node*)NULL);
-		// if($1->declSp)
-			// printf("346 pointer level: %d\n", $1->declSp->ptrLevel);
 	}
 	;
 
@@ -387,10 +381,11 @@ type_specifier
 
 struct_or_union_specifier
 	: struct_or_union IDENTIFIER '{' struct_declaration_list '}' {
-		int retVal = insertSymbol(gSymTable, line+1, yylval.id);
-		if(retVal) {
-			error("", retVal);
-		}
+		// TODO: decide to keep or no
+		// int retVal = insertSymbol(gSymTable, line+1, yylval.id);
+		// if(retVal) {
+		// 	error("", retVal);
+		// }
 		symbolTableNode* stNode = lookUp(gSymTable, yylval.id);
 		if(!stNode) {
 			error(yylval.id, UNDECLARED_SYMBOL);	
@@ -494,9 +489,6 @@ declarator
 direct_declarator
 	// can be both in struct, or a declaration
 	: IDENTIFIER { 
-		// insertSymbol(gSymTable, line+1, yylval.id);
-		printf("I am here  %d, scope = %d\n", line+1, gSymTable->scope);
-		printf("%s\n", yylval.id);
 		$$ = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$-> infoType = INFO_TYPE_NORMAL;
 		$$->lineNo = line+1;
@@ -565,7 +557,6 @@ pointer
 		mergeConstVolatile($3,$2);
 		mergeConstVolatile(temp, $3);
 		$$ = temp;
-		printf("'*' type_qualifier_list pointer \n");
 		}
 	;
 
@@ -655,7 +646,6 @@ parameter_declaration
 		// }
 
 
-		printf("In decl spec\n");
 		// $$ = $1;
 		node* declaration_specifiers = $1;
 		// node* declarator = new node();
@@ -678,8 +668,11 @@ parameter_declaration
 	;
 
 identifier_list
-	: IDENTIFIER {insertSymbol(gSymTable, line+1, yylval.id);printf("501 I am here  %d\n", line+1); $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| identifier_list ',' IDENTIFIER { insertSymbol(gSymTable, line+1, yylval.id);printf("502 I am here  %d\n", line+1); makeSibling(makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
+	: IDENTIFIER { // insertSymbol(gSymTable, line+1, yylval.id);
+	 	$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| identifier_list ',' IDENTIFIER { 
+		// insertSymbol(gSymTable, line+1, yylval.id);
+		makeSibling(makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
 	;
 
 type_name
@@ -762,12 +755,10 @@ declaration_list
 			temp = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);
 
 		for(auto &u : $2->paramList){
-			cout << "Here" << endl;
 			temp->paramList.push_back(u);
 		}
 
 		for(auto &u : $1->paramList){
-			cout << "Here" << endl;
 			temp->paramList.push_back(u);
 		}
 		$$ = temp;
@@ -807,8 +798,8 @@ jump_statement
 	;
 
 translation_unit
-	: external_declaration { $$ = $1; root = $$; printf("start\n"); }
-	| translation_unit external_declaration {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; root = $$; printf("start1\n");}
+	: external_declaration { $$ = $1; root = $$; }
+	| translation_unit external_declaration {if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; root = $$;}
 	;
 
 external_declaration
@@ -826,8 +817,9 @@ function_definition
 		
 		
 		for(auto &u: $4->paramList){
-			cout << "IN func adding param" << endl;
 			$2->paramList.push_back(u);
+			// int err = removeSymbol(gSymTable, u->paramName);
+			// if(err) error("removeSymbol", err);
 		}
 		addFunctionSymbol( declaration_specifiers, declarator);
 		$$ = $2;
@@ -836,7 +828,7 @@ function_definition
 		addChild($2, $4);
 		node* declaration_specifiers = $1; // type
 		node* declarator = $2; // func , param list
-		addFunctionSymbol(declaration_specifiers, declarator);
+		addFunctionSymbol(declaration_specifiers, declarator); 
 
 		$$ = $2;
 	}
@@ -846,8 +838,9 @@ function_definition
 		node* declarator = $1; // func , param list
 		
 		for(auto &u: $3->paramList){
-			cout << "IN func adding param" << endl;
 			$1->paramList.push_back(u);
+			// int err = removeSymbol(gSymTable, u->paramName);
+			// if(err) error("removeSymbol", err);
 		}
 		addFunctionSymbol(NULL, declarator);
 		$$ = $1;

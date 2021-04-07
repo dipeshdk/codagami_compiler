@@ -9,6 +9,8 @@
 #define TYPE_ERROR 107
 #define ARRAY_SIZE_NOT_CONSTANT 108
 #define ARRAY_SIZE_SHOULD_BE_INT 109
+#define INVALID_STORAGE_CLASS 110
+#define SYMBOL_NOT_FOUND 111
 
 #define TYPE_CHAR 1
 #define TYPE_SHORT 2
@@ -143,3 +145,5 @@ int checkValidType(declSpec* declSp);
 int check_type_array(vector<int> &v);
 
 int addStorageClassToDeclSpec(node *temp, vector<int>&v);
+
+int removeSymbol(symbolTable* st, string name);

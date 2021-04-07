@@ -1,32 +1,14 @@
-I am here  1, scope = 0
-hhh
-start
-I am here  2, scope = 0
-fun
-501 I am here  2
-502 I am here  2
-I am here  3, scope = 1
-b
-I am here  4, scope = 1
-c
-Here
-Here
-IN func adding param
-IN func adding param
-start1
-I am here  9, scope = 0
-main
-I am here  10, scope = 2
-l
-I am here  12, scope = 3
-x
-I am here  13, scope = 3
-a
-I am here  14, scope = 3
-b
-I am here  18, scope = 4
-e
-start1
+inserting symbol hhh in scope 0
+inserting symbol b in scope 0
+inserting symbol b in scope 1
+inserting symbol c in scope 1
+addFunctionSymbol: name: fun scope 0
+inserting symbol l in scope 2
+inserting symbol x in scope 3
+inserting symbol a in scope 3
+inserting symbol b in scope 3
+inserting symbol e in scope 4
+addFunctionSymbol: name: main scope 0
 
 
 =============Printing symbol table (scope: 0)====================
@@ -41,21 +23,15 @@ paramSize: 0
 isDefined: 0 
 declSp: 
    Printing Decl Sp
-   Decl Sp: NULL
-paramList: 
-   
----------------------------------------
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
 
----------------------------------------
-c 
-name: c 
-infoType: 0 
-arraySize: 0 
-paramSize: 0 
-isDefined: 0 
-declSp: 
-   Printing Decl Sp
-   Decl Sp: NULL
+     type: 
+    INT 
+     storageClassSpecifier: 
+   
 paramList: 
    
 ---------------------------------------
@@ -249,7 +225,7 @@ declSp:
      type: 
     INT 
      storageClassSpecifier: 
-   EXTERN STATIC 
+   STATIC 
 paramList: 
    
 ---------------------------------------

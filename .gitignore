@@ -39,3 +39,10 @@
 /obj/y.tab.h
 /obj/y.tab.c
 /obj/y.output
+
+/src/*.ps
+/src/*.dot
+/src/y.tab.c
+/src/y.tab.h
+/src/lex.yy.c
+/src/*.output
