@@ -20,7 +20,6 @@ The project parses input C file and outputs an abstract syntax tree as a DOT scr
 ## Usage example
 
   ```console
-  $ make clean && make
-  $ bin/parser tests/test1.c [optional]output.dot
-  $ dot -Tps output.dot -o output.ps
+  $ cd src
+  $ ./run && ./a.out ../tests/test1.c && ./genDot
   ``` 

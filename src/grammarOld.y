@@ -145,9 +145,11 @@ primary_expression
 		}
 		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
 		temp->declSp = new declSpec();
-		for(int &i : stNode->declSp->type)
+		for(auto i : stNode->declSp->type){
 			temp->declSp->type.push_back(i);
-		for(int &i : stNode->declSp->storageClassSpecifier)
+			// printf("Here\n");
+		}
+		for(auto i : stNode->declSp->storageClassSpecifier)
 			temp->declSp->storageClassSpecifier.push_back(i);
 
 		temp->declSp->ptrLevel = stNode->declSp->ptrLevel;
@@ -748,6 +750,7 @@ assignment_expression
 	| unary_expression assignment_operator assignment_expression { 
 		node* unary_expression = $1;
 		node* assignment_expression = $3;
+		node* assignment_operator = $2;
 		if(!unary_expression->declSp){
 			declSpec* ds = new declSpec();
 			if(!assignment_expression->declSp){
@@ -756,8 +759,41 @@ assignment_expression
 			ds->type = assignment_expression->declSp->type;
 			unary_expression->declSp = ds;
 		}
+		else{
+			if(assignment_operator->lexeme == "AND_ASSIGN" || assignment_operator->lexeme == "OR_ASSIGN" || assignment_operator->lexeme == "XOR_ASSIGN" || assignment_operator->lexeme == "LEFT_ASSIGN" || assignment_operator->lexeme == "RIGHT_ASSIGN"){
+				int retval = checkIntLongShort(unary_expression);
+				int retval2 = checkIntLongShort(assignment_expression);
+				if(retval || retval2){
+					error("expression", TYPE_ERROR);
+				}
+			}
+			else if(assignment_operator->lexeme == "MUL_ASSIGN" || assignment_operator->lexeme == "DIV_ASSIGN" || assignment_operator->lexeme == "ADD_ASSIGN" || assignment_operator->lexeme == "SUB_ASSIGN"){
+				string var;
+				int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, var);
+				if(retval){
+					error(var,retval);
+				}
+			}
+			else if(assignment_operator->lexeme == "MOD_ASSIGN"){
+				int retval = checkFloat(assignment_expression);
+				if(retval){
+					error(assignment_expression->lexeme, SHOULD_NOT_BE_FLOAT);
+				}
+				string var;
+				retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, var);
+				if(retval){
+					error(var,retval);
+				}
+			}
+			// int retVal = giveTypeCastRankUnary(unary_expression, assignment_expression);
+			// if(retVal){
+			// 	error("error unary type cast", retVal);
+			// }
+
+		}
+
 		addChild($2, $unary_expression); addChild($2, assignment_expression); $$ = $2;
-		}//TODO: Implicit typecasting
+		}
 	;
 
 assignment_operator
@@ -1606,7 +1642,6 @@ void generateDot(node* root, char* fileName) {
 using namespace std;
 
 int main(int ac, char **av) {
-	cout << "I am in main" << endl;
 	insert_into_sets();
 	int val;
     FILE    *fd;
@@ -1635,7 +1670,8 @@ int main(int ac, char **av) {
 
 		generateDot(root,fileName);
 
-		printSymbolTable(gSymTable);
+		// printSymbolTable(gSymTable);
+		printSymbolTableJSON(gSymTable,0);
 
         fclose(fd);
     }

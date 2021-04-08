@@ -4,6 +4,7 @@
         "typeinfo": "cpp",
         "iostream": "cpp",
         "thread": "cpp",
-        "random": "c"
+        "random": "c",
+        "string": "cpp"
     }
 }

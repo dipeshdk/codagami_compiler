@@ -43,6 +43,14 @@
 #define TYPE_REGISTER 17
 #define TYPE_STRING_LITERAL 18
 
+#define SIZE_CHAR 1
+#define SIZE_SHORT 2
+#define SIZE_INT 4 
+#define SIZE_LONG 8
+#define SIZE_FLOAT 4
+#define SIZE_DOUBLE 8
+#define SIZE_VOID 0
+
 #define DEAD_NODE 2
 
 #define INFO_TYPE_NORMAL 201
@@ -69,6 +77,7 @@ struct symbolTableNode {
 };
 
 typedef struct symbolTable{
+    vector<string> symbolOrder;
     map<string, struct symbolTableNode*> symbolTableMap; // <lexeme, struct>
     struct symbolTable *parent;
     int scope; //name for scope : global, main, function name
@@ -195,8 +204,13 @@ int checkValidTypeCast(declSpec* from, declSpec* to);
 int checkPointer(node* root);
 
 int giveTypeCastRank(node* n1, node* n2);
+int giveTypeCastRankUnary(node* n1, node* n2);
 
 int implicitTypecastingNotPointerNotStringLiteral(node*n1, node*n2, string& var);
 int implicitTypecastingNotStringLiteral(node*n1, node*n2, string& var);
 
 int checkFloat(node* root);
+
+void printSymbolTableJSON(symbolTable *st, int numTab);
+
+int getTypeSize(vector<int> &type);

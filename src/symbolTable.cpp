@@ -1,5 +1,6 @@
 #include<bits/stdc++.h>
 #include "symbolTable.h"
+
 using namespace std;
 int gScope=0;
 struct symbolTable* gSymTable;
@@ -143,6 +144,7 @@ int insertSymbol(symbolTable* st, int lineNo, string name){
     if(!node) {
         return ALLOCATION_ERROR;
     }
+    st->symbolOrder.push_back(name);
     node->name = name;
     node->lineNo = lineNo;
     st->symbolTableMap[name] = node;
@@ -343,7 +345,36 @@ void printDeclSp(declSpec* ds) {
     cout << "\n";
 }
 
+void printToCsvFile(symbolTable *st){
+    string fileName = "symbolTableOfScope";
+    fileName = fileName.append(to_string(st->scope));
+    fileName = fileName.append(".csv");
+    fstream file;
+    file.open(fileName, ios::app);
+    file << "Name, infoType, arraySize, paramSize, isDefined";
+    int maxParamListSize = 0;
+    for(auto elem: st->symbolTableMap){
+        maxParamListSize = elem.second->paramList.size() > maxParamListSize ? elem.second->paramList.size() : maxParamListSize;
+    }
+    for(int i = 0; i < maxParamListSize;i++){
+        file << ", Parameter" << i + 1;
+    }
+    file << "\n";
+    for(auto elem : st->symbolTableMap){
+        file << elem.second->name << ", "
+            << elem.second->infoType << ", "
+            << elem.second->arraySize << ", "
+            << elem.second->paramSize << ", "
+            << elem.second->isDefined;
+        for(param* t : elem.second->paramList) {
+            file << ", " << t->paramName;
+        }
+        file << "\n";
+    }
+}
+
 void printSymbolTable(symbolTable *st) {
+    printToCsvFile(st);
     cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
     cout << "\n\n=============Printing symbol table (scope: " << st->scope << ")====================\n\n";
 
@@ -363,8 +394,13 @@ void printSymbolTable(symbolTable *st) {
             cout << "name: " << t->paramName << "\n";
             printDeclSp(t->declSp);
         }
+
         cout << "\n---------------------------------------\n";
     }
+    for(auto &s: st->symbolOrder){
+        cout << s << " ";
+    }
+    cout << endl;
     cout << "\n=================================================\n";
     printStructTable(st->structMap, st->scope);
     for(symbolTable *child : st->childList) {
@@ -373,6 +409,268 @@ void printSymbolTable(symbolTable *st) {
     cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
 
 }
+
+// int getSize(struct symbolTableNode* elem){
+//     int size = 0;
+//     if(elem->infoType == INFO_TYPE_ARRAY){
+//             size += getTypeSize(elem->declSp->type)*(elem->arraySize);
+//         }
+//         else if(elem->infoType == INFO_TYPE_FUNC){
+//             size += 8;
+//         }
+//         else if(elem->infoType == INFO_TYPE_STRUCT){
+//             structTableNode* n = st->structMap[s->declSp->lexeme];
+//             for(auto i: n->paramList){
+//                 size+= getTypeSize(i->declSp->type);
+//             }
+//         }
+//         else if(elem->declSp && elem->declSp->ptrLevel){
+//             size += 8;
+//         }
+//     else{
+//         size += getTypeSize(elem->declSp->type);
+//     }
+// }
+
+
+void printElem(symbolTableNode* elem, string str) {
+    
+    printf("%s", str.c_str());
+    printf("\"name\" : \"%s\",\n", elem->name.c_str());
+    printf("%s", str.c_str());
+    printf("\"infoType\" : %d,\n", elem->infoType);
+    printf("%s", str.c_str());
+    printf("\"arraySize\" : %d,\n", elem->arraySize);
+    printf("%s", str.c_str());
+    printf("\"paramSize\" : %d,\n", elem->paramSize);
+    printf("%s", str.c_str());
+    printf("\"isDefined\" : %d,\n", elem->isDefined);
+
+    declSpec *ds = elem->declSp;
+    if(ds) {
+        printf("%s", str.c_str());
+        printf("\"ptrLevel\" : %d,\n", ds->ptrLevel);
+        printf("%s", str.c_str());
+        printf("\"lexeme\" : \"%s\",\n", ds->lexeme.c_str());
+        printf("%s", str.c_str());
+        printf("\"isConst\" : %d,\n", elem->arraySize);
+        printf("%s", str.c_str());
+        printf("\"isVolatile\" : %d,\n", elem->paramSize);
+        printf("%s", str.c_str());
+        printf("\"declSpIsDefined\" : %d,\n", elem->isDefined);
+        printf("%s", str.c_str());
+        printf("\"type\" : \"");
+        for(int t : ds->type) 
+            printf("%s ",getTypeName(t).c_str());
+        printf("\",\n");
+        printf("%s", str.c_str());
+        printf("\"storageClassSpecifier\" : \"");
+        for(int t : ds->storageClassSpecifier) 
+            printf("%s ",getTypeName(t).c_str());
+        printf("\",\n");
+    }
+    printf("%s", str.c_str());
+    printf("\"paramList\" : \n");
+    printf("%s", str.c_str());
+    str += "\t";
+    printf("[\n");
+    int paramListSize = elem->paramList.size();
+    int i = 0;
+    for(param* t : elem->paramList) {
+        printf("%s", str.c_str());
+        printf("{\n");
+        printf("%s", str.c_str());
+        printf("\"name\" : \"%s\"\n", t->paramName.c_str());
+        ds = t->declSp;
+        if(ds) {
+            printf(",\n");
+            printf("%s", str.c_str());
+            printf("\"ptrLevel\" : %d,\n", ds->ptrLevel);
+            printf("%s", str.c_str());
+            printf("\"struct lexeme\" : \"%s\",\n", ds->lexeme.c_str() );
+            printf("%s", str.c_str());
+            printf("\"isConst\" : %d,\n", elem->arraySize);
+            printf("%s", str.c_str());
+            printf("\"isVolatile\" : %d,\n", elem->paramSize);
+            printf("%s", str.c_str());
+            printf("\"isDefined\" : %d,\n", elem->isDefined );
+            printf("%s", str.c_str());
+            printf("\"type\" : \"");
+            for(int t : ds->type) 
+                printf("%s ",getTypeName(t).c_str());
+            printf("\",\n");
+            printf("%s", str.c_str());
+            printf("\"storageClassSpecifier\" : \"");
+            for(int t : ds->storageClassSpecifier) 
+                printf("%s ",getTypeName(t).c_str());
+            printf("\"\n");
+            printf("%s", str.c_str());
+            printf("}");
+            if(i < (paramListSize-1)) {
+                printf(",");
+            }
+            printf("\n");
+            i++;
+        }
+    }
+    printf("%s", str.c_str());
+    printf("]\n");
+    str.pop_back();
+    printf("%s", str.c_str());
+}
+
+void printSymbolTableJSON(symbolTable *st, int numTab) {
+    stringstream ss;  
+    ss << "symbolTable" << st->scope << ".json";
+    string fileName;
+    ss >> fileName;
+    freopen(fileName.c_str(), "w", stdout);
+    string str;
+    for(int i = 0; i < numTab; i++) {
+        str += '\t';
+    }
+    printf("%s", str.c_str());
+    str += "\t";
+    printf("{\n");
+    printf("%s", str.c_str());
+    printf("\"scope\" : %d,\n", st->scope);
+    int mapSize = st->symbolTableMap.size();
+    int j = 0;
+    printf("\"symbolOrder\" : [");
+    int offset = 0;
+    for(int i = 0; i < st->symbolOrder.size(); i++) {
+    // for(auto &s: st->symbolOrder){
+        // printf("\"%s\", ",s.c_str());
+        symbolTableNode *elem = st->symbolTableMap[st->symbolOrder[i]];
+        int size = 0;
+        if(elem->infoType == INFO_TYPE_ARRAY){
+            size += getTypeSize(elem->declSp->type)*(elem->arraySize);
+        }
+        else if(elem->infoType == INFO_TYPE_FUNC){
+            size += 8;
+        }
+        else if(elem->infoType == INFO_TYPE_STRUCT){
+            if(!elem->declSp){
+                structTableNode* n = st->structMap[elem->declSp->lexeme];
+                for(auto i: n->paramList){
+                    if(!i->declSp)
+                        size+= getTypeSize(i->declSp->type);
+                }
+            }
+            
+        }
+        else if(elem->declSp && elem->declSp->ptrLevel){
+            size += 8;
+        }
+        else{
+            size += getTypeSize(elem->declSp->type);
+        }
+        
+        printf("%s", str.c_str());
+        printf("{\n");
+        printf("%s", str.c_str());
+        printf("\"size\" : %d,\n", size);
+        printf("%s", str.c_str());
+        printf("\"offset\" : %d,\n", offset);
+        printElem(elem, str);
+        printf("}");
+        if(i < (st->symbolOrder.size()-1)) {
+            printf(",");
+        }
+        printf("\n");
+        offset += size;
+
+    }
+    printf("]\n");
+    printf("%s", str.c_str());
+    printf("}\n");
+    // str.pop_back();
+    // printStructTable(st->structMap, st->scope);
+    for(symbolTable *child : st->childList) {
+        printSymbolTableJSON(child, numTab);
+    }   
+    // printf("}\n");
+}
+
+// int getTypeSize(vector<int> &type) {
+//     int size = 0;
+
+//     for(int &t : type) {
+//         switch(t) {
+//             case TYPE_CHAR: return SIZE_CHAR; break; 
+//             case TYPE_SHORT: return SIZE_SHORT; break; 
+//             case TYPE_INT: return SIZE_INT; break; 
+//             case TYPE_LONG: return SIZE_LONG; break; 
+//             case TYPE_FLOAT: return SIZE_FLOAT; break; 
+//             case TYPE_DOUBLE: return SIZE_DOUBLE; break;
+//             default: break; 
+//         }
+//     }
+//     return size;
+// }
+
+int getTypeSize(vector<int> &type) {
+    vector<int> &v = type;
+    bool c1 = (short_type_check.find(v) != short_type_check.end());
+    bool c2 = (long_type_check.find(v) != long_type_check.end());
+    bool c3 = (int_type_check.find(v) != int_type_check.end());
+    bool c4 = (float_type_check.find(v) != float_type_check.end()); 
+    bool c5 = (double_type_check.find(v) != double_type_check.end());
+    bool c6 = (char_type_check.find(v) != char_type_check.end());
+    bool c7 = (void_type_check.find(v) != void_type_check.end());
+    if(c1){
+        return SIZE_SHORT;
+    }else if(c2){
+        return SIZE_LONG;
+    }else if(c3){
+        return SIZE_INT;
+    }else if(c4){
+        return SIZE_FLOAT;
+    }else if(c5){
+        return SIZE_DOUBLE;
+    }else if(c6){
+        return SIZE_CHAR;
+    }else if(c7){
+        return SIZE_VOID;
+    }
+    return 0;
+}
+
+// void symbolTableCsvDump(symbolTable *st) {
+//     cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+//     cout << "\n\n=============Printing symbol table (scope: " << st->scope << ")====================\n\n";
+
+//     for(auto elem : st->symbolTableMap) {
+//         cout << "\n---------------------------------------\n";
+//         cout << elem.first << " \n" 
+//             << "name: " << elem.second->name << " \n"
+//             << "infoType: " << elem.second->infoType << " \n"
+//             << "arraySize: " << elem.second->arraySize << " \n"
+//             << "paramSize: " << elem.second->paramSize << " \n"
+//             << "isDefined: " << elem.second->isDefined << " \n";
+
+//         cout << "declSp: \n";
+//         printDeclSp(elem.second->declSp);
+//         cout << "paramList: \n   ";
+//         for(param* t : elem.second->paramList) {
+//             cout << "name: " << t->paramName << "\n";
+//             printDeclSp(t->declSp);
+//         }
+
+//         cout << "\n---------------------------------------\n";
+//     }
+//     for(auto &s: st->symbolOrder){
+//         cout << s << " ";
+//     }
+//     cout << endl;
+//     cout << "\n=================================================\n";
+//     printStructTable(st->structMap, st->scope);
+//     for(symbolTable *child : st->childList) {
+//         printSymbolTable(child);
+//     }   
+//     cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+
+// }
 
 void printStructTable(map<string, struct structTableNode*> &structMap, int scope) {
     cout << "\n\n=============Printing struct table (scope: " << scope << ")====================\n\n";
@@ -430,7 +728,7 @@ int copyPtrLevel(node* temp, node* from) {
 
 int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
     string name = declarator->lexeme;
-    cout << "addFunctionSymbol: name: " << name << " scope " << gSymTable->scope << "\n";
+    // cout << "addFunctionSymbol: name: " << name << " scope " << gSymTable->scope << "\n";
     int retVal = insertSymbol(gSymTable, declarator->lineNo, name);
     if(retVal == SYMBOL_ALREADY_EXISTS) {
         //TODO: Later
@@ -636,30 +934,66 @@ int giveTypeCastRank(node* n1, node* n2){
 
     if(!n2) return INVALID_ARGS;
     if(!n2 -> declSp) return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+
+
     vector<int> v1 = n1 -> declSp ->type;
     vector<int> v2 = n2 -> declSp ->type;
+
+    // cout << v1[0] << endl;
     
-    bool f1 =  float_type_check.find(v1) != float_type_check.end(); 
-    bool d1 = double_type_check.find(v1) != double_type_check.end();
-    bool i1 = checkIntLongShort(n1) == 0;
-    bool c1 = char_type_check.find(v1) != char_type_check.end();
-    int rank1 = (f1|d1)<<2 + i1<<1 + c1;
-    bool f2 =  float_type_check.find(v2) != float_type_check.end(); 
-    bool d2 = double_type_check.find(v2) != double_type_check.end();
-    bool i2 = checkIntLongShort(n2) == 0;
-    bool c2 = char_type_check.find(v2) != char_type_check.end();
-    int rank2 = (f2|d2)<<2 + i2<<1 + c2;
-    string strType = "(to_";
-    if(rank1 >= rank2){
+    int f1 =  (float_type_check.find(v1) != float_type_check.end()); 
+    int d1 = (double_type_check.find(v1) != double_type_check.end());
+    int i1 = (checkIntLongShort(n1) == 0);
+    int c1 = (char_type_check.find(v1) != char_type_check.end());
+    // cout << f1 << d1 << i1 << c1 << endl;
+    int rank1 = ((f1|d1)<<2) + (i1<<1) + (c1);
+    int f2 =  (float_type_check.find(v2) != float_type_check.end()); 
+    int d2 = (double_type_check.find(v2) != double_type_check.end());
+    int i2 = (checkIntLongShort(n2) == 0);
+    int c2 = (char_type_check.find(v2) != char_type_check.end());
+    int rank2 = ((f2|d2)<<2) + (i2<<1) + (c2);
+    string strType = "(TO_";
+    // printf("rank1 = %d, rank2 = %d\n", rank1, rank2);
+    if(rank1 > rank2){
         strType = strType + getTypeString(n1->declSp->type) + ")";
         n2->declSp->type = n1->declSp->type;
         string s = strType + string(n2->lexeme); 
         strcpy(n2->lexeme, s.c_str());
-    }else{
+    }else if(rank1 < rank2){
         strType = strType + getTypeString(n2->declSp->type) + ")";
         n1->declSp->type = n2->declSp->type;
         string s = strType + string(n1->lexeme); 
         strcpy(n1->lexeme, s.c_str());
+    }
+    return 0;
+}
+int giveTypeCastRankUnary(node* n1, node* n2){
+    if(!n1) return INVALID_ARGS;
+    if(!n1 -> declSp) return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+
+    if(!n2) return INVALID_ARGS;
+    if(!n2 -> declSp) return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+
+
+    vector<int> v1 = n1 -> declSp ->type;
+    vector<int> v2 = n2 -> declSp ->type;
+    int f1 =  (float_type_check.find(v1) != float_type_check.end()); 
+    int d1 = (double_type_check.find(v1) != double_type_check.end());
+    int i1 = (checkIntLongShort(n1) == 0);
+    int c1 = (char_type_check.find(v1) != char_type_check.end());
+    cout << f1 << d1 << i1 << c1 << endl;
+    int rank1 = ((f1|d1)<<2) + (i1<<1) + (c1);
+    int f2 =  (float_type_check.find(v2) != float_type_check.end()); 
+    int d2 = (double_type_check.find(v2) != double_type_check.end());
+    int i2 = (checkIntLongShort(n2) == 0);
+    int c2 = (char_type_check.find(v2) != char_type_check.end());
+    int rank2 = ((f2|d2)<<2) + (i2<<1) + (c2);
+    if(rank1 != rank2){
+        string strType = "(TO_";
+        strType = strType + getTypeString(n1->declSp->type) + ")";
+        n2->declSp->type = n1->declSp->type;
+        string s = strType + string(n2->lexeme); 
+        strcpy(n2->lexeme, s.c_str());
     }
     return 0;
 }
