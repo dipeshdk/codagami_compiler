@@ -1,9 +1,21 @@
-int main() {
-    char s[] = "Programming is fun";
-    int i;
+/*check function args
+  should not work properly
+*/ 
 
-    for (i = 0; s[i] != '\0'; ++i);
-    
-    printf("Length of the string: %d", i);
+int foo(int a, float b) {
+    int c = 4;
+    return c;
+}
+
+int main() {
+    int p=1, q=2;
+    float r;
+    /*incorrect*/
+    foo(p,q);
+    foo(p,q,r);
+    foo(r,p);
+    /*correct*/
+    foo(p,r);
     return 0;
 }
+

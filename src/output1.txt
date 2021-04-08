@@ -1,0 +1,287 @@
+I am in main
+addFunctionSymbol: name: fun scope 0
+addFunctionSymbol: name: main scope 0
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+=============Printing symbol table (scope: 0)====================
+
+
+---------------------------------------
+fun 
+name: fun 
+infoType: 202 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    INT 
+     storageClassSpecifier: 
+   
+paramList: 
+   name: a
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    INT 
+     storageClassSpecifier: 
+   
+name: b
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    FLOAT 
+     storageClassSpecifier: 
+   
+
+---------------------------------------
+
+---------------------------------------
+main 
+name: main 
+infoType: 202 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    INT 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+=================================================
+
+
+=============Printing struct table (scope: 0)====================
+
+
+---------------------------------------
+foo 
+infoType: 204 
+lineNo: 4 
+name: foo 
+paramList: 
+   name: a
+bit: -1
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    INT 
+     storageClassSpecifier: 
+   
+name: b
+bit: -1
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    INT 
+     storageClassSpecifier: 
+   
+name: c
+bit: -1
+   Printing Decl Sp
+   ptrLevel: 1 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    FLOAT 
+     storageClassSpecifier: 
+   
+
+---------------------------------------
+
+=================================================
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+=============Printing symbol table (scope: 1)====================
+
+
+---------------------------------------
+a 
+name: a 
+infoType: 0 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    INT 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+---------------------------------------
+b 
+name: b 
+infoType: 0 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    FLOAT 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+=================================================
+
+
+=============Printing struct table (scope: 1)====================
+
+
+=================================================
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+=============Printing symbol table (scope: 2)====================
+
+
+---------------------------------------
+b 
+name: b 
+infoType: 0 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    CHAR 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+---------------------------------------
+f 
+name: f 
+infoType: 0 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme:   
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    FLOAT 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+---------------------------------------
+h 
+name: h 
+infoType: 0 
+arraySize: 0 
+paramSize: 0 
+isDefined: 0 
+declSp: 
+   Printing Decl Sp
+   ptrLevel: 0 
+    lexeme: hoo  
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    STRUCT 
+     storageClassSpecifier: 
+   
+paramList: 
+   
+---------------------------------------
+
+=================================================
+
+
+=============Printing struct table (scope: 2)====================
+
+
+---------------------------------------
+hoo 
+infoType: 204 
+lineNo: 16 
+name: hoo 
+paramList: 
+   name: f
+bit: -1
+   Printing Decl Sp
+   ptrLevel: 1 
+    lexeme: foo  
+    isConst: 0  
+    isVolatile: 0  
+
+     type: 
+    STRUCT 
+     storageClassSpecifier: 
+   
+
+---------------------------------------
+
+=================================================
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

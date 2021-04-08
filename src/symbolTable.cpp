@@ -10,6 +10,7 @@ set< vector<int> > int_type_check;
 set< vector<int> > long_type_check;
 set< vector<int> > float_type_check;
 set< vector<int> > double_type_check;
+set< vector<int> > void_type_check;
 
 vector<int> c1 {TYPE_CHAR};
 vector<int> c2 {TYPE_SIGNED,TYPE_CHAR};
@@ -46,6 +47,8 @@ vector<int> l3 {TYPE_SIGNED, TYPE_LONG, TYPE_LONG};
 vector<int> l4 {TYPE_SIGNED, TYPE_LONG, TYPE_LONG, TYPE_INT};
 vector<int> l5 {TYPE_UNSIGNED, TYPE_LONG, TYPE_LONG};
 vector<int> l6 {TYPE_UNSIGNED, TYPE_LONG, TYPE_LONG, TYPE_INT};
+
+vector<int> vv1 {TYPE_VOID};
 
 
 void insert_into_sets(){
@@ -113,6 +116,8 @@ void insert_into_sets(){
 
     double_type_check.insert(d1);
     double_type_check.insert(d2);    
+
+    void_type_check.insert(vv1);
 }
 
 // grammar.y check if nullptr then it is error.
@@ -201,12 +206,44 @@ int checkValidType(declSpec* declSp) {
     bool c4 = float_type_check.find(v) != float_type_check.end(); 
     bool c5 = double_type_check.find(v) != double_type_check.end();
     bool c6 = char_type_check.find(v) != char_type_check.end();
-    bool x = c1 | c2 | c3 | c4 | c5 | c6;
+    bool c7 = void_type_check.find(v) != void_type_check.end();
+    bool x = c1 | c2 | c3 | c4 | c5 | c6| c7;
     if(x){
         return 0;
     }else{
         return CONFLICTING_TYPES;
     }
+}
+
+int compareTypes(declSpec* ds1,  declSpec* ds2){
+    if(!ds1 | !ds2)
+        return CONFLICTING_TYPES;
+    vector<int> v1 = ds1->type;
+    vector<int> v2 = ds2->type;
+    int pt1 = ds1->ptrLevel;
+    int pt2 = ds2->ptrLevel;
+
+    bool c4 = float_type_check.find(v1) != float_type_check.end(); 
+    bool c5 = double_type_check.find(v1) != double_type_check.end();
+    bool c6 = char_type_check.find(v1) != char_type_check.end();
+    bool x1 = c4|c5;
+
+    bool g6 = char_type_check.find(v2) != char_type_check.end();
+    bool g4 = float_type_check.find(v2) != float_type_check.end(); 
+    bool g5 = double_type_check.find(v2) != double_type_check.end();
+    bool x2 = g4|g5;
+
+    // float char* not allowed
+    if((x1 && g6 && pt2>0) || (x2 && c6 && pt1>0)){
+        return CONFLICTING_TYPES;
+    }
+    // ds1 string
+    if(v1[0] == TYPE_STRING_LITERAL){
+        if(pt2 == 0 ) return CONFLICTING_TYPES;
+    }
+    return 0;
+    // string (int, char, float)* allowed
+    // string (int,char) not allowed 
 }
 
 int check_type_array(vector<int> &v){
@@ -276,6 +313,15 @@ string getTypeName(int type) {
         case TYPE_REGISTER: return "REGISTER";
     }
     return "INVALID TYPE";
+}
+
+string getTypeString(vector<int> type) {
+    string s;
+    for(int &t : type) {
+        s += getTypeName(t);
+        s += "_";
+    }
+    return s;
 }
 
 void printDeclSp(declSpec* ds) {
@@ -472,4 +518,196 @@ structTableNode* structLookUp(symbolTable* st, string name) {
         curr = curr->parent;
     }
     return nullptr;
+}
+
+structParam* structureParamLookup(structTableNode* node, string paramName, int& err){
+    //returns 0 if struct node has a param named paramName
+    err = 0;
+    if(!node || !paramName.size()) {
+        err = INVALID_ARGS;
+        return nullptr;
+    }
+    
+    for(structParam* p : node->paramList) {
+        if(p->name == paramName) 
+            return p;
+    }
+    
+    return nullptr;
+}
+
+int checkVoid(node* root){
+    if(!root -> declSp){
+        return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    }
+    vector<int>v = (root-> declSp->type);
+    bool v1 = void_type_check.find(v) != void_type_check.end(); 
+    if(!v1){
+        return TYPE_ERROR;
+    }
+    return 0; 
+}
+
+int checkIntLongShort(node* root){
+    if(!root -> declSp){
+        return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    }
+    int retval = check_type_array(root-> declSp->type);
+    if(retval){
+        return TYPE_ERROR;
+    }
+    return 0;
+}
+
+int checkFloat(node* root){
+    if(!root -> declSp){
+        return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    }
+    vector<int>v = (root-> declSp->type);
+    bool c1 = float_type_check.find(v) != float_type_check.end(); 
+    bool c2 = double_type_check.find(v) != double_type_check.end(); 
+    bool x = c1 | c2;
+    if(!x){
+        return TYPE_ERROR;
+    }
+    return 0;
+}
+
+int checkStringLiteral(node* root){
+    if(!root -> declSp){
+        return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    }
+    vector<int> v1 = root -> declSp->type;
+    if(v1.size()> 0 && v1[0] == TYPE_STRING_LITERAL ){
+        return 0;
+    }
+
+    return TYPE_ERROR;
+}
+
+int checkValidTypeCast(declSpec* from, declSpec* to){
+    //return 0 if typecast is valid
+    if(!to || !from) {
+        return INVALID_ARGS;
+    }
+    bool toIsFloat = false;
+    bool toIsCharStar = false;
+    for(int &t : to->type) {
+        if(t == TYPE_FLOAT) {
+            toIsFloat=1;
+        }
+        if(t == TYPE_CHAR && to->ptrLevel == 1) {
+            toIsCharStar = true;
+        }
+    }
+
+    bool fromIsFloat = false;
+    bool fromIsCharStar = false;
+
+    if(from) {
+        for(int &t : from->type) {
+            if(t == TYPE_FLOAT) {
+                fromIsFloat=1;
+            }
+            if(t == TYPE_CHAR && from->ptrLevel == 1) {
+                fromIsCharStar = true;
+            }
+        }
+    }
+
+    if((fromIsFloat && toIsCharStar) || (fromIsCharStar && toIsFloat)) {
+        return 1;
+    }
+
+    return 0;
+}
+
+
+int checkPointer(node* root){
+    if(!root) return INVALID_ARGS;
+    if(!root -> declSp) return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    if(root -> declSp->ptrLevel <= 0) return TYPE_ERROR;
+    return 0;
+}
+
+int giveTypeCastRank(node* n1, node* n2){
+    if(!n1) return INVALID_ARGS;
+    if(!n1 -> declSp) return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+
+    if(!n2) return INVALID_ARGS;
+    if(!n2 -> declSp) return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    vector<int> v1 = n1 -> declSp ->type;
+    vector<int> v2 = n2 -> declSp ->type;
+    
+    bool f1 =  float_type_check.find(v1) != float_type_check.end(); 
+    bool d1 = double_type_check.find(v1) != double_type_check.end();
+    bool i1 = checkIntLongShort(n1) == 0;
+    bool c1 = char_type_check.find(v1) != char_type_check.end();
+    int rank1 = (f1|d1)<<2 + i1<<1 + c1;
+    bool f2 =  float_type_check.find(v2) != float_type_check.end(); 
+    bool d2 = double_type_check.find(v2) != double_type_check.end();
+    bool i2 = checkIntLongShort(n2) == 0;
+    bool c2 = char_type_check.find(v2) != char_type_check.end();
+    int rank2 = (f2|d2)<<2 + i2<<1 + c2;
+    string strType = "(to_";
+    if(rank1 >= rank2){
+        strType = strType + getTypeString(n1->declSp->type) + ")";
+        n2->declSp->type = n1->declSp->type;
+        string s = strType + string(n2->lexeme); 
+        strcpy(n2->lexeme, s.c_str());
+    }else{
+        strType = strType + getTypeString(n2->declSp->type) + ")";
+        n1->declSp->type = n2->declSp->type;
+        string s = strType + string(n1->lexeme); 
+        strcpy(n1->lexeme, s.c_str());
+    }
+    return 0;
+}
+
+int implicitTypecastingNotPointerNotStringLiteral(node*n1, node*n2, string& var){
+    int retval1 = checkPointer(n1);
+    int retval2 = checkPointer(n2);
+    if(!retval1){
+        var = n1->lexeme;
+        return POINTER_ERROR;
+    }
+    if(!retval2){
+        var = n2->lexeme;
+        return POINTER_ERROR;
+    }
+    retval1 = checkStringLiteral(n1);
+    retval2 = checkStringLiteral(n2);
+    if(!retval1){
+        var = n1->lexeme;
+        return STRING_LITERAL_ERROR;
+    }
+    if(!retval2){
+        var = n2->lexeme;
+        return STRING_LITERAL_ERROR;
+    }
+    int rank = giveTypeCastRank(n1, n2);
+    if(rank){
+        var = "typecasting error rank";
+        return rank;
+    }
+    return 0;
+}
+
+int implicitTypecastingNotStringLiteral(node*n1, node*n2, string& var){
+    int retval1 = checkStringLiteral(n1);
+    int retval2 = checkStringLiteral(n2);
+    if(!retval1){
+        var = n1->lexeme;
+        return STRING_LITERAL_ERROR;
+    }
+    if(!retval2){
+        var = n2->lexeme;
+        return STRING_LITERAL_ERROR;
+    }
+    int rank = giveTypeCastRank(n1, n2);
+    if(rank){
+        var = "typecasting error rank";
+        return rank;
+    }
+    return 0;
 }

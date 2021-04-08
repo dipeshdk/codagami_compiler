@@ -1,4 +1,5 @@
-lex grammar.l
-yacc --verbose --debug -d grammarOld.y
+lex grammar_copy.l
+yacc --verbose --debug -d grammar.y
 gcc -c lex.yy.c
-g++ lex.yy.o y.tab.c
+g++ -c symbolTable.cpp
+g++ lex.yy.o y.tab.c symbolTable.o
