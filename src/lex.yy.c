@@ -1069,7 +1069,7 @@ YY_RULE_SETUP
 case 34:
 YY_RULE_SETUP
 #line 56 "grammar.l"
-{ count(); previ = yylval.id; yylval.id = strdup(yytext); printf("iden name lex = %s\n", yylval.id); return(check_type()); }
+{ count(); previ = yylval.id; yylval.id = strdup(yytext); return(check_type()); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
@@ -2521,11 +2521,11 @@ void getTokenName(int ind, char c[]) {
     }
 }
 
-void printTable(int token) {
-    char c[20];
-    getTokenName(token,c);
-    printf("    %-15s\t\t %-35s\t\t %8d\t %8d\n", c, yytext, line+1, prevCol+1);
-}
+// void printTable(int token) {
+//     char c[20];
+//     getTokenName(token,c);
+//     printf("    %-15s\t\t %-35s\t\t %8d\t %8d\n", c, yytext, line+1, prevCol+1);
+// }
 
 // int yylval.id = strdup(yytext)(char id){
 //     switch id{

@@ -174,3 +174,5 @@ int removeSymbol(symbolTable* st, string name);
 int getValueFromConstantExpression(node* constant_expression, int &err);
 
 void printStructTable(map<string, struct structTableNode*> &structMap, int scope);
+
+structTableNode* structLookUp(symbolTable* st, string name);

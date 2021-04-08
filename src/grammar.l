@@ -53,7 +53,7 @@ char* previ;
 "volatile"		{ count();  return(VOLATILE); }
 "while"			{ count();  return(WHILE); }
 
-{L}({L}|{D})*		{ count(); previ = yylval.id; yylval.id = strdup(yytext); printf("iden name lex = %s\n", yylval.id); return(check_type()); }
+{L}({L}|{D})*		{ count(); previ = yylval.id; yylval.id = strdup(yytext); return(check_type()); }
 
 0[xX]{H}+{IS}?		{ count();yylval.id = strdup(yytext); return(I_CONSTANT); }
 0{D}+{IS}?		{ count();yylval.id = strdup(yytext); return(I_CONSTANT); }
@@ -261,11 +261,11 @@ void getTokenName(int ind, char c[]) {
     }
 }
 
-void printTable(int token) {
-    char c[20];
-    getTokenName(token,c);
-    printf("    %-15s\t\t %-35s\t\t %8d\t %8d\n", c, yytext, line+1, prevCol+1);
-}
+// void printTable(int token) {
+//     char c[20];
+//     getTokenName(token,c);
+//     printf("    %-15s\t\t %-35s\t\t %8d\t %8d\n", c, yytext, line+1, prevCol+1);
+// }
 
 // int yylval.id = strdup(yytext)(char id){
 //     switch id{

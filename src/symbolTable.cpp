@@ -462,3 +462,14 @@ int getValueFromConstantExpression(node* constant_expression, int &err) {
     }
     return val;
 }
+
+structTableNode* structLookUp(symbolTable* st, string name) {
+    symbolTable* curr = st;
+    while(curr) {
+        if(curr->structMap.find(name) != curr->structMap.end()) {
+            return curr->structMap[name];
+        }
+        curr = curr->parent;
+    }
+    return nullptr;
+}

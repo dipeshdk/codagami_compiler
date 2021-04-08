@@ -114,7 +114,7 @@ void error(string var, int error_code) {
 
 primary_expression
 	// assuming identifier is not included in declaration. It must be declared before
-	: IDENTIFIER { cout << "117 identifier : " << yylval.id << endl;if(!lookUp(gSymTable, yylval.id)) { error(yylval.id, UNDECLARED_SYMBOL);	}; $$ = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+	: IDENTIFIER { if(!lookUp(gSymTable, yylval.id)) { error(yylval.id, UNDECLARED_SYMBOL);	}; $$ = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
 	| constant	{$$ = $1;}
 	| STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '(' expression ')' { $$ = $2; }
@@ -348,7 +348,6 @@ declaration
 			
 			if(!temp) continue;
 			string lex = temp->lexeme;
-			cout << "inserting symbol " << lex << " in scope " << gSymTable->scope << endl;
 			int retVal = insertSymbol(gSymTable, temp->lineNo, lex);
 			if(retVal) {
 				error(temp->lexeme, retVal);
@@ -372,7 +371,6 @@ declaration
 					sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
 			}
 			else {
-				// sym_node->infoType = INFO_TYPE_NORMAL;
 				sym_node->declSp = declSpCopy($1->declSp);
 				if(temp->declSp)
 					sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
@@ -396,7 +394,6 @@ declaration_specifiers
 	}
 	| type_specifier {$$ = $1;} 
 	| type_specifier declaration_specifiers {
-		cout << 399 << endl;
 		if($1){makeSibling($2,$1);} 
 		node *temp = $2;
 		vector<int> v = $1->declSp->type;
@@ -406,7 +403,6 @@ declaration_specifiers
 	}
 	| type_qualifier {$$ = $1;}
 	| type_qualifier declaration_specifiers {
-		cout << 409 << endl;
 		node *temp = $2;
 		//TODO: Verify correctness, code to merge types commented out
 		// vector<int> v = $1->declSp->type;
@@ -458,7 +454,6 @@ inden_marker
 	: {
 		node* temp = makeDeadNode();
 		temp->lexeme = yylval.id;
-		cout << "inden_marker " << yylval.id << endl;
 		$$ =temp;		
 	}
 	;
@@ -487,10 +482,8 @@ struct_or_union_specifier
 	} 
 	| struct_or_union '{' struct_declaration_list '}' {cout << "488 feature not included"<< endl; $$ = NULL;} // segfault will come whenever this will be running
 	| struct_or_union  IDENTIFIER {
-		string name(previ); //TODO: wrong name
-		if(gSymTable->structMap.find(name) == gSymTable->structMap.end()){
-			cout << "error here " << name <<" "<<yylval.id <<endl;
-			cout << "previous = " << previ << endl;
+		string name(previ); //TODO: wrong name, uses previ
+		if(!structLookUp(gSymTable, name)) { //Recursive lookup
 			error(name, STRUCT_NOT_DECLARED);
 		}
 		int type = ($1->infoType == INFO_TYPE_STRUCT) ? TYPE_STRUCT : TYPE_UNION;
@@ -644,8 +637,6 @@ declarator
 direct_declarator
 	// can be both in struct, or a declaration
 	: IDENTIFIER { 
-		cout << "601 iden name = " << yylval.id <<endl;
-		// cout << "601 marker name = " << $1->lexeme <<endl;
 		$$ = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$-> infoType = INFO_TYPE_NORMAL;
 		$$->lineNo = line+1;
@@ -787,15 +778,7 @@ parameter_declaration
 		$$ = declarator; 
 	 }
 	| declaration_specifiers { 
-		// if(funcDecl){
-		// 	// TODO: Error
-			
-		// }
-
-
-		// $$ = $1;
 		node* declaration_specifiers = $1;
-		// node* declarator = new node();
 
 		param *parameter = new param();
 		if(!parameter->declSp) {
@@ -804,9 +787,6 @@ parameter_declaration
 		if(declaration_specifiers->declSp) {
 			parameter->declSp = declSpCopy(declaration_specifiers->declSp);
 		}
-		// if(declarator->declSp) {
-		// 	parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
-		// }
 		parameter->paramName = "111NoParamName111";
 		declaration_specifiers->paramList.push_back(parameter);
 
@@ -815,12 +795,9 @@ parameter_declaration
 	;
 
 identifier_list
-	: IDENTIFIER { // insertSymbol(gSymTable, line+1, yylval.id);
-	 	cout << "773 : " << yylval.id << endl;
+	: IDENTIFIER { 
 		 $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| identifier_list ',' IDENTIFIER { 
-		// insertSymbol(gSymTable, line+1, yylval.id);
-		cout << "773 : " << yylval.id << endl;
 		makeSibling(makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
 	;
 
@@ -883,9 +860,9 @@ labeled_statement
 
 compound_statement
 	: scope_marker '{' '}' { $$ = (node*)NULL; gSymTable = gSymTable->parent;}
-	| scope_marker '{' statement_list '}' { cout << 874 << endl; $$ = $3; gSymTable = gSymTable->parent;}
-	| scope_marker '{' declaration_list '}' { cout << 875<< endl; $$ = $3; gSymTable = gSymTable->parent;}
-	| scope_marker '{' declaration_list statement_list '}' { cout << 876 << endl; if($3){$$ = makeNode(strdup("BODY"), strdup(""), 0, $3, $4, (node*)NULL, (node*)NULL);} else{
+	| scope_marker '{' statement_list '}' { $$ = $3; gSymTable = gSymTable->parent;}
+	| scope_marker '{' declaration_list '}' {  $$ = $3; gSymTable = gSymTable->parent;}
+	| scope_marker '{' declaration_list statement_list '}' { if($3){$$ = makeNode(strdup("BODY"), strdup(""), 0, $3, $4, (node*)NULL, (node*)NULL);} else{
 		$$ = $4;} gSymTable = gSymTable->parent;}
 	;
 
@@ -895,7 +872,7 @@ scope_marker
 	}
 
 declaration_list
-	: declaration { cout << 887 << endl; $$ = $1;}
+	: declaration { $$ = $1;}
 	| declaration_list declaration {
 		node* temp = NULL;
 		string s($1->name);
@@ -916,8 +893,8 @@ declaration_list
 	;
 
 statement_list
-	: statement { cout << 907 << endl; $$ = $1; }
-	| statement_list statement { cout << 908 << endl; if(!strcmp(($1 -> name), "STMT_LIST")){$$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);} else $$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
+	: statement { $$ = $1; }
+	| statement_list statement { if(!strcmp(($1 -> name), "STMT_LIST")){$$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);} else $$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
 	;
 
 expression_statement
@@ -967,8 +944,6 @@ function_definition
 		
 		for(auto &u: $4->paramList){
 			$2->paramList.push_back(u);
-			// int err = removeSymbol(gSymTable, u->paramName);
-			// if(err) error("removeSymbol", err);
 		}
 		addFunctionSymbol( declaration_specifiers, declarator);
 		$$ = $2;
@@ -988,8 +963,6 @@ function_definition
 		
 		for(auto &u: $3->paramList){
 			$1->paramList.push_back(u);
-			// int err = removeSymbol(gSymTable, u->paramName);
-			// if(err) error("removeSymbol", err);
 		}
 		addFunctionSymbol(NULL, declarator);
 		$$ = $1;
@@ -1052,37 +1025,8 @@ void generateDot(node* root, char* fileName) {
     fclose(fp);
 }
 
-// int main(int ac, char **av) {
-// 	int val;
-//     FILE    *fd;
-//     if (ac >= 2)
-//     {
-//         if (!(fd = fopen(av[1], "r")))
-//         {
-//             perror("Error: ");
-//             return (-1);
-//         }
-//         yyset_in(fd);
-        
-// 		yyparse();
-// 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
-// 		char * fileName = strdup("graph.dot");
-// 		if(ac == 3) fileName = av[2];
-
-// 		generateDot(root,fileName);
-
-//         fclose(fd);
-//     }
-//     else
-//         printf("Usage: a.out input_filename [optional]ouput.dot \n");
-	
-// 	return 0; 
-// }
 
 using namespace std;
-// extern int gScope;
-// extern symbolTable* gSymTable;
-// extern int line;
 
 int main(int ac, char **av) {
 	cout << "I am in main" << endl;
