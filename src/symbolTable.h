@@ -11,6 +11,7 @@
 #define ARRAY_SIZE_SHOULD_BE_INT 109
 #define INVALID_STORAGE_CLASS 110
 #define SYMBOL_NOT_FOUND 111
+#define STRUCT_NOT_DECLARED 112
 
 #define TYPE_CHAR 1
 #define TYPE_SHORT 2
@@ -36,8 +37,10 @@
 #define INFO_TYPE_FUNC 202
 #define INFO_TYPE_ARRAY 203
 #define INFO_TYPE_STRUCT 204
+#define INFO_TYPE_UNION 205
 
 #define INF_PARAM_LIST INT_MAX
+#define NO_BIT_ASSIGNED -1
 
 using namespace std;
 
@@ -67,8 +70,9 @@ struct symbolTableNode {
 typedef struct symbolTable{
     map<string, struct symbolTableNode*> symbolTableMap; // <lexeme, struct>
     struct symbolTable *parent;
-    int scope;
+    int scope; //name for scope : global, main, function name
     vector<struct symbolTable *> childList;
+    map<string, struct structTableNode*> structMap;
 } symbolTable;
 
 // TODO: write a function in grammar.y to check types like int double should not come together
@@ -92,11 +96,28 @@ struct param{
     }
 };
 
+struct structParam{
+    struct declSpec *declSp;
+    string name;
+    int bit;
+    structParam():bit(NO_BIT_ASSIGNED) {
+        declSp = new declSpec();
+    }
+};
+
+struct structTableNode {
+    int infoType; //struct or union
+    string name;
+    int lineNo;
+    vector<structParam*> paramList;
+};
+
+
 typedef struct node
 {
     int id;
-    char *name;
-    char *lexeme;
+    char *name = NULL;
+    char *lexeme = NULL;
     int valType; //in which variable is constant stored
     long lval;
     int ival;
@@ -104,7 +125,7 @@ typedef struct node
     double dval;
     int isLeaf; // DEAD_NODE if declaration node so not ot be printed in AST
     struct node *next;
-    struct node *childList;
+    struct node *childList = nullptr;
     struct declSpec *declSp;
 
     // symtable node
@@ -113,9 +134,11 @@ typedef struct node
     int arraySize = 0;
     int paramSize = 0;
     vector<struct param*> paramList;
-} node;
+    vector<struct structParam*> structParamList;
+} node; 
 
 void insert_into_sets();
+
 int addIVal(node* temp, string s);
 
 int addFVal(node* temp, string s);
@@ -147,3 +170,7 @@ int check_type_array(vector<int> &v);
 int addStorageClassToDeclSpec(node *temp, vector<int>&v);
 
 int removeSymbol(symbolTable* st, string name);
+
+int getValueFromConstantExpression(node* constant_expression, int &err);
+
+void printStructTable(map<string, struct structTableNode*> &structMap, int scope);

@@ -14,6 +14,7 @@ void count();
 void error();
 int check_type();
 int comment();
+char* previ;
 %}
 
 %%
@@ -52,7 +53,7 @@ int comment();
 "volatile"		{ count();  return(VOLATILE); }
 "while"			{ count();  return(WHILE); }
 
-{L}({L}|{D})*		{ count(); yylval.id = strdup(yytext); return(check_type()); }
+{L}({L}|{D})*		{ count(); previ = yylval.id; yylval.id = strdup(yytext); printf("iden name lex = %s\n", yylval.id); return(check_type()); }
 
 0[xX]{H}+{IS}?		{ count();yylval.id = strdup(yytext); return(I_CONSTANT); }
 0{D}+{IS}?		{ count();yylval.id = strdup(yytext); return(I_CONSTANT); }

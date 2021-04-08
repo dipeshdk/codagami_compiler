@@ -183,8 +183,7 @@ int addFVal(node* temp, string s) {
 }
 
 
-struct symbolTable* addChildSymbolTable(struct symbolTable *parent)
-{
+struct symbolTable* addChildSymbolTable(struct symbolTable *parent){
     symbolTable* node = new symbolTable();
     if(!node)
         return nullptr;
@@ -299,6 +298,7 @@ void printDeclSp(declSpec* ds) {
 }
 
 void printSymbolTable(symbolTable *st) {
+    cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
     cout << "\n\n=============Printing symbol table (scope: " << st->scope << ")====================\n\n";
 
     for(auto elem : st->symbolTableMap) {
@@ -320,9 +320,33 @@ void printSymbolTable(symbolTable *st) {
         cout << "\n---------------------------------------\n";
     }
     cout << "\n=================================================\n";
+    printStructTable(st->structMap, st->scope);
     for(symbolTable *child : st->childList) {
         printSymbolTable(child);
     }   
+    cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+
+}
+
+void printStructTable(map<string, struct structTableNode*> &structMap, int scope) {
+    cout << "\n\n=============Printing struct table (scope: " << scope << ")====================\n\n";
+
+    for(auto elem : structMap) {
+        cout << "\n---------------------------------------\n";
+        cout << elem.first << " \n" 
+            << "infoType: " << elem.second->infoType << " \n"
+            << "lineNo: " << elem.second->lineNo << " \n"
+            << "name: " << elem.second->name << " \n";
+
+        cout << "paramList: \n   ";
+        for(structParam* t : elem.second->paramList) {
+            cout << "name: " << t->name << "\n";
+            cout << "bit: " << t->bit << "\n";
+            printDeclSp(t->declSp);
+        }
+        cout << "\n---------------------------------------\n";
+    }
+    cout << "\n=================================================\n"; 
 }
 
 int mergeConstVolatile(node* temp, node* from) {
@@ -413,4 +437,28 @@ int removeSymbol(symbolTable* st, string name) {
     }
     st->symbolTableMap.erase(it);
     return 0;
+}
+
+int getValueFromConstantExpression(node* constant_expression, int &err) {
+    err=0;
+    int val = 0;
+    if(!constant_expression) {
+        err = INVALID_ARGS;
+        return val;
+    }
+    switch(constant_expression->valType){
+        case TYPE_INT: 
+            val = constant_expression->ival;
+            break;
+        case TYPE_LONG: 
+            val = constant_expression->lval;
+            break;
+        case TYPE_FLOAT:
+        case TYPE_DOUBLE:
+            err = TYPE_ERROR;
+            break;
+        default:
+            break; 
+    }
+    return val;
 }

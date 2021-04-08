@@ -22,7 +22,7 @@
 			pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
-			constant
+			constant inden_marker 
 // Prototypes
 %{
 	#include <stdio.h>
@@ -32,6 +32,7 @@
     extern int gScope;
     extern symbolTable* gSymTable;
     extern int line;
+	extern char* previ;
 	int funcDecl = 0;
 
 
@@ -113,7 +114,7 @@ void error(string var, int error_code) {
 
 primary_expression
 	// assuming identifier is not included in declaration. It must be declared before
-	: IDENTIFIER { if(!lookUp(gSymTable, yylval.id)) { error(yylval.id, UNDECLARED_SYMBOL);	}; $$ = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
+	: IDENTIFIER { cout << "117 identifier : " << yylval.id << endl;if(!lookUp(gSymTable, yylval.id)) { error(yylval.id, UNDECLARED_SYMBOL);	}; $$ = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
 	| constant	{$$ = $1;}
 	| STRING_LITERAL {$$ = makeNode(strdup("STRING_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '(' expression ')' { $$ = $2; }
@@ -135,13 +136,29 @@ constant
 
 postfix_expression
 	: primary_expression { $$ = $1; }
-	| postfix_expression '[' expression ']' {addChild($1,$3);$$ = $1;}
-	| postfix_expression '(' ')' {$$ = $1;}
-	| postfix_expression '(' argument_expression_list ')' {addChild($1,$3);$$ = $1;}
-	| postfix_expression '.' IDENTIFIER { $$ = makeNode(strdup("."), strdup(""), 0, $1, makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
-	| postfix_expression PTR_OP IDENTIFIER {$$ = makeNode(strdup("PTR_OP"), strdup(""), 0, $1, makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
-	| postfix_expression INC_OP {addChild($1, makeNode(strdup("INC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL));$$ = $1;}
-	| postfix_expression DEC_OP {addChild($1, makeNode(strdup("DEC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL)); $$ = $1;}
+	| postfix_expression '[' expression ']' {
+		// TODO: expression should be int
+		addChild($1,$3);$$ = $1;}
+	| postfix_expression '(' ')' {$$ = $1; // Check with function paramlist
+	}
+	| postfix_expression '(' argument_expression_list ')' {
+		// TODO: Error check for argument validity and function name
+		
+		addChild($1,$3);$$ = $1;
+	}
+	| postfix_expression '.' IDENTIFIER { 
+		// TODO: Check if IDENTIFIER is valid field in struct
+		
+		$$ = makeNode(strdup("."), strdup(""), 0, $1, makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
+	| postfix_expression PTR_OP IDENTIFIER {
+		// TODO: Struct field check
+		$$ = makeNode(strdup("PTR_OP"), strdup(""), 0, $1, makeNode(strdup("IDENTIFIER"), strdup(""), 1, NULL, NULL, NULL, NULL), NULL, NULL);}
+	| postfix_expression INC_OP {
+		// TODO: Should be integer
+		addChild($1, makeNode(strdup("INC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL));$$ = $1;}
+	| postfix_expression DEC_OP {
+		// TODO: postfix_expression should be integer
+		addChild($1, makeNode(strdup("DEC_OP"), strdup(""), 1, NULL, NULL, NULL, NULL)); $$ = $1;}
 	;
 
 argument_expression_list
@@ -151,16 +168,26 @@ argument_expression_list
 
 unary_expression
 	: postfix_expression {$$ = $1; }
-	| INC_OP unary_expression {$$ = makeNode(strdup("INC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| DEC_OP unary_expression {$$ = makeNode(strdup("DEC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| unary_operator cast_expression { addChild($1, $2); $$ = $1; }
+	| INC_OP unary_expression {
+		// TODO: Integer check
+		$$ = makeNode(strdup("INC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| DEC_OP unary_expression {
+		// TODO: Integer check
+		$$ = makeNode(strdup("DEC_OP"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| unary_operator cast_expression { 
+		// TODO: Type checking and typecasting based on the unary_operatory
+		addChild($1, $2); $$ = $1; }
 	| SIZEOF unary_expression {$$ = makeNode(strdup("SIZEOF"), strdup(""), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| SIZEOF '(' type_name ')'{$$ = makeNode(strdup("SIZEOF"), strdup(""), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| SIZEOF '(' type_name ')'{
+		// TODO: Check validity of type_name 
+		$$ = makeNode(strdup("SIZEOF"), strdup(""), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
 	;
 
 unary_operator
 	: '&' {$$ = makeNode(strdup("&"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| '*' {$$ = makeNode(strdup("*"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| '*' {
+		//TODO: Check ptrLevel>0 or array..
+		$$ = makeNode(strdup("*"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '+' {$$ = makeNode(strdup("+"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '-' {$$ = makeNode(strdup("-"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '~' {$$ = makeNode(strdup("~"), strdup(""), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
@@ -169,45 +196,84 @@ unary_operator
 
 cast_expression
 	: unary_expression {$$ = $1; }
-	| '(' type_name ')' cast_expression { if($2){makeSibling($4, $2); $$ = $2;} else {$$ = $4;} }
+	| '(' type_name ')' cast_expression { 
+		// Append typename to front of lexeme
+		// TODO: Typename check, check if it can be typecasted (string cant be typecasted)
+		string type = "(to ";
+		node* temp = $2;
+		while(temp != NULL){
+			type = type + temp->lexeme; // TODO: check lexeme for type_name
+			temp = temp->next;
+		}
+		type = type+")";
+		string s = type + string($4->lexeme); // TODO: check expression lexeme
+		strcpy($4->lexeme, s.c_str());
+		$$ = $4;
+	}
 	;
 
 multiplicative_expression
 	: cast_expression {$$ = $1; }
-	| multiplicative_expression '*' cast_expression { $$ = makeNode(strdup("*"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-	| multiplicative_expression '/' cast_expression { $$ = makeNode(strdup("/"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-	| multiplicative_expression '%' cast_expression { $$ = makeNode(strdup("%"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| multiplicative_expression '*' cast_expression { 
+		// TODO: Type check
+		$$ = makeNode(strdup("*"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| multiplicative_expression '/' cast_expression { 
+
+		$$ = makeNode(strdup("/"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| multiplicative_expression '%' cast_expression { 
+		// TODO: Type check : integers
+		$$ = makeNode(strdup("%"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
 additive_expression
 	: multiplicative_expression { $$ = $1; }
-	| additive_expression '+' multiplicative_expression { $$ = makeNode(strdup("+"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-	| additive_expression '-' multiplicative_expression { $$ = makeNode(strdup("-"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| additive_expression '+' multiplicative_expression { 
+		// TODO: Check implicit typecasting
+		$$ = makeNode(strdup("+"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| additive_expression '-' multiplicative_expression { 
+		// TODO: Check implicit typecasting
+		$$ = makeNode(strdup("-"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
 shift_expression
 	: additive_expression { $$ = $1; }
-	| shift_expression LEFT_OP additive_expression { $$ = makeNode(strdup("LEFT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-	| shift_expression RIGHT_OP additive_expression { $$ = makeNode(strdup("RIGHT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| shift_expression LEFT_OP additive_expression { 
+		// TODO: Both should be integers
+		$$ = makeNode(strdup("LEFT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| shift_expression RIGHT_OP additive_expression { 
+		// TODO: Both should be integers
+		$$ = makeNode(strdup("RIGHT_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
 relational_expression
 	: shift_expression { $$ = $1; }
-	| relational_expression '<' shift_expression { $$ = makeNode(strdup("<"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-	| relational_expression '>' shift_expression { $$ = makeNode(strdup(">"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-	| relational_expression LE_OP shift_expression { $$ = makeNode(strdup("LE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-	| relational_expression GE_OP shift_expression { $$ = makeNode(strdup("GE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| relational_expression '<' shift_expression { 
+		// TODO: String Literal check,  implicit typecasting
+		$$ = makeNode(strdup("<"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| relational_expression '>' shift_expression { 
+		// TODO: String Literal check, implicit typecasting
+		$$ = makeNode(strdup(">"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| relational_expression LE_OP shift_expression { // TODO: String Literal check
+	$$ = makeNode(strdup("LE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| relational_expression GE_OP shift_expression { 
+		// TODO: String Literal check, implicit typecasting
+		$$ = makeNode(strdup("GE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
 equality_expression
 	: relational_expression { $$ = $1; }
-	| equality_expression EQ_OP relational_expression { $$ = makeNode(strdup("EQ_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
-	| equality_expression NE_OP relational_expression { $$ = makeNode(strdup("NE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| equality_expression EQ_OP relational_expression { 
+		// TODO: String Literal check, implicit typecasting
+		$$ = makeNode(strdup("EQ_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| equality_expression NE_OP relational_expression { 
+		// TODO: String Literal check, implicit typecasting
+		$$ = makeNode(strdup("NE_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
 and_expression
 	: equality_expression { $$ = $1; }
-	| and_expression '&' equality_expression { $$ = makeNode(strdup("&"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| and_expression '&' equality_expression { 
+		$$ = makeNode(strdup("&"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
 exclusive_or_expression
@@ -222,24 +288,30 @@ inclusive_or_expression
 
 logical_and_expression
 	: inclusive_or_expression {$$ = $1;}
-	| logical_and_expression AND_OP inclusive_or_expression { $$ = makeNode(strdup("AND_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| logical_and_expression AND_OP inclusive_or_expression { 
+		//TODO: Strings Literals allowed
+		$$ = makeNode(strdup("AND_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
 logical_or_expression
 	: logical_and_expression { $$ = $1; }
-	| logical_or_expression OR_OP logical_and_expression { $$ = makeNode(strdup("OR_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| logical_or_expression OR_OP logical_and_expression { 
+		//TODO: Strings Literals allowed
+		$$ = makeNode(strdup("OR_OP"), strdup(""), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
 conditional_expression
 	: logical_or_expression { $$ = $1; }
-	| logical_or_expression '?' expression ':' conditional_expression { $$ = makeNode(strdup("?:"), strdup(""), 0, $1, $3, $5, (node*)NULL); }
+	| logical_or_expression '?' expression ':' conditional_expression { 
+		
+		$$ = makeNode(strdup("?:"), strdup(""), 0, $1, $3, $5, (node*)NULL); }
 	;
 
 assignment_expression
 	: conditional_expression { $$ = $1; }
 	| unary_expression assignment_operator assignment_expression { addChild($2, $1); addChild($2, $3); $$ = $2; }
 	;
-
+//TODO: Implicit typecasting
 assignment_operator
 	: '=' {$$ = makeNode(strdup("="), strdup("="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| MUL_ASSIGN { $$ = makeNode(strdup("MUL_ASSIGN"), strdup("*="), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); }
@@ -315,7 +387,7 @@ declaration
 declaration_specifiers
 	: storage_class_specifier {$$ = $1;}
 	| storage_class_specifier declaration_specifiers {
-		if($1){makeSibling($2,$1);$$ = $1;} 
+		if($1){makeSibling($2,$1);} 
 		node *temp = $2;
 		vector<int> v = $1->declSp->storageClassSpecifier;
 		int err = addStorageClassToDeclSpec(temp, v);
@@ -324,6 +396,8 @@ declaration_specifiers
 	}
 	| type_specifier {$$ = $1;} 
 	| type_specifier declaration_specifiers {
+		cout << 399 << endl;
+		if($1){makeSibling($2,$1);} 
 		node *temp = $2;
 		vector<int> v = $1->declSp->type;
 		int err = addTypeToDeclSpec(temp, v);
@@ -332,6 +406,7 @@ declaration_specifiers
 	}
 	| type_qualifier {$$ = $1;}
 	| type_qualifier declaration_specifiers {
+		cout << 409 << endl;
 		node *temp = $2;
 		//TODO: Verify correctness, code to merge types commented out
 		// vector<int> v = $1->declSp->type;
@@ -343,7 +418,7 @@ declaration_specifiers
 	;
 
 init_declarator_list
-	: init_declarator { $$ = $1;  }
+	: init_declarator {  $$ = $1;  }
 	| init_declarator_list ',' init_declarator { 
 		if($1){makeSibling($3,$1);$$ = $1;} else $$ = $3;
 	} 
@@ -376,72 +451,152 @@ type_specifier
 	| UNSIGNED {$$ = makeTypeNode( TYPE_UNSIGNED);}
 	| struct_or_union_specifier {$$ = $1;}
 	| enum_specifier {$$ = $1;}
-	| TYPE_NAME {$$ = NULL;} //TODO: unkown use
+	| TYPE_NAME { $$ = NULL;} //TODO: unknown use -- struct name
 	;
 
+inden_marker
+	: {
+		node* temp = makeDeadNode();
+		temp->lexeme = yylval.id;
+		cout << "inden_marker " << yylval.id << endl;
+		$$ =temp;		
+	}
+	;
+	
 struct_or_union_specifier
-	: struct_or_union IDENTIFIER '{' struct_declaration_list '}' {
-		// TODO: decide to keep or no
-		// int retVal = insertSymbol(gSymTable, line+1, yylval.id);
-		// if(retVal) {
-		// 	error("", retVal);
-		// }
-		symbolTableNode* stNode = lookUp(gSymTable, yylval.id);
-		if(!stNode) {
-			error(yylval.id, UNDECLARED_SYMBOL);	
-		}
-		stNode->infoType = INFO_TYPE_STRUCT;
-		$$ = NULL;
+	: struct_or_union IDENTIFIER inden_marker '{' struct_declaration_list '}' {
+		structTableNode* structNode = new structTableNode();
+		string name = $3->lexeme;
+		structNode->infoType = $1->infoType;
+		structNode->lineNo = line+1;
+		structNode->name = name;
+		for(auto &u : $5->structParamList){
+			structNode->paramList.push_back(u);
 		} 
-	| struct_or_union '{' struct_declaration_list '}' {$$ = NULL;}
-	| struct_or_union IDENTIFIER {$$ = NULL;}
+		
+		int type = ($1->infoType == INFO_TYPE_STRUCT) ? TYPE_STRUCT : TYPE_UNION;
+		node * temp = makeTypeNode(type);
+		if(!temp->declSp)
+			temp->declSp = new declSpec();
+		temp->declSp->lexeme = name;
+		temp->infoType = $1->infoType;
+		temp->lineNo = line +1;
+
+		gSymTable->structMap[$3->lexeme] = structNode;
+		$$ = temp;
+	} 
+	| struct_or_union '{' struct_declaration_list '}' {cout << "488 feature not included"<< endl; $$ = NULL;} // segfault will come whenever this will be running
+	| struct_or_union  IDENTIFIER {
+		string name(previ); //TODO: wrong name
+		if(gSymTable->structMap.find(name) == gSymTable->structMap.end()){
+			cout << "error here " << name <<" "<<yylval.id <<endl;
+			cout << "previous = " << previ << endl;
+			error(name, STRUCT_NOT_DECLARED);
+		}
+		int type = ($1->infoType == INFO_TYPE_STRUCT) ? TYPE_STRUCT : TYPE_UNION;
+		node * temp = makeTypeNode(type);
+		if(!temp->declSp)
+			temp->declSp = new declSpec();
+		temp->declSp->lexeme = name;
+		temp->infoType = $1->infoType;
+		temp->lineNo = line +1;
+		$$ = temp;
+	}
 	;
 
 struct_or_union
 	: STRUCT {
 		node* temp = makeNode(strdup("STRUCT"), strdup("struct"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		temp->declSp = new declSpec();
-		temp->declSp->type.push_back(TYPE_STRUCT);
-	 	$$ = temp;}
-	 
+		temp->infoType = INFO_TYPE_STRUCT;
+		$$ = temp;}
 	| UNION {
 		node* temp = makeNode(strdup("UNION"), strdup("union"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		temp->declSp = new declSpec();
-		temp->declSp->type.push_back(TYPE_UNION);
-		$$=temp;}
+		temp->infoType = INFO_TYPE_UNION;
+		$$ = temp;}
 	;
 
 struct_declaration_list
 	: struct_declaration { $$ = $1; }
-	| struct_declaration_list struct_declaration { if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2; }
+	| struct_declaration_list struct_declaration {  
+		for(auto &u : $2->structParamList)
+			$1->structParamList.push_back(u);
+		$$ = $1;
+	}
 	;
 
 struct_declaration
-	: specifier_qualifier_list struct_declarator_list ';' {$$ = NULL;}
+	: specifier_qualifier_list struct_declarator_list ';' {
+		node* specifier_qualifier_list = $1;
+		node* struct_declarator_list = $2;
+		node* curr = struct_declarator_list;
+		while(curr) {
+			node* temp = curr;
+			string s(curr->name);
+			if(s == "="){
+				temp = curr->childList;
+			}
+			if(!temp) continue;
+			for(auto &u : temp->structParamList) {
+				u->declSp = specifier_qualifier_list->declSp;
+				specifier_qualifier_list->structParamList.push_back(u);
+			}
+			curr = curr -> next;
+		}
+		$$ = specifier_qualifier_list;
+	}
 	;
 
 specifier_qualifier_list
 	: type_specifier specifier_qualifier_list {
 		if($1){makeSibling($2,$1);}
+		node *temp = $2;
+		vector<int> v = $1->declSp->type;
+		int err = addTypeToDeclSpec(temp, v);
+		if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
+		$$ = temp;
 		}
 	| type_specifier { $$ = $1; }
 	| type_qualifier specifier_qualifier_list {
-		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;
-		mergeConstVolatile($2, $1);
-		$$ = $2;
+		node *temp = $2;
+		mergeConstVolatile(temp, $1);
+		$$ = temp;
 	}
 	| type_qualifier { $$ = $1; }
 	;
 
 struct_declarator_list
 	: struct_declarator { $$ = $1; }
-	| struct_declarator_list ',' struct_declarator {$$ = NULL;}
+	| struct_declarator_list ',' struct_declarator {
+		node* struct_declarator = $3; 
+		node* struct_declarator_list = $1; 
+		for(auto &u : struct_declarator->structParamList)
+			struct_declarator_list->structParamList.push_back(u);
+		$$ = struct_declarator_list;
+	}
 	;
 
 struct_declarator
-	: declarator { $$ = $1; }
-	| ':' constant_expression {$$ = NULL;}
-	| declarator ':' constant_expression {$$ = NULL;}
+	: declarator { 
+		node* declarator = $1; 
+		structParam* param = new structParam();
+		param->name = declarator->lexeme;
+		param->declSp = declarator->declSp;
+		declarator->structParamList.push_back(param);
+		$$ = declarator;
+	}
+	| ':' constant_expression {$$ = NULL;} //TODO: Later, don't know meaning
+	| declarator ':' constant_expression {
+		node* declarator = $1; 
+		structParam* param = new structParam();
+		param->name = declarator->lexeme;
+		param->declSp = declarator->declSp;
+		int err = 0;
+		int ret = getValueFromConstantExpression($3, err);
+		if(err) error("getValueFromConstantExpression", err);
+		param->bit = ret;
+		declarator->structParamList.push_back(param);
+		$$ = declarator;
+	}
 	;
 
 enum_specifier
@@ -489,6 +644,8 @@ declarator
 direct_declarator
 	// can be both in struct, or a declaration
 	: IDENTIFIER { 
+		cout << "601 iden name = " << yylval.id <<endl;
+		// cout << "601 marker name = " << $1->lexeme <<endl;
 		$$ = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$-> infoType = INFO_TYPE_NORMAL;
 		$$->lineNo = line+1;
@@ -496,20 +653,10 @@ direct_declarator
 	| '(' declarator ')' { $$ = $2;}
 	| direct_declarator '[' constant_expression ']' {
 		node* temp = $1;
-		int asize = 0;
-		switch($3->valType){
-			case TYPE_INT: 
-				asize = $3->ival;
-				break;
-			case TYPE_LONG: 
-				asize = $3->lval;
-				break;
-			case TYPE_FLOAT:
-			case TYPE_DOUBLE:
-				error($3->name, TYPE_ERROR);
-				break;
-			default:
-				break; 
+		int err;
+		int asize = getValueFromConstantExpression(temp, err);
+		if(err){
+			error(temp->lexeme, err);
 		}
 		temp->infoType = INFO_TYPE_ARRAY;
 		temp->arraySize = asize;
@@ -669,9 +816,11 @@ parameter_declaration
 
 identifier_list
 	: IDENTIFIER { // insertSymbol(gSymTable, line+1, yylval.id);
-	 	$$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	 	cout << "773 : " << yylval.id << endl;
+		 $$ = makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| identifier_list ',' IDENTIFIER { 
 		// insertSymbol(gSymTable, line+1, yylval.id);
+		cout << "773 : " << yylval.id << endl;
 		makeSibling(makeNode(strdup("IDENTIFIER"), strdup(""), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
 	;
 
@@ -734,9 +883,9 @@ labeled_statement
 
 compound_statement
 	: scope_marker '{' '}' { $$ = (node*)NULL; gSymTable = gSymTable->parent;}
-	| scope_marker '{' statement_list '}' { $$ = $3; gSymTable = gSymTable->parent;}
-	| scope_marker '{' declaration_list '}' { $$ = $3; gSymTable = gSymTable->parent;}
-	| scope_marker '{' declaration_list statement_list '}' { if($3){$$ = makeNode(strdup("BODY"), strdup(""), 0, $3, $4, (node*)NULL, (node*)NULL);} else{
+	| scope_marker '{' statement_list '}' { cout << 874 << endl; $$ = $3; gSymTable = gSymTable->parent;}
+	| scope_marker '{' declaration_list '}' { cout << 875<< endl; $$ = $3; gSymTable = gSymTable->parent;}
+	| scope_marker '{' declaration_list statement_list '}' { cout << 876 << endl; if($3){$$ = makeNode(strdup("BODY"), strdup(""), 0, $3, $4, (node*)NULL, (node*)NULL);} else{
 		$$ = $4;} gSymTable = gSymTable->parent;}
 	;
 
@@ -746,29 +895,29 @@ scope_marker
 	}
 
 declaration_list
-	: declaration { $$ = $1;}
-	| declaration_list declaration { 
-		node* temp;
-		if(!strcmp(($1 -> name), "DECL_LIST")){
-			temp = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);
-		} else 
+	: declaration { cout << 887 << endl; $$ = $1;}
+	| declaration_list declaration {
+		node* temp = NULL;
+		string s($1->name);
+		bool c1  = (s == "DECL_LIST");
+		if( c1 ){ 
+			temp = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1->childList, $2, (node*)NULL, (node*)NULL);
+		} else {
 			temp = makeNode(strdup("DECL_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);
-
+		}
 		for(auto &u : $2->paramList){
 			temp->paramList.push_back(u);
 		}
-
 		for(auto &u : $1->paramList){
 			temp->paramList.push_back(u);
 		}
 		$$ = temp;
 	}
-
 	;
 
 statement_list
-	: statement { $$ = $1; }
-	| statement_list statement { if(!strcmp(($1 -> name), "STMT_LIST")){$$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);} else $$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
+	: statement { cout << 907 << endl; $$ = $1; }
+	| statement_list statement { cout << 908 << endl; if(!strcmp(($1 -> name), "STMT_LIST")){$$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);} else $$ = makeNode(strdup("STMT_LIST"), strdup(""), 0, $1, $2, (node*)NULL, (node*)NULL);}
 	;
 
 expression_statement
@@ -936,6 +1085,7 @@ using namespace std;
 // extern int line;
 
 int main(int ac, char **av) {
+	cout << "I am in main" << endl;
 	insert_into_sets();
 	int val;
     FILE    *fd;
@@ -1012,6 +1162,7 @@ node* makeStorageClassNode(int storageClass, char* name, char* lexeme, int isLea
 			c1,c2, c3, c4);
 	newNode->declSp = new declSpec();
 	newNode->declSp->storageClassSpecifier.push_back(storageClass); //TODO: check validity of storage class
+	newNode->name = strdup("Storage Node");
 	return newNode;
 }
 

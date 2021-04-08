@@ -3,6 +3,7 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "iostream": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "random": "c"
     }
 }

@@ -30,7 +30,15 @@ function_definition:  declaration_specifiers makeSTMarker declarator function_sc
 
 
 int main() {
-    char b = 10;
-    printf("ret value: %d\n", a(b,5));
+    char b = (1.5);
+    double f = b+1.5;
+    int i = 100;
+    char* g=100;
+    float h = g;
+    if(g == b) {
+        printf("eq");
+    }else {
+        printf("neq");
+    }
     return 0;
 } 
