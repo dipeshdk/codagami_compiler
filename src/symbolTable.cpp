@@ -981,7 +981,7 @@ int giveTypeCastRankUnary(node* n1, node* n2){
     int d1 = (double_type_check.find(v1) != double_type_check.end());
     int i1 = (checkIntLongShort(n1) == 0);
     int c1 = (char_type_check.find(v1) != char_type_check.end());
-    cout << f1 << d1 << i1 << c1 << endl;
+    // cout << f1 << d1 << i1 << c1 << endl;
     int rank1 = ((f1|d1)<<2) + (i1<<1) + (c1);
     int f2 =  (float_type_check.find(v2) != float_type_check.end()); 
     int d2 = (double_type_check.find(v2) != double_type_check.end());
@@ -991,7 +991,7 @@ int giveTypeCastRankUnary(node* n1, node* n2){
     if(rank1 != rank2){
         string strType = "(TO_";
         strType = strType + getTypeString(n1->declSp->type) + ")";
-        n2->declSp->type = n1->declSp->type;
+        // n2->declSp->type = n1->declSp->type;
         string s = strType + string(n2->lexeme); 
         strcpy(n2->lexeme, s.c_str());
     }

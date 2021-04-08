@@ -74,6 +74,14 @@ struct symbolTableNode {
     vector<struct param*> paramList; //for functions, struct and union
     string name;
     struct declSpec *declSp;
+
+    symbolTableNode() {
+        infoType = INFO_TYPE_NORMAL;
+        arraySize=0;
+        paramSize=0;
+        isDefined=0;
+        declSp = nullptr;
+    }
 };
 
 typedef struct symbolTable{
@@ -83,6 +91,10 @@ typedef struct symbolTable{
     int scope; //name for scope : global, main, function name
     vector<struct symbolTable *> childList;
     map<string, struct structTableNode*> structMap;
+
+    symbolTable() {
+        parent = nullptr;
+    }
 } symbolTable;
 
 // TODO: write a function in grammar.y to check types like int double should not come together
@@ -95,7 +107,9 @@ typedef struct declSpec
     bool isConst; //bool
     bool isVolatile; //bool
 
-    declSpec() : ptrLevel(0), isConst(0), isVolatile(0)  { }
+    declSpec() : ptrLevel(0), isConst(0), isVolatile(0)  {
+        lexeme="empty";
+     }
 } declSpec;
 
 struct param{
@@ -103,6 +117,7 @@ struct param{
     string paramName;
     param() {
         declSp = new declSpec();
+        paramName="empty";
     }
 };
 
@@ -112,6 +127,7 @@ struct structParam{
     int bit;
     structParam():bit(NO_BIT_ASSIGNED) {
         declSp = new declSpec();
+        name="empty";
     }
 };
 
@@ -120,6 +136,9 @@ struct structTableNode {
     string name;
     int lineNo;
     vector<structParam*> paramList;
+    structTableNode() {
+        name="empty";
+    }
 };
 
 
@@ -145,6 +164,13 @@ typedef struct node
     int paramSize = 0;
     vector<struct param*> paramList;
     vector<struct structParam*> structParamList;
+
+    node() {
+        lexeme = strdup("empty");
+        name = strdup("empty");
+        next = childList = nullptr;
+        declSp = new declSpec();
+    }
 } node; 
 
 void insert_into_sets();

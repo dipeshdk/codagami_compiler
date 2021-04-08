@@ -220,8 +220,17 @@ postfix_expression
 		// TODO: Error check for argument validity and function name
 		node* postfix_expression  = $1;
 		string func_name(postfix_expression->lexeme);
-		vector<struct param*> paramList = postfix_expression -> paramList; 
+		string name = postfix_expression->lexeme;
+		symbolTableNode* stNode = lookUp(gSymTable, name);
+		if(!stNode || stNode->infoType != INFO_TYPE_FUNC || !stNode->declSp) {
+			error(name, SYMBOL_NOT_FOUND);
+		}
+
+		// vector<struct param*> paramList = postfix_expression->paramList; 
+		vector<struct param*> paramList = stNode->paramList; 
+		int maxSize = paramList.size();
 		int idx = 0;
+		// printf("Here 1\n");
 		node* curr = $3;
 		while(curr){
 			node* temp = curr;
@@ -229,7 +238,10 @@ postfix_expression
 			if(s == "="){
 				temp = curr->childList;
 			}
+			// printf("Here 2\n");
 			if(!temp) continue;
+			if(idx >= maxSize)
+				error(temp->lexeme, INVALID_ARGS_IN_FUNC_CALL);
 			if(!temp->declSp || !paramList[idx]->declSp){
 				error(temp->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
 				break;
@@ -239,10 +251,12 @@ postfix_expression
 				error(temp->lexeme, INVALID_ARGS_IN_FUNC_CALL);
 			}
 			idx++;
+			// printf("Here 3\n");
 			curr = curr -> next;
 		}
 		postfix_expression->infoType = INFO_TYPE_FUNC;
 		addChild(postfix_expression,$3);
+		// printf("Here 4\n");
 		$$ = postfix_expression;
 	}
 	| postfix_expression '.' IDENTIFIER { 
@@ -785,10 +799,10 @@ assignment_expression
 					error(var,retval);
 				}
 			}
-			// int retVal = giveTypeCastRankUnary(unary_expression, assignment_expression);
-			// if(retVal){
-			// 	error("error unary type cast", retVal);
-			// }
+			int retVal = giveTypeCastRankUnary(unary_expression, assignment_expression);
+			if(retVal){
+				error("error unary type cast", retVal);
+			}
 
 		}
 
@@ -1683,7 +1697,7 @@ int main(int ac, char **av) {
 
 node* makeNode(char* name, char* lexeme, int isLeaf, 
 			node*c1, node*c2, node*c3, node* c4){
-	node* newNode = (node*) malloc(sizeof(node));
+	node* newNode = new node();
 	newNode->id = id++;
 	newNode->name = (char*)malloc(sizeof(char)*(strlen(name)+1));
 	newNode->lexeme = (char*)malloc(sizeof(char)*(strlen(lexeme)+1));
