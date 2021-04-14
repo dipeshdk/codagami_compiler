@@ -2,4 +2,4 @@ lex grammar.l
 yacc --verbose --debug -d grammarOld.y
 gcc -c lex.yy.c
 g++ -c symbolTable.cpp
-g++ lex.yy.o y.tab.c symbolTable.o
+g++ lex.yy.o y.tab.c symbolTable.o 

@@ -24,6 +24,7 @@
 #define SHOULD_NOT_BE_FLOAT 122
 #define VOID_ERROR 123
 #define UNSUPPORTED_FUNCTIONALITY 125
+#define NOT_A_CHAR 126
 
 #define TYPE_CHAR 1
 #define TYPE_SHORT 2
@@ -176,9 +177,9 @@ typedef struct node
 
 void insert_into_sets();
 
-int addIVal(node* temp, string s);
+void addIVal(node* temp, string s);
 
-int addFVal(node* temp, string s);
+void addFVal(node* temp, string s);
 
 struct symbolTableNode* lookUp(symbolTable* st, string name);
 
@@ -210,10 +211,8 @@ void printStructTable(map<string, struct structTableNode*> &structMap, int scope
 
 structTableNode* structLookUp(symbolTable* st, string name);
 
-structParam* structureParamLookup(structTableNode* node, string paramName, int& err);
+structParam* structureParamLookup(structTableNode* node, string paramName, int& err, string& errStr);
 
-
-// type checking
 int checkValidType(declSpec* declSp);
 
 int check_type_array(vector<int> &v);
@@ -241,3 +240,19 @@ int checkFloat(node* root);
 void printSymbolTableJSON(symbolTable *st, int numTab);
 
 int getTypeSize(vector<int> &type);
+
+void setErrorParams(int &errCode, int code, string &errString, string str);
+
+void checkFuncArgValidity(node* postfix_expression, node* argument_expression_list, int &errCode, string &errString);
+
+structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expression, bool isPtrOp, int &errCode, string &errString);
+
+symbolTableNode* primary_expression_identifier(char* lexeme, int &errCode, string& errStr);
+
+node* struct_declaration(node* specifier_qualifier_list, node* struct_declarator_list);
+
+node* declaration_list(node* declaration_list, node* declaration);
+
+node* parameter_declaration(node* declaration_specifiers, node* declarator);
+
+node* struct_or_union_specifier(node* struct_or_union);

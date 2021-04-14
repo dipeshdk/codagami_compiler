@@ -69,6 +69,7 @@ L?'(\\.|[^\\'])+'	{ count();yylval.id = strdup(yytext); return(I_CONSTANT); }
 {D}+"."{D}*({E})?{LS}?	{ count();yylval.id = strdup(yytext); return(I_CONSTANT); }
 
 L?\"(\\.|[^\\"])*\"	{ count(); yylval.id = strdup(yytext); return(STRING_LITERAL); }
+L?\'(\\.|[^\\"])*\'	{ count(); yylval.id = strdup(yytext); return(CHAR_LITERAL); }
 
 "..."			{ count();  return(ELLIPSIS); }
 ">>="			{ count();  return(RIGHT_ASSIGN); }

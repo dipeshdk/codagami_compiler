@@ -1,4 +1,4 @@
-%token IDENTIFIER I_CONSTANT F_CONSTANT STRING_LITERAL SIZEOF
+%token IDENTIFIER I_CONSTANT F_CONSTANT STRING_LITERAL CHAR_LITERAL SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
@@ -36,7 +36,8 @@
 	struct node* currDecl;
 	struct node* currDeclSpec;
 	int funcDecl = 0;
-
+	int errCode=0;
+	string errStr;
 
 extern "C"
 {
@@ -128,9 +129,13 @@ void error(string var, int error_code) {
 		case UNSUPPORTED_FUNCTIONALITY:
 			str = "functionality is not supported by this compiler.";
 			break;
+		case NOT_A_CHAR:
+			str = "should be a char";
+			break;
 		default:
 			break;
 	}
+	str += " ";
 	str+=var;
 	cout << "\nERROR: " << str << " on line number: " << line+1 << endl;
 	exit(error_code);
@@ -217,30 +222,24 @@ primary_expression
 	// assuming identifier is not included in declaration. It must be declared before
 	: IDENTIFIER { 
 		symbolTableNode* stNode = lookUp(gSymTable, yylval.id);
-		if(!stNode) { 
-			error(yylval.id, UNDECLARED_SYMBOL);
-		}
+		if(!stNode) error(yylval.id, UNDECLARED_SYMBOL);
 		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
-		temp->declSp = new declSpec();
-		for(auto i : stNode->declSp->type){
-			temp->declSp->type.push_back(i);
-		}
-		for(auto i : stNode->declSp->storageClassSpecifier)
-			temp->declSp->storageClassSpecifier.push_back(i);
-        
-		temp->declSp->ptrLevel = stNode->declSp->ptrLevel;
-		temp->declSp->lexeme = stNode->declSp->lexeme;
-		temp->declSp->isConst = stNode->declSp->isConst;
-		temp->declSp->isVolatile = stNode->declSp->isVolatile;
+		temp->declSp = declSpCopy(stNode->declSp);
 		$$=temp;
 	}
 	| constant	{$$ = $1;}
 	| STRING_LITERAL {
 		node* temp = makeNode(strdup("STRING_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		if(!temp->declSp){
-			temp->declSp = new declSpec();
-		}
+		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_STRING_LITERAL);
+		$$ = temp;
+	}
+	| CHAR_LITERAL {
+		string name = yylval.id;
+		if(name.size() != 3) error( yylval.id, NOT_A_CHAR);
+		node* temp = makeNode(strdup("CHAR_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		if(!temp->declSp) temp->declSp = new declSpec();
+		temp->declSp->type.push_back(TYPE_CHAR);
 		$$ = temp;
 	}
 	| '(' expression ')' { $$ = $2; }
@@ -250,9 +249,7 @@ constant
 	: I_CONSTANT {
 		string s = yylval.id;
 		node* temp = makeNode(strdup("CONSTANT"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
-		if(!temp->declSp){
-			temp->declSp = new declSpec();
-		}
+		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_INT);
 		addIVal(temp, yylval.id);
 		$$ = temp;
@@ -260,9 +257,7 @@ constant
 	| F_CONSTANT {
 		string s = yylval.id;
 		node* temp = makeNode(strdup("CONSTANT"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
-		if(!temp->declSp){
-			temp->declSp = new declSpec();
-		}
+		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_FLOAT);
 		addFVal(temp, yylval.id);
 		$$ = temp;}
@@ -275,199 +270,45 @@ postfix_expression
 			int err = check_type_array($3->declSp->type);
 			error($3->lexeme, err);
 		}
-		else {
-			error($3->lexeme, ARRAY_INDEX_SHOULD_BE_INT);
-		}
+		else error($3->lexeme, ARRAY_INDEX_SHOULD_BE_INT);
 		addChild($1,$3);
 		$1->infoType = INFO_TYPE_ARRAY;
 		$$ = $1;
-		}
+	}
 	| postfix_expression '(' ')' { // Check with function paramlist111NoParamName111
-		node* postfix_expression  = $1;
-		string func_name(postfix_expression->lexeme);
-		if(postfix_expression -> paramList.size() > 0){
-			error(func_name, INVALID_ARGS_IN_FUNC_CALL);
-		}
-		postfix_expression->infoType = INFO_TYPE_FUNC;
-		$$ = postfix_expression;	
+		string func_name($1->lexeme);
+		if($1->paramList.size() > 0) error(func_name, INVALID_ARGS_IN_FUNC_CALL);
+		$1->infoType = INFO_TYPE_FUNC;
+		$$ = $1;	
 	}
 	| postfix_expression '(' argument_expression_list ')' {
-		// TODO: Error check for argument validity and function name
-		node* postfix_expression  = $1;
-		string func_name(postfix_expression->lexeme);
-		string name = postfix_expression->lexeme;
-		symbolTableNode* stNode = lookUp(gSymTable, name);
-		if(!stNode || stNode->infoType != INFO_TYPE_FUNC || !stNode->declSp) {
-			error(name, SYMBOL_NOT_FOUND);
-		}
-
-		// vector<struct param*> paramList = postfix_expression->paramList; 
-		vector<struct param*> paramList = stNode->paramList; 
-		int maxSize = paramList.size();
-		int idx = 0;
-		// printf("Here 1\n");
-		node* curr = $3;
-		while(curr){
-			node* temp = curr;
-			string s(curr->name);
-			if(s == "="){
-				temp = curr->childList;
-			}
-			// printf("Here 2\n");
-			if(!temp) continue;
-			if(idx >= maxSize)
-				error(temp->lexeme, INVALID_ARGS_IN_FUNC_CALL);
-			if(!temp->declSp || !paramList[idx]->declSp){
-				error(temp->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
-				break;
-			}
-			int retval = compareTypes(temp->declSp, paramList[idx]->declSp);
-			if(retval){
-				error(temp->lexeme, INVALID_ARGS_IN_FUNC_CALL);
-			}
-			idx++;
-			// printf("Here 3\n");
-			curr = curr -> next;
-		}
-		postfix_expression->infoType = INFO_TYPE_FUNC;
-		addChild(postfix_expression,$3);
-		// printf("Here 4\n");
-		$$ = postfix_expression;
+		checkFuncArgValidity($1, $3, errCode, errStr);
+		if(errCode) error(errStr, errCode);
+		$1->infoType = INFO_TYPE_FUNC;
+		addChild($1,$3);
+		$$ = $1;
 	}
 	| postfix_expression '.' IDENTIFIER { 
-		// TODO: Check if IDENTIFIER is valid field in struct
-		// x.y.z
-		node* curr = $1;
-		while(curr != NULL){
-			string s(curr->name);
-			if(s == "IDENTIFIER"){
-				break;
-			}
-			else{
-				curr = curr->childList;
-				if(curr){
- 					curr = curr->next;
-				}
-			}
-		}
-
-		if(curr == NULL){
-			// Error
-			error("",VARIABLE_NOT_A_STRUCT);
-		}
+		structTableNode* structure = getRightMostStructFromPostfixExpression($1, false, errCode, errStr);
+		if(errCode) error(errStr, errCode);
 		
-		string rightMostStructName;	
-		structTableNode* structure = nullptr;
-		if(curr->infoType == INFO_NESTED_STRUCT){
-			// declSp allocated so look in structure table
-			if(curr->declSp) {
-				rightMostStructName = curr->declSp->lexeme;
-				structure = structLookUp(gSymTable, rightMostStructName);
-			}
-		}
-		else{
-			// look in symbol table
-			symbolTableNode* n = lookUp(gSymTable, curr->lexeme);
-			int isStruct = 0;
-			if(n->declSp) {
-				for(int t : n->declSp->type) {
-					if(t == TYPE_STRUCT) {
-						isStruct=1;
-						break;
-					}
-				}
-				if(isStruct) {
-					rightMostStructName = n->declSp->lexeme;
-					structure = structLookUp(gSymTable, rightMostStructName);
-				}
-			}
-			
-		}
-		if(structure == nullptr) {
-			//error
-			error("",VARIABLE_NOT_A_STRUCT);
-		}
-		// rightMostStructName = curr->lexeme;
-		string identifierName(yylval.id);
-		// structure = structLookUp(gSymTable, rightMostStructName);
-		int err = 0;
-		structParam* param = structureParamLookup(structure, identifierName, err);
-		if(err) error("structHasParam", err);
-		if(!param) error(identifierName, INVALID_STRUCT_PARAM);
+		string identifierName = yylval.id;
+		structParam* param = structureParamLookup(structure, identifierName, errCode, errStr);
+		if(errCode) error(errStr, errCode);
 		
 		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, NULL, NULL, NULL, NULL);
 		temp->declSp = param->declSp;
 		temp->infoType = INFO_NESTED_STRUCT;
 		
 		$$ = makeNode(strdup("."), strdup("."), 0, $1, temp , NULL, NULL);
-		}
+	}
 	| postfix_expression PTR_OP IDENTIFIER {
-		// TODO: Struct field check
-		node* curr = $1;
-		while(curr != NULL){
-			string s(curr->name);
-			if(s == "IDENTIFIER"){
-				break;
-			}
-			else{
-				curr = curr->childList;
-				if(curr){
- 					curr = curr->next;
-				}
-			}
-		}
-
-		if(curr == NULL){
-			// Error
-			error("",VARIABLE_NOT_A_STRUCT);
-		}
+		structTableNode* structure = getRightMostStructFromPostfixExpression($1, true, errCode, errStr);
+		if(errCode) error(errStr, errCode);
 		
-		string rightMostStructName;	
-		structTableNode* structure = nullptr;
-		if(curr->infoType == INFO_NESTED_STRUCT){
-			// declSp allocated so look in structure table
-			if(curr->declSp)
-				if(curr->declSp->ptrLevel != 1){
-					// Error
-					printf("ptrlev 1= %d\n", curr->declSp->ptrLevel);
-					error(curr->lexeme, INVALID_REFERENCE);
-				}
-				rightMostStructName = curr->declSp->lexeme;
-				structure = structLookUp(gSymTable, rightMostStructName);
-			
-		}
-		else{
-			// look in symbol table
-			symbolTableNode* n = lookUp(gSymTable, curr->lexeme);
-			int isStruct = 0;
-			if(n->declSp) {
-				for(int t : n->declSp->type) {
-					if(t == TYPE_STRUCT) {
-						isStruct=1;
-						break;
-					}
-				}
-				if(isStruct) {
-					if(n->declSp->ptrLevel != 1){
-						// Error
-						printf("ptrlev 2= %d\n", curr->declSp->ptrLevel);
-						error(n->name, INVALID_REFERENCE);
-					}
-					rightMostStructName = n->declSp->lexeme;
-					structure = structLookUp(gSymTable, rightMostStructName);
-				}
-			}
-			
-		}
-		if(structure == nullptr) {
-			//error
-			error("",VARIABLE_NOT_A_STRUCT);
-		}
-		string identifierName(yylval.id);
-		int err = 0;
-		structParam* param = structureParamLookup(structure, identifierName, err);
-		if(err) error("structHasParam", err);
-		if(!param) error(identifierName, INVALID_STRUCT_PARAM);
+		string identifierName = yylval.id;
+		structParam* param = structureParamLookup(structure, identifierName, errCode, errStr);
+		if(errCode) error(errStr, errCode);
 		
 		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, NULL, NULL, NULL, NULL);
 		temp->declSp = param->declSp;
@@ -476,20 +317,14 @@ postfix_expression
 		$$ = makeNode(strdup("PTR_OP"), strdup("->"), 0, $1, temp , NULL, NULL);
 	}
 	| postfix_expression INC_OP {
-		// TODO: Should be integer
 		int retval  = checkIntLongShort($1);
-		if(retval){
-			error($1->lexeme, retval);
-		}
+		if(retval) error($1->lexeme, retval);
 		addChild($1, makeNode(strdup("INC_OP"), strdup("++"), 1, NULL, NULL, NULL, NULL));
 		$$ = $1;
-		}
+	}
 	| postfix_expression DEC_OP {
-		// TODO: postfix_expression should be integer
 		int retval  = checkIntLongShort($1);
-		if(retval){
-			error($1->lexeme, retval);
-		}
+		if(retval) error($1->lexeme, retval);
 		addChild($1, makeNode(strdup("DEC_OP"), strdup("--"), 1, NULL, NULL, NULL, NULL));
 		$$ = $1;
 		}
@@ -503,35 +338,25 @@ argument_expression_list
 unary_expression
 	: postfix_expression {$$ = $1;}
 	| INC_OP unary_expression {
-		// TODO: Integer check
 		int retval  = checkIntLongShort($2);
-		if(retval){
-			error($2->lexeme, retval);
-		}
+		if(retval) error($2->lexeme, retval);
 		$$ = makeNode(strdup("INC_OP"), strdup("++"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| DEC_OP unary_expression {
-		// TODO: Integer check
 		int retval  = checkIntLongShort($2);
-		if(retval){
-			error($2->lexeme, retval);
-		}
+		if(retval) error($2->lexeme, retval);
 		$$ = makeNode(strdup("DEC_OP"), strdup("--"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| unary_operator cast_expression { 
-		// TODO: Type checking and typecasting based on the unary_operatory
+	| unary_operator cast_expression {
 		node* unary_operator = $1;
 		node* cast_expression = $2;
 		string name(unary_operator->name);
 		
 		int retval = checkStringLiteral(cast_expression);
-		if(!retval){
-			error(cast_expression->name, TYPE_ERROR);
-		}
+		if(!retval)	error(cast_expression->name, TYPE_ERROR);
 
-		if(name == "*"){
-			if(!(cast_expression -> infoType == INFO_TYPE_ARRAY ||(cast_expression -> declSp && cast_expression -> declSp->ptrLevel > 0)) ){
-				return TYPE_ERROR;	
-			}
-		}
+		if(name == "*" && 
+			(!(cast_expression->infoType == INFO_TYPE_ARRAY || (cast_expression->declSp && cast_expression->declSp->ptrLevel > 0))))
+				error(cast_expression->name, TYPE_ERROR);
+	
 		unary_operator->declSp = cast_expression->declSp;
 		addChild(unary_operator, cast_expression);
 		$$ = unary_operator;
@@ -545,7 +370,6 @@ unary_expression
 unary_operator
 	: '&' {$$ = makeNode(strdup("&"), strdup("&"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '*' {
-		// TODO: Check ptrLevel>0 or array..
 		$$ = makeNode(strdup("*"), strdup("*"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '+' {
 		// TODO: String Literal check
@@ -980,9 +804,6 @@ declaration_specifiers
 	| type_qualifier declaration_specifiers {
 		node *temp = $2;
 		//TODO: Verify correctness, code to merge types commented out
-		// vector<int> v = $1->declSp->type;
-		// int err = addTypeToDeclSpec(temp, v);
-		// if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
 		mergeConstVolatile(temp, $1);
 		$$ = temp;
 		currDeclSpec = $$;
@@ -1054,17 +875,8 @@ struct_or_union_specifier
 		for(auto &u : $5->structParamList){
 			structNode->paramList.push_back(u);
 		} 
-		
-		int type = ($1->infoType == INFO_TYPE_STRUCT) ? TYPE_STRUCT : TYPE_UNION;
-		node * temp = makeTypeNode(type);
-		if(!temp->declSp)
-			temp->declSp = new declSpec();
-		temp->declSp->lexeme = name;
-		temp->infoType = $1->infoType;
-		temp->lineNo = line +1;
-
 		gSymTable->structMap[$3->lexeme] = structNode;
-		$$ = temp;
+		$$ = struct_or_union_specifier($1);	
 	} 
 	| struct_or_union '{' struct_declaration_list '}' {cout << "488 feature not included"<< endl; $$ = NULL;} // segfault will come whenever this will be running
 	| struct_or_union  IDENTIFIER {
@@ -1078,14 +890,7 @@ struct_or_union_specifier
 				name = yylval.id;
 			}
 		}
-		int type = ($1->infoType == INFO_TYPE_STRUCT) ? TYPE_STRUCT : TYPE_UNION;
-		node * temp = makeTypeNode(type);
-		if(!temp->declSp)
-			temp->declSp = new declSpec();
-		temp->declSp->lexeme = name;
-		temp->infoType = $1->infoType;
-		temp->lineNo = line +1;
-		$$ = temp;
+		$$ = struct_or_union_specifier($1);
 	}
 	;
 
@@ -1112,27 +917,10 @@ struct_declaration_list
 
 struct_declaration
 	: specifier_qualifier_list struct_declarator_list ';' {
-		node* specifier_qualifier_list = $1;
-		node* struct_declarator_list = $2;
-		node* curr = struct_declarator_list;
-		while(curr) {
-			node* temp = curr;
-			string s(curr->name);
-			if(s == "="){
-				temp = curr->childList;
-			}	
-			if(!temp) continue;
-			for(auto &u : temp->structParamList) {
-				int ptrLevel = 0;
-				if(u->declSp)
-					ptrLevel = u->declSp->ptrLevel;
-				u->declSp = specifier_qualifier_list->declSp;
-				u->declSp->ptrLevel = ptrLevel;				
-				specifier_qualifier_list->structParamList.push_back(u);
-			}
-			curr = curr -> next;
-		}
-		$$ = specifier_qualifier_list;
+		// node* specifier_qualifier_list = $1;
+		// node* struct_declarator_list = $2;
+		// $$ = specifier_qualifier_list;
+		$$ = struct_declaration($1, $2);
 	}
 	;
 
@@ -1337,44 +1125,11 @@ parameter_list
 
 parameter_declaration
 	: declaration_specifiers declarator { 
-		node* declaration_specifiers = $1;
-		node* declarator = $2;
-
-		param *parameter = new param();
-		if(!parameter->declSp) {
-			parameter->declSp = new declSpec();
-		}
-		if(declaration_specifiers->declSp) {
-			parameter->declSp = declSpCopy(declaration_specifiers->declSp);
-		}
-		if(declarator->declSp) {
-			parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
-		}
-		parameter->paramName = declarator->lexeme;
-		declarator->paramList.push_back(parameter);
-
-		$$ = declarator; 
+		$$ = parameter_declaration($1, $2);
 	}
 	| declaration_specifiers abstract_declarator { 
 		//TODO: difference in abstract_declarator and declarator
-		node* declaration_specifiers = $1;
-		node* declarator = $2;
-
-		param *parameter = new param();
-		if(!parameter->declSp) {
-			parameter->declSp = new declSpec();
-		}
-		if(declaration_specifiers->declSp) {
-			parameter->declSp = declSpCopy(declaration_specifiers->declSp);
-		}
-		if(declarator->declSp) {
-			parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
-		}
-		parameter->paramName = declarator->lexeme;
-
-		declarator->paramList.push_back(parameter);
-
-		$$ = declarator; 
+		$$ = parameter_declaration($1, $2);
 	 }
 	| declaration_specifiers { 
 		node* declaration_specifiers = $1;
@@ -1484,27 +1239,34 @@ scope_marker
 declaration_list
 	: declaration { $$ = $1;}
 	| declaration_list declaration {
-		node* temp = NULL;
-		string s($1->name);
-		bool c1  = (s == "DECL_LIST");
-		if( c1 ){ 
-			temp = makeNode(strdup("DECL_LIST"), strdup("declaration list"), 0, $1->childList, $2, (node*)NULL, (node*)NULL);
-		} else {
-			temp = makeNode(strdup("DECL_LIST"), strdup("declaration list"), 0, $1, $2, (node*)NULL, (node*)NULL);
-		}
-		for(auto &u : $2->paramList){
-			temp->paramList.push_back(u);
-		}
-		for(auto &u : $1->paramList){
-			temp->paramList.push_back(u);
-		}
-		$$ = temp;
+		// node* temp = NULL;
+		// string s($1->name);
+		// bool c1  = (s == "DECL_LIST");
+		// if( c1 ){ 
+		// 	temp = makeNode(strdup("DECL_LIST"), strdup("declaration list"), 0, $1->childList, $2, (node*)NULL, (node*)NULL);
+		// } else {
+		// 	temp = makeNode(strdup("DECL_LIST"), strdup("declaration list"), 0, $1, $2, (node*)NULL, (node*)NULL);
+		// }
+		// for(auto &u : $2->paramList){
+		// 	temp->paramList.push_back(u);
+		// }
+		// for(auto &u : $1->paramList){
+		// 	temp->paramList.push_back(u);
+		// }
+		// $$ = temp;
+		$$ = declaration_list($1, $2);
 	}
 	;
 
 statement_list
 	: statement { $$ = $1; }
-	| statement_list statement { if(!strcmp(($1 -> name), "STMT_LIST")){$$ = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);} else $$ = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1, $2, (node*)NULL, (node*)NULL);}
+	| statement_list statement { 
+		if(!strcmp(($1 -> name), "STMT_LIST")){
+			$$ = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);
+		} else{ 
+			$$ = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1, $2, (node*)NULL, (node*)NULL);
+		}
+	}
 	;
 
 expression_statement
@@ -1551,50 +1313,13 @@ function_definition
 		node* declaration_specifiers = $1; // type
 		node* declarator = $2; // func , param list
 		
-		
 		for(auto &u: $4->paramList){
 			$2->paramList.push_back(u);
 		}
-		// addFunctionSymbol( declaration_specifiers, declarator);
 		$$ = $2;
 	}
 	| declaration_specifiers declarator func_marker_2 compound_statement { 
 		addChild($2, $4);
-		node* declaration_specifiers = $1; // type
-		node* declarator = $2; // func , param list
-		// addFunctionSymbol(declaration_specifiers, declarator); 
-		// // Adding params to symtab
-		// symbolTable* curr;
-		// for(auto s: gSymTable->childList){
-		// 	curr = s;
-		// }
-
-		// for(auto &p: declarator->paramList){
-		// 	int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
-		// 	if(retVal) {
-		// 		error(p->paramName, retVal);
-		// 	}
-		// 	string lex = p->paramName;
-			
-		// 	struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-		// 	if(!sym_node){
-		// 		error(lex, ALLOCATION_ERROR);
-		// 	}
-			
-		// 	// if(temp->infoType == INFO_TYPE_ARRAY){
-		// 	// 	sym_node->infoType = INFO_TYPE_ARRAY;
-				
-		// 	// 	sym_node->declSp = declSpCopy(p->declSp);
-		// 	// 	if(p->declSp)
-		// 	// 		sym_node->declSp->ptrLevel = p->declSp->ptrLevel;
-		// 	// }
-		// 	// else {
-		// 	sym_node->declSp = declSpCopy(p->declSp);
-		// 	// if(temp->declSp)
-		// 	// 		sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
-		// 	// } 
-		// }
-
 		$$ = $2;
 	}
 	| declarator func_marker_1 declaration_list compound_statement { 
@@ -1605,53 +1330,17 @@ function_definition
 		for(auto &u: $3->paramList){
 			$1->paramList.push_back(u);
 		}
-		// addFunctionSymbol(NULL, declarator);
 		$$ = $1;
 	}
 	| declarator func_marker_1 compound_statement { 
 		addChild($1, $3);
-		node* declarator = $1; // func , param list
-		// addFunctionSymbol(NULL, declarator);
-
-		// // Adding params to symtab
-		// symbolTable* curr;
-		// for(auto s: gSymTable->childList){
-		// 	curr = s;
-		// }
-
-		// for(auto &p: declarator->paramList){
-		// 	int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
-		// 	if(retVal) {
-		// 		error(p->paramName, retVal);
-		// 	}
-		// 	string lex = p->paramName;
-			
-		// 	struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-		// 	if(!sym_node){
-		// 		error(lex, ALLOCATION_ERROR);
-		// 	}
-			
-		// 	// if(temp->infoType == INFO_TYPE_ARRAY){
-		// 	// 	sym_node->infoType = INFO_TYPE_ARRAY;
-				
-		// 	// 	sym_node->declSp = declSpCopy(p->declSp);
-		// 	// 	if(p->declSp)
-		// 	// 		sym_node->declSp->ptrLevel = p->declSp->ptrLevel;
-		// 	// }
-		// 	// else {
-		// 	sym_node->declSp = declSpCopy(p->declSp);
-		// 	// if(temp->declSp)
-		// 	// 		sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
-		// 	// } 
-		// }
-		
 		$$ = $1;
 	}
 	;
 
 func_marker_1
 	: {
-		// TODO: Send type from declaration specifier to function name
+		// Send type from declaration specifier to function name
 		struct node* declarator = currDecl;
 		addFunctionSymbol(NULL, declarator);
 
@@ -1672,18 +1361,7 @@ func_marker_1
 				error(lex, ALLOCATION_ERROR);
 			}
 			
-			// if(temp->infoType == INFO_TYPE_ARRAY){
-			// 	sym_node->infoType = INFO_TYPE_ARRAY;
-				
-			// 	sym_node->declSp = declSpCopy(p->declSp);
-			// 	if(p->declSp)
-			// 		sym_node->declSp->ptrLevel = p->declSp->ptrLevel;
-			// }
-			// else {
 			sym_node->declSp = declSpCopy(p->declSp);
-			// if(temp->declSp)
-			// 		sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
-			// } 
 		}
 	}
 
@@ -1711,18 +1389,7 @@ func_marker_2
 				error(lex, ALLOCATION_ERROR);
 			}
 			
-			// if(temp->infoType == INFO_TYPE_ARRAY){
-			// 	sym_node->infoType = INFO_TYPE_ARRAY;
-				
-			// 	sym_node->declSp = declSpCopy(p->declSp);
-			// 	if(p->declSp)
-			// 		sym_node->declSp->ptrLevel = p->declSp->ptrLevel;
-			// }
-			// else {
 			sym_node->declSp = declSpCopy(p->declSp);
-			// if(temp->declSp)
-			// 		sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
-			// } 
 		}
 	}
 
