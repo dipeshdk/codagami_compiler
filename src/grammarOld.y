@@ -34,6 +34,7 @@
     extern int line;
 	extern char* previ;
 	struct node* currDecl;
+	struct node* currDeclSpec;
 	int funcDecl = 0;
 
 
@@ -123,6 +124,10 @@ void error(string var, int error_code) {
 			break;
 		case VOID_ERROR:
 			str = "void data type is not compatible";
+			break;
+		case UNSUPPORTED_FUNCTIONALITY:
+			str = "functionality is not supported by this compiler.";
+			break;
 		default:
 			break;
 	}
@@ -131,11 +136,83 @@ void error(string var, int error_code) {
 	exit(error_code);
 }
 
-
 %}
 
 %%
+/*
+	struct quadruple {
+		int operator, op1, op2, eq;
+	}
 
+	vector<quadruple> code;
+
+	a = b + c;
+	(+,b,c,a)
+	a = -b
+	(un- , b, NULL, a)
+
+	if a < b then S1 else S2
+
+	t = a < b
+
+	t = x relop y	
+	if x relop y then goto Z
+ 
+	(condJump, true, false, exp)
+	(condJump, s1, s2, t)  
+	
+	while M1 A do M2 B done
+
+	E.true =
+	E.truelist = [all statement numbers which goto ___]
+
+
+	//AST node additions: place, truelist, falselist, nextlist, begin, next, ?end?//(breaklist) left as of now//, quad, ??code??
+	// truelist, falselist: list stl datatype
+	// new functions:
+	• makelist(i): create a newlist containing only i, return a pointer to the list. 
+	• merge(p1, p2): merge lists pointed to by p1 and p2 and return a pointer to the concatenated list 
+	• backpatch(p, i):
+	. emit()
+	. string newTemp()
+	//findOperatorType(operator, op1, op2);
+
+	//#define all operators
+
+
+	gramar change
+	//normal statements (slide 43)
+	//flow control statements
+	//procedure calls :  activation record 
+	//boolean expressions, short circuiting
+
+
+	//global vars:
+	vector<quadruple> gCode, 
+	int nextStat; (gCode.size())
+	//store temp variables in a new symbol table
+	gNewTemp = 0;
+	//symbol table of temp variables
+
+
+	//string newTemp(){
+		return '@t'+gNewTemp++; //@ so that names do not conflict with program variable names
+	}
+
+
+	a = b * c + d;
+	t1 = b * c;
+	a = t1 + d;
+
+
+	id=>
+	E -> id
+	E.place = lexeme;
+	E -> A + B
+	E.place = newtmp();
+	emit(E.place = A.place type_+ B.place);
+*/
+// [,,,]
 primary_expression
 	// assuming identifier is not included in declaration. It must be declared before
 	: IDENTIFIER { 
@@ -147,17 +224,15 @@ primary_expression
 		temp->declSp = new declSpec();
 		for(auto i : stNode->declSp->type){
 			temp->declSp->type.push_back(i);
-			// printf("Here\n");
 		}
 		for(auto i : stNode->declSp->storageClassSpecifier)
 			temp->declSp->storageClassSpecifier.push_back(i);
-
+        
 		temp->declSp->ptrLevel = stNode->declSp->ptrLevel;
 		temp->declSp->lexeme = stNode->declSp->lexeme;
 		temp->declSp->isConst = stNode->declSp->isConst;
 		temp->declSp->isVolatile = stNode->declSp->isVolatile;
 		$$=temp;
-
 	}
 	| constant	{$$ = $1;}
 	| STRING_LITERAL {
@@ -881,7 +956,7 @@ declaration
 	;
 
 declaration_specifiers
-	: storage_class_specifier {$$ = $1;}
+	: storage_class_specifier {$$ = $1; currDeclSpec = $$;}
 	| storage_class_specifier declaration_specifiers {
 		if($1){makeSibling($2,$1);} 
 		node *temp = $2;
@@ -889,8 +964,9 @@ declaration_specifiers
 		int err = addStorageClassToDeclSpec(temp, v);
 		if(err) error("addStorageClassToDeclSpec", err); //Error handling according to error code passed
 		$$ = temp;
+		currDeclSpec = $$;
 	}
-	| type_specifier {$$ = $1;} 
+	| type_specifier {$$ = $1; currDeclSpec = $$;} 
 	| type_specifier declaration_specifiers {
 		if($1){makeSibling($2,$1);} 
 		node *temp = $2;
@@ -898,8 +974,9 @@ declaration_specifiers
 		int err = addTypeToDeclSpec(temp, v);
 		if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
 		$$ = temp;
+		currDeclSpec = $$;
 	}
-	| type_qualifier {$$ = $1;}
+	| type_qualifier {$$ = $1; currDeclSpec = $$;}
 	| type_qualifier declaration_specifiers {
 		node *temp = $2;
 		//TODO: Verify correctness, code to merge types commented out
@@ -908,6 +985,7 @@ declaration_specifiers
 		// if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
 		mergeConstVolatile(temp, $1);
 		$$ = temp;
+		currDeclSpec = $$;
 	}
 	;
 
@@ -1466,7 +1544,7 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator func_marker declaration_list compound_statement { 
+	: declaration_specifiers declarator func_marker_2 declaration_list compound_statement { 
 		addChild($2, $4); 
 		addChild($2, $5); 
 	 	
@@ -1477,14 +1555,14 @@ function_definition
 		for(auto &u: $4->paramList){
 			$2->paramList.push_back(u);
 		}
-		addFunctionSymbol( declaration_specifiers, declarator);
+		// addFunctionSymbol( declaration_specifiers, declarator);
 		$$ = $2;
 	}
-	| declaration_specifiers declarator func_marker compound_statement { 
+	| declaration_specifiers declarator func_marker_2 compound_statement { 
 		addChild($2, $4);
 		node* declaration_specifiers = $1; // type
 		node* declarator = $2; // func , param list
-		addFunctionSymbol(declaration_specifiers, declarator); 
+		// addFunctionSymbol(declaration_specifiers, declarator); 
 		// // Adding params to symtab
 		// symbolTable* curr;
 		// for(auto s: gSymTable->childList){
@@ -1519,7 +1597,7 @@ function_definition
 
 		$$ = $2;
 	}
-	| declarator func_marker declaration_list compound_statement { 
+	| declarator func_marker_1 declaration_list compound_statement { 
 		addChild($1, $3); 
 		addChild($1, $4);
 		node* declarator = $1; // func , param list
@@ -1527,13 +1605,13 @@ function_definition
 		for(auto &u: $3->paramList){
 			$1->paramList.push_back(u);
 		}
-		addFunctionSymbol(NULL, declarator);
+		// addFunctionSymbol(NULL, declarator);
 		$$ = $1;
 	}
-	| declarator func_marker compound_statement { 
+	| declarator func_marker_1 compound_statement { 
 		addChild($1, $3);
 		node* declarator = $1; // func , param list
-		addFunctionSymbol(NULL, declarator);
+		// addFunctionSymbol(NULL, declarator);
 
 		// // Adding params to symtab
 		// symbolTable* curr;
@@ -1571,13 +1649,15 @@ function_definition
 	}
 	;
 
-func_marker
+func_marker_1
 	: {
 		// TODO: Send type from declaration specifier to function name
+		struct node* declarator = currDecl;
+		addFunctionSymbol(NULL, declarator);
+
 		funcDecl = 1;
 		gSymTable = addChildSymbolTable(gSymTable);
 		// Adding params to symtab
-		struct node* declarator = currDecl;
 		symbolTable* curr = gSymTable;
 
 		for(auto &p: declarator->paramList){
@@ -1606,6 +1686,46 @@ func_marker
 			// } 
 		}
 	}
+
+func_marker_2
+	: {
+		// TODO: Send type from declaration specifier to function name
+		struct node* declarator = currDecl;
+		struct node* declaration_specifiers = currDeclSpec;
+		addFunctionSymbol(declaration_specifiers, declarator);
+
+		funcDecl = 1;
+		gSymTable = addChildSymbolTable(gSymTable);
+		// Adding params to symtab
+		symbolTable* curr = gSymTable;
+
+		for(auto &p: declarator->paramList){
+			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
+			if(retVal) {
+				error(p->paramName, retVal);
+			}
+			string lex = p->paramName;
+			
+			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+			if(!sym_node){
+				error(lex, ALLOCATION_ERROR);
+			}
+			
+			// if(temp->infoType == INFO_TYPE_ARRAY){
+			// 	sym_node->infoType = INFO_TYPE_ARRAY;
+				
+			// 	sym_node->declSp = declSpCopy(p->declSp);
+			// 	if(p->declSp)
+			// 		sym_node->declSp->ptrLevel = p->declSp->ptrLevel;
+			// }
+			// else {
+			sym_node->declSp = declSpCopy(p->declSp);
+			// if(temp->declSp)
+			// 		sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
+			// } 
+		}
+	}
+
 %%
 #include <stdio.h>
 int id = 0;

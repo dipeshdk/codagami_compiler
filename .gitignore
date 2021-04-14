@@ -46,3 +46,4 @@
 /src/y.tab.h
 /src/lex.yy.c
 /src/*.output
+/src/*.json
