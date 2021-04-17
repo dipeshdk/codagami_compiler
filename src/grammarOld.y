@@ -876,7 +876,7 @@ struct_or_union_specifier
 			structNode->paramList.push_back(u);
 		} 
 		gSymTable->structMap[$3->lexeme] = structNode;
-		$$ = struct_or_union_specifier($1);	
+		$$ = struct_or_union_specifier($1, name);	
 	} 
 	| struct_or_union '{' struct_declaration_list '}' {cout << "488 feature not included"<< endl; $$ = NULL;} // segfault will come whenever this will be running
 	| struct_or_union  IDENTIFIER {
@@ -890,7 +890,7 @@ struct_or_union_specifier
 				name = yylval.id;
 			}
 		}
-		$$ = struct_or_union_specifier($1);
+		$$ = struct_or_union_specifier($1, name);
 	}
 	;
 
@@ -1395,50 +1395,6 @@ func_marker_2
 
 %%
 #include <stdio.h>
-int id = 0;
-
-
-
-void printDeclarations(node* root, FILE *fp) {
-    if(!root || root->isLeaf == DEAD_NODE ) return;
-	string s1(root->name), s2(root->lexeme);
-	string s = "n: " + s1 + " , l: " + s2 + "\0";
-	if(root->isLeaf){
-		fprintf(fp, "%d [label=\"%s\"];\n", root->id, s.c_str());
-	} else {
-		fprintf(fp, "%d [label=\"%s\"];\n", root->id, s.c_str());
-	}
-    node* childList = root->childList;
-    while(childList) {
-        printDeclarations(childList, fp);
-        childList = childList->next;
-    }
-}        
-
-void printEdges(node* root, FILE *fp) {
-	if(root->isLeaf == DEAD_NODE) return;
-    node* child = root->childList;
-    while(child) {
-		if(child->isLeaf == DEAD_NODE) {
-			child = child->next;
-			continue;
-		}
-        fprintf(fp, "%d -> %d\n", root->id, child->id);
-        printEdges(child, fp);
-        child = child->next;
-    }
-}
-
-void generateDot(node* root, char* fileName) {
-    FILE *fp;
-    fp = fopen(fileName, "w");
-    fprintf(fp,"strict digraph AST {\n");
-    printDeclarations(root, fp);
-    printEdges(root, fp);
-    fprintf(fp,"}\n");
-    fclose(fp);
-}
-
 
 using namespace std;
 
@@ -1480,69 +1436,6 @@ int main(int ac, char **av) {
         printf("Usage: a.out input_filename [optional]ouput.dot \n");
 
 	return 0; 
-}
-
-node* makeNode(char* name, char* lexeme, int isLeaf, 
-			node*c1, node*c2, node*c3, node* c4){
-	node* newNode = new node();
-	newNode->id = id++;
-	newNode->name = (char*)malloc(sizeof(char)*(strlen(name)+1));
-	newNode->lexeme = (char*)malloc(sizeof(char)*(strlen(lexeme)+1));
-	strcpy(newNode->name, name);
-	strcpy(newNode->lexeme, lexeme);
-	newNode->isLeaf = isLeaf;
-	newNode->childList = c1;
-	makeSibling(c2,newNode->childList);
-	makeSibling(c3,newNode->childList);
-	makeSibling(c4,newNode->childList);
-	return newNode;
-}
-
-node* makeDeadNode(){
-	node* newNode = new node();
-	newNode->isLeaf=DEAD_NODE;
-	newNode->declSp = new declSpec();
-    newNode->childList = NULL;
-    newNode->next = NULL;
-	newNode->name = strdup("Dead Node");
-	return newNode;
-}
-
-node* makeTypeNode(int tp){
-	node* newNode = makeDeadNode();
-	newNode->declSp->type.push_back(tp); //TODO: check validity of type
-	return newNode;
-}
-
-node* makeStorageClassNode(int storageClass, char* name, char* lexeme, int isLeaf, 
-			node*c1, node*c2, node*c3, node* c4){
-	node* newNode = makeNode(name, lexeme, isLeaf, 
-			c1,c2, c3, c4);
-	newNode->declSp = new declSpec();
-	newNode->declSp->storageClassSpecifier.push_back(storageClass); //TODO: check validity of storage class
-	newNode->name = strdup("Storage Node");
-	return newNode;
-}
-
-void makeSibling(node* root, node* childList){
-	if(!root) return;
-	if(!childList) return;
-	node* curr  = childList;
-	node* prev  = (node*)NULL;
-	while(curr){
-		prev = curr;
-		curr = curr->next;
-	}
-	prev->next = root;
-}
-
-void addChild(node* parent, node* child){
-	if(parent->childList == (node*)NULL){
-		parent->childList = child;
-	}
-	else{
-		makeSibling(child, parent->childList);
-	}
 }
 
 

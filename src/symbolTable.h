@@ -247,7 +247,7 @@ void checkFuncArgValidity(node* postfix_expression, node* argument_expression_li
 
 structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expression, bool isPtrOp, int &errCode, string &errString);
 
-symbolTableNode* primary_expression_identifier(char* lexeme, int &errCode, string& errStr);
+node* primary_expression_identifier(char* lexeme, int &errCode, string& errStr);
 
 node* struct_declaration(node* specifier_qualifier_list, node* struct_declarator_list);
 
@@ -255,4 +255,26 @@ node* declaration_list(node* declaration_list, node* declaration);
 
 node* parameter_declaration(node* declaration_specifiers, node* declarator);
 
-node* struct_or_union_specifier(node* struct_or_union);
+node* struct_or_union_specifier(node* struct_or_union, string name);
+
+node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
+
+void makeSibling(node* root, node* childList);
+
+void addChild(node* parent, node* child);
+
+node* makeTypeNode(int type);
+
+node* makeDeadNode();
+
+node* makeStorageClassNode(int storageClass, char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
+
+void printDeclarations(node* root, FILE *fp);
+
+void printEdges(node* root, FILE *fp);
+
+void generateDot(node* root, char* fileName);
+
+node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
+
+void addChild(node* parent, node* child);
