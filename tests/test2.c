@@ -7,5 +7,6 @@ int foo(int a, int b) {
 
 int main() {
     int c,d=5;
+    char xxx = 'p';
     foo(c,d);
 }
