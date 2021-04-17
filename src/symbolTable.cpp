@@ -5,7 +5,9 @@ using namespace std;
 int gScope=0;
 int id = 0;
 extern int line;
+extern string currFunc;
 struct symbolTable* gSymTable;
+extern void error(string var, int error_code);
 
 set< vector<int> > char_type_check;
 set< vector<int> > short_type_check;
@@ -705,14 +707,17 @@ int copyPtrLevel(node* temp, node* from) {
 
 int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
     string name = declarator->lexeme;
+    currFunc = name;
     // cout << "addFunctionSymbol: name: " << name << " scope " << gSymTable->scope << "\n";
     int retVal = insertSymbol(gSymTable, declarator->lineNo, name);
     if(retVal == SYMBOL_ALREADY_EXISTS) {
         //TODO: Later
+        error("Symbol "+name+"already exists", retVal);        
     }
     
     if(retVal) {
         //error checks
+        error("", retVal);
     }
 
     symbolTableNode* sym_node = gSymTable->symbolTableMap[name];
@@ -725,6 +730,7 @@ int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
     if(declaration_specifiers)
         sym_node->declSp = declaration_specifiers->declSp;
     else{
+        cout << "NO declspecs" <<endl;
         declSpec* ds = new declSpec();
         ds->type.push_back(TYPE_INT);
         sym_node->declSp = ds;
@@ -823,6 +829,21 @@ int checkVoid(node* root){
     return 0; 
 }
 
+int checkVoidSymbol(symbolTableNode* root){
+    if(!root -> declSp){
+        return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    }
+    vector<int>v = (root-> declSp->type);
+    bool v1 = void_type_check.find(v) != void_type_check.end(); 
+    for(auto a: v){
+        cout << "h--" <<a << endl;
+    }
+    if(!v1){
+        return TYPE_ERROR;
+    }
+    return 0; 
+}
+
 int checkIntLongShort(node* root){
     if(!root -> declSp){
         return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
@@ -864,6 +885,13 @@ int checkValidTypeCast(declSpec* from, declSpec* to){
     //return 0 if typecast is valid
     if(!to || !from) {
         return INVALID_ARGS;
+    }
+    vector<int>v1 = (from->type);
+    bool fromVoid = void_type_check.find(v1) != void_type_check.end(); 
+    vector<int>v2 = (to->type);
+    bool toVoid = void_type_check.find(v2) != void_type_check.end();
+    if(fromVoid || toVoid){
+      return TYPE_ERROR;
     }
     bool toIsFloat = false;
     bool toIsCharStar = false;

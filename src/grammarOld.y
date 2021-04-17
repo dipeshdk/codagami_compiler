@@ -38,6 +38,7 @@
 	int funcDecl = 0;
 	int errCode=0;
 	string errStr;
+	string currFunc = "#prog";
 
 extern "C"
 {
@@ -131,6 +132,9 @@ void error(string var, int error_code) {
 			break;
 		case NOT_A_CHAR:
 			str = "should be a char";
+			break;
+		case DEFAULT_ERROR:
+			str = "";
 			break;
 		default:
 			break;
@@ -844,7 +848,7 @@ storage_class_specifier
 	;
 
 type_specifier
-	: VOID { $$ = makeTypeNode(TYPE_VOID);	}
+	: VOID { cout << "Here" << endl; $$ = makeTypeNode(TYPE_VOID);	}
 	| CHAR {$$ = makeTypeNode(TYPE_CHAR);}
 	| SHORT {$$ = makeTypeNode(TYPE_SHORT);}
 	| INT {$$ = makeTypeNode(TYPE_INT);}
@@ -1292,8 +1296,35 @@ jump_statement
 	: GOTO IDENTIFIER ';' {$$ = makeNode(strdup("GOTO"), strdup("goto"), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
 	| CONTINUE ';'{ $$ = makeNode(strdup("CONTINUE"), strdup("continue"),1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| BREAK ';' { $$ = makeNode(strdup("BREAK"), strdup("break"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| RETURN ';' { $$ = makeNode(strdup("RETURN"), strdup("return"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| RETURN expression ';' { $$ = makeNode(strdup("RETURN"), strdup("return"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| RETURN ';' { 
+		symbolTableNode* funcNode = lookUp(gSymTable, currFunc);
+		if(funcNode == nullptr){ // Not in func
+			error("Return statement not in function", DEFAULT_ERROR);
+		}
+
+		int err = checkVoidSymbol(funcNode);
+		if(err){
+			error("Function type not void", err);
+		}
+		
+		$$ = makeNode(strdup("RETURN"), strdup("return"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+	}
+	| RETURN expression ';' { 
+		symbolTableNode* funcNode = lookUp(gSymTable, currFunc);
+		if(funcNode == nullptr){ // Not in func
+			error("Return statement not in function", DEFAULT_ERROR);
+		}
+		
+     	node* temp = makeNode(strdup("RETURN"), strdup("return"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
+		
+      	// symbolTableNode* n1 = funcNode;
+      	int err = checkValidTypeCast(funcNode->declSp, temp->declSp);;
+		    if(err) error("return type isn't valid", err);
+        node* n1 = new node();
+        n1->declSp = funcNode->declSp;
+      	err = giveTypeCastRankUnary(n1, temp);
+        if(err) error("error n typecasting", err);
+    }
 	;
 
 translation_unit
@@ -1317,11 +1348,14 @@ function_definition
 		for(auto &u: $4->paramList){
 			$2->paramList.push_back(u);
 		}
+
 		$$ = $2;
+		currFunc = "#prog"; // Back to main program
 	}
 	| declaration_specifiers declarator func_marker_2 compound_statement { 
 		addChild($2, $4);
 		$$ = $2;
+		currFunc = "#prog";
 	}
 	| declarator func_marker_1 declaration_list compound_statement { 
 		addChild($1, $3); 
@@ -1332,10 +1366,12 @@ function_definition
 			$1->paramList.push_back(u);
 		}
 		$$ = $1;
+		currFunc = "#prog";
 	}
 	| declarator func_marker_1 compound_statement { 
 		addChild($1, $3);
 		$$ = $1;
+		currFunc = "#prog";
 	}
 	;
 

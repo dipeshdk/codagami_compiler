@@ -26,6 +26,9 @@
 #define UNSUPPORTED_FUNCTIONALITY 125
 #define NOT_A_CHAR 126
 
+
+#define DEFAULT_ERROR 127
+
 #define TYPE_CHAR 1
 #define TYPE_SHORT 2
 #define TYPE_INT 3 
@@ -278,3 +281,5 @@ void generateDot(node* root, char* fileName);
 node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
 
 void addChild(node* parent, node* child);
+
+int checkVoidSymbol(symbolTableNode* root);
