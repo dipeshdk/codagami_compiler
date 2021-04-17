@@ -278,3 +278,7 @@ void generateDot(node* root, char* fileName);
 node* makeNode(char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
 
 void addChild(node* parent, node* child);
+
+void typeCastLexeme(node* temp, declSpec* dp);
+
+bool requiresTypeCasting(declSpec* n1, declSpec* n2);

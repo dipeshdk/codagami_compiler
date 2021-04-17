@@ -929,21 +929,28 @@ int giveTypeCastRank(node* n1, node* n2){
     int i2 = (checkIntLongShort(n2) == 0);
     int c2 = (char_type_check.find(v2) != char_type_check.end());
     int rank2 = ((f2|d2)<<2) + (i2<<1) + (c2);
-    string strType = "(TO_";
-    // printf("rank1 = %d, rank2 = %d\n", rank1, rank2);
     if(rank1 > rank2){
-        strType = strType + getTypeString(n1->declSp->type) + ")";
-        n2->declSp->type = n1->declSp->type;
-        string s = strType + string(n2->lexeme); 
-        strcpy(n2->lexeme, s.c_str());
+        typeCastLexeme(n2, n1->declSp);
     }else if(rank1 < rank2){
-        strType = strType + getTypeString(n2->declSp->type) + ")";
-        n1->declSp->type = n2->declSp->type;
-        string s = strType + string(n1->lexeme); 
-        strcpy(n1->lexeme, s.c_str());
+        typeCastLexeme(n1, n2->declSp);
     }
     return 0;
 }
+
+void typeCastLexeme(node* temp, declSpec* dp){
+    vector<int> newType = dp->type;
+    string strType = "(TO_";
+    strType = strType + getTypeString(newType);
+    strType.pop_back();
+    if(dp->ptrLevel){
+        strType += "*";
+    }
+    strType += ")";
+    temp->declSp->type = newType;
+    string s = strType + string(temp->lexeme); 
+    strcpy(temp->lexeme, s.c_str());
+}
+
 int giveTypeCastRankUnary(node* n1, node* n2){
     if(!n1) return INVALID_ARGS;
     if(!n1 -> declSp) return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
@@ -966,11 +973,7 @@ int giveTypeCastRankUnary(node* n1, node* n2){
     int c2 = (char_type_check.find(v2) != char_type_check.end());
     int rank2 = ((f2|d2)<<2) + (i2<<1) + (c2);
     if(rank1 != rank2){
-        string strType = "(TO_";
-        strType = strType + getTypeString(n1->declSp->type) + ")";
-        // n2->declSp->type = n1->declSp->type;
-        string s = strType + string(n2->lexeme); 
-        strcpy(n2->lexeme, s.c_str());
+        typeCastLexeme(n2, n1->declSp);
     }
     return 0;
 }
@@ -1062,11 +1065,24 @@ void checkFuncArgValidity(node* postfix_expression, node* argument_expression_li
             setErrorParams(errCode, INVALID_ARGS_IN_FUNC_CALL, errString, temp->lexeme);
             return;
         }
+        //if valid but different types then typcast temp to paramList[idx]'s type
+        if(requiresTypeCasting(temp->declSp, paramList[idx]->declSp)) {
+            typeCastLexeme(temp, paramList[idx]->declSp);
+        }
         idx++;
         curr = curr -> next;
     }
     return;
 }
+
+bool requiresTypeCasting(declSpec* n1, declSpec* n2){
+    vector<int> v1 = n1->type;
+    vector<int> v2 = n2->type;
+    if(v1 != v2 || (v1 == v2 && v1[0] == TYPE_STRUCT && n1->lexeme != n2->lexeme) || (v1 == v2 && n1->ptrLevel != n2->ptrLevel)) 
+        return true;
+    return false;
+}
+
 
 structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expression, bool isPtrOp, int &errCode, string &errString) {
     structTableNode* structure = nullptr;

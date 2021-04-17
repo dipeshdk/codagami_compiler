@@ -1,4 +1,4 @@
-int foo(int a, int b) {
+int foo(int a, char* b) {
     int c, d;
     c=a;
     d=b;
@@ -8,5 +8,6 @@ int foo(int a, int b) {
 int main() {
     int c,d=5;
     char xxx = 'p';
-    foo(c,d);
+    float f = 4.5;
+    foo(c,xxx);
 }
