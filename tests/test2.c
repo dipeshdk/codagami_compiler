@@ -7,10 +7,5 @@ void func(float a, int b){
   return ;
 }
 int main() {
-    int c = 9;
-    int d = 0;
-    char* ch = "abcd";
-    char xxx;
-    float f;
-    f = func(c, d);
+    char* ch,m,n;
 }

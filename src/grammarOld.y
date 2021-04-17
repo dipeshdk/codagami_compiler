@@ -829,8 +829,11 @@ init_declarator_list
 init_declarator
 	: declarator { $$ = $1; }
 	| declarator '=' initializer { 
+		node* declaration_specifiers = currDeclSpec;
 		node* declarator = $1;
 		node* initializer = $3;
+    //TODO:  typecasting
+		
 		if(!declarator->declSp){
 			declSpec* ds = new declSpec();
 			if(!initializer->declSp){
