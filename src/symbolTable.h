@@ -175,13 +175,13 @@ typedef struct node
     }
 } node; 
 
-void insert_into_sets();
-
 void addIVal(node* temp, string s);
 
 void addFVal(node* temp, string s);
 
 struct symbolTableNode* lookUp(symbolTable* st, string name);
+
+string getTypeName(int type);
 
 int insertSymbol(symbolTable* st, int lineNo, string name);
 
@@ -201,8 +201,6 @@ int addFunctionSymbol(node* declaration_specifiers, node* declarator);
 
 declSpec* declSpCopy(declSpec* ds);
 
-int addStorageClassToDeclSpec(node *temp, vector<int>&v);
-
 int removeSymbol(symbolTable* st, string name);
 
 int getValueFromConstantExpression(node* constant_expression, int &err);
@@ -213,29 +211,29 @@ structTableNode* structLookUp(symbolTable* st, string name);
 
 structParam* structureParamLookup(structTableNode* node, string paramName, int& err, string& errStr);
 
-int checkValidType(declSpec* declSp);
+int checkValidType(vector<int> &v);
 
-int check_type_array(vector<int> &v);
+bool checkType(declSpec *ds, int typeName, int ptrLevel);
 
-int compareTypes(declSpec* ds1,  declSpec* ds2);
+int canTypecast(declSpec* to_ds,  declSpec* from_ds);
 
-int checkInt(node*root);
+int checkTypeArray(vector<int> &v);
 
-int checkStringLiteral(node* root);
+
 
 string getTypeString(vector<int> type);
 
-int checkValidTypeCast(declSpec* from, declSpec* to);
 
 int checkPointer(node* root);
 
 int giveTypeCastRank(node* n1, node* n2);
+
 int giveTypeCastRankUnary(node* n1, node* n2);
 
 int implicitTypecastingNotPointerNotStringLiteral(node*n1, node*n2, string& var);
+
 int implicitTypecastingNotStringLiteral(node*n1, node*n2, string& var);
 
-int checkFloat(node* root);
 
 void printSymbolTableJSON(symbolTable *st, int numTab);
 
@@ -282,3 +280,13 @@ void addChild(node* parent, node* child);
 void typeCastLexeme(node* temp, declSpec* dp);
 
 bool requiresTypeCasting(declSpec* n1, declSpec* n2);
+
+int getTypeRank(vector<int> &type);
+
+int checkValidStorageClass(node *temp);
+
+int addStorageClassToDeclSpec(node *temp, vector<int>&v);
+
+int checkIntOrCharOrPointer(node* root);
+
+int checkIntOrChar(node* root);

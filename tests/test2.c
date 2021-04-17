@@ -1,11 +1,6 @@
-struct hello
-{
-    int a, b;
-    char x,y;
-};
-
-
 int main() {
-    struct  hello foo;
-    foo.a = 0;
+    int i1, i2;
+    float f1, f2;
+    char c1, c2;
+    i1 = i1 * f2 + i2;
 }

@@ -20,10 +20,10 @@ int fu(int a1, float a2, char a3, char *a4) {
 int a,b;
 
 int main() {
-    struct foo p,b;
-    a = 5;
+    struct foo p;
     char a = 'a';
-    char b = 'ajdbgkbfjk';
+    char b = 'b';
+    a = 5;
     a = a;
     return 0;
 }
