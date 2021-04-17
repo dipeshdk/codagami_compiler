@@ -3,6 +3,8 @@
 
 using namespace std;
 int gScope=0;
+int id = 0;
+extern int line;
 struct symbolTable* gSymTable;
 
 set< vector<int> > char_type_check;
@@ -1122,12 +1124,12 @@ structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expressio
 
 //------------------Grammar Functions-----------------------------
 
-symbolTableNode* primary_expression_identifier(char* lexeme, int &errCode, string& errStr) {
+node* primary_expression_identifier(char* lexeme, int &errCode, string& errStr) {
     symbolTableNode* stNode = lookUp(gSymTable, lexeme);
     if(!stNode) {
         errCode =  UNDECLARED_SYMBOL;
         errStr = lexeme;
-        return;
+        return nullptr;
     }
     node *temp = makeNode(strdup("IDENTIFIER"), strdup(lexeme), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
     temp->declSp = new declSpec();
@@ -1144,7 +1146,7 @@ symbolTableNode* primary_expression_identifier(char* lexeme, int &errCode, strin
     return temp;
 }
 
-node* struct_or_union_specifier(node* struct_or_union){
+node* struct_or_union_specifier(node* struct_or_union, string name){
   int type = (struct_or_union->infoType == INFO_TYPE_STRUCT) ? TYPE_STRUCT : TYPE_UNION;
   node * temp = makeTypeNode(type);
   if(!temp->declSp)
@@ -1212,4 +1214,113 @@ node* parameter_declaration(node* declaration_specifiers, node* declarator){
     declarator->paramList.push_back(parameter);
 
     return declarator;
+}
+
+//==============================MAKE NODE==========================================================
+
+
+void printDeclarations(node* root, FILE *fp) {
+    if(!root || root->isLeaf == DEAD_NODE ) return;
+	string s1(root->name), s2(root->lexeme);
+	string s = "n: " + s1 + " , l: " + s2 + "\0";
+	if(root->isLeaf){
+		fprintf(fp, "%d [label=\"%s\"];\n", root->id, s.c_str());
+	} else {
+		fprintf(fp, "%d [label=\"%s\"];\n", root->id, s.c_str());
+	}
+    node* childList = root->childList;
+    while(childList) {
+        printDeclarations(childList, fp);
+        childList = childList->next;
+    }
+}        
+
+void printEdges(node* root, FILE *fp) {
+	if(root->isLeaf == DEAD_NODE) return;
+    node* child = root->childList;
+    while(child) {
+		if(child->isLeaf == DEAD_NODE) {
+			child = child->next;
+			continue;
+		}
+        fprintf(fp, "%d -> %d\n", root->id, child->id);
+        printEdges(child, fp);
+        child = child->next;
+    }
+}
+
+void generateDot(node* root, char* fileName) {
+    FILE *fp;
+    fp = fopen(fileName, "w");
+    fprintf(fp,"strict digraph AST {\n");
+    printDeclarations(root, fp);
+    printEdges(root, fp);
+    fprintf(fp,"}\n");
+    fclose(fp);
+}
+
+
+
+
+node* makeNode(char* name, char* lexeme, int isLeaf, 
+			node*c1, node*c2, node*c3, node* c4){
+	node* newNode = new node();
+	newNode->id = id++;
+	newNode->name = (char*)malloc(sizeof(char)*(strlen(name)+1));
+	newNode->lexeme = (char*)malloc(sizeof(char)*(strlen(lexeme)+1));
+	strcpy(newNode->name, name);
+	strcpy(newNode->lexeme, lexeme);
+	newNode->isLeaf = isLeaf;
+	newNode->childList = c1;
+	makeSibling(c2,newNode->childList);
+	makeSibling(c3,newNode->childList);
+	makeSibling(c4,newNode->childList);
+	return newNode;
+}
+
+node* makeDeadNode(){
+	node* newNode = new node();
+	newNode->isLeaf=DEAD_NODE;
+	newNode->declSp = new declSpec();
+    newNode->childList = NULL;
+    newNode->next = NULL;
+	newNode->name = strdup("Dead Node");
+	return newNode;
+}
+
+node* makeTypeNode(int tp){
+	node* newNode = makeDeadNode();
+	newNode->declSp->type.push_back(tp); //TODO: check validity of type
+	return newNode;
+}
+
+node* makeStorageClassNode(int storageClass, char* name, char* lexeme, int isLeaf, 
+			node*c1, node*c2, node*c3, node* c4){
+	node* newNode = makeNode(name, lexeme, isLeaf, 
+			c1,c2, c3, c4);
+	newNode->declSp = new declSpec();
+	newNode->declSp->storageClassSpecifier.push_back(storageClass); //TODO: check validity of storage class
+	newNode->name = strdup("Storage Node");
+	return newNode;
+}
+
+void makeSibling(node* root, node* childList){
+	if(!root) return;
+	if(!childList) return;
+	node* curr  = childList;
+	node* prev  = (node*)NULL;
+	while(curr){
+		prev = curr;
+		curr = curr->next;
+	}
+	prev->next = root;
+}
+
+void addChild(node* parent, node* child){
+	if(parent->childList == (node*)NULL){
+		parent->childList = child;
+	}
+	else{
+		makeSibling(child, parent->childList);
+	}
 }

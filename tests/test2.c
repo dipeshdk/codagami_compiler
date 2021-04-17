@@ -11,7 +11,9 @@ struct foo {
 
 int main() {
     struct foo f;
+    int c = 9;
+    int d = 0;
+    char  xxx = 'p';
     f.a = 6;
-    int c,d=5;
     foo(c,d);
 }

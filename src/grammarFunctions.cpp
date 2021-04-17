@@ -5,7 +5,7 @@ symbolTableNode* primary_expression_identifier(char* lexeme, int &errCode, strin
     if(!stNode) {
         errCode =  UNDECLARED_SYMBOL;
         errStr = lexeme;
-        return;
+        return nullptr;
     }
     node *temp = makeNode(strdup("IDENTIFIER"), strdup(lexeme), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
     temp->declSp = new declSpec();
@@ -22,7 +22,7 @@ symbolTableNode* primary_expression_identifier(char* lexeme, int &errCode, strin
     return temp;
 }
 
-node* struct_or_union_specifier(node* struct_or_union){
+node* struct_or_union_specifier(node* struct_or_union, string name){
   int type = (struct_or_union->infoType == INFO_TYPE_STRUCT) ? TYPE_STRUCT : TYPE_UNION;
   node * temp = makeTypeNode(type);
   if(!temp->declSp)
