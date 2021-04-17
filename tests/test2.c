@@ -1,6 +1,12 @@
+
+struct foo {
+    int a,b,c;
+};
+
+void func(float a, int b){
+  char* ch;
+  return ;
+}
 int main() {
-    int i1, i2;
-    float f1, f2;
-    char c1, c2;
-    i1 = i1 * f2 + i2;
+    char* ch,m,n;
 }

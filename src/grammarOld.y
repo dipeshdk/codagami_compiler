@@ -22,7 +22,7 @@
 			pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
-			constant inden_marker 
+			constant inden_marker func_marker_1 
 // Prototypes
 %{
 	#include <stdio.h>
@@ -38,6 +38,7 @@
 	int funcDecl = 0;
 	int errCode=0;
 	string errStr;
+	string currFunc = "#prog";
 
 extern "C"
 {
@@ -131,6 +132,9 @@ void error(string var, int error_code) {
 			break;
 		case NOT_A_CHAR:
 			str = "should be a char";
+			break;
+		case DEFAULT_ERROR:
+			str = "";
 			break;
 		default:
 			break;
@@ -241,6 +245,7 @@ primary_expression
 		node* temp = makeNode(strdup("CHAR_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
 		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_CHAR);
+		printf("char identified: %s\n", yylval.id);
 		$$ = temp;
 	}
 	| '(' expression ')' { $$ = $2; }
@@ -689,6 +694,10 @@ assignment_expression
 			}
 			else if(assignment_operator->lexeme == "MUL_ASSIGN" || assignment_operator->lexeme == "DIV_ASSIGN" || assignment_operator->lexeme == "ADD_ASSIGN" || assignment_operator->lexeme == "SUB_ASSIGN"){
 				string var;
+        int err = checkValidTypeCast(assignment_expression->declSp,unary_expression->declSp);
+        if(!err){
+          error("invalid typecast", err);
+        }
 				int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, var);
 				if(retval){
 					error(var,retval);
@@ -827,8 +836,11 @@ init_declarator_list
 init_declarator
 	: declarator { $$ = $1; }
 	| declarator '=' initializer { 
+		node* declaration_specifiers = currDeclSpec;
 		node* declarator = $1;
 		node* initializer = $3;
+    //TODO:  typecasting
+		
 		if(!declarator->declSp){
 			declSpec* ds = new declSpec();
 			if(!initializer->declSp){
@@ -837,7 +849,7 @@ init_declarator
 			ds->type = initializer->declSp->type;
 			declarator->declSp = ds;
 		}
-		$$ = makeNode(strdup("="), strdup("="), 0, $1, $3, (node*)NULL, (node*)NULL);
+		$$ = makeNode(strdup("="), strdup("="), 0, declarator, initializer, (node*)NULL, (node*)NULL);
 	}
 	;
 // do not handle
@@ -850,7 +862,7 @@ storage_class_specifier
 	;
 
 type_specifier
-	: VOID { $$ = makeTypeNode(TYPE_VOID);	}
+	: VOID { cout << "Here" << endl; $$ = makeTypeNode(TYPE_VOID);	}
 	| CHAR {$$ = makeTypeNode(TYPE_CHAR);}
 	| SHORT {$$ = makeTypeNode(TYPE_SHORT);}
 	| INT {$$ = makeTypeNode(TYPE_INT);}
@@ -883,7 +895,8 @@ struct_or_union_specifier
 			structNode->paramList.push_back(u);
 		} 
 		gSymTable->structMap[$3->lexeme] = structNode;
-		$$ = struct_or_union_specifier($1, name);	
+
+		$$ = struct_or_union_specifier($1,name);	
 	} 
 	| struct_or_union '{' struct_declaration_list '}' {cout << "488 feature not included"<< endl; $$ = NULL;} // segfault will come whenever this will be running
 	| struct_or_union  IDENTIFIER {
@@ -1297,8 +1310,35 @@ jump_statement
 	: GOTO IDENTIFIER ';' {$$ = makeNode(strdup("GOTO"), strdup("goto"), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
 	| CONTINUE ';'{ $$ = makeNode(strdup("CONTINUE"), strdup("continue"),1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| BREAK ';' { $$ = makeNode(strdup("BREAK"), strdup("break"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| RETURN ';' { $$ = makeNode(strdup("RETURN"), strdup("return"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| RETURN expression ';' { $$ = makeNode(strdup("RETURN"), strdup("return"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| RETURN ';' { 
+		symbolTableNode* funcNode = lookUp(gSymTable, currFunc);
+		if(funcNode == nullptr){ // Not in func
+			error("Return statement not in function", DEFAULT_ERROR);
+		}
+
+		int err = checkVoidSymbol(funcNode);
+		if(err){
+			error("Function type not void", err);
+		}
+		
+		$$ = makeNode(strdup("RETURN"), strdup("return"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+	}
+	| RETURN expression ';' { 
+		symbolTableNode* funcNode = lookUp(gSymTable, currFunc);
+		if(funcNode == nullptr){ // Not in func
+			error("Return statement not in function", DEFAULT_ERROR);
+		}
+		
+    node* temp = $2;
+    // symbolTableNode* n1 = funcNode;
+    int err = checkValidTypeCast(funcNode->declSp, temp->declSp);;
+    if(err) error("return type isn't valid", err);
+    node* n1 = new node();
+    n1->declSp = funcNode->declSp;
+    err = giveTypeCastRankUnary(n1, temp);
+    if(err) error("error n typecasting", err);
+    $$ = makeNode(strdup("RETURN"), strdup("return"), 0, temp, (node*)NULL, (node*)NULL, (node*)NULL);
+    }
 	;
 
 translation_unit
@@ -1312,7 +1352,33 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator func_marker_2 declaration_list compound_statement { 
+	: declaration_specifiers declarator {
+		// TODO: Send type from declaration specifier to function name
+		struct node* declarator = $2; 
+		struct node* declaration_specifiers = $1;
+		addFunctionSymbol(declaration_specifiers, declarator);
+
+		funcDecl = 1;
+		gSymTable = addChildSymbolTable(gSymTable);
+		// Adding params to symtab
+		symbolTable* curr = gSymTable;
+
+		for(auto &p: declarator->paramList){
+			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
+			if(retVal) {
+				error(p->paramName, retVal);
+			}
+			string lex = p->paramName;
+			cout << lex << endl;
+			
+			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+			if(!sym_node){
+				error(lex, ALLOCATION_ERROR);
+			}
+			
+			sym_node->declSp = declSpCopy(p->declSp);
+		}
+	} declaration_list compound_statement { 
 		addChild($2, $4); 
 		addChild($2, $5); 
 	 	
@@ -1322,11 +1388,40 @@ function_definition
 		for(auto &u: $4->paramList){
 			$2->paramList.push_back(u);
 		}
+
 		$$ = $2;
+		currFunc = "#prog"; // Back to main program
 	}
-	| declaration_specifiers declarator func_marker_2 compound_statement { 
+	| declaration_specifiers declarator {
+		// TODO: Send type from declaration specifier to function name
+		struct node* declarator = $2; 
+		struct node* declaration_specifiers = $1;
+		addFunctionSymbol(declaration_specifiers, declarator);
+
+		funcDecl = 1;
+		gSymTable = addChildSymbolTable(gSymTable);
+		// Adding params to symtab
+		symbolTable* curr = gSymTable;
+
+		for(auto &p: declarator->paramList){
+			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
+			if(retVal) {
+				error(p->paramName, retVal);
+			}
+			string lex = p->paramName;
+			cout << lex << endl;
+			
+			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+			if(!sym_node){
+				error(lex, ALLOCATION_ERROR);
+			}
+			
+			sym_node->declSp = declSpCopy(p->declSp);
+		}
+	} compound_statement { 
 		addChild($2, $4);
 		$$ = $2;
+		currFunc = "#prog";
 	}
 	| declarator func_marker_1 declaration_list compound_statement { 
 		addChild($1, $3); 
@@ -1337,10 +1432,12 @@ function_definition
 			$1->paramList.push_back(u);
 		}
 		$$ = $1;
+		currFunc = "#prog";
 	}
 	| declarator func_marker_1 compound_statement { 
 		addChild($1, $3);
 		$$ = $1;
+		currFunc = "#prog";
 	}
 	;
 
@@ -1371,33 +1468,33 @@ func_marker_1
 		}
 	}
 
-func_marker_2
-	: {
-		// TODO: Send type from declaration specifier to function name
-		struct node* declarator = currDecl;
-		struct node* declaration_specifiers = currDeclSpec;
-		addFunctionSymbol(declaration_specifiers, declarator);
+// func_marker_2
+// 	: {
+// 		// TODO: Send type from declaration specifier to function name
+// 		struct node* declarator = currDecl; 
+// 		struct node* declaration_specifiers = currDeclSpec;
+// 		addFunctionSymbol(declaration_specifiers, declarator);
 
-		funcDecl = 1;
-		gSymTable = addChildSymbolTable(gSymTable);
-		// Adding params to symtab
-		symbolTable* curr = gSymTable;
+// 		funcDecl = 1;
+// 		gSymTable = addChildSymbolTable(gSymTable);
+// 		// Adding params to symtab
+// 		symbolTable* curr = gSymTable;
 
-		for(auto &p: declarator->paramList){
-			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
-			if(retVal) {
-				error(p->paramName, retVal);
-			}
-			string lex = p->paramName;
+// 		for(auto &p: declarator->paramList){
+// 			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
+// 			if(retVal) {
+// 				error(p->paramName, retVal);
+// 			}
+// 			string lex = p->paramName;
 			
-			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-			if(!sym_node){
-				error(lex, ALLOCATION_ERROR);
-			}
+// 			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+// 			if(!sym_node){
+// 				error(lex, ALLOCATION_ERROR);
+// 			}
 			
-			sym_node->declSp = declSpCopy(p->declSp);
-		}
-	}
+// 			sym_node->declSp = declSpCopy(p->declSp);
+// 		}
+// 	}
 
 %%
 #include <stdio.h>

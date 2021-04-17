@@ -23,6 +23,7 @@ int main() {
     struct foo p;
     char a = 'a';
     char b = 'b';
+
     a = 5;
     a = a;
     return 0;

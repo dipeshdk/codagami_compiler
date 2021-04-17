@@ -7,6 +7,9 @@ int id = 0;
 extern int line;
 struct symbolTable* gSymTable;
 set<int> validTypes = {TYPE_CHAR, TYPE_INT, TYPE_FLOAT, TYPE_VOID, TYPE_STRUCT};
+extern string currFunc;
+struct symbolTable* gSymTable;
+extern void error(string var, int error_code);
 
 // grammar.y check if nullptr then it is error.
 struct symbolTableNode* lookUp(symbolTable* st, string name) {
@@ -533,14 +536,26 @@ int copyPtrLevel(node* temp, node* from) {
 
 int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
     string name = declarator->lexeme;
+
+    currFunc = name;
+    // cout << "addFunctionSymbol: name: " << name << " scope " << gSymTable->scope << "\n";
     int retVal = insertSymbol(gSymTable, declarator->lineNo, name);
-    if(retVal) return retVal;
+    if(retVal == SYMBOL_ALREADY_EXISTS) {
+        //TODO: Later
+        error("Symbol "+name+"already exists", retVal);        
+    }
+    
+    if(retVal) {
+        //error checks
+        error("", retVal);
+    }
     symbolTableNode* sym_node = gSymTable->symbolTableMap[name];
     if(!sym_node) return ALLOCATION_ERROR;
     sym_node->infoType = INFO_TYPE_FUNC;
     if(declaration_specifiers)
         sym_node->declSp = declaration_specifiers->declSp;
     else{
+        cout << "NO declspecs" <<endl;
         declSpec* ds = new declSpec();
         ds->type.push_back(TYPE_INT); //default function types if no type specified
         sym_node->declSp = ds;
@@ -633,6 +648,15 @@ structParam* structureParamLookup(structTableNode* node, string paramName, int& 
 //     return 0; 
 // }
 
+int checkVoidSymbol(symbolTableNode* root){
+    if(!root -> declSp){
+        return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    }
+    if(checkType(root->declSp, TYPE_VOID, 0)) return 0;
+    return TYPE_ERROR;
+
+}
+
 int checkIntOrCharOrPointer(node* root){
     if(!root -> declSp){
         return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
@@ -652,6 +676,17 @@ int checkIntOrChar(node* root) {
 
     return TYPE_ERROR;
 
+}
+int checkStringLiteralDecl(declSpec* root){
+    if(!root){
+        return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    }
+    vector<int> v1 = root ->type;
+    if(v1.size()> 0 && v1[0] == TYPE_STRING_LITERAL ){
+        return 0;
+    }
+
+    return TYPE_ERROR;
 }
 
 // int checkFloat(node* root){
@@ -695,6 +730,52 @@ int checkIntOrChar(node* root) {
 //         if(t == TYPE_CHAR && to->ptrLevel == 1) {
 //             toIsCharStar = true;
 //         }
+//     }
+
+//Same as above fucntion, but takes care of string literal
+// int checkValidTypeCast(declSpec* from, declSpec* to){
+//     //return 0 if typecast is valid
+//     if(!to || !from) {
+//         return INVALID_ARGS;
+//     }
+//     vector<int>v1 = (from->type);
+//     bool fromVoid = void_type_check.find(v1) != void_type_check.end(); 
+//     vector<int>v2 = (to->type);
+//     bool toVoid = void_type_check.find(v2) != void_type_check.end();
+//     if(fromVoid || toVoid){
+//       return TYPE_ERROR;
+//     }
+//     bool toIsFloat = false;
+//     bool toIsCharStar = false;
+//     bool toIsString = false;
+//     for(int &t : to->type) {
+//         if(t == TYPE_FLOAT) {
+//             toIsFloat=1;
+//         }
+//         if(t == TYPE_CHAR && to->ptrLevel == 1) {
+//             toIsCharStar = true;
+//         }
+//         toIsString = !checkStringLiteralDecl(to);
+//     }
+
+//     bool fromIsFloat = false;
+//     bool fromIsCharStar = false;
+//     bool fromIsString = false;
+
+//     if(from) {
+//         for(int &t : from->type) {
+//             if(t == TYPE_FLOAT) {
+//                 fromIsFloat=1;
+//             }
+//             if(t == TYPE_CHAR && from->ptrLevel == 1) {
+//                 fromIsCharStar = true;
+//             }
+//             fromIsString = !checkStringLiteralDecl(from);
+//         }
+//     }
+
+//     if((fromIsFloat && (toIsCharStar || toIsString)) || ((fromIsCharStar || fromIsString) && toIsFloat)) {
+//         return 1;
 //     }
 
 //     bool fromIsFloat = false;

@@ -26,6 +26,9 @@
 #define UNSUPPORTED_FUNCTIONALITY 125
 #define NOT_A_CHAR 126
 
+
+#define DEFAULT_ERROR 127
+
 #define TYPE_CHAR 1
 #define TYPE_SHORT 2
 #define TYPE_INT 3 
@@ -221,6 +224,8 @@ int checkTypeArray(vector<int> &v);
 
 
 
+int checkStringLiteralDecl(declSpec* root);
+
 string getTypeString(vector<int> type);
 
 
@@ -290,3 +295,5 @@ int addStorageClassToDeclSpec(node *temp, vector<int>&v);
 int checkIntOrCharOrPointer(node* root);
 
 int checkIntOrChar(node* root);
+
+int checkVoidSymbol(symbolTableNode* root);
