@@ -289,6 +289,7 @@ postfix_expression
 		$$ = $1;
 	}
 	| postfix_expression '.' IDENTIFIER { 
+		printf("hello\n");
 		structTableNode* structure = getRightMostStructFromPostfixExpression($1, false, errCode, errStr);
 		if(errCode) error(errStr, errCode);
 		
@@ -317,13 +318,13 @@ postfix_expression
 		$$ = makeNode(strdup("PTR_OP"), strdup("->"), 0, $1, temp , NULL, NULL);
 	}
 	| postfix_expression INC_OP {
-		int retval  = checkIntLongShort($1);
+		int retval  = checkInt($1);
 		if(retval) error($1->lexeme, retval);
 		addChild($1, makeNode(strdup("INC_OP"), strdup("++"), 1, NULL, NULL, NULL, NULL));
 		$$ = $1;
 	}
 	| postfix_expression DEC_OP {
-		int retval  = checkIntLongShort($1);
+		int retval  = checkInt($1);
 		if(retval) error($1->lexeme, retval);
 		addChild($1, makeNode(strdup("DEC_OP"), strdup("--"), 1, NULL, NULL, NULL, NULL));
 		$$ = $1;
@@ -338,11 +339,11 @@ argument_expression_list
 unary_expression
 	: postfix_expression {$$ = $1;}
 	| INC_OP unary_expression {
-		int retval  = checkIntLongShort($2);
+		int retval  = checkInt($2);
 		if(retval) error($2->lexeme, retval);
 		$$ = makeNode(strdup("INC_OP"), strdup("++"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| DEC_OP unary_expression {
-		int retval  = checkIntLongShort($2);
+		int retval  = checkInt($2);
 		if(retval) error($2->lexeme, retval);
 		$$ = makeNode(strdup("DEC_OP"), strdup("--"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| unary_operator cast_expression {
@@ -447,11 +448,11 @@ additive_expression
 shift_expression
 	: additive_expression { $$ = $1; }
 	| shift_expression LEFT_OP additive_expression { 
-		int retval = checkIntLongShort($3);
+		int retval = checkInt($3);
 		if(retval){
 			error($3->lexeme, TYPE_ERROR);
 		}
-		retval = checkIntLongShort($1);
+		retval = checkInt($1);
 		if(retval){
 			error($1->lexeme, TYPE_ERROR);
 		}
@@ -462,11 +463,11 @@ shift_expression
 		}
 		$$ = makeNode(strdup("LEFT_OP"), strdup("<<"), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	| shift_expression RIGHT_OP additive_expression { 
-		int retval = checkIntLongShort($3);
+		int retval = checkInt($3);
 		if(retval){
 			error($3->lexeme, TYPE_ERROR);
 		}
-		retval = checkIntLongShort($1);
+		retval = checkInt($1);
 		if(retval){
 			error($1->lexeme, TYPE_ERROR);
 		}
@@ -512,7 +513,7 @@ relational_expression
 
 equality_expression
 	: relational_expression { $$ = $1; }
-	| equality_expression EQ_OP relational_expression { 
+	| equality_expression EQ_OP relational_expression {
 		int retval1 = checkPointer($1);
 		int retval2 = checkPointer($3);
 		int x = (retval1 == 0) + (retval2 == 0); 
@@ -607,8 +608,8 @@ equality_expression
 and_expression
 	: equality_expression { $$ = $1; }
 	| and_expression '&' equality_expression { 
-		int retval = checkIntLongShort($1);
-		int retval2 = checkIntLongShort($3);
+		int retval = checkInt($1);
+		int retval2 = checkInt($3);
 		if(retval || retval2){
 			error("expression", TYPE_ERROR);
 		}
@@ -618,8 +619,8 @@ and_expression
 exclusive_or_expression
 	: and_expression {$$ = $1;}
 	| exclusive_or_expression '^' and_expression { 
-		int retval = checkIntLongShort($1);
-		int retval2 = checkIntLongShort($3);
+		int retval = checkInt($1);
+		int retval2 = checkInt($3);
 		if(retval || retval2){
 			error("expression", TYPE_ERROR);
 		}
@@ -629,8 +630,8 @@ exclusive_or_expression
 inclusive_or_expression
 	: exclusive_or_expression { $$ = $1; }
 	| inclusive_or_expression '|' exclusive_or_expression { 
-		int retval = checkIntLongShort($1);
-		int retval2 = checkIntLongShort($3);
+		int retval = checkInt($1);
+		int retval2 = checkInt($3);
 		if(retval || retval2){
 			error("expression", TYPE_ERROR);
 		}
@@ -661,10 +662,15 @@ conditional_expression
 assignment_expression
 	: conditional_expression { $$ = $1; }
 	| unary_expression assignment_operator assignment_expression { 
+
+		// a = b; (b.type = a.type)
+		// a (op)= b; rank wise typcast of b;
+		// a %= b; b should be int
+		
 		node* unary_expression = $1;
 		node* assignment_expression = $3;
 		node* assignment_operator = $2;
-		if(!unary_expression->declSp){
+		if (!unary_expression->declSp) {
 			declSpec* ds = new declSpec();
 			if(!assignment_expression->declSp){
 				error(assignment_expression->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
@@ -674,8 +680,8 @@ assignment_expression
 		}
 		else{
 			if(assignment_operator->lexeme == "AND_ASSIGN" || assignment_operator->lexeme == "OR_ASSIGN" || assignment_operator->lexeme == "XOR_ASSIGN" || assignment_operator->lexeme == "LEFT_ASSIGN" || assignment_operator->lexeme == "RIGHT_ASSIGN"){
-				int retval = checkIntLongShort(unary_expression);
-				int retval2 = checkIntLongShort(assignment_expression);
+				int retval = checkInt(unary_expression);
+				int retval2 = checkInt(assignment_expression);
 				if(retval || retval2){
 					error("expression", TYPE_ERROR);
 				}

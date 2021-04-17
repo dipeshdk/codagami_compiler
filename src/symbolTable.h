@@ -219,7 +219,7 @@ int check_type_array(vector<int> &v);
 
 int compareTypes(declSpec* ds1,  declSpec* ds2);
 
-int checkIntLongShort(node*root);
+int checkInt(node*root);
 
 int checkStringLiteral(node* root);
 

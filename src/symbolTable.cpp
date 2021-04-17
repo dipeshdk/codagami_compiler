@@ -229,12 +229,14 @@ int check_type_array(vector<int> &v){
     bool c1 = short_type_check.find(v) != short_type_check.end();
     bool c2 = long_type_check.find(v) != long_type_check.end();
     bool c3 = int_type_check.find(v) != int_type_check.end();
+    // bool c1 = char_type_check.find(v) != char_type_check.end();
+    // bool c1 = void_type_check.find(v) != void_type_check.end();
     bool c4 = float_type_check.find(v) != float_type_check.end(); 
     bool c5 = double_type_check.find(v) != double_type_check.end();
-    bool x = c1 | c2 | c3 ;
-    if(x){
+    
+    if(c3){
         return 0;
-    }else if(c4|c5){
+    }else if(c4){
         return ARRAY_SIZE_SHOULD_BE_INT;
     }
     else{
@@ -823,7 +825,7 @@ int checkVoid(node* root){
     return 0; 
 }
 
-int checkIntLongShort(node* root){
+int checkInt(node* root){
     if(!root -> declSp){
         return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
     }
@@ -912,23 +914,21 @@ int giveTypeCastRank(node* n1, node* n2){
     if(!n2) return INVALID_ARGS;
     if(!n2 -> declSp) return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
 
-
     vector<int> v1 = n1 -> declSp ->type;
     vector<int> v2 = n2 -> declSp ->type;
-
-    // cout << v1[0] << endl;
     
     int f1 =  (float_type_check.find(v1) != float_type_check.end()); 
     int d1 = (double_type_check.find(v1) != double_type_check.end());
-    int i1 = (checkIntLongShort(n1) == 0);
+    int i1 = (checkInt(n1) == 0);
     int c1 = (char_type_check.find(v1) != char_type_check.end());
-    // cout << f1 << d1 << i1 << c1 << endl;
     int rank1 = ((f1|d1)<<2) + (i1<<1) + (c1);
+
     int f2 =  (float_type_check.find(v2) != float_type_check.end()); 
     int d2 = (double_type_check.find(v2) != double_type_check.end());
-    int i2 = (checkIntLongShort(n2) == 0);
+    int i2 = (checkInt(n2) == 0);
     int c2 = (char_type_check.find(v2) != char_type_check.end());
     int rank2 = ((f2|d2)<<2) + (i2<<1) + (c2);
+    
     if(rank1 > rank2){
         typeCastLexeme(n2, n1->declSp);
     }else if(rank1 < rank2){
@@ -938,6 +938,7 @@ int giveTypeCastRank(node* n1, node* n2){
 }
 
 void typeCastLexeme(node* temp, declSpec* dp){
+    printf("lol why 2\n");
     vector<int> newType = dp->type;
     string strType = "(TO_";
     strType = strType + getTypeString(newType);
@@ -958,22 +959,21 @@ int giveTypeCastRankUnary(node* n1, node* n2){
     if(!n2) return INVALID_ARGS;
     if(!n2 -> declSp) return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
 
-
     vector<int> v1 = n1 -> declSp ->type;
     vector<int> v2 = n2 -> declSp ->type;
     int f1 =  (float_type_check.find(v1) != float_type_check.end()); 
     int d1 = (double_type_check.find(v1) != double_type_check.end());
-    int i1 = (checkIntLongShort(n1) == 0);
+    int i1 = (checkInt(n1) == 0);
     int c1 = (char_type_check.find(v1) != char_type_check.end());
     // cout << f1 << d1 << i1 << c1 << endl;
     int rank1 = ((f1|d1)<<2) + (i1<<1) + (c1);
     int f2 =  (float_type_check.find(v2) != float_type_check.end()); 
     int d2 = (double_type_check.find(v2) != double_type_check.end());
-    int i2 = (checkIntLongShort(n2) == 0);
+    int i2 = (checkInt(n2) == 0);
     int c2 = (char_type_check.find(v2) != char_type_check.end());
     int rank2 = ((f2|d2)<<2) + (i2<<1) + (c2);
     if(rank1 != rank2){
-        typeCastLexeme(n2, n1->declSp);
+        // typeCastLexeme(n2, n1->declSp);
     }
     return 0;
 }
@@ -1076,6 +1076,7 @@ void checkFuncArgValidity(node* postfix_expression, node* argument_expression_li
 }
 
 bool requiresTypeCasting(declSpec* n1, declSpec* n2){
+    printf("lol why\n");
     vector<int> v1 = n1->type;
     vector<int> v2 = n2->type;
     if(v1 != v2 || (v1 == v2 && v1[0] == TYPE_STRUCT && n1->lexeme != n2->lexeme) || (v1 == v2 && n1->ptrLevel != n2->ptrLevel)) 
@@ -1085,6 +1086,7 @@ bool requiresTypeCasting(declSpec* n1, declSpec* n2){
 
 
 structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expression, bool isPtrOp, int &errCode, string &errString) {
+    printf("here\n");
     structTableNode* structure = nullptr;
     node* curr = postfix_expression;
     while(curr != NULL){
