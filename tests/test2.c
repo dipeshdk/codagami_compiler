@@ -1,3 +1,4 @@
+
 struct foo {
     int a,b,c;
 };

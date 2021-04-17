@@ -233,6 +233,7 @@ primary_expression
 	}
 	| constant	{$$ = $1;}
 	| STRING_LITERAL {
+		error(yylval.id, STRING_LITERAL_ERROR);
 		node* temp = makeNode(strdup("STRING_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
 		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_STRING_LITERAL);
@@ -272,7 +273,7 @@ postfix_expression
 	: primary_expression { $$ = $1; }
 	| postfix_expression '[' expression ']' {
 		if($3->declSp) {
-			int err = check_type_array($3->declSp->type);
+			int err = checkTypeArray($3->declSp->type);
 			error($3->lexeme, err);
 		}
 		else error($3->lexeme, ARRAY_INDEX_SHOULD_BE_INT);
@@ -322,13 +323,13 @@ postfix_expression
 		$$ = makeNode(strdup("PTR_OP"), strdup("->"), 0, $1, temp , NULL, NULL);
 	}
 	| postfix_expression INC_OP {
-		int retval  = checkIntLongShort($1);
+		int retval  = checkIntOrCharOrPointer($1);
 		if(retval) error($1->lexeme, retval);
 		addChild($1, makeNode(strdup("INC_OP"), strdup("++"), 1, NULL, NULL, NULL, NULL));
 		$$ = $1;
 	}
 	| postfix_expression DEC_OP {
-		int retval  = checkIntLongShort($1);
+		int retval  = checkIntOrCharOrPointer($1);
 		if(retval) error($1->lexeme, retval);
 		addChild($1, makeNode(strdup("DEC_OP"), strdup("--"), 1, NULL, NULL, NULL, NULL));
 		$$ = $1;
@@ -343,11 +344,11 @@ argument_expression_list
 unary_expression
 	: postfix_expression {$$ = $1;}
 	| INC_OP unary_expression {
-		int retval  = checkIntLongShort($2);
+		int retval  = checkIntOrCharOrPointer($2);
 		if(retval) error($2->lexeme, retval);
 		$$ = makeNode(strdup("INC_OP"), strdup("++"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| DEC_OP unary_expression {
-		int retval  = checkIntLongShort($2);
+		int retval  = checkIntOrCharOrPointer($2);
 		if(retval) error($2->lexeme, retval);
 		$$ = makeNode(strdup("DEC_OP"), strdup("--"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| unary_operator cast_expression {
@@ -355,9 +356,9 @@ unary_expression
 		node* cast_expression = $2;
 		string name(unary_operator->name);
 		
-		int retval = checkStringLiteral(cast_expression);
-		if(!retval)	error(cast_expression->name, TYPE_ERROR);
-
+		// int retval = checkStringLiteral(cast_expression);
+		// if(!retval)	error(cast_expression->name, TYPE_ERROR);
+		// TODO: hanlde & for pointers int h; int * c = &h; 
 		if(name == "*" && 
 			(!(cast_expression->infoType == INFO_TYPE_ARRAY || (cast_expression->declSp && cast_expression->declSp->ptrLevel > 0))))
 				error(cast_expression->name, TYPE_ERROR);
@@ -391,7 +392,7 @@ cast_expression
 		string strType = "(TO_";
 		node* type_name = $2;
 		node* cast_expression = $4;
-		int err = checkValidTypeCast(cast_expression->declSp, type_name->declSp);;
+		int err = canTypecast(cast_expression->declSp, type_name->declSp);
 		if(err) error("", err);
 		strType = strType + getTypeString(type_name->declSp->type) + ")";
 		cast_expression->declSp->type = type_name->declSp->type;
@@ -419,7 +420,7 @@ multiplicative_expression
 		}		
 		$$ = makeNode(strdup("/"), strdup("/"), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	| multiplicative_expression '%' cast_expression { 
-		int retval = checkFloat($3);
+		int retval = checkType($3->declSp,TYPE_FLOAT,0);
 		if(retval){
 			error($3->lexeme, SHOULD_NOT_BE_FLOAT);
 		}
@@ -452,11 +453,11 @@ additive_expression
 shift_expression
 	: additive_expression { $$ = $1; }
 	| shift_expression LEFT_OP additive_expression { 
-		int retval = checkIntLongShort($3);
+		int retval = checkIntOrChar($3);
 		if(retval){
 			error($3->lexeme, TYPE_ERROR);
 		}
-		retval = checkIntLongShort($1);
+		retval = checkIntOrChar($1);
 		if(retval){
 			error($1->lexeme, TYPE_ERROR);
 		}
@@ -467,11 +468,11 @@ shift_expression
 		}
 		$$ = makeNode(strdup("LEFT_OP"), strdup("<<"), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	| shift_expression RIGHT_OP additive_expression { 
-		int retval = checkIntLongShort($3);
+		int retval = checkIntOrChar($3);
 		if(retval){
 			error($3->lexeme, TYPE_ERROR);
 		}
-		retval = checkIntLongShort($1);
+		retval = checkIntOrChar($1);
 		if(retval){
 			error($1->lexeme, TYPE_ERROR);
 		}
@@ -517,7 +518,7 @@ relational_expression
 
 equality_expression
 	: relational_expression { $$ = $1; }
-	| equality_expression EQ_OP relational_expression { 
+	| equality_expression EQ_OP relational_expression {
 		int retval1 = checkPointer($1);
 		int retval2 = checkPointer($3);
 		int x = (retval1 == 0) + (retval2 == 0); 
@@ -535,8 +536,8 @@ equality_expression
 					error(var, POINTER_ERROR);
 				}	
 			}else{
-				retval1 = checkStringLiteral($1);
-				retval2 = checkStringLiteral($3);
+				// retval1 = checkStringLiteral($1);
+				// retval2 = checkStringLiteral($3);
 				x = (retval1 == 0) + (retval2 == 0); 
 				if(x == 2){
 
@@ -579,27 +580,28 @@ equality_expression
 					var = $3->lexeme;
 					error(var, POINTER_ERROR);
 				}	
-			}else{
-				retval1 = checkStringLiteral($1);
-				retval2 = checkStringLiteral($3);
-				x = (retval1 == 0) + (retval2 == 0); 
-				if(x == 2){
-
-				}else{
-					if(x == 1){
-						if(!retval1){
-							var = $1->lexeme;
-							error(var,STRING_LITERAL_ERROR);
-						}
-						if(!retval2){
-							var = $3->lexeme;
-							error(var,STRING_LITERAL_ERROR);
-						}
-					}
-				
-				}
-				
 			}
+			// else{
+			// 	// retval1 = checkStringLiteral($1);
+			// 	// retval2 = checkStringLiteral($3);
+			// 	x = (retval1 == 0) + (retval2 == 0); 
+			// 	if(x == 2){
+
+			// 	}else{
+			// 		if(x == 1){
+			// 			if(!retval1){
+			// 				var = $1->lexeme;
+			// 				error(var,STRING_LITERAL_ERROR);
+			// 			}
+			// 			if(!retval2){
+			// 				var = $3->lexeme;
+			// 				error(var,STRING_LITERAL_ERROR);
+			// 			}
+			// 		}
+				
+			// 	}
+				
+			// }
 		}
 		int rank = giveTypeCastRank($1, $3);
 		if(rank){
@@ -612,8 +614,8 @@ equality_expression
 and_expression
 	: equality_expression { $$ = $1; }
 	| and_expression '&' equality_expression { 
-		int retval = checkIntLongShort($1);
-		int retval2 = checkIntLongShort($3);
+		int retval = checkIntOrChar($1);
+		int retval2 = checkIntOrChar($3);
 		if(retval || retval2){
 			error("expression", TYPE_ERROR);
 		}
@@ -623,8 +625,8 @@ and_expression
 exclusive_or_expression
 	: and_expression {$$ = $1;}
 	| exclusive_or_expression '^' and_expression { 
-		int retval = checkIntLongShort($1);
-		int retval2 = checkIntLongShort($3);
+		int retval = checkIntOrChar($1);
+		int retval2 = checkIntOrChar($3);
 		if(retval || retval2){
 			error("expression", TYPE_ERROR);
 		}
@@ -634,8 +636,8 @@ exclusive_or_expression
 inclusive_or_expression
 	: exclusive_or_expression { $$ = $1; }
 	| inclusive_or_expression '|' exclusive_or_expression { 
-		int retval = checkIntLongShort($1);
-		int retval2 = checkIntLongShort($3);
+		int retval = checkIntOrChar($1);
+		int retval2 = checkIntOrChar($3);
 		if(retval || retval2){
 			error("expression", TYPE_ERROR);
 		}
@@ -666,10 +668,15 @@ conditional_expression
 assignment_expression
 	: conditional_expression { $$ = $1; }
 	| unary_expression assignment_operator assignment_expression { 
+
+		// a = b; (b.type = a.type)
+		// a (op)= b; rank wise typcast of b;
+		// a %= b; b should be int
+		
 		node* unary_expression = $1;
 		node* assignment_expression = $3;
 		node* assignment_operator = $2;
-		if(!unary_expression->declSp){
+		if (!unary_expression->declSp) {
 			declSpec* ds = new declSpec();
 			if(!assignment_expression->declSp){
 				error(assignment_expression->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
@@ -679,8 +686,8 @@ assignment_expression
 		}
 		else{
 			if(assignment_operator->lexeme == "AND_ASSIGN" || assignment_operator->lexeme == "OR_ASSIGN" || assignment_operator->lexeme == "XOR_ASSIGN" || assignment_operator->lexeme == "LEFT_ASSIGN" || assignment_operator->lexeme == "RIGHT_ASSIGN"){
-				int retval = checkIntLongShort(unary_expression);
-				int retval2 = checkIntLongShort(assignment_expression);
+				int retval = checkIntOrChar(unary_expression);
+				int retval2 = checkIntOrChar(assignment_expression);
 				if(retval || retval2){
 					error("expression", TYPE_ERROR);
 				}
@@ -697,7 +704,7 @@ assignment_expression
 				}
 			}
 			else if(assignment_operator->lexeme == "MOD_ASSIGN"){
-				int retval = checkFloat(assignment_expression);
+				int retval = checkType(assignment_expression->declSp, TYPE_FLOAT, 0);
 				if(retval){
 					error(assignment_expression->lexeme, SHOULD_NOT_BE_FLOAT);
 				}
@@ -888,6 +895,7 @@ struct_or_union_specifier
 			structNode->paramList.push_back(u);
 		} 
 		gSymTable->structMap[$3->lexeme] = structNode;
+
 		$$ = struct_or_union_specifier($1,name);	
 	} 
 	| struct_or_union '{' struct_declaration_list '}' {cout << "488 feature not included"<< endl; $$ = NULL;} // segfault will come whenever this will be running
@@ -910,7 +918,6 @@ struct_or_union
 	: STRUCT {
 		node* temp = makeNode(strdup("STRUCT"), strdup("struct"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
 		temp->infoType = INFO_TYPE_STRUCT;
-		// printf("struct here\n"); 
 		$$ = temp;}
 	| UNION {
 		node* temp = makeNode(strdup("UNION"), strdup("union"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
@@ -1495,7 +1502,7 @@ func_marker_1
 using namespace std;
 
 int main(int ac, char **av) {
-	insert_into_sets();
+	// insert_into_sets();
 	int val;
     FILE    *fd;
     if (ac >= 2)
