@@ -8,7 +8,6 @@ extern int line;
 struct symbolTable* gSymTable;
 set<int> validTypes = {TYPE_CHAR, TYPE_INT, TYPE_FLOAT, TYPE_VOID, TYPE_STRUCT};
 extern string currFunc;
-struct symbolTable* gSymTable;
 extern void error(string var, int error_code);
 
 // grammar.y check if nullptr then it is error.

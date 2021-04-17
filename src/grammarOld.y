@@ -694,7 +694,7 @@ assignment_expression
 			}
 			else if(assignment_operator->lexeme == "MUL_ASSIGN" || assignment_operator->lexeme == "DIV_ASSIGN" || assignment_operator->lexeme == "ADD_ASSIGN" || assignment_operator->lexeme == "SUB_ASSIGN"){
 				string var;
-        int err = checkValidTypeCast(assignment_expression->declSp,unary_expression->declSp);
+        int err = canTypecast(assignment_expression->declSp,unary_expression->declSp);
         if(!err){
           error("invalid typecast", err);
         }
@@ -1331,7 +1331,7 @@ jump_statement
 		
     node* temp = $2;
     // symbolTableNode* n1 = funcNode;
-    int err = checkValidTypeCast(funcNode->declSp, temp->declSp);;
+    int err = canTypecast(funcNode->declSp, temp->declSp);;
     if(err) error("return type isn't valid", err);
     node* n1 = new node();
     n1->declSp = funcNode->declSp;
