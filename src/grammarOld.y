@@ -22,7 +22,7 @@
 			pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
-			constant inden_marker 
+			constant inden_marker func_marker_1 
 // Prototypes
 %{
 	#include <stdio.h>
@@ -687,6 +687,10 @@ assignment_expression
 			}
 			else if(assignment_operator->lexeme == "MUL_ASSIGN" || assignment_operator->lexeme == "DIV_ASSIGN" || assignment_operator->lexeme == "ADD_ASSIGN" || assignment_operator->lexeme == "SUB_ASSIGN"){
 				string var;
+        int err = checkValidTypeCast(assignment_expression->declSp,unary_expression->declSp);
+        if(!err){
+          error("invalid typecast", err);
+        }
 				int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, var);
 				if(retval){
 					error(var,retval);
@@ -835,7 +839,7 @@ init_declarator
 			ds->type = initializer->declSp->type;
 			declarator->declSp = ds;
 		}
-		$$ = makeNode(strdup("="), strdup("="), 0, $1, $3, (node*)NULL, (node*)NULL);
+		$$ = makeNode(strdup("="), strdup("="), 0, declarator, initializer, (node*)NULL, (node*)NULL);
 	}
 	;
 // do not handle
@@ -1315,15 +1319,15 @@ jump_statement
 			error("Return statement not in function", DEFAULT_ERROR);
 		}
 		
-     	node* temp = makeNode(strdup("RETURN"), strdup("return"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
-		
-      	// symbolTableNode* n1 = funcNode;
-      	int err = checkValidTypeCast(funcNode->declSp, temp->declSp);;
-		    if(err) error("return type isn't valid", err);
-        node* n1 = new node();
-        n1->declSp = funcNode->declSp;
-      	err = giveTypeCastRankUnary(n1, temp);
-        if(err) error("error n typecasting", err);
+    node* temp = $2;
+    // symbolTableNode* n1 = funcNode;
+    int err = checkValidTypeCast(funcNode->declSp, temp->declSp);;
+    if(err) error("return type isn't valid", err);
+    node* n1 = new node();
+    n1->declSp = funcNode->declSp;
+    err = giveTypeCastRankUnary(n1, temp);
+    if(err) error("error n typecasting", err);
+    $$ = makeNode(strdup("RETURN"), strdup("return"), 0, temp, (node*)NULL, (node*)NULL, (node*)NULL);
     }
 	;
 
@@ -1338,7 +1342,33 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator func_marker_2 declaration_list compound_statement { 
+	: declaration_specifiers declarator {
+		// TODO: Send type from declaration specifier to function name
+		struct node* declarator = $2; 
+		struct node* declaration_specifiers = $1;
+		addFunctionSymbol(declaration_specifiers, declarator);
+
+		funcDecl = 1;
+		gSymTable = addChildSymbolTable(gSymTable);
+		// Adding params to symtab
+		symbolTable* curr = gSymTable;
+
+		for(auto &p: declarator->paramList){
+			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
+			if(retVal) {
+				error(p->paramName, retVal);
+			}
+			string lex = p->paramName;
+			cout << lex << endl;
+			
+			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+			if(!sym_node){
+				error(lex, ALLOCATION_ERROR);
+			}
+			
+			sym_node->declSp = declSpCopy(p->declSp);
+		}
+	} declaration_list compound_statement { 
 		addChild($2, $4); 
 		addChild($2, $5); 
 	 	
@@ -1352,7 +1382,33 @@ function_definition
 		$$ = $2;
 		currFunc = "#prog"; // Back to main program
 	}
-	| declaration_specifiers declarator func_marker_2 compound_statement { 
+	| declaration_specifiers declarator {
+		// TODO: Send type from declaration specifier to function name
+		struct node* declarator = $2; 
+		struct node* declaration_specifiers = $1;
+		addFunctionSymbol(declaration_specifiers, declarator);
+
+		funcDecl = 1;
+		gSymTable = addChildSymbolTable(gSymTable);
+		// Adding params to symtab
+		symbolTable* curr = gSymTable;
+
+		for(auto &p: declarator->paramList){
+			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
+			if(retVal) {
+				error(p->paramName, retVal);
+			}
+			string lex = p->paramName;
+			cout << lex << endl;
+			
+			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+			if(!sym_node){
+				error(lex, ALLOCATION_ERROR);
+			}
+			
+			sym_node->declSp = declSpCopy(p->declSp);
+		}
+	} compound_statement { 
 		addChild($2, $4);
 		$$ = $2;
 		currFunc = "#prog";
@@ -1402,33 +1458,33 @@ func_marker_1
 		}
 	}
 
-func_marker_2
-	: {
-		// TODO: Send type from declaration specifier to function name
-		struct node* declarator = currDecl;
-		struct node* declaration_specifiers = currDeclSpec;
-		addFunctionSymbol(declaration_specifiers, declarator);
+// func_marker_2
+// 	: {
+// 		// TODO: Send type from declaration specifier to function name
+// 		struct node* declarator = currDecl; 
+// 		struct node* declaration_specifiers = currDeclSpec;
+// 		addFunctionSymbol(declaration_specifiers, declarator);
 
-		funcDecl = 1;
-		gSymTable = addChildSymbolTable(gSymTable);
-		// Adding params to symtab
-		symbolTable* curr = gSymTable;
+// 		funcDecl = 1;
+// 		gSymTable = addChildSymbolTable(gSymTable);
+// 		// Adding params to symtab
+// 		symbolTable* curr = gSymTable;
 
-		for(auto &p: declarator->paramList){
-			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
-			if(retVal) {
-				error(p->paramName, retVal);
-			}
-			string lex = p->paramName;
+// 		for(auto &p: declarator->paramList){
+// 			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
+// 			if(retVal) {
+// 				error(p->paramName, retVal);
+// 			}
+// 			string lex = p->paramName;
 			
-			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-			if(!sym_node){
-				error(lex, ALLOCATION_ERROR);
-			}
+// 			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+// 			if(!sym_node){
+// 				error(lex, ALLOCATION_ERROR);
+// 			}
 			
-			sym_node->declSp = declSpCopy(p->declSp);
-		}
-	}
+// 			sym_node->declSp = declSpCopy(p->declSp);
+// 		}
+// 	}
 
 %%
 #include <stdio.h>

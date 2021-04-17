@@ -226,6 +226,8 @@ int checkIntLongShort(node*root);
 
 int checkStringLiteral(node* root);
 
+int checkStringLiteralDecl(declSpec* root)
+
 string getTypeString(vector<int> type);
 
 int checkValidTypeCast(declSpec* from, declSpec* to);

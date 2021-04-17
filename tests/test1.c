@@ -21,9 +21,10 @@ int a,b;
 
 int main() {
     struct foo p,b;
-    a = 5;
+    
     char a = 'a';
     char b = 'ajdbgkbfjk';
+    a = 5;
     a = a;
     return 0;
 }

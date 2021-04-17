@@ -836,7 +836,7 @@ int checkVoidSymbol(symbolTableNode* root){
     vector<int>v = (root-> declSp->type);
     bool v1 = void_type_check.find(v) != void_type_check.end(); 
     for(auto a: v){
-        cout << "h--" <<a << endl;
+        cout <<a << endl;
     }
     if(!v1){
         return TYPE_ERROR;
@@ -880,6 +880,17 @@ int checkStringLiteral(node* root){
 
     return TYPE_ERROR;
 }
+int checkStringLiteralDecl(declSpec* root){
+    if(!root){
+        return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    }
+    vector<int> v1 = root ->type;
+    if(v1.size()> 0 && v1[0] == TYPE_STRING_LITERAL ){
+        return 0;
+    }
+
+    return TYPE_ERROR;
+}
 
 int checkValidTypeCast(declSpec* from, declSpec* to){
     //return 0 if typecast is valid
@@ -895,6 +906,7 @@ int checkValidTypeCast(declSpec* from, declSpec* to){
     }
     bool toIsFloat = false;
     bool toIsCharStar = false;
+    bool toIsString = false;
     for(int &t : to->type) {
         if(t == TYPE_FLOAT) {
             toIsFloat=1;
@@ -902,10 +914,12 @@ int checkValidTypeCast(declSpec* from, declSpec* to){
         if(t == TYPE_CHAR && to->ptrLevel == 1) {
             toIsCharStar = true;
         }
+        toIsString = !checkStringLiteralDecl(to);
     }
 
     bool fromIsFloat = false;
     bool fromIsCharStar = false;
+    bool fromIsString = false;
 
     if(from) {
         for(int &t : from->type) {
@@ -915,10 +929,11 @@ int checkValidTypeCast(declSpec* from, declSpec* to){
             if(t == TYPE_CHAR && from->ptrLevel == 1) {
                 fromIsCharStar = true;
             }
+            fromIsString = !checkStringLiteralDecl(from);
         }
     }
 
-    if((fromIsFloat && toIsCharStar) || (fromIsCharStar && toIsFloat)) {
+    if((fromIsFloat && (toIsCharStar || toIsString)) || ((fromIsCharStar || fromIsString) && toIsFloat)) {
         return 1;
     }
 
@@ -958,7 +973,7 @@ int giveTypeCastRank(node* n1, node* n2){
     int c2 = (char_type_check.find(v2) != char_type_check.end());
     int rank2 = ((f2|d2)<<2) + (i2<<1) + (c2);
     string strType = "(TO_";
-    // printf("rank1 = %d, rank2 = %d\n", rank1, rank2);
+    //printf("rank1 = %d, rank2 = %d\n", rank1, rank2);
     if(rank1 > rank2){
         strType = strType + getTypeString(n1->declSp->type) + ")";
         n2->declSp->type = n1->declSp->type;

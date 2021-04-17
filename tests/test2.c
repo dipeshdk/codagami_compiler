@@ -1,19 +1,16 @@
-int foo(int a, int b) {
-    int c, d;
-    c=a;
-    d=b;
-    foo(d,c);
-}
-
 struct foo {
     int a,b,c;
 };
 
+void func(float a, int b){
+  char* ch;
+  return ;
+}
 int main() {
-    struct foo f;
     int c = 9;
     int d = 0;
-    char  xxx = 'p';
-    f.a = 6;
-    foo(c,d);
+    char* ch = "abcd";
+    char xxx;
+    float f;
+    f = func(c, d);
 }
