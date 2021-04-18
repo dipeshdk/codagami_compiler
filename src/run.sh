@@ -11,7 +11,7 @@ g++ -c TAC.cpp -o TAC.o
 g++ -c typecast.cpp -o typecast.o
 g++ -c utility.cpp -o utility.o
 
-g++ lex.yy.o y.tab.c AST.o  generateDot.o  grammarFunctions.o  printSymbolTable.o  symbolTable.o TAC.o typecast.o utility.o
+g++ lex.yy.o y.tab.c AST.o  generateDot.o  grammarFunctions.o  printSymbolTable.o  symbolTable.o TAC.o typecast.o utility.o 
 
 ./a.out ../tests/test$1.c
 ./genDot.sh

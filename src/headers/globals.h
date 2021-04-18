@@ -7,17 +7,24 @@
 
 using namespace std;
 
-int temp_num = 0;
-int gScope=0;
-int id = 0;
+extern int temp_num;
+extern int gScope;
+extern int id;
 
 extern int line;
 
-struct symbolTable* gTempSymbolMap;
-struct symbolTable* gSymTable;
+extern symbolTable* gTempSymbolMap;
+extern symbolTable* gSymTable;
 
-vector<struct quadruple*> gCode;
+extern string currFunc;
+// extern void error(string var, int error_code);
 
-set<int> validTypes = {TYPE_CHAR, TYPE_INT, TYPE_FLOAT, TYPE_VOID, TYPE_STRUCT};
+extern int errCode;
+extern string errStr;
+
+extern vector<struct quadruple*> gCode;
+extern set<int> validTypes;
+
+extern node* root;
 
 #endif

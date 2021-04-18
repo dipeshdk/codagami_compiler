@@ -50,9 +50,95 @@ int getValueFromConstantExpression(node* constant_expression, int &err) {
 }
 
 
-
 void setErrorParams(int &errCode, int code, string &errString, string str) {
     errCode=code;
     errString=str;
     return;
+}
+
+void error(string var, int error_code) {
+	string str;
+	switch(error_code) {
+		case SYMBOL_ALREADY_EXISTS:
+			str = "SYMBOL_ALREADY_EXISTS";
+			break;
+		case ALLOCATION_ERROR:
+			str = "ALLOCATION_ERROR";
+			break;
+		case INVALID_ARGS:
+			str = "Invalid arguments passed to the function ";
+			break;
+		case CONFLICTING_TYPES:
+			str = "Conflicting type of declaration ";
+			break;
+		case UNDECLARED_SYMBOL:
+			str = "Undeclared symbol ";
+			break;		
+		case TYPE_ERROR:
+			str = "TYPE_ERROR";
+			break;
+		case ARRAY_SIZE_NOT_CONSTANT:
+			str = "Array size should be a constant ";
+			break;
+		case ARRAY_SIZE_SHOULD_BE_INT:
+			str = "Array size should be a integer ";
+			break;
+		case ARRAY_INDEX_SHOULD_BE_INT:
+			str = "Array index should be a integer ";
+			break;
+		case INVALID_ARGS_IN_FUNC_CALL:
+			str = "Invalid aruments in function call ";
+			break;
+		case INVALID_STORAGE_CLASS:
+			str = "Conflicting type of storage class ";
+			break;
+		case SYMBOL_NOT_FOUND:
+			str = "Symbol used before declaration ";
+			break;
+		case STRUCT_NOT_DECLARED:
+			str = "Undeclared struct ";
+			break;
+		case INVALID_SYNTAX:
+			str = "Invalid Syntax ";
+			break;
+		case VARIABLE_NOT_A_STRUCT:
+			str = "Not a struct ";
+			break;
+		case INVALID_REFERENCE:
+			str = "Invalid reference ";
+			break;
+		case INVALID_STRUCT_PARAM:
+			str = "Invalid struct param ";
+			break;
+		case INTERNAL_ERROR_DECL_SP_NOT_DEFINED:
+			str = "INTERNAL_ERROR_DECL_SP_NOT_DEFINED";
+			break;
+		case POINTER_ERROR:
+			str = "Invalid Operand Of Type Pointer";
+			break;
+		case STRING_LITERAL_ERROR:
+			str = "Invalid Operand Of Type String";
+			break;
+		case SHOULD_NOT_BE_FLOAT:
+			str = "Invalid Operand Of Type Float";
+			break;
+		case VOID_ERROR:
+			str = "void data type is not compatible";
+			break;
+		case UNSUPPORTED_FUNCTIONALITY:
+			str = "functionality is not supported by this compiler.";
+			break;
+		case NOT_A_CHAR:
+			str = "should be a char";
+			break;
+		case DEFAULT_ERROR:
+			str = "";
+			break;
+		default:
+			break;
+	}
+	str += " ";
+	str+=var;
+	cout << "\nERROR: " << str << " on line number: " << line+1 << endl;
+	exit(error_code);
 }

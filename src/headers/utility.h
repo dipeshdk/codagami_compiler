@@ -14,4 +14,5 @@ int getValueFromConstantExpression(node* constant_expression, int &err);
 
 void setErrorParams(int &errCode, int code, string &errString, string str);
 
+void error(string var, int error_code);
 #endif

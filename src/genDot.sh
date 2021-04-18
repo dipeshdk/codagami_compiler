@@ -1,1 +1,1 @@
-dot -Tps graph.dot -o graph.ps
+dot -Tps $1 -o graph.ps

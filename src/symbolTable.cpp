@@ -1,7 +1,12 @@
 #include "headers/allInclude.h" 
 
-extern string currFunc;
-extern void error(string var, int error_code);
+int temp_num = 0;
+int gScope=0;
+int id = 0;
+symbolTable* gTempSymbolMap;
+symbolTable* gSymTable;
+set<int> validTypes = {TYPE_CHAR, TYPE_INT, TYPE_FLOAT, TYPE_VOID, TYPE_STRUCT};
+vector<struct quadruple*> gCode;
 
 // grammar.y check if nullptr then it is error.
 struct symbolTableNode* lookUp(symbolTable* st, string name) {
