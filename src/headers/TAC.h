@@ -15,6 +15,11 @@ void emit(int opCode, string arg1, string arg2, string result);
 
 int nextQuad();
 
-string generateTemp();
+string generateTemp(int &errCode);
 
+void setAddr(node* n, string addr);
+
+string getOpName(int opCode);
+
+void printCode();
 #endif

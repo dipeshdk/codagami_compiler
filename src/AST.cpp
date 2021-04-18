@@ -62,3 +62,4 @@ void addChild(node* parent, node* child){
 		makeSibling(child, parent->childList);
 	}
 }
+

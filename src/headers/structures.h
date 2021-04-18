@@ -104,7 +104,7 @@ struct node
     int paramSize = 0;
     vector<struct param*> paramList;
     vector<struct structParam*> structParamList;
-
+    string addr; 
     node() {
         lexeme = strdup("empty");
         name = strdup("empty");

@@ -241,7 +241,8 @@ void printSymbolTableJSON(symbolTable *st, int numTab) {
     for(symbolTable *child : st->childList) {
         printSymbolTableJSON(child, numTab);
     }   
-    // printf("}\n");
+
+    freopen(fileName.c_str(), "w", stdout);
 }
 
 int getTypeSize(vector<int> &type) {

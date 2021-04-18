@@ -43,8 +43,56 @@ string generateTemp(int &errCode){
     temp_num++;
     string name = to_string(temp_num)+"temp";
     int retval = insertSymbol(gTempSymbolMap, TEMP_LINE_NO, name);
-    if(retval){
+    if(retval)
         errCode = retval; 
-    }
     return name;
+}
+
+void setAddr(node* n, string addr) {
+	n->addr = addr;
+}
+
+string getOpName(int opCode) {
+    switch(opCode){
+        case OP_GOTO: return "OP_GOTO";
+        case OP_ADDI: return "OP_ADDI";
+        case OP_MULI: return "OP_MULI";
+        case OP_IFGOTO: return "OP_IFGOTO";
+        case OP_SUBI: return "OP_SUBI";
+        case OP_ASSIGNMENT: return "OP_ASSIGNMENT";
+        case OP_UNARY_MINUS: return "OP_UNARY_MINUS";
+        case OP_DIVI: return "OP_DIVI";
+        case OP_CALL: return "OP_CALL";
+        case OP_LEFT_SHIFT: return "OP_LEFT_SHIFT";
+        case OP_RIGHT_SHIFT: return "OP_RIGHT_SHIFT";
+        case OP_NOR: return "OP_NOR";
+        case OP_OR: return "OP_OR";
+        case OP_AND: return "OP_AND";
+        case OP_NOT: return "OP_NOT";
+        case OP_XOR: return "OP_XOR";
+        case OP_EQ: return "OP_EQ";
+        case OP_NEQ: return "OP_NEQ";
+        case OP_LEQ: return "OP_LEQ";
+        case OP_GREATER: return "OP_GREATER";
+        case OP_LESS: return "OP_LESS";
+        case OP_MOD: return "OP_MOD";
+        case OP_ADDF: return "OP_ADDF";
+        case OP_MULF: return "OP_MULF";
+        case OP_SUBF: return "OP_SUBF";
+        case OP_DIVF: return "OP_DIVF"; 
+    }
+    return "INVALID OPCODE";
+}
+
+void printCode() {
+    cout << "\n==================== Printing Code ==================\n";
+    for(auto &quad : gCode) {
+        cout <<"result =  "<< quad->result
+        <<", arg1 = " << quad->arg1 
+        << ", opCode  = " 
+        << getOpName(quad->opCode)
+        <<", arg2 = " << quad->arg2
+        << "\n"; 
+    }
+    cout << "\n====================================================\n";
 }

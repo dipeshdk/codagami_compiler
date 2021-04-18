@@ -1,5 +1,6 @@
 int main() {
-    int a = 0,b = 9,c = 8;
+    int a,c;
     float f;
-    a = b + c * f;
+    a = c * f;
+    c = a * f;
 }

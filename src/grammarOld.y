@@ -137,6 +137,7 @@ primary_expression
 		if(!stNode) error(yylval.id, UNDECLARED_SYMBOL);
 		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
 		temp->declSp = declSpCopy(stNode->declSp);
+		setAddr(temp, string(yylval.id));
 		$$=temp;
 	}
 	| constant	{$$ = $1;}
@@ -154,6 +155,7 @@ primary_expression
 		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_CHAR);
 		printf("char identified: %s\n", yylval.id);
+		setAddr(temp, string(yylval.id));
 		$$ = temp;
 	}
 	| '(' expression ')' { $$ = $2; }
@@ -166,6 +168,7 @@ constant
 		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_INT);
 		addIVal(temp, yylval.id);
+		setAddr(temp, string(yylval.id));
 		$$ = temp;
 	}
 	| F_CONSTANT {
@@ -174,7 +177,9 @@ constant
 		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_FLOAT);
 		addFVal(temp, yylval.id);
-		$$ = temp;}
+		setAddr(temp, string(yylval.id));
+		$$ = temp;
+	}
 	;
 
 postfix_expression
@@ -213,7 +218,6 @@ postfix_expression
 		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, NULL, NULL, NULL, NULL);
 		temp->declSp = param->declSp;
 		temp->infoType = INFO_NESTED_STRUCT;
-		
 		$$ = makeNode(strdup("."), strdup("."), 0, $1, temp , NULL, NULL);
 	}
 	| postfix_expression PTR_OP IDENTIFIER {
@@ -317,6 +321,11 @@ multiplicative_expression
 		node* temp = makeNodeForExpression($1, $3, "*", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		emit(OP_MULI, $1->addr, $3->addr, newTmp);
+		temp->addr = newTmp;
 		$$ = temp;
 		}
 	| multiplicative_expression '/' cast_expression { 
@@ -1233,15 +1242,15 @@ jump_statement
 			error("Return statement not in function", DEFAULT_ERROR);
 		}
 		
-    node* temp = $2;
-    // symbolTableNode* n1 = funcNode;
-    int err = canTypecast(funcNode->declSp, temp->declSp);;
-    if(err) error("return type isn't valid", err);
-    node* n1 = new node();
-    n1->declSp = funcNode->declSp;
-    err = giveTypeCastRankUnary(n1, temp);
-    if(err) error("error n typecasting", err);
-    $$ = makeNode(strdup("RETURN"), strdup("return"), 0, temp, (node*)NULL, (node*)NULL, (node*)NULL);
+		node* temp = $2;
+		// symbolTableNode* n1 = funcNode;
+		int err = canTypecast(funcNode->declSp, temp->declSp);;
+		if(err) error("return type isnt valid", err);
+		node* n1 = new node();
+		n1->declSp = funcNode->declSp;
+		err = giveTypeCastRankUnary(n1, temp);
+		if(err) error("error n typecasting", err);
+		$$ = makeNode(strdup("RETURN"), strdup("return"), 0, temp, (node*)NULL, (node*)NULL, (node*)NULL);
     }
 	;
 
@@ -1420,23 +1429,26 @@ int main(int ac, char **av) {
         
         // Make the first symbol table with global scope
 		gSymTable = new symbolTable();
+		gTempSymbolMap = new symbolTable();
 		if(!gSymTable) {
 			printf("ERROR: Cannot allocate global symbol table\n");
 			return 1;
 		}
+
+		if(!gTempSymbolMap) {
+			printf("ERROR: Cannot allocate global temp symbol table\n");
+			return 1;
+		}
 		gSymTable->scope = gScope++;
 		gSymTable->parent = nullptr;
-		
+		gTempSymbolMap->parent = nullptr;
         yyparse();
 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
-
 		generateDot(root,fileName);
-
-		// printSymbolTable(gSymTable);
+		printCode();
 		printSymbolTableJSON(gSymTable,0);
-
         fclose(fd);
     }
     else
