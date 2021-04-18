@@ -1,7 +1,0 @@
-lex grammar.l
-yacc --verbose --debug -d grammarOld.y
-gcc -c lex.yy.c
-g++ -c symbolTable.cpp
-g++ -c TAC.cpp
-g++ lex.yy.o y.tab.c symbolTable.o TAC.o 
-./a.out ../tests/test$1.c

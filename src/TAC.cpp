@@ -1,10 +1,4 @@
-#include "TAC.h"
-#include "symbolTable.h"
-using namespace std;
-
-int temp_num = 0;
-vector<quadruple*> gCode;
-struct symbolTable* gTempSymbolMap;
+#include "headers/allInclude.h" 
 
 vector<int> makelist(int i){
     return vector<int>{i};

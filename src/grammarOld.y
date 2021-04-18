@@ -28,8 +28,7 @@
 	#include <stdio.h>
 	#include <string.h>
 	#include <stdlib.h>
-	#include "symbolTable.h"
-	#include "TAC.h"
+	#include "headers/allInclude.h" 
     extern int gScope;
     extern symbolTable* gSymTable;
     extern int line;
@@ -801,11 +800,11 @@ declaration_specifiers
 	| storage_class_specifier declaration_specifiers {
 		if($1){makeSibling($2,$1);} 
 		node *temp = $2;
-		vector<int> v = $1->declSp->storageClassSpecifier;
-		int err = addStorageClassToDeclSpec(temp, v);
-		if(err) error("addStorageClassToDeclSpec", err); //Error handling according to error code passed
+		// vector<int> v = $1->declSp->storageClassSpecifier;
+		// int err = addStorageClassToDeclSpec(temp, v);
+		// if(err) error("addStorageClassToDeclSpec", err); //Error handling according to error code passed
 		$$ = temp;
-		currDeclSpec = $$;
+		// currDeclSpec = $$;
 	}
 	| type_specifier {$$ = $1; currDeclSpec = $$;} 
 	| type_specifier declaration_specifiers {
@@ -855,25 +854,25 @@ init_declarator
 	;
 // do not handle
 storage_class_specifier
-	: TYPEDEF {$$ = makeStorageClassNode(TYPE_TYPEDEF, strdup("TYPEDEF"), strdup("typedef"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| EXTERN {$$ = makeStorageClassNode(TYPE_EXTERN, strdup("EXTERN"), strdup("extern"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| STATIC {$$ = makeStorageClassNode(TYPE_STATIC, strdup("STATIC"), strdup("static"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| AUTO {$$ = makeStorageClassNode(TYPE_AUTO, strdup("AUTO"), strdup("auto"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| REGISTER {$$ = makeStorageClassNode(TYPE_REGISTER, strdup("REGISTER"), strdup("register"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	: TYPEDEF {$$ = NULL; error("TYPEDEF", UNSUPPORTED_FUNCTIONALITY);}
+	| EXTERN {$$ = NULL; error("EXTERN", UNSUPPORTED_FUNCTIONALITY);}
+	| STATIC {$$ = NULL; error("STATIC", UNSUPPORTED_FUNCTIONALITY);}
+	| AUTO {$$ = NULL; error("AUTO", UNSUPPORTED_FUNCTIONALITY);}
+	| REGISTER {$$ = NULL; error("REGISTER", UNSUPPORTED_FUNCTIONALITY);}
 	;
 
 type_specifier
-	: VOID { cout << "Here" << endl; $$ = makeTypeNode(TYPE_VOID);	}
+	: VOID {$$ = makeTypeNode(TYPE_VOID);	}
 	| CHAR {$$ = makeTypeNode(TYPE_CHAR);}
-	| SHORT {$$ = makeTypeNode(TYPE_SHORT);}
 	| INT {$$ = makeTypeNode(TYPE_INT);}
-	| LONG {$$ = makeTypeNode(TYPE_LONG);}
 	| FLOAT {$$ = makeTypeNode(TYPE_FLOAT);}
-	| DOUBLE {$$ = makeTypeNode(TYPE_DOUBLE);}
-	| SIGNED {$$ = makeTypeNode(TYPE_SIGNED);}
-	| UNSIGNED {$$ = makeTypeNode( TYPE_UNSIGNED);}
 	| struct_or_union_specifier {$$ = $1;}
-	| enum_specifier {$$ = $1;}
+	| SHORT {$$ = NULL; error("SHORT", UNSUPPORTED_FUNCTIONALITY);}
+	| LONG {$$ = NULL; error("LONG", UNSUPPORTED_FUNCTIONALITY);}
+	| DOUBLE {$$ = NULL; error("DOUBLE", UNSUPPORTED_FUNCTIONALITY);}
+	| SIGNED {$$ = NULL; error("SIGNED", UNSUPPORTED_FUNCTIONALITY);}
+	| UNSIGNED {$$ = NULL; error("UNSIGNED", UNSUPPORTED_FUNCTIONALITY);}
+	| enum_specifier {$$ = NULL;error("ENUM", UNSUPPORTED_FUNCTIONALITY);}
 	| TYPE_NAME { $$ = NULL;} //TODO: unknown use -- struct name
 	;
 
@@ -1183,7 +1182,7 @@ type_name
 		if($2->declSp) {
 			int err = addTypeToDeclSpec(temp, $2->declSp->type);
 			if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
-			err = addStorageClassToDeclSpec(temp, $2->declSp->storageClassSpecifier);
+			// err = addStorageClassToDeclSpec(temp, $2->declSp->storageClassSpecifier);
 			mergeConstVolatile(temp, $2);
 			copyPtrLevel(temp, $2);
 		}
