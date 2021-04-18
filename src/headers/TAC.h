@@ -19,7 +19,7 @@ string generateTemp(int &errCode);
 void setAddr(node* n, string addr);
 
 int getOpMulType(node* temp, int &errCode, string &errStr);
-
 int getOpAddType(node* temp, int &errCode, string &errStr);
-
+int getOpDivType(node* temp, int &errCode, string &errStr);
+int getOpSubType(node* temp, int &errCode, string &errStr);
 #endif

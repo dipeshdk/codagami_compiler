@@ -41,7 +41,7 @@ int nextQuad(){
 string generateTemp(int &errCode){
     errCode = 0;
     temp_num++;
-    string name = to_string(temp_num)+"temp";
+    string name = to_string(temp_num)+"t";
     int retval = insertSymbol(gTempSymbolMap, TEMP_LINE_NO, name);
     if(retval)
         errCode = retval; 
@@ -86,6 +86,44 @@ int getOpAddType(node* temp, int &errCode, string &errStr){
         return OP_ADDI;
     if(type == TYPE_FLOAT)
         return OP_ADDF;
+    setErrorParams(errCode, TYPE_ERROR, errStr, temp->lexeme);
+    return -TYPE_ERROR;
+}
+
+int getOpDivType(node* temp, int &errCode, string &errStr){
+    if(!temp || !temp->declSp) {
+        setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, temp->lexeme);
+        return -INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    }
+    if(checkValidType(temp->declSp->type)){
+        setErrorParams(errCode, TYPE_ERROR, errStr, temp->lexeme);
+        return -TYPE_ERROR;
+    }
+
+    int type = temp->declSp->type[0];
+    if(type == TYPE_INT || type == TYPE_CHAR)
+        return OP_DIVI;
+    if(type == TYPE_FLOAT)
+        return OP_DIVF;
+    setErrorParams(errCode, TYPE_ERROR, errStr, temp->lexeme);
+    return -TYPE_ERROR;
+}
+
+int getOpSubType(node* temp, int &errCode, string &errStr){
+    if(!temp || !temp->declSp) {
+        setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, temp->lexeme);
+        return -INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    }
+    if(checkValidType(temp->declSp->type)){
+        setErrorParams(errCode, TYPE_ERROR, errStr, temp->lexeme);
+        return -TYPE_ERROR;
+    }
+
+    int type = temp->declSp->type[0];
+    if(type == TYPE_INT || type == TYPE_CHAR)
+        return OP_SUBI;
+    if(type == TYPE_FLOAT)
+        return OP_SUBF;
     setErrorParams(errCode, TYPE_ERROR, errStr, temp->lexeme);
     return -TYPE_ERROR;
 }

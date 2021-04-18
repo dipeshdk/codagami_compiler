@@ -142,11 +142,12 @@ primary_expression
 	}
 	| constant	{$$ = $1;}
 	| STRING_LITERAL {
+		$$ = NULL;
+		// node* temp = makeNode(strdup("STRING_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		// if(!temp->declSp) temp->declSp = new declSpec();
+		// temp->declSp->type.push_back(TYPE_STRING_LITERAL);
 		error(yylval.id, STRING_LITERAL_ERROR);
-		node* temp = makeNode(strdup("STRING_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		if(!temp->declSp) temp->declSp = new declSpec();
-		temp->declSp->type.push_back(TYPE_STRING_LITERAL);
-		$$ = temp;
+		;
 	}
 	| CHAR_LITERAL {
 		string name = yylval.id;
@@ -335,6 +336,14 @@ multiplicative_expression
 		node* temp = makeNodeForExpression($1, $3, "/", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		int opCode = getOpDivType(temp, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		emit(opCode, $1->addr, $3->addr, newTmp);
+		temp->addr = newTmp;
 		$$ = temp;
 		}
 	| multiplicative_expression '%' cast_expression { 
@@ -345,6 +354,12 @@ multiplicative_expression
 		node* temp = makeNodeForExpression($1, $3, "%", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
+			
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		emit(OP_MOD, $1->addr, $3->addr, newTmp);
+		temp->addr = newTmp;
 		$$ = temp;
 		}
 	;
@@ -355,12 +370,28 @@ additive_expression
 		node* temp = makeNodeForExpression($1, $3, "+", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		int opCode = getOpAddType(temp, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		emit(opCode, $1->addr, $3->addr, newTmp);
+		temp->addr = newTmp;
 		$$ = temp;
 		}
 	| additive_expression '-' multiplicative_expression { 
 		node* temp = makeNodeForExpression($1, $3, "-", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		int opCode = getOpSubType(temp, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		emit(opCode, $1->addr, $3->addr, newTmp);
+		temp->addr = newTmp;
 		$$ = temp;
 		}
 	;

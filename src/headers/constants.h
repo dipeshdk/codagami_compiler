@@ -69,23 +69,23 @@
 #define OP_UNARY_MINUS 707
 #define OP_DIVI 708
 #define OP_CALL 709
-#define OP_LEFT_SHIFT 7010
-#define OP_RIGHT_SHIFT 7011
-#define OP_NOR 7012
-#define OP_OR 7013
-#define OP_AND 7014
-#define OP_NOT 7015
-#define OP_XOR 7016
-#define OP_EQ 7017
-#define OP_NEQ 7018
-#define OP_LEQ 7019
-#define OP_GREATER 7020
-#define OP_LESS 7021
-#define OP_MOD 7022
-#define OP_ADDF 7023
-#define OP_MULF 7024
-#define OP_SUBF 7025
-#define OP_DIVF 7026
+#define OP_LEFT_SHIFT 710
+#define OP_RIGHT_SHIFT 711
+#define OP_NOR 712
+#define OP_OR 713
+#define OP_AND 714
+#define OP_NOT 715
+#define OP_XOR 716
+#define OP_EQ 717
+#define OP_NEQ 718
+#define OP_LEQ 719
+#define OP_GREATER 720
+#define OP_LESS 721
+#define OP_MOD 722
+#define OP_ADDF 723
+#define OP_MULF 724
+#define OP_SUBF 725
+#define OP_DIVF 726
 
 
 #endif

@@ -312,13 +312,15 @@ string getOpName(int opCode) {
 
 void printCode() {
     cout << "\n==================== Printing Code ==================\n";
+    printf("    %-15s\t\t %-35s\t\t %8s\t %8s\n", "result", "arg1", "opcode", "arg2");
     for(auto &quad : gCode) {
-        cout <<"result =  "<< quad->result
-        <<", arg1 = " << quad->arg1 
-        << ", opCode  = " 
-        << getOpName(quad->opCode)
-        <<", arg2 = " << quad->arg2
-        << "\n"; 
+        printf("    %-15s\t\t %-35s\t\t %8s\t %8s\n", quad->result.c_str(),  quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());
+        // cout <<"result =  "<< quad->result
+        // <<", arg1 = " << quad->arg1 
+        // << ", opCode  = " 
+        // << getOpName(quad->opCode)
+        // <<", arg2 = " << quad->arg2
+        // << "\n"; 
     }
     cout << "\n====================================================\n";
 }
