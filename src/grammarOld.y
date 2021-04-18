@@ -29,6 +29,7 @@
 	#include <string.h>
 	#include <stdlib.h>
 	#include "symbolTable.h"
+	#include "TAC.h"
     extern int gScope;
     extern symbolTable* gSymTable;
     extern int line;

@@ -1,47 +1,36 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-#define TYPE_CHAR 1
-#define TYPE_SHORT 2
-#define TYPE_INT 3 
-#define TYPE_LONG 4
-#define TYPE_FLOAT 5
-#define TYPE_DOUBLE 6
-#define TYPE_SIGNED 7
-#define TYPE_UNSIGNED 8
-#define TYPE_VOID 9
-#define TYPE_STRUCT 10
-#define TYPE_UNION 11
-#define TYPE_ENUM 12
-#define TYPE_TYPEDEF 13
-#define TYPE_EXTERN 14
-#define TYPE_STATIC 15
-#define TYPE_AUTO 16
-#define TYPE_REGISTER 17
-#define TYPE_STRING_LITERAL 18
+#define TEMP_LINE_NO -301
 
+#define NOT_GOTO_IN_BACKPATCH 401
 
-#define GOTO 1
-#define ADD 2
-#define MULTIPLY 3 
-#define IFGOTO 4
-#define SUBTRACT 5
-#define ASSIGNMENT 6
-#define UNARY_MINUS 7
-#define DIVISION 8
-#define CALL 9
-#define LEFT_SHIFT 10
-#define RIGHT_SHIFT 11
-#define NOR 12
-#define OR 13
-#define AND 14
-#define NOT 15
-#define XOR 16
-#define EQUALITY 17
-#define NEQ 18
-#define LEQ 19
-#define GREATER 20
-#define LESS 21
+#define OP_GOTO 1
+#define OP_ADDI 2
+#define OP_MULI 3 
+#define OP_IFGOTO 4
+#define OP_SUBI 5
+#define OP_ASSIGNMENT 6
+#define OP_UNARY_MINUS 7
+#define OP_DIVI 8
+#define OP_CALL 9
+#define OP_LEFT_SHIFT 10
+#define OP_RIGHT_SHIFT 11
+#define OP_NOR 12
+#define OP_OR 13
+#define OP_AND 14
+#define OP_NOT 15
+#define OP_XOR 16
+#define OP_EQ 17
+#define OP_NEQ 18
+#define OP_LEQ 19
+#define OP_GREATER 20
+#define OP_LESS 21
+#define OP_MOD 22
+#define OP_ADDF 23
+#define OP_MULF 24
+#define OP_SUBF 25
+#define OP_DIVF 26
 
 
 struct quadruple {
@@ -49,9 +38,23 @@ struct quadruple {
     string arg1, arg2, result;
 };
 
-struct symbol {
-    int variabletype;
-    symbol(int varType) {
-        variabletype = varType;
-    }
-};
+// struct symbol {
+//     int variabletype;
+//     symbol(int varType) {
+//         variabletype = varType;
+//     }
+// };
+
+vector<int> makelist(int i);
+
+vector<int> makelist();
+
+vector<int> mergelist(vector<int> &list1,vector<int> &list2);
+
+int backpatch(vector<int> &list, int i);
+
+void emit(int opCode, string arg1, string arg2, string result);
+
+int nextQuad();
+
+string generateTemp();
