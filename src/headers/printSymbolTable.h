@@ -12,4 +12,7 @@ void printToCsvFile(symbolTable *st);
 void printSymbolTableJSON(symbolTable *st, int numTab);
 void printStructTable(map<string, struct structTableNode*> &structMap, int scope);
 void printSymbolTable(symbolTable *st);
+
+string getOpName(int opCode);
+void printCode();
 #endif

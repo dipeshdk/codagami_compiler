@@ -4,7 +4,6 @@
 #include "structures.h" 
 
 vector<int> makelist(int i);
-
 vector<int> makelist();
 
 vector<int> mergelist(vector<int> &list1,vector<int> &list2);
@@ -19,7 +18,8 @@ string generateTemp(int &errCode);
 
 void setAddr(node* n, string addr);
 
-string getOpName(int opCode);
+int getOpMulType(node* temp, int &errCode, string &errStr);
 
-void printCode();
+int getOpAddType(node* temp, int &errCode, string &errStr);
+
 #endif

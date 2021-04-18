@@ -324,7 +324,10 @@ multiplicative_expression
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
-		emit(OP_MULI, $1->addr, $3->addr, newTmp);
+		int opCode = getOpMulType(temp, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
 		$$ = temp;
 		}
