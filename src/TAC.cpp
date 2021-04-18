@@ -141,3 +141,43 @@ void emitRelop(node* n1, node* n2, node* temp, int opCode, int& errCode, string 
     emit(OP_IFGOTO, temp->addr, EMPTY_STR, BLANK_STR);
     emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
 }
+
+
+string emitTypeCast(node* node, declSpec *toDs, int &errCode, string &errStr) {
+    string newTmp = generateTemp(errCode);
+    if(errCode){
+        setErrorParams(errCode, errCode, errStr, "new temp not generated");
+        return BLANK_STR;
+    }
+    symbolTableNode* tempNode= lookUp(gTempSymbolMap, newTmp);
+    tempNode->declSp = declSpCopy(toDs);
+    if(!node->declSp){
+        setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, node->lexeme);
+        return BLANK_STR;
+    }
+    string typeCastAddr = "( " +getTypeName(node->declSp->type[0]) + "_TO_" + getTypeName(toDs->type[0]) + " ) " + node->addr; 
+    emit(OP_ASSIGNMENT, typeCastAddr , EMPTY_STR, newTmp);
+    return newTmp;
+}
+
+void emitOperationAssignment(node* unary_expression, node* assignment_expression, int opCode, int &errCode, string &errStr) {
+    string newTmp = generateTemp(errCode);
+    if(errCode){
+        setErrorParams(errCode, errCode, errStr, "Cannot generate Temp");
+        return;
+    }
+    symbolTableNode* tempNode= lookUp(gTempSymbolMap, newTmp);
+    int rank = giveTypeCastRank(unary_expression, assignment_expression);
+    if(rank < 0) {
+        setErrorParams(errCode, -rank, errStr, "get Rank error");
+        return;
+    }
+    if(rank == 2) {
+        tempNode->declSp = declSpCopy(assignment_expression->declSp);
+    }else {
+        tempNode->declSp = declSpCopy(unary_expression->declSp);
+    }
+
+    emit(opCode, unary_expression->addr, assignment_expression->addr, newTmp);
+    emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, unary_expression->addr);
+}  

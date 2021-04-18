@@ -148,12 +148,10 @@ int giveTypeCastRankUnary(node* n1, node* n2){
     if(!n2) return INVALID_ARGS;
     if(!n2 -> declSp) return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
 
-
     if(requiresTypeCasting(n1->declSp, n2->declSp)) {
         int retval=canTypecast(n2->declSp, n1->declSp);
-        if(retval){
+        if(retval)
             return retval;
-        }
         typeCastLexeme(n2, n1->declSp);
     }
     return 0;

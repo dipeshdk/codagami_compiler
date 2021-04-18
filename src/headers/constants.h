@@ -87,7 +87,9 @@
 #define OP_SUBF 725
 #define OP_DIVF 726
 #define OP_GEQ 727
-
+#define OP_ANDAND 728   // &&
+#define OP_OROR 729     // ||
+ 
 #define BLANK_STR "BLANK"
 #define EMPTY_STR "______"
 

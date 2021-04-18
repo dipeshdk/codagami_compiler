@@ -22,7 +22,7 @@
 			pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
-			constant inden_marker func_marker_1 
+			constant inden_marker func_marker_1 M_marker N_marker
 // Prototypes
 %{
 	#include <stdio.h>
@@ -311,6 +311,8 @@ cast_expression
 		cast_expression->declSp->type = type_name->declSp->type;
 		string s = strType + string(cast_expression->lexeme); 
 		strcpy(cast_expression->lexeme, s.c_str());
+		string newTmp = emitTypeCast(cast_expression, type_name->declSp, errCode, errStr);
+		cast_expression->addr = newTmp;
 		$$ = cast_expression;
 	}
 	;
@@ -400,34 +402,38 @@ shift_expression
 	: additive_expression { $$ = $1; }
 	| shift_expression LEFT_OP additive_expression { 
 		int retval = checkIntOrChar($3);
-		if(retval){
-			error($3->lexeme, TYPE_ERROR);
-		}
+		if(retval)	error($3->lexeme, TYPE_ERROR);
 		retval = checkIntOrChar($1);
-		if(retval){
-			error($1->lexeme, TYPE_ERROR);
+		if(retval)	error($1->lexeme, TYPE_ERROR);
+		
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "<<", errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+			
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		emit(OP_LEFT_SHIFT, $1->addr, $3->addr, newTmp);
+		temp->addr = newTmp;
+		$$ = temp; 
 		}
-		string var;
-		retval = implicitTypecastingNotPointerNotStringLiteral($1, $3, var);
-		if(retval){
-			error(var,retval);
-		}
-		$$ = makeNode(strdup("LEFT_OP"), strdup("<<"), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	| shift_expression RIGHT_OP additive_expression { 
 		int retval = checkIntOrChar($3);
-		if(retval){
-			error($3->lexeme, TYPE_ERROR);
-		}
+		if(retval)	error($3->lexeme, TYPE_ERROR);
 		retval = checkIntOrChar($1);
-		if(retval){
-			error($1->lexeme, TYPE_ERROR);
+		if(retval)	error($1->lexeme, TYPE_ERROR);
+		
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, ">>", errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+			
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		emit(OP_RIGHT_SHIFT, $1->addr, $3->addr, newTmp);
+		temp->addr = newTmp;
+		$$ = temp;
 		}
-		string var;
-		retval = implicitTypecastingNotPointerNotStringLiteral($1, $3, var);
-		if(retval){
-			error(var,retval);
-		}
-		$$ = makeNode(strdup("RIGHT_OP"), strdup(">>"), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
 relational_expression
@@ -532,50 +538,86 @@ and_expression
 		if(retval || retval2){
 			error("expression", TYPE_ERROR);
 		}
-		$$ = makeNode(strdup("&"), strdup("&"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		node* temp = makeNode(strdup("&"), strdup("&"), 0, $1, $3, (node*)NULL, (node*)NULL);
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		emit(OP_AND, $1->addr, $3->addr, newTmp);
+		temp->addr = newTmp;
+		$$ = temp;
+		}
 	;
+
 
 exclusive_or_expression
 	: and_expression {$$ = $1;}
-	| exclusive_or_expression '^' and_expression { 
+	| exclusive_or_expression '^'  and_expression { 
 		int retval = checkIntOrChar($1);
 		int retval2 = checkIntOrChar($3);
 		if(retval || retval2){
 			error("expression", TYPE_ERROR);
 		}
-		$$ = makeNode(strdup("^"), strdup("^"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		node* temp = makeNode(strdup("^"), strdup("^"), 0, $1, $3, (node*)NULL, (node*)NULL);
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		emit(OP_XOR, $1->addr, $3->addr, newTmp);
+		temp->addr = newTmp;
+		$$ = temp;
+	}
 	;
 
 inclusive_or_expression
 	: exclusive_or_expression { $$ = $1; }
-	| inclusive_or_expression '|' exclusive_or_expression { 
+	| inclusive_or_expression '|'  exclusive_or_expression { 
 		int retval = checkIntOrChar($1);
 		int retval2 = checkIntOrChar($3);
 		if(retval || retval2){
 			error("expression", TYPE_ERROR);
 		}
-		$$ = makeNode(strdup("|"), strdup("|"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		node* temp = makeNode(strdup("^"), strdup("^"), 0, $1, $3, (node*)NULL, (node*)NULL);
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		emit(OP_OR, $1->addr, $3->addr, newTmp);
+		temp->addr = newTmp;
+		$$ = temp;
+	}
 	;
 
 logical_and_expression
 	: inclusive_or_expression {$$ = $1;}
-	| logical_and_expression AND_OP inclusive_or_expression { 
-		//Strings Literals allowed
-		$$ = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| logical_and_expression AND_OP M_marker inclusive_or_expression { 
+		backpatch($1->truelist, $3->quad);
+		node* temp = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $4, (node*)NULL, (node*)NULL); 
+		temp->truelist = $4->truelist;
+		temp->falselist = mergelist($1->falselist, $4->falselist);
+		$$ = temp;
+	}
 	;
 
 logical_or_expression
 	: logical_and_expression { $$ = $1; }
-	| logical_or_expression OR_OP logical_and_expression { 
-		//Strings Literals allowed
-		$$ = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| logical_or_expression OR_OP M_marker logical_and_expression { 
+		backpatch($1->falselist, $3->quad);
+		node* temp = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $4, (node*)NULL, (node*)NULL);  
+		temp->truelist = mergelist($1->truelist, $4->truelist);
+		temp->falselist = $4->falselist;
+		$$ = temp;
+		}
 	;
 
+ 
 conditional_expression
 	: logical_or_expression { $$ = $1; }
-	| logical_or_expression '?' expression ':' conditional_expression { 
-		
-		$$ = makeNode(strdup("?:"), strdup("?:"), 0, $1, $3, $5, (node*)NULL); }
+	| logical_or_expression '?' M_marker expression N_marker ':' M_marker conditional_expression {
+		backpatch($1->truelist, $3->quad);
+		backpatch($1->falselist, $7->quad);
+		node* temp = makeNode(strdup("?:"), strdup("?:"), 0, $1, $4, $8, (node*)NULL); 
+		vector<int> tempVec = mergelist( $4->nextlist, $5->nextlist);
+		temp->nextlist = mergelist(tempVec, $8->nextlist);
+		$$ = temp;
+		}
 	;
 
 assignment_expression
@@ -597,44 +639,98 @@ assignment_expression
 			ds->type = assignment_expression->declSp->type;
 			unary_expression->declSp = ds;
 		}
-		else{
-			if(assignment_operator->lexeme == "AND_ASSIGN" || assignment_operator->lexeme == "OR_ASSIGN" || assignment_operator->lexeme == "XOR_ASSIGN" || assignment_operator->lexeme == "LEFT_ASSIGN" || assignment_operator->lexeme == "RIGHT_ASSIGN"){
-				int retval = checkIntOrChar(unary_expression);
-				int retval2 = checkIntOrChar(assignment_expression);
-				if(retval || retval2){
-					error("expression", TYPE_ERROR);
-				}
+		else
+		{
+			string s(assignment_operator->name);
+			if(s == "AND_ASSIGN" || s == "OR_ASSIGN" || s == "XOR_ASSIGN" || s == "LEFT_ASSIGN" || s == "RIGHT_ASSIGN") {
+				//should be only int or char
+				if(checkIntOrChar(unary_expression) || checkIntOrChar(assignment_expression))
+					error("expression should only be int or char", TYPE_ERROR);
 			}
-			else if(assignment_operator->lexeme == "MUL_ASSIGN" || assignment_operator->lexeme == "DIV_ASSIGN" || assignment_operator->lexeme == "ADD_ASSIGN" || assignment_operator->lexeme == "SUB_ASSIGN"){
-				string var;
-        int err = canTypecast(assignment_expression->declSp,unary_expression->declSp);
-        if(!err){
-          error("invalid typecast", err);
-        }
-				int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, var);
-				if(retval){
-					error(var,retval);
-				}
+			if(s=="MUL_ASSIGN" || s=="DIV_ASSIGN" || s=="ADD_ASSIGN" || s=="SUB_ASSIGN" || s=="=") {
+				int retval = canTypecast(assignment_expression->declSp,unary_expression->declSp);
+				if(!retval)
+					error("invalid typecast in assignment expression", retval);
+				retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, errStr);
+				if(retval)
+					error(errStr,retval);
 			}
-			else if(assignment_operator->lexeme == "MOD_ASSIGN"){
-				int retval = checkType(assignment_expression->declSp, TYPE_FLOAT, 0);
-				if(retval){
+			if(s == "MOD_ASSIGN") {
+				if(checkType(assignment_expression->declSp, TYPE_FLOAT, 0))
 					error(assignment_expression->lexeme, SHOULD_NOT_BE_FLOAT);
-				}
-				string var;
-				retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, var);
-				if(retval){
-					error(var,retval);
-				}
+				//typecast by rank
+				int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, errStr);
+				if(retval)
+					error(errStr,retval);
 			}
+			//does typecast if required
 			int retVal = giveTypeCastRankUnary(unary_expression, assignment_expression);
-			if(retVal){
+			if(retVal)
 				error("error unary type cast", retVal);
-			}
-
 		}
-
-		addChild($2, $unary_expression); addChild($2, assignment_expression); $$ = $2;
+		// string s(assignment_operator->name);
+		// switch(s) {
+		// 	case "AND_ASSIGN":
+		// 	{
+		// 		emitOperationAssignment(unary_expression, assignment_expression, OP_AND, errCode, errStr);
+		// 		if(errCode)
+		// 			error(errStr, errCode);
+		// 		assignment_operator->addr = newTmp;
+		// 		break;
+		// 	}
+		// 	case "OR_ASSIGN":
+		// 	{
+		// 		emitOperationAssignment(unary_expression, assignment_expression, OP_OR, errCode, errStr);
+		// 		if(errCode)
+		// 			error(errStr, errCode);
+		// 		break;
+		// 	}
+		// 	case "XOR_ASSIGN":
+		// 	{
+		// 		emitOperationAssignment(unary_expression, assignment_expression, OP_XOR, errCode, errStr);
+		// 		if(errCode)
+		// 			error(errStr, errCode);
+		// 		break;
+		// 	}
+		// 	case "LEFT_ASSIGN": 
+		// 	{
+		// 		emitOperationAssignment(unary_expression, assignment_expression, OP_LEFT_SHIFT, errCode, errStr);
+		// 		if(errCode)
+		// 			error(errStr, errCode);
+		// 		break;
+		// 	}
+		// 	case "RIGHT_ASSIGN":  
+		// 	{
+		// 		emitOperationAssignment(unary_expression, assignment_expression-, OP_RIGHT_SHIFT, errCode, errStr);
+		// 		if(errCode)
+		// 			error(errStr, errCode);
+		// 		break;
+		// 	}
+		// 	case "MOD_ASSIGN":
+		// 	{
+		// 		emitOperationAssignment(unary_expression, assignment_expression, OP_MOD, errCode, errStr);
+		// 		if(errCode)
+		// 			error(errStr, errCode);
+		// 		break;
+		// 	}
+		// 	case "MUL_ASSIGN": 
+		// 	{
+				
+		// 	}
+		// 	case "DIV_ASSIGN":
+		// 	case "ADD_ASSIGN":
+		// 	case "SUB_ASSIGN":
+			
+		// 	case "=":
+		// 	{
+		// 		emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
+		// 		break;
+		// 	}
+		// }
+		assignment_operator->addr = unary_expression->addr;
+		addChild(assignment_operator, unary_expression); 
+		addChild(assignment_operator, assignment_expression); 
+		$$ = assignment_operator;
 		}
 	;
 
@@ -1384,10 +1480,19 @@ func_marker_1
 
 M_marker:
  	{
-		M.quad = nextQuad();
+		node* temp = makeDeadNode();
+		temp->quad = nextQuad();
+		$$ = temp;
 	}
 	;
-
+N_marker:
+ 	{
+		node* temp = makeDeadNode();
+		temp->nextlist = makelist(nextQuad());
+		emit(OP_GOTO, BLANK_STR, BLANK_STR, EMPTY_STR);
+		$$ = temp;
+	}
+	;
 // func_marker_2
 // 	: {
 // 		// TODO: Send type from declaration specifier to function name
