@@ -31,7 +31,7 @@ int implicitTypecastingNotStringLiteral(node*n1, node*n2, string& var);
 
 // Deprecated
 int checkStringLiteralDecl(declSpec* root);
-
+node* makeNodeForExpression(node* n1, node* n2, string name, int& errCode, string& errStr);
 
 
 #endif

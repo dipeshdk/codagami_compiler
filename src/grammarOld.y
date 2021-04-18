@@ -314,48 +314,43 @@ multiplicative_expression
 	: cast_expression {$$ = $1; }
 	| multiplicative_expression '*' cast_expression { 
 		//  no pointer & no string literal
-		string var;
-		int retval = implicitTypecastingNotPointerNotStringLiteral($1, $3, var);
-		if(retval){
-			error(var,retval);
+		node* temp = makeNodeForExpression($1, $3, "*", errCode, errStr); 
+		if(errCode)
+			error(errStr, errCode);
+		$$ = temp;
 		}
-		$$ = makeNode(strdup("*"), strdup("*"), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	| multiplicative_expression '/' cast_expression { 
-		string var;
-		int retval = implicitTypecastingNotPointerNotStringLiteral($1, $3, var);
-		if(retval){
-			error(var,retval);
-		}		
-		$$ = makeNode(strdup("/"), strdup("/"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		node* temp = makeNodeForExpression($1, $3, "/", errCode, errStr); 
+		if(errCode)
+			error(errStr, errCode);
+		$$ = temp;
+		}
 	| multiplicative_expression '%' cast_expression { 
 		int retval = checkType($3->declSp,TYPE_FLOAT,0);
 		if(retval){
 			error($3->lexeme, SHOULD_NOT_BE_FLOAT);
 		}
-		string var;
-		retval = implicitTypecastingNotPointerNotStringLiteral($1, $3, var);
-		if(retval){
-			error(var,retval);
+		node* temp = makeNodeForExpression($1, $3, "%", errCode, errStr); 
+		if(errCode)
+			error(errStr, errCode);
+		$$ = temp;
 		}
-		$$ = makeNode(strdup("%"), strdup("%"), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
 additive_expression
 	: multiplicative_expression { $$ = $1; }
 	| additive_expression '+' multiplicative_expression { 
-		string var;
-		int retval = implicitTypecastingNotPointerNotStringLiteral($1, $3, var);
-		if(retval){
-			error(var,retval);
+		node* temp = makeNodeForExpression($1, $3, "+", errCode, errStr); 
+		if(errCode)
+			error(errStr, errCode);
+		$$ = temp;
 		}
-		$$ = makeNode(strdup("+"), strdup("+"), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	| additive_expression '-' multiplicative_expression { 
-		string var;
-		int retval = implicitTypecastingNotPointerNotStringLiteral($1, $3, var);
-		if(retval){
-			error(var,retval);
+		node* temp = makeNodeForExpression($1, $3, "-", errCode, errStr); 
+		if(errCode)
+			error(errStr, errCode);
+		$$ = temp;
 		}
-		$$ = makeNode(strdup("-"), strdup("-"), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
 shift_expression
@@ -443,27 +438,28 @@ equality_expression
 					var = $3->lexeme;
 					error(var, POINTER_ERROR);
 				}	
-			}else{
-				// retval1 = checkStringLiteral($1);
-				// retval2 = checkStringLiteral($3);
-				x = (retval1 == 0) + (retval2 == 0); 
-				if(x == 2){
-
-				}else{
-					if(x == 1){
-						if(!retval1){
-							var = $1->lexeme;
-							error(var,STRING_LITERAL_ERROR);
-						}
-						if(!retval2){
-							var = $3->lexeme;
-							error(var,STRING_LITERAL_ERROR);
-						}
-					}
-				
-				}
-				
 			}
+			// else{
+			// 	// retval1 = checkStringLiteral($1);
+			// 	// retval2 = checkStringLiteral($3);
+			// 	x = (retval1 == 0) + (retval2 == 0); 
+			// 	if(x == 2){
+
+			// 	}else{
+			// 		if(x == 1){
+			// 			if(!retval1){
+			// 				var = $1->lexeme;
+			// 				error(var,STRING_LITERAL_ERROR);
+			// 			}
+			// 			if(!retval2){
+			// 				var = $3->lexeme;
+			// 				error(var,STRING_LITERAL_ERROR);
+			// 			}
+			// 		}
+				
+			// 	}
+				
+			// }
 		}
 		int rank = giveTypeCastRank($1, $3);
 		if(rank){

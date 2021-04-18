@@ -1,12 +1,5 @@
-
-struct foo {
-    int a,b,c;
-};
-
-void func(float a, int b){
-  char* ch;
-  return ;
-}
 int main() {
-    char* ch,m,n;
+    int a = 0,b = 9,c = 8;
+    float f;
+    a = b + c * f;
 }
