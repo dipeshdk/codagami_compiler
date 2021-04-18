@@ -84,8 +84,6 @@ int checkStringLiteralDecl(declSpec* root){
     return TYPE_ERROR;
 }
 
-
-
 int checkPointer(node* root){
     if(!root) return INVALID_ARGS;
     if(!root->declSp) return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
@@ -228,13 +226,12 @@ bool requiresTypeCasting(declSpec* n1, declSpec* n2){
     return false;
 }
 
-node* makeNodeForExpression(node* n1, node* n2, string name, int& errCode, string& errStr) {
-    int rank = implicitTypecastingNotPointerNotStringLiteral(n1, n2, errStr);
+node* makeNodeForExpressionByRank(node* n1, node* n2, string name, string lexeme, int rank, int& errCode, string& errStr) {
     if(rank < 0){
         setErrorParams(errCode, rank, errStr, errStr);
         return nullptr;
     }
-    node* temp = makeNode((char*)name.c_str(), (char*)name.c_str(), 0, n1, n2, (node*)NULL, (node*)NULL); 
+    node* temp = makeNode((char*)name.c_str(), (char*)lexeme.c_str(), 0, n1, n2, (node*)NULL, (node*)NULL); 
     temp->declSp = new declSpec();
     switch(rank){
         case 1: temp->declSp = n1->declSp; break; 
@@ -242,4 +239,9 @@ node* makeNodeForExpression(node* n1, node* n2, string name, int& errCode, strin
         default:  temp->declSp = n1->declSp;  break;
     }
     return temp;
+}
+
+node* makeNodeForExpressionNotPointerNotString(node* n1, node* n2, string name, int& errCode, string& errStr) {
+    int rank = implicitTypecastingNotPointerNotStringLiteral(n1, n2, errStr);
+    return makeNodeForExpressionByRank(n1, n2, name, name, rank, errCode, errStr);
 }

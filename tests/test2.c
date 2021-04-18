@@ -1,8 +1,27 @@
 int main() {
-    int a,c;
-    float f;
-    a = c * a * f;
-    c = a * c;
-    a = a + c - f * (a / a) + a * a;
-    c = a % c;
+    int a,b,c;
+    float f,g;
+    a = b==c;
+    c = f==a;
+    b = f==g;
+
+    a = b!=c;
+    c = f!=a;
+    b = f!=g;
+
+    a = b<c;
+    c = f<a;
+    b = f<g;
+
+    a = b>c;
+    c = f>a;
+    b = f>g;
+
+    a = b<=c;
+    c = f<=a;
+    b = f<=g;
+
+    a = b>=c;
+    c = f>=a;
+    b = f>=g;
 }

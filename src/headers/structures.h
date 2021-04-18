@@ -104,12 +104,16 @@ struct node
     int paramSize = 0;
     vector<struct param*> paramList;
     vector<struct structParam*> structParamList;
+
     string addr; 
+    int quad;
+    vector<int> truelist, falselist, nextlist, continuelist, breaklist;
     node() {
         lexeme = strdup("empty");
         name = strdup("empty");
         next = childList = nullptr;
         declSp = new declSpec();
+        addr = "EMPTY_ADDR";
     }
 }; 
 

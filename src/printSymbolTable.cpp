@@ -306,6 +306,7 @@ string getOpName(int opCode) {
         case OP_MULF: return "OP_MULF";
         case OP_SUBF: return "OP_SUBF";
         case OP_DIVF: return "OP_DIVF"; 
+        case OP_GEQ: return "OP_GEQ"; 
     }
     return "INVALID OPCODE";
 }

@@ -60,10 +60,10 @@
 
 #define NOT_GOTO_IN_BACKPATCH 301
 
-#define OP_GOTO 701
+#define OP_GOTO 701 //{OP_GOTO, "", "", gotoAddr}
 #define OP_ADDI 702
 #define OP_MULI 703 
-#define OP_IFGOTO 704
+#define OP_IFGOTO 704 //{OP_IFGOTO, relop->addr, "", gotoAddr}
 #define OP_SUBI 705
 #define OP_ASSIGNMENT 706
 #define OP_UNARY_MINUS 707
@@ -86,6 +86,9 @@
 #define OP_MULF 724
 #define OP_SUBF 725
 #define OP_DIVF 726
+#define OP_GEQ 727
 
+#define BLANK_STR "BLANK"
+#define EMPTY_STR "______"
 
 #endif

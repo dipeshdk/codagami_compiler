@@ -22,4 +22,5 @@ int getOpMulType(node* temp, int &errCode, string &errStr);
 int getOpAddType(node* temp, int &errCode, string &errStr);
 int getOpDivType(node* temp, int &errCode, string &errStr);
 int getOpSubType(node* temp, int &errCode, string &errStr);
+void emitRelop(node* n1, node* n2, node* temp, int opCode, int& errCode, string &errStr);
 #endif

@@ -319,7 +319,7 @@ multiplicative_expression
 	: cast_expression {$$ = $1; }
 	| multiplicative_expression '*' cast_expression { 
 		//  no pointer & no string literal
-		node* temp = makeNodeForExpression($1, $3, "*", errCode, errStr); 
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "*", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
 		string newTmp = generateTemp(errCode);
@@ -333,7 +333,7 @@ multiplicative_expression
 		$$ = temp;
 		}
 	| multiplicative_expression '/' cast_expression { 
-		node* temp = makeNodeForExpression($1, $3, "/", errCode, errStr); 
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "/", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
 		string newTmp = generateTemp(errCode);
@@ -351,7 +351,7 @@ multiplicative_expression
 		if(retval){
 			error($3->lexeme, SHOULD_NOT_BE_FLOAT);
 		}
-		node* temp = makeNodeForExpression($1, $3, "%", errCode, errStr); 
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "%", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
 			
@@ -367,7 +367,7 @@ multiplicative_expression
 additive_expression
 	: multiplicative_expression { $$ = $1; }
 	| additive_expression '+' multiplicative_expression { 
-		node* temp = makeNodeForExpression($1, $3, "+", errCode, errStr); 
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "+", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
 		string newTmp = generateTemp(errCode);
@@ -381,7 +381,7 @@ additive_expression
 		$$ = temp;
 		}
 	| additive_expression '-' multiplicative_expression { 
-		node* temp = makeNodeForExpression($1, $3, "-", errCode, errStr); 
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "-", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
 		string newTmp = generateTemp(errCode);
@@ -433,129 +433,95 @@ shift_expression
 relational_expression
 	: shift_expression { $$ = $1; }
 	| relational_expression '<' shift_expression { 
-			string var;
-			int retval = implicitTypecastingNotStringLiteral($1, $3, var);
-			if(retval){
-				error(var,retval);
-		}
-		$$ = makeNode(strdup("<"), strdup("<"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
+			if(retval)
+				error(errStr,retval);
+			node* temp = makeNode(strdup("<"), strdup("<"), 0, $1, $3, (node*)NULL, (node*)NULL); 
+			emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			$$ = temp;
+			}
 	| relational_expression '>' shift_expression { 
-			string var;
-			int retval = implicitTypecastingNotStringLiteral($1, $3, var);
-			if(retval){
-				error(var,retval);
-		}
-		$$ = makeNode(strdup(">"), strdup(">"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
+			if(retval)
+				error(errStr,retval);
+			node* temp = makeNode(strdup(">"), strdup(">"), 0, $1, $3, (node*)NULL, (node*)NULL); 
+			emitRelop($1, $3, temp, OP_GREATER, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			$$ = temp;
+	}
 	| relational_expression LE_OP shift_expression {
-			string var;
-			int retval = implicitTypecastingNotStringLiteral($1, $3, var);
-			if(retval){
-				error(var,retval);
-		}
-	$$ = makeNode(strdup("LE_OP"), strdup("<="), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
+		if(retval)
+			error(errStr,retval);
+		node* temp = makeNode(strdup("LE_OP"), strdup("<="), 0, $1, $3, (node*)NULL, (node*)NULL);
+		emitRelop($1, $3, temp, OP_LEQ, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		$$ = temp;
+	}
 	| relational_expression GE_OP shift_expression { 
-			string var;
-			int retval = implicitTypecastingNotStringLiteral($1, $3, var);
-			if(retval){
-				error(var,retval);
-		}
-		$$ = makeNode(strdup("GE_OP"), strdup(">="), 0, $1, $3, (node*)NULL, (node*)NULL); }
+			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
+			if(retval)
+				error(errStr,retval);
+			node* temp = makeNode(strdup("GE_OP"), strdup(">="), 0, $1, $3, (node*)NULL, (node*)NULL);
+			emitRelop($1, $3, temp, OP_GEQ, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			$$ = temp;
+	}
 	;
 
 equality_expression
 	: relational_expression { $$ = $1; }
 	| equality_expression EQ_OP relational_expression {
-		int retval1 = checkPointer($1);
-		int retval2 = checkPointer($3);
-		int x = (retval1 == 0) + (retval2 == 0); 
-		string var;
-		if(x == 2){
-			
-		}else{
-			if(x == 1){
-				if(!retval1){
-					var = $1->lexeme;
-					error(var, POINTER_ERROR);
-				}
-				if(!retval2){
-					var = $3->lexeme;
-					error(var, POINTER_ERROR);
-				}	
-			}
-			// else{
-			// 	// retval1 = checkStringLiteral($1);
-			// 	// retval2 = checkStringLiteral($3);
-			// 	x = (retval1 == 0) + (retval2 == 0); 
-			// 	if(x == 2){
+		node* equality_expression = $1;
+		node* relational_expression = $3;
+		int retval1 = checkPointer(equality_expression);
+		int retval2 = checkPointer(relational_expression);
+		int x = (retval1 == 0) + (retval2 == 0);
+		if(x == 1)
+			error("equality check between pointer and non pointer", POINTER_ERROR);
 
-			// 	}else{
-			// 		if(x == 1){
-			// 			if(!retval1){
-			// 				var = $1->lexeme;
-			// 				error(var,STRING_LITERAL_ERROR);
-			// 			}
-			// 			if(!retval2){
-			// 				var = $3->lexeme;
-			// 				error(var,STRING_LITERAL_ERROR);
-			// 			}
-			// 		}
-				
-			// 	}
-				
-			// }
-		}
-		int rank = giveTypeCastRank($1, $3);
-		if(rank){
-			var = "typecasting error rank";
-			error(var, rank);
-		}	
-		$$ = makeNode(strdup("EQ_OP"), strdup("=="), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		int rank = giveTypeCastRank(equality_expression, relational_expression);
+		if(rank < 0)
+			error("typecasting error rank", rank);
+		int retval = typeCastByRank(equality_expression, relational_expression, rank);
+		if(retval)
+			error("typecasting error rank", retval);
+		node* temp = makeNodeForExpressionByRank(equality_expression, relational_expression, "EQ_OP", "==", rank, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		emitRelop(equality_expression, relational_expression, temp, OP_EQ, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		$$ = temp;
+	}
 	| equality_expression NE_OP relational_expression { 
-		int retval1 = checkPointer($1);
-		int retval2 = checkPointer($3);
-		int x = (retval1 == 0) + (retval2 == 0); 
-		string var;
-		if(x == 2){
-			
-		}else{
-			if(x == 1){
-				if(!retval1){
-					var = $1->lexeme;
-					error(var, POINTER_ERROR);
-				}
-				if(!retval2){
-					var = $3->lexeme;
-					error(var, POINTER_ERROR);
-				}	
-			}
-			// else{
-			// 	// retval1 = checkStringLiteral($1);
-			// 	// retval2 = checkStringLiteral($3);
-			// 	x = (retval1 == 0) + (retval2 == 0); 
-			// 	if(x == 2){
+		node* equality_expression = $1;
+		node* relational_expression = $3;
+		int retval1 = checkPointer(equality_expression);
+		int retval2 = checkPointer(relational_expression);
+		int x = (retval1 == 0) + (retval2 == 0);
+		if(x == 1)
+			error("equality check between pointer and non pointer", POINTER_ERROR);
 
-			// 	}else{
-			// 		if(x == 1){
-			// 			if(!retval1){
-			// 				var = $1->lexeme;
-			// 				error(var,STRING_LITERAL_ERROR);
-			// 			}
-			// 			if(!retval2){
-			// 				var = $3->lexeme;
-			// 				error(var,STRING_LITERAL_ERROR);
-			// 			}
-			// 		}
-				
-			// 	}
-				
-			// }
-		}
-		int rank = giveTypeCastRank($1, $3);
-		if(rank){
-			var = "typecasting error rank";
-			error(var, rank);
-		}
-		$$ = makeNode(strdup("NE_OP"), strdup("!="), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		int rank = giveTypeCastRank(equality_expression, relational_expression);
+		if(rank < 0)
+			error("typecasting error rank", rank);
+		int retval = typeCastByRank(equality_expression, relational_expression, rank);
+		if(retval)
+			error("typecasting error rank", retval);
+		node* temp = makeNodeForExpressionByRank(equality_expression, relational_expression, "NE_OP", "!=", rank, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		emitRelop(equality_expression, relational_expression, temp, OP_NEQ, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		$$ = temp;
+	}
 	;
 
 and_expression
@@ -1414,6 +1380,13 @@ func_marker_1
 			sym_node->declSp = declSpCopy(p->declSp);
 		}
 	}
+	;
+
+M_marker:
+ 	{
+		M.quad = nextQuad();
+	}
+	;
 
 // func_marker_2
 // 	: {

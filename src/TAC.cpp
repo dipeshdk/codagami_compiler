@@ -128,3 +128,16 @@ int getOpSubType(node* temp, int &errCode, string &errStr){
     return -TYPE_ERROR;
 }
 
+void emitRelop(node* n1, node* n2, node* temp, int opCode, int& errCode, string &errStr){
+    temp->truelist = makelist(nextQuad());
+    temp->falselist = makelist(nextQuad() + 1);
+    string newTmp = generateTemp(errCode);
+    if(errCode){
+        setErrorParams(errCode, errCode, errStr, temp->name);
+        return;
+    }
+    temp->addr = newTmp;
+    emit(opCode, n1->addr, n2->addr, temp->addr);
+    emit(OP_IFGOTO, temp->addr, EMPTY_STR, BLANK_STR);
+    emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
+}
