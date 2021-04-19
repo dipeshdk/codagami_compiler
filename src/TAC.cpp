@@ -42,7 +42,8 @@ string generateTemp(int &errCode){
     errCode = 0;
     temp_num++;
     string name = to_string(temp_num)+"t";
-    int retval = insertSymbol(gTempSymbolMap, TEMP_LINE_NO, name);
+    int retval = insertSymbol(gSymTable, TEMP_LINE_NO, name);
+    // int retval = insertSymbol(gTempSymbolMap, TEMP_LINE_NO, name);
     if(retval)
         errCode = retval; 
     return name;
@@ -149,7 +150,8 @@ string emitTypeCast(node* node, declSpec *toDs, int &errCode, string &errStr) {
         setErrorParams(errCode, errCode, errStr, "new temp not generated");
         return BLANK_STR;
     }
-    symbolTableNode* tempNode= lookUp(gTempSymbolMap, newTmp);
+    // symbolTableNode* tempNode= lookUp(gTempSymbolMap, newTmp);
+    symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
     tempNode->declSp = declSpCopy(toDs);
     if(!node->declSp){
         setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, node->lexeme);
@@ -166,7 +168,7 @@ void emitOperationAssignment(node* unary_expression, node* assignment_expression
         setErrorParams(errCode, errCode, errStr, "Cannot generate Temp");
         return;
     }
-    symbolTableNode* tempNode= lookUp(gTempSymbolMap, newTmp);
+    symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
     int rank = giveTypeCastRank(unary_expression, assignment_expression);
     if(rank < 0) {
         setErrorParams(errCode, -rank, errStr, "get Rank error");
@@ -181,3 +183,13 @@ void emitOperationAssignment(node* unary_expression, node* assignment_expression
     emit(opCode, unary_expression->addr, assignment_expression->addr, newTmp);
     emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, unary_expression->addr);
 }  
+
+int getOpcodeFromAssignStr(string s){
+    if (s == "AND_ASSIGN") return OP_AND;
+    else if(s == "OR_ASSIGN") return OP_OR;
+    else if(s == "XOR_ASSIGN") return OP_XOR;
+    else if(s == "LEFT_ASSIGN") return OP_LEFT_SHIFT;
+    else if(s == "RIGHT_ASSIGN") return OP_RIGHT_SHIFT;
+    else if(s == "MOD_ASSIGN") return OP_MOD;
+    return -INVALID_ARGS;
+}

@@ -88,10 +88,8 @@ struct node
     char *name = NULL;
     char *lexeme = NULL;
     int valType; //in which variable is constant stored
-    long lval;
     int ival;
     float fval;
-    double dval;
     int isLeaf; // DEAD_NODE if declaration node so not ot be printed in AST
     struct node *next;
     struct node *childList = nullptr;
@@ -114,6 +112,7 @@ struct node
         next = childList = nullptr;
         declSp = new declSpec();
         addr = "EMPTY_ADDR";
+        valType = NOT_CONSTANT;
     }
 }; 
 

@@ -24,8 +24,10 @@ int getTypeRank(vector<int> &type);
 int giveTypeCastRank(node* n1, node* n2);
 
 void typeCastLexeme(node* temp, declSpec* dp);
+void typeCastLexemeWithEmit(node* temp, declSpec* dp);
 int typeCastByRank(node*n1, node*n2, int rank);
 
+int bitwiseImplicitTypecasting(node*n1, node*n2, int& errCode, string& errStr);
 int implicitTypecastingNotPointerNotStringLiteral(node*n1, node*n2, string& var);
 int implicitTypecastingNotStringLiteral(node*n1, node*n2, string& var);
 
@@ -35,5 +37,6 @@ int checkStringLiteralDecl(declSpec* root);
 node* makeNodeForExpressionByRank(node* n1, node* n2, string lexeme, string name, int rank, int& errCode, string& errStr);
 node* makeNodeForExpressionNotPointerNotString(node* n1, node* n2, string name, int& errCode, string& errStr);
 
-
+bool areDifferentTypes(declSpec* to_ds,  declSpec* from_ds, int &errCode, string &errStr);
+bool typeCastRequired(declSpec* to_ds,  declSpec* from_ds, int &errCode, string &errStr);
 #endif

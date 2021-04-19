@@ -12,6 +12,7 @@
 #define TYPE_VOID 504
 #define TYPE_STRUCT 505
 #define TYPE_STRING_LITERAL 506
+# define NOT_CONSTANT 507
 
 #define SIZE_CHAR 1
 #define SIZE_SHORT 2
@@ -92,5 +93,6 @@
  
 #define BLANK_STR "BLANK"
 #define EMPTY_STR "______"
+
 
 #endif
