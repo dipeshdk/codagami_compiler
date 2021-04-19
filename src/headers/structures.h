@@ -54,7 +54,7 @@ struct symbolTableNode {
         arraySize=0;
         paramSize=0;
         isDefined=0;
-        declSp = nullptr;
+        declSp = new declSpec();
     }
 };
 
