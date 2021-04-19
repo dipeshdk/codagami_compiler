@@ -61,7 +61,7 @@ struct symbolTableNode {
 struct symbolTable{
     vector<string> symbolOrder;
     map<string, struct symbolTableNode*> symbolTableMap; // <lexeme, struct>
-    struct symbolTable *parent;
+    struct symbolTable* parent;
     int scope; //name for scope : global, main, function name
     vector<struct symbolTable *> childList;
     map<string, struct structTableNode*> structMap;

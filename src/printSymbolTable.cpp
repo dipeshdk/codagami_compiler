@@ -48,7 +48,6 @@ void printToCsvFile(symbolTable *st){
 }
 
 void printSymbolTable(symbolTable *st) {
-    printToCsvFile(st);
     cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
     cout << "\n\n=============Printing symbol table (scope: " << st->scope << ")====================\n\n";
 

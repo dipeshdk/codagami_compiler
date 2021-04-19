@@ -352,11 +352,14 @@ multiplicative_expression
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
 		int opCode = getOpMulType(temp, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	| multiplicative_expression '/' cast_expression { 
@@ -366,11 +369,14 @@ multiplicative_expression
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
 		int opCode = getOpDivType(temp, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	| multiplicative_expression '%' cast_expression { 
@@ -385,8 +391,11 @@ multiplicative_expression
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
 		emit(OP_MOD, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	;
@@ -400,11 +409,14 @@ additive_expression
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
 		int opCode = getOpAddType(temp, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	| additive_expression '-' multiplicative_expression { 
@@ -414,11 +426,14 @@ additive_expression
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
 		int opCode = getOpSubType(temp, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	;
@@ -438,8 +453,11 @@ shift_expression
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
 		emit(OP_LEFT_SHIFT, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp; 
 		}
 	| shift_expression RIGHT_OP additive_expression { 
@@ -455,8 +473,11 @@ shift_expression
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
 		emit(OP_RIGHT_SHIFT, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	;
@@ -471,6 +492,7 @@ relational_expression
 			emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
+			temp->declSp = declSpCopy($1->declSp);
 			$$ = temp;
 			}
 	| relational_expression '>' shift_expression { 
@@ -481,6 +503,7 @@ relational_expression
 			emitRelop($1, $3, temp, OP_GREATER, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
+			temp->declSp = declSpCopy($1->declSp);
 			$$ = temp;
 	}
 	| relational_expression LE_OP shift_expression {
@@ -491,6 +514,7 @@ relational_expression
 		emitRelop($1, $3, temp, OP_LEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	| relational_expression GE_OP shift_expression { 
@@ -501,6 +525,7 @@ relational_expression
 		emitRelop($1, $3, temp, OP_GEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	;
@@ -528,6 +553,7 @@ equality_expression
 		emitRelop(equality_expression, relational_expression, temp, OP_EQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	| equality_expression NE_OP relational_expression { 
@@ -551,6 +577,7 @@ equality_expression
 		emitRelop(equality_expression, relational_expression, temp, OP_NEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	;
@@ -570,6 +597,7 @@ and_expression
 			error(errStr, errCode);
 		emit(OP_AND, and_expression->addr, equality_expression->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	;
@@ -670,23 +698,24 @@ assignment_expression
 			}
 			if(s=="MUL_ASSIGN" || s=="DIV_ASSIGN" || s=="ADD_ASSIGN" || s=="SUB_ASSIGN" || s=="=") {
 				int retval = canTypecast(assignment_expression->declSp,unary_expression->declSp);
-				if(!retval)
+				if(retval)
 					error("invalid typecast in assignment expression", retval);
 			}
 			if(s == "MOD_ASSIGN") {
 				if(checkType(assignment_expression->declSp, TYPE_FLOAT, 0))
 					error(assignment_expression->lexeme, SHOULD_NOT_BE_FLOAT);
 				//typecast by rank
-				int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, errStr);
-				if(retval)
-					error(errStr,retval);
+				// int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, errStr);
+				// if(retval)
+					// error(errStr,retval);
 			}
 		}
+		string resultAddr = unary_expression->addr;
 		string s(assignment_operator->name);
 		int opCode = getOpcodeFromAssignStr(s);
 		if(opCode >= 0) { 
 			//AND_ASSIGN or OR_ASSIGN or XOR_ASSIGN or LEFT_ASSIGN or RIGHT_ASSIGN or MOD_ASSIGN
-			emitOperationAssignment(unary_expression, assignment_expression, opCode, errCode, errStr);
+			emitOperationAssignment(unary_expression, assignment_expression, opCode, resultAddr, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
 		}
@@ -704,6 +733,7 @@ assignment_expression
 			int rank = giveTypeCastRank(unary_expression, assignment_expression);
 			if(rank < 0)
 				error("giveTypeCastRank error",-rank);
+			
 			int retval = typeCastByRank(unary_expression, assignment_expression, rank);
 			if(retval)
 				error("typecast error",retval);
@@ -719,7 +749,7 @@ assignment_expression
 			
 			if(errCode || opCode == -1)
 				error(errStr, errCode);
-			emitOperationAssignment(unary_expression, assignment_expression, opCode, errCode, errStr);
+			emitOperationAssignment(unary_expression, assignment_expression, opCode, resultAddr, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
 		}
@@ -1571,7 +1601,8 @@ int main(int ac, char **av) {
 		if(ac == 3) fileName = av[2];
 		generateDot(root,fileName);
 		printCode();
-		printSymbolTableJSON(gSymTable,0);
+		// printSymbolTableJSON(gSymTable,0);
+		printSymbolTable(gSymTable);
         fclose(fd);
     }
     else

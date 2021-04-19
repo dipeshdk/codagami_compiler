@@ -42,8 +42,8 @@ string generateTemp(int &errCode){
     errCode = 0;
     temp_num++;
     string name = to_string(temp_num)+"t";
-    // int retval = insertSymbol(gSymTable, TEMP_LINE_NO, name);
-    int retval = insertSymbol(gTempSymbolMap, TEMP_LINE_NO, name);
+    int retval = insertSymbol(gSymTable, TEMP_LINE_NO, name);
+    // int retval = insertSymbol(gTempSymbolMap, TEMP_LINE_NO, name);
     if(retval)
         errCode = retval; 
     return name;
@@ -137,6 +137,8 @@ void emitRelop(node* n1, node* n2, node* temp, int opCode, int& errCode, string 
         setErrorParams(errCode, errCode, errStr, temp->name);
         return;
     }
+    symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+    tempNode->declSp = declSpCopy(n1->declSp);
     temp->addr = newTmp;
     emit(opCode, n1->addr, n2->addr, temp->addr);
     emit(OP_IFGOTO, temp->addr, EMPTY_STR, BLANK_STR);
@@ -150,8 +152,8 @@ string emitTypeCast(node* node, declSpec *toDs, int &errCode, string &errStr) {
         setErrorParams(errCode, errCode, errStr, "new temp not generated");
         return BLANK_STR;
     }
-    symbolTableNode* tempNode= lookUp(gTempSymbolMap, newTmp);
-    // symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+    // symbolTableNode* tempNode= lookUp(gTempSymbolMap, newTmp);
+    symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
     tempNode->declSp = declSpCopy(toDs);
     if(!node->declSp){
         setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, node->lexeme);
@@ -162,14 +164,14 @@ string emitTypeCast(node* node, declSpec *toDs, int &errCode, string &errStr) {
     return newTmp;
 }
 
-void emitOperationAssignment(node* unary_expression, node* assignment_expression, int opCode, int &errCode, string &errStr) {
+void emitOperationAssignment(node* unary_expression, node* assignment_expression, int opCode, string resultAddr, int &errCode, string &errStr) {
     string newTmp = generateTemp(errCode);
     if(errCode){
         setErrorParams(errCode, errCode, errStr, "Cannot generate Temp");
         return;
     }
-    // symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-    symbolTableNode* tempNode= lookUp(gTempSymbolMap, newTmp);
+    symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+    // symbolTableNode* tempNode= lookUp(gTempSymbolMap, newTmp);
     int rank = giveTypeCastRank(unary_expression, assignment_expression);
     if(rank < 0) {
         setErrorParams(errCode, -rank, errStr, "get Rank error");
@@ -182,7 +184,7 @@ void emitOperationAssignment(node* unary_expression, node* assignment_expression
     }
 
     emit(opCode, unary_expression->addr, assignment_expression->addr, newTmp);
-    emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, unary_expression->addr);
+    emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, resultAddr);
 }  
 
 int getOpcodeFromAssignStr(string s){
