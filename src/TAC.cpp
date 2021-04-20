@@ -130,15 +130,16 @@ int getOpSubType(node* temp, int &errCode, string &errStr){
 }
 
 void emitRelop(node* n1, node* n2, node* temp, int opCode, int& errCode, string &errStr){
-    temp->truelist = makelist(nextQuad());
-    temp->falselist = makelist(nextQuad() + 1);
+    temp->truelist = makelist(nextQuad() + 1);
+    temp->falselist = makelist(nextQuad() + 2);
     string newTmp = generateTemp(errCode);
     if(errCode){
         setErrorParams(errCode, errCode, errStr, temp->name);
         return;
     }
     symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-    tempNode->declSp = declSpCopy(n1->declSp);
+    tempNode->declSp = new declSpec();
+    tempNode->declSp->type[0] = TYPE_INT;
     temp->addr = newTmp;
     emit(opCode, n1->addr, n2->addr, temp->addr);
     emit(OP_IFGOTO, temp->addr, EMPTY_STR, BLANK_STR);
