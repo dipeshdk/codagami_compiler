@@ -337,7 +337,7 @@ cast_expression
 		node* cast_expression = $4;
 		int err = canTypecast(cast_expression->declSp, type_name->declSp);
 		if(err) error("", err);
-		typeCastLexeme(cast_expression, type_name->declSp);
+		typeCastLexemeWithEmit(cast_expression, type_name->declSp);
 		$$ = cast_expression;
 	}
 	;
@@ -492,7 +492,6 @@ relational_expression
 			emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
-			temp->declSp = declSpCopy($1->declSp);
 			$$ = temp;
 			}
 	| relational_expression '>' shift_expression { 
@@ -503,7 +502,6 @@ relational_expression
 			emitRelop($1, $3, temp, OP_GREATER, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
-			temp->declSp = declSpCopy($1->declSp);
 			$$ = temp;
 	}
 	| relational_expression LE_OP shift_expression {
@@ -514,7 +512,6 @@ relational_expression
 		emitRelop($1, $3, temp, OP_LEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
-		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	| relational_expression GE_OP shift_expression { 
@@ -525,7 +522,6 @@ relational_expression
 		emitRelop($1, $3, temp, OP_GEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
-		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	;
@@ -553,7 +549,6 @@ equality_expression
 		emitRelop(equality_expression, relational_expression, temp, OP_EQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
-		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	| equality_expression NE_OP relational_expression { 
@@ -577,7 +572,6 @@ equality_expression
 		emitRelop(equality_expression, relational_expression, temp, OP_NEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
-		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	;
@@ -618,25 +612,27 @@ exclusive_or_expression
 			error(errStr, errCode);
 		emit(OP_XOR, exclusive_or_expression->addr, and_expression->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	;
 
 inclusive_or_expression
 	: exclusive_or_expression { $$ = $1; }
-	| inclusive_or_expression '|'  inclusive_or_expression { 
+	| inclusive_or_expression '|' exclusive_or_expression { 
 		node * inclusive_or_expression1 = $1;
-		node * inclusive_or_expression2 = $3;
-		int retval = bitwiseImplicitTypecasting(inclusive_or_expression1, inclusive_or_expression2, errCode,errStr);
+		node * exclusive_or_expression = $3;
+		int retval = bitwiseImplicitTypecasting(inclusive_or_expression1, exclusive_or_expression, errCode,errStr);
 		if(retval < 0){
 			error(errStr, errCode);
 		}
-		node* temp = makeNode(strdup("^"), strdup("^"), 0, inclusive_or_expression1, inclusive_or_expression2, (node*)NULL, (node*)NULL);
+		node* temp = makeNode(strdup("|"), strdup("|"), 0, inclusive_or_expression1, exclusive_or_expression, (node*)NULL, (node*)NULL);
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
-		emit(OP_OR, inclusive_or_expression1->addr, inclusive_or_expression2->addr, newTmp);
+		emit(OP_OR, inclusive_or_expression1->addr, exclusive_or_expression->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	;
@@ -648,6 +644,7 @@ logical_and_expression
 		node* temp = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $4, (node*)NULL, (node*)NULL); 
 		temp->truelist = $4->truelist;
 		temp->falselist = mergelist($1->falselist, $4->falselist);
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	;
@@ -659,6 +656,7 @@ logical_or_expression
 		node* temp = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $4, (node*)NULL, (node*)NULL);  
 		temp->truelist = mergelist($1->truelist, $4->truelist);
 		temp->falselist = $4->falselist;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	;
@@ -672,24 +670,28 @@ conditional_expression
 		node* temp = makeNode(strdup("?:"), strdup("?:"), 0, $1, $4, $8, (node*)NULL); 
 		vector<int> tempVec = mergelist( $4->nextlist, $5->nextlist);
 		temp->nextlist = mergelist(tempVec, $8->nextlist);
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	;
 
 assignment_expression
-	: conditional_expression { $$ = $1; }
-	| unary_expression assignment_operator assignment_expression { 
+	: conditional_expression { $$ = $1;}
+	| unary_expression assignment_operator assignment_expression 
+	{ 
 		node* unary_expression = $1;
 		node* assignment_expression = $3;
 		node* assignment_operator = $2;
-		if (!unary_expression->declSp) {
+		if (!unary_expression->declSp) 
+		{
 			declSpec* ds = new declSpec();
 			if(!assignment_expression->declSp)
 				error(assignment_expression->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
 			ds->type = assignment_expression->declSp->type;
 			unary_expression->declSp = ds;
 		}
-		else {
+		else 
+		{
 			string s(assignment_operator->name);
 			if(s == "AND_ASSIGN" || s == "OR_ASSIGN" || s == "XOR_ASSIGN" || s == "LEFT_ASSIGN" || s == "RIGHT_ASSIGN") {
 				//should be only int or char
@@ -724,8 +726,9 @@ assignment_expression
 			bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
-			if(retval)
+			if(retval){
 				typeCastLexemeWithEmit(assignment_expression, unary_expression->declSp);
+			}
 			emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
 		}
 		else
@@ -1333,22 +1336,23 @@ expression_statement
 
 
 selection_statement
-	: IF '(' expression ')' M_marker statement {
+	: IF '(' expression  ')' M_marker statement {
 		backpatch($3->truelist, $5->quad);
 		node * temp = makeNode(strdup("IF"), strdup("if"),0, $3, $6, (node*)NULL, (node*)NULL);
 		temp->nextlist = mergelist($3->falselist, $6->nextlist);
 		$$ = temp;
 	}
-	| IF  '(' expression ')' M_marker statement N_marker ELSE M_marker statement {
+	| IF  '(' expression  ')' M_marker statement ELSE N_marker M_marker statement {
 		backpatch($3->truelist, $5->quad);
 		backpatch($3->falselist, $9->quad);
 		node* temp = makeNode(strdup("IF_ELSE"), strdup("else"),0, $3, $6, $10, (node*)NULL);
-		vector<int> tempVec = mergelist($6->nextlist, $7->nextlist);
+		vector<int> tempVec = mergelist($6->nextlist, $8->nextlist);
 		temp->nextlist = mergelist(tempVec, $10->nextlist);
 		$$ = temp;
 	}
 	| SWITCH '(' expression ')' statement {$$ = makeNode(strdup("SWITCH"), strdup("switch"),0, $3, $5, (node*)NULL, (node*)NULL);}
 	;
+
 
 iteration_statement
 	: WHILE '(' M_marker expression ')' M_marker statement {

@@ -20,7 +20,7 @@ int backpatch(vector<int> &list, int i){
             ((gCode[index]->opCode != OP_GOTO) && 
             gCode[index]->opCode != OP_IFGOTO))
             return NOT_GOTO_IN_BACKPATCH;
-        gCode[index]->arg1 = to_string(i);
+        gCode[index]->result = to_string(i);
     }
     return 0;
 }
@@ -139,8 +139,9 @@ void emitRelop(node* n1, node* n2, node* temp, int opCode, int& errCode, string 
     }
     symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
     tempNode->declSp = new declSpec();
-    tempNode->declSp->type[0] = TYPE_INT;
+    tempNode->declSp->type.push_back(TYPE_INT);
     temp->addr = newTmp;
+    temp->declSp = declSpCopy(tempNode->declSp);
     emit(opCode, n1->addr, n2->addr, temp->addr);
     emit(OP_IFGOTO, temp->addr, EMPTY_STR, BLANK_STR);
     emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);

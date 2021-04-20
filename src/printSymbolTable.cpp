@@ -325,12 +325,11 @@ void printQuad(quadruple* quad, int line) {
 }
 
 void printCode() {
-    // string fileName = "code.txt";
-    freopen("code.txt", "a+", stdout);
+    freopen("code.txt", "w", stdout);
     cout << "\n==================== Printing 3AC Code ==================\n";
     int n = gCode.size();
     for(int i = 0; i < n; i++) {
-        printQuad(gCode[i], i+1);
+        printQuad(gCode[i], i);
     }
     cout << "\n====================================================\n";
 }
