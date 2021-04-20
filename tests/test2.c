@@ -1,11 +1,17 @@
 int main() {
-    float f1, f2;
+    float  f2;
     int a,b,c;
     char p,q,r;
     int j1;
-    ++a;
-    ++f1;
-    --a;
-    c = ++p;
-    --p;
+    int i;
+    int f1 = (float)a + b;
+
+    while(f2 != 10){
+        a = a+1;
+        break;
+        b= b+1;
+    }
+
+    a = a+3;
+    
 }

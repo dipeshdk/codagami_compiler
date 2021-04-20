@@ -18,7 +18,7 @@ int backpatch(vector<int> &list, int i){
     for(int index : list){
         if(index > sizeOfList || 
             ((gCode[index]->opCode != OP_GOTO) && 
-            gCode[index]->opCode != OP_IFGOTO))
+            (gCode[index]->opCode != OP_IFGOTO) && (gCode[index]->opCode != OP_IFNEQGOTO)))
             return NOT_GOTO_IN_BACKPATCH;
         gCode[index]->result = to_string(i);
     }

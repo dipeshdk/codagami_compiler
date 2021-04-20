@@ -39,6 +39,7 @@
 	int errCode=0;
 	string errStr;
 	string currFunc = "#prog";
+	vector<node*> case_consts;
 
 extern "C"
 {
@@ -1329,46 +1330,92 @@ statement
 		$$ = $1;
 		vector<int> tmp = mergelist($1->truelist, $1->falselist);
 		$$->nextlist = mergelist(tmp, $1->nextlist);
+		$$->breaklist = $1->breaklist;
+		$$->continuelist = $1->continuelist;
 	}
 	| compound_statement { 
 		$$ = $1;
 		vector<int> tmp = mergelist($1->truelist, $1->falselist);
 		$$->nextlist = mergelist(tmp, $1->nextlist);
+		$$->breaklist = $1->breaklist;
+		$$->continuelist = $1->continuelist;
 	}
 	| expression_statement { 
 		$$ = $1;
 		vector<int> tmp = mergelist($1->truelist, $1->falselist);
 		$$->nextlist = mergelist(tmp, $1->nextlist);
+		$$->breaklist = $1->breaklist;
+		$$->continuelist = $1->continuelist;
 	}
 	| selection_statement { 
 		$$ = $1;
 		vector<int> tmp = mergelist($1->truelist, $1->falselist);
 		$$->nextlist = mergelist(tmp, $1->nextlist);
+		$$->breaklist = $1->breaklist;
+		$$->continuelist = $1->continuelist;
 	}
 	| iteration_statement { 
 		$$ = $1;
 		vector<int> tmp = mergelist($1->truelist, $1->falselist);
 		$$->nextlist = mergelist(tmp, $1->nextlist);
+		$$->breaklist = $1->breaklist;
+		$$->continuelist = $1->continuelist;
 	}
 	| jump_statement { 
 		$$ = $1;
 		vector<int> tmp = mergelist($1->truelist, $1->falselist);
 		$$->nextlist = mergelist(tmp, $1->nextlist);
+		$$->breaklist = $1->breaklist;
+		$$->continuelist = $1->continuelist;
 	}
 	;
 
 labeled_statement
-	: IDENTIFIER ':' statement {$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
-	| CASE constant_expression ':' statement { $$ = makeNode(strdup("CASE"), strdup("case"), 0, $2, $4, (node*)NULL, (node*)NULL); }
-	| DEFAULT ':' statement {$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("DEFAULT"), strdup("default"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
+	: IDENTIFIER ':' statement {
+		$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);
+		$$->breaklist = $3->breaklist;
+		$$->continuelist = $3->continuelist;
+	}
+	| CASE constant_expression {
+		// ifgoto
+		vector<int> next = makelist(nextQuad());
+		emit(OP_IFNEQGOTO, case_consts[case_consts.size()-1]->addr, $2->addr, BLANK_STR);
+		// This should go to next case
+		$2->nextlist = mergelist($2->nextlist, next);
+	} ':' statement {
+		// Add goto to nextlist of $$ if not equal
+		$$ = makeNode(strdup("CASE"), strdup("case"), 0, $2, $5, (node*)NULL, (node*)NULL);
+		$$->nextlist = mergelist($2->nextlist, $5->nextlist);
+		
+		$$->breaklist = $5->breaklist;
+		$$->continuelist = $5->continuelist;
+	}
+	| DEFAULT ':' statement {
+		$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("DEFAULT"), strdup("default"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);
+		$$->breaklist = $3->breaklist;
+		$$->nextlist = $3->nextlist;
+		$$->continuelist = $3->continuelist;
+	}
 	;
 
 compound_statement
 	: scope_marker '{' '}' { $$ = (node*)NULL; gSymTable = gSymTable->parent;}
-	| scope_marker '{' statement_list '}' { $$ = $3; gSymTable = gSymTable->parent;}
+	| scope_marker '{' statement_list '}' {
+		$$ = $3; gSymTable = gSymTable->parent;
+		$$->breaklist = $3->breaklist;	
+		$$->continuelist = $3->continuelist;
+	}
 	| scope_marker '{' declaration_list '}' {  $$ = $3; gSymTable = gSymTable->parent;}
-	| scope_marker '{' declaration_list statement_list '}' { if($3){$$ = makeNode(strdup("BODY"), strdup("body"), 0, $3, $4, (node*)NULL, (node*)NULL);} else{
-		$$ = $4;} gSymTable = gSymTable->parent;}
+	| scope_marker '{' declaration_list statement_list '}' { 
+		if($3){
+			$$ = makeNode(strdup("BODY"), strdup("body"), 0, $3, $4, (node*)NULL, (node*)NULL);}
+		else{
+			$$ = $4;
+		}
+		gSymTable = gSymTable->parent;
+		$$->breaklist = $4->breaklist;	
+		$$->continuelist = $4->continuelist;
+	}
 	;
 
 scope_marker
@@ -1408,7 +1455,10 @@ statement_list
 			temp = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1, $2, (node*)NULL, (node*)NULL);
 		}
 		backpatch($1->nextlist, $2->quad);
+		
 		temp->nextlist = $3->nextlist;
+		temp->breaklist = mergelist($1->breaklist, $3->breaklist);
+		temp->continuelist = mergelist($1->continuelist, $3->continuelist);
 		$$=temp;
 	}
 	;
@@ -1442,6 +1492,8 @@ selection_statement
 		backpatch($3->truelist, $5->quad);
 		node * temp = makeNode(strdup("IF"), strdup("if"),0, $3, $6, (node*)NULL, (node*)NULL);
 		temp->nextlist = mergelist($3->falselist, $6->nextlist);
+		temp->breaklist = $6->breaklist;
+		temp->continuelist = $6->continuelist;
 		$$ = temp;
 	}
 	| IF  '(' expressionJump  ')' M_marker statement ELSE N_marker M_marker statement {
@@ -1450,12 +1502,18 @@ selection_statement
 		node* temp = makeNode(strdup("IF_ELSE"), strdup("else"),0, $3, $6, $10, (node*)NULL);
 		vector<int> tempVec = mergelist($6->nextlist, $8->nextlist);
 		temp->nextlist = mergelist(tempVec, $10->nextlist);
+		temp->breaklist = mergelist($5->breaklist, $10->breaklist);
+		temp->continuelist = mergelist($5->continuelist, $10->continuelist);
 		$$ = temp;
 	}
-	| SWITCH '(' expressionJump ')' statement {
-		$5->addr = $3->addr;
-		$$ = makeNode(strdup("SWITCH"), strdup("switch"),0, $3, $5, (node*)NULL, (node*)NULL);
-		}
+	| SWITCH '(' expressionJump {case_consts.push_back($3);} ')' statement {
+		$6->addr = $3->addr;
+		$$ = makeNode(strdup("SWITCH"), strdup("switch"),0, $3, $6, (node*)NULL, (node*)NULL);
+		$$->nextlist = mergelist($6->breaklist, $6->nextlist);
+		$$->nextlist = mergelist($$->nextlist, $3->nextlist);
+		$$->continuelist = $6->continuelist;
+		case_consts.pop_back();
+	}	
 	;
 
 
@@ -1508,8 +1566,16 @@ iteration_statement
 
 jump_statement
 	: GOTO IDENTIFIER ';' {$$ = makeNode(strdup("GOTO"), strdup("goto"), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
-	| CONTINUE ';'{ $$ = makeNode(strdup("CONTINUE"), strdup("continue"),1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| BREAK ';' { $$ = makeNode(strdup("BREAK"), strdup("break"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| CONTINUE ';'{ 
+		$$ = makeNode(strdup("CONTINUE"), strdup("continue"),1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		$$->continuelist = makelist(nextQuad());
+		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
+	}
+	| BREAK ';' { 
+		$$ = makeNode(strdup("BREAK"), strdup("break"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		$$->breaklist = makelist(nextQuad());
+		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
+	}
 	| RETURN ';' { 
 		symbolTableNode* funcNode = lookUp(gSymTable, currFunc);
 		if(funcNode == nullptr){ // Not in func

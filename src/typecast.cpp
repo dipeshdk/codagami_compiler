@@ -294,8 +294,14 @@ node* makeNodeForExpressionByRank(node* n1, node* n2, string name, string lexeme
         case 2: temp->declSp = n2->declSp; break;
         default:  temp->declSp = n1->declSp;  break;
     }
+    string type = getTypeName(temp->declSp->type[0]);
+    string new_lexeme = lexeme + "(" + type + ")";
+    temp->lexeme = strcpy(new char[new_lexeme.length() + 1], new_lexeme.c_str());
     return temp;
 }
+
+//  4       3     2       1 
+//         Float > Int > Char > Void
 
 node* makeNodeForExpressionNotPointerNotString(node* n1, node* n2, string name, int& errCode, string& errStr) {
     int rank = implicitTypecastingNotPointerNotStringLiteral(n1, n2, errStr);

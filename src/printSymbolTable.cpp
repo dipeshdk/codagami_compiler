@@ -193,29 +193,29 @@ void printSymbolTableJSON(symbolTable *st, int numTab) {
     // for(auto &s: st->symbolOrder){
         // printf("\"%s\", ",s.c_str());
         symbolTableNode *elem = st->symbolTableMap[st->symbolOrder[i]];
-        int size = 0;
-        if(elem->infoType == INFO_TYPE_ARRAY){
-            size += getTypeSize(elem->declSp->type)*(elem->arraySize);
-        }
-        else if(elem->infoType == INFO_TYPE_FUNC){
-            size += 8;
-        }
-        else if(elem->infoType == INFO_TYPE_STRUCT){
-            if(!elem->declSp){
-                structTableNode* n = st->structMap[elem->declSp->lexeme];
-                for(auto i: n->paramList){
-                    if(!i->declSp)
-                        size+= getTypeSize(i->declSp->type);
-                }
-            }
+        int size = getNodeSize(elem, st);
+        // if(elem->infoType == INFO_TYPE_ARRAY){
+        //     size += getTypeSize(elem->declSp->type)*(elem->arraySize);
+        // }
+        // else if(elem->infoType == INFO_TYPE_FUNC){
+        //     size += 8;
+        // }
+        // else if(elem->infoType == INFO_TYPE_STRUCT){
+        //     if(!elem->declSp){
+        //         structTableNode* n = st->structMap[elem->declSp->lexeme];
+        //         for(auto i: n->paramList){
+        //             if(!i->declSp)
+        //                 size+= getTypeSize(i->declSp->type);
+        //         }
+        //     }
             
-        }
-        else if(elem->declSp && elem->declSp->ptrLevel){
-            size += 8;
-        }
-        else{
-            size += getTypeSize(elem->declSp->type);
-        }
+        // }
+        // else if(elem->declSp && elem->declSp->ptrLevel){
+        //     size += 8;
+        // }
+        // else{
+        //     size += getTypeSize(elem->declSp->type);
+        // }
         
         printf("%s", str.c_str());
         printf("{\n");
@@ -243,6 +243,40 @@ void printSymbolTableJSON(symbolTable *st, int numTab) {
 
     freopen(fileName.c_str(), "w", stdout);
 }
+
+int getNodeSize(symbolTableNode* elem, symbolTable* st){
+    int size = 0;
+    if(elem->infoType == INFO_TYPE_ARRAY){
+        if(elem->declSp->ptrLevel > 0){
+            size += 8*(elem->arraySize);
+        }
+        else size += getTypeSize(elem->declSp->type)*(elem->arraySize);
+    }
+    else if(elem->infoType == INFO_TYPE_FUNC){
+        size += 8;
+    }
+    else if(elem->infoType == INFO_TYPE_STRUCT){
+        if(!elem->declSp){
+            structTableNode* n = st->structMap[elem->declSp->lexeme];
+            for(auto i: n->paramList){
+                if(!i->declSp)
+                    if(i->declSp->ptrLevel > 0){
+                        size += 8;
+                    }
+                    else size+= getTypeSize(i->declSp->type);
+            }
+        }
+        
+    }
+    else if(elem->declSp && elem->declSp->ptrLevel){
+        size += 8;
+    }
+    else{
+        size += getTypeSize(elem->declSp->type);
+    }
+    return size;
+}
+
 
 int getTypeSize(vector<int> &type) {
     if(type.size() != 1) return -CONFLICTING_TYPES;
@@ -319,6 +353,8 @@ void printQuad(quadruple* quad, int line) {
             printf("GOTO %s\n", quad->result.c_str()); break;
         case OP_ASSIGNMENT:
             printf("%s = %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
+        case OP_IFNEQGOTO:
+            printf("IF %s <> %s GOTO %s\n", quad->arg1.c_str(), quad->arg2.c_str(), quad->result.c_str()); break;
         default:
             printf("%s = %s %s %s\n", quad->result.c_str(),  quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());
     }
