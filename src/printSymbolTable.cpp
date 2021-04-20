@@ -310,17 +310,25 @@ string getOpName(int opCode) {
     return "INVALID OPCODE";
 }
 
+void printQuad(quadruple* quad, int line) {
+    printf("%d.   ", line);
+    switch(quad->opCode) {
+        case OP_IFGOTO:
+            printf("IF %s THEN GOTO %s\n",quad->arg1.c_str(), quad->result.c_str()); break;
+        case OP_GOTO:
+            printf("GOTO %s\n", quad->result.c_str()); break;
+        case OP_ASSIGNMENT:
+            printf("%s = %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
+        default:
+            printf("%s = %s %s %s\n", quad->result.c_str(),  quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());
+    }
+}
+
 void printCode() {
-    cout << "\n==================== Printing Code ==================\n";
-    printf("    %-15s\t\t %-35s\t\t %8s\t %8s\n", "result", "arg1", "opcode", "arg2");
-    for(auto &quad : gCode) {
-        printf("    %-15s\t\t %-35s\t\t %8s\t %8s\n", quad->result.c_str(),  quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());
-        // cout <<"result =  "<< quad->result
-        // <<", arg1 = " << quad->arg1 
-        // << ", opCode  = " 
-        // << getOpName(quad->opCode)
-        // <<", arg2 = " << quad->arg2
-        // << "\n"; 
+    cout << "\n==================== Printing 3AC Code ==================\n";
+    int n = gCode.size();
+    for(int i = 0; i < n; i++) {
+        printQuad(gCode[i], i+1);
     }
     cout << "\n====================================================\n";
 }

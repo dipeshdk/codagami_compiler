@@ -1602,7 +1602,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName);
 		printCode();
 		// printSymbolTableJSON(gSymTable,0);
-		printSymbolTable(gSymTable);
+		// printSymbolTable(gSymTable);
         fclose(fd);
     }
     else
