@@ -247,18 +247,21 @@ postfix_expression
 		$$ = newNode;
 	}
 	| postfix_expression INC_OP {
-		int retval  = checkIntOrCharOrPointer($1);
-		if(retval) error($1->lexeme, retval);
-		addChild($1, makeNode(strdup("INC_OP"), strdup("++"), 1, NULL, NULL, NULL, NULL));
-		
+		// int retval  = checkIntOrCharOrPointer($1);
+		// if(retval) error($1->lexeme, retval);
+		// addChild($1, makeNode(strdup("INC_OP"), strdup("++"), 1, NULL, NULL, NULL, NULL));
+		errStr = "use ++" + string($1->lexeme)+ " instead of " + string($1->lexeme) + "++";
+		error(errStr.c_str(), UNSUPPORTED_FUNCTIONALITY);
 		$$ = $1;
 	}
 	| postfix_expression DEC_OP {
-		int retval  = checkIntOrCharOrPointer($1);
-		if(retval) error($1->lexeme, retval);
-		addChild($1, makeNode(strdup("DEC_OP"), strdup("--"), 1, NULL, NULL, NULL, NULL));
+		// int retval  = checkIntOrCharOrPointer($1);
+		// if(retval) error($1->lexeme, retval);
+		// addChild($1, makeNode(strdup("DEC_OP"), strdup("--"), 1, NULL, NULL, NULL, NULL));
+		errStr = "use --" + string($1->lexeme)+ " instead of " + string($1->lexeme) + "--";
+		error(errStr.c_str(), UNSUPPORTED_FUNCTIONALITY);
 		$$ = $1;
-		}
+	}
 	;
 
 argument_expression_list
@@ -269,14 +272,35 @@ argument_expression_list
 unary_expression
 	: postfix_expression {$$ = $1;}
 	| INC_OP unary_expression {
-		int retval  = checkIntOrCharOrPointer($2);
-		if(retval) error($2->lexeme, retval);
+		// int retval  = checkIntOrCharOrPointer($2);
+		// if(retval) error($2->lexeme, retval);
+		string newTmp = generateTemp(errCode);
+    	if(errCode)
+        	error("Cannot generate Temp",errCode);
+		int opCode = getOpAddType($2, errCode, errStr);
+		if(errCode)
+			error("Cannot generate Temp",errCode);
+        emit(opCode, $2->addr, "1", newTmp);
+    	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $2->addr);
 		$$ = makeNode(strdup("INC_OP"), strdup("++"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
-		}
+		$$->declSp = declSpCopy($2->declSp);
+		$$->addr = $2->addr;
+	}
 	| DEC_OP unary_expression {
-		int retval  = checkIntOrCharOrPointer($2);
-		if(retval) error($2->lexeme, retval);
-		$$ = makeNode(strdup("DEC_OP"), strdup("--"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
+		// int retval  = checkIntOrCharOrPointer($2);
+		// if(retval) error($2->lexeme, retval);
+		string newTmp = generateTemp(errCode);
+    	if(errCode)
+        	error("Cannot generate Temp",errCode);
+		int opCode = getOpSubType($2, errCode, errStr);
+		if(errCode)
+			error("Cannot generate Temp",errCode);
+        emit(opCode, $2->addr, "1", newTmp);
+    	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $2->addr);
+		$$ = makeNode(strdup("DEC_OP"), strdup("--"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
+		$$->declSp = declSpCopy($2->declSp);
+		$$->addr = $2->addr;
+	}
 	| unary_operator cast_expression {
 		node* unary_operator = $1;
 		node* cast_expression = $2;
@@ -1428,7 +1452,10 @@ selection_statement
 		temp->nextlist = mergelist(tempVec, $10->nextlist);
 		$$ = temp;
 	}
-	| SWITCH '(' expressionJump ')' statement {$$ = makeNode(strdup("SWITCH"), strdup("switch"),0, $3, $5, (node*)NULL, (node*)NULL);}
+	| SWITCH '(' expressionJump ')' statement {
+		$5->addr = $3->addr;
+		$$ = makeNode(strdup("SWITCH"), strdup("switch"),0, $3, $5, (node*)NULL, (node*)NULL);
+		}
 	;
 
 
