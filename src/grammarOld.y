@@ -156,7 +156,6 @@ primary_expression
 		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_CHAR);
 		temp->valType = TYPE_CHAR;
-		printf("char identified: %s\n", yylval.id);
 		setAddr(temp, string(yylval.id));
 		$$ = temp;
 	}
@@ -810,8 +809,10 @@ declaration
 		while(curr){
 			node* temp = curr;
 			string s(curr->name);
+			node* initializer=nullptr;
 			if(s == "="){
 				temp = curr->childList;
+				initializer = temp->next;
 			}
 			
 			if(!temp) continue;
@@ -843,11 +844,26 @@ declaration
 				sym_node->declSp = declSpCopy($1->declSp);
 				if(temp->declSp)
 					sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
+				if(initializer) {
+					//variable initialized
+					int retval = canTypecast(sym_node->declSp, initializer->declSp);
+					if(retval)
+						error("variable assignment error", retval);
+					retval = areDifferentTypes(sym_node->declSp, initializer->declSp, errCode, errStr);
+					if(errCode)
+						error(errStr, errCode);
+					if(retval) {
+						typeCastLexemeWithEmit(initializer, sym_node->declSp);
+					}
+					emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);
+				}
 			} 
 			
 			curr = curr->next;
 		}
-		if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;   
+		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;   
+		makeSibling($2,$1);
+		$$ = $1; 
 	}
 	;
 
@@ -895,7 +911,6 @@ init_declarator
 		node* declaration_specifiers = currDeclSpec;
 		node* declarator = $1;
 		node* initializer = $3;
-    //TODO:  typecasting
 		
 		if(!declarator->declSp){
 			declSpec* ds = new declSpec();
@@ -906,6 +921,7 @@ init_declarator
 			declarator->declSp = ds;
 		}
 		$$ = makeNode(strdup("="), strdup("="), 0, declarator, initializer, (node*)NULL, (node*)NULL);
+		$$->addr=$1->addr;
 	}
 	;
 // do not handle
@@ -1102,6 +1118,7 @@ direct_declarator
 		$$ = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$-> infoType = INFO_TYPE_NORMAL;
 		$$->lineNo = line+1;
+		$$->addr = yylval.id;
 	}
 	| '(' declarator ')' { $$ = $2;}
 	| direct_declarator '[' constant_expression ']' {
