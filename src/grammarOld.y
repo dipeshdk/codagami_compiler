@@ -1334,6 +1334,7 @@ expression_statement
 	| expression ';' {makeSibling(makeNode(strdup(";"), strdup(";"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
 	;
 
+
 selection_statement
 	: IF '(' expression  ')' M_marker statement {
 		backpatch($3->truelist, $5->quad);
@@ -1354,11 +1355,51 @@ selection_statement
 
 
 iteration_statement
-	: WHILE '(' expression ')' statement {$$ = makeNode(strdup("WHILE"), strdup("while"), 0, $3, $5, (node*)NULL, (node*)NULL);}
-	| DO statement WHILE '(' expression ')' ';' {$$ = makeNode(strdup("DO WHILE"), strdup("do while"), 0, $2, $5, (node*)NULL, (node*)NULL);}
-	| FOR '(' expression_statement expression_statement ')' statement {$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $4, $6, (node*)NULL);}
-	| FOR '(' expression_statement expression_statement expression ')' statement {$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $4, $5, $7);}
+	: WHILE '(' M_marker expression ')' M_marker statement {
+		node *m1 = $3, *m2 = $6, *s1 = $7, *e1 = $4;
+		backpatch(s1->nextlist, m1->quad);
+		backpatch(e1->truelist, m2->quad);
+		backpatch(s1->continuelist, m1->quad);
+
+		$$ = makeNode(strdup("WHILE"), strdup("while"), 0, $4, $7, (node*)NULL, (node*)NULL);
+		
+		$$->nextlist = mergelist(s1->breaklist, e1->falselist);
+		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m1->quad));
+	}
+	| DO M_marker statement WHILE '(' M_marker expression ')' ';' {
+		node* s1 = $3, *e1 = $7, *m2 = $2, *m1 = $6;
+		backpatch(s1->nextlist, m1->quad);
+		backpatch(e1->truelist, m2->quad);
+		backpatch(s1->continuelist, m1->quad);
+		
+		$$ = makeNode(strdup("DO WHILE"), strdup("do while"), 0, $3, $7, (node*)NULL, (node*)NULL);
+		
+		$$->nextlist = mergelist(s1->breaklist, e1->falselist);
+		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m2->quad));
+	}
+	| FOR '(' expression_statement M_marker expression_statement ')' M_marker statement {
+		node *e1 = $3, *m1 = $4, *e2 = $5, *m3 = $7, *s1 = $8;
+		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m1->quad));
+		backpatch(e2->truelist, m3->quad);
+		backpatch(s1->continuelist, m1->quad);
+		backpatch(s1->nextlist, m1->quad);
+		
+		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $8, (node*)NULL);
+		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
+	}
+	| FOR '(' expression_statement M_marker expression_statement M_marker expression N_marker ')' M_marker statement {
+		node *e1 = $3, *m1 = $4, *e2 = $5, *m2 = $6, *e3 = $7, *n1 = $8, *m3 = $10, *s1 = $11;
+		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m2->quad));
+		backpatch(n1->nextlist, m1->quad);
+		backpatch(e2->truelist, m3->quad);
+		backpatch(s1->continuelist, m2->quad);
+		backpatch(s1->nextlist, m2->quad);
+
+		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $7, $11);
+		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
+	}
 	;
+
 
 jump_statement
 	: GOTO IDENTIFIER ';' {$$ = makeNode(strdup("GOTO"), strdup("goto"), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
