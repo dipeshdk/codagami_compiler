@@ -41,13 +41,13 @@ int insertSymbol(symbolTable* st, int lineNo, string name){
 void addIVal(node* temp, string s) {
     size_t p;
     temp->valType = TYPE_INT;
-    temp->lval = (int)stod(s, &p);
+    temp->ival = (int)stod(s, &p);
 }
 
 void addFVal(node* temp, string s) {
     size_t p;
     temp->valType = TYPE_FLOAT;
-    temp->dval = (float)stod(s, &p);
+    temp->fval = (float)stod(s, &p);
 }
 
 struct symbolTable* addChildSymbolTable(struct symbolTable *parent){

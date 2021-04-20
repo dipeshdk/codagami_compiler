@@ -22,7 +22,7 @@
 			pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
-			constant inden_marker func_marker_1 
+			constant inden_marker func_marker_1 M_marker N_marker
 // Prototypes
 %{
 	#include <stdio.h>
@@ -155,6 +155,7 @@ primary_expression
 		node* temp = makeNode(strdup("CHAR_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
 		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_CHAR);
+		temp->valType = TYPE_CHAR;
 		printf("char identified: %s\n", yylval.id);
 		setAddr(temp, string(yylval.id));
 		$$ = temp;
@@ -209,17 +210,23 @@ postfix_expression
 		$$ = $1;
 	}
 	| postfix_expression '.' IDENTIFIER { 
+		node * postfix_expression = $1;
 		structTableNode* structure = getRightMostStructFromPostfixExpression($1, false, errCode, errStr);
 		if(errCode) error(errStr, errCode);
 		
 		string identifierName = yylval.id;
 		structParam* param = structureParamLookup(structure, identifierName, errCode, errStr);
 		if(errCode) error(errStr, errCode);
-		
+		string newAddr = postfix_expression->addr + "." + identifierName;
 		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, NULL, NULL, NULL, NULL);
-		temp->declSp = param->declSp;
+		temp->declSp = declSpCopy(param->declSp);
 		temp->infoType = INFO_NESTED_STRUCT;
-		$$ = makeNode(strdup("."), strdup("."), 0, $1, temp , NULL, NULL);
+		temp->addr = newAddr;
+		node *newNode = makeNode(strdup("."), strdup("."), 0, $1, temp , NULL, NULL);
+		newNode->declSp = declSpCopy(temp->declSp);
+		newNode->infoType = INFO_NESTED_STRUCT;
+		newNode->addr = newAddr;
+		$$ = newNode;
 	}
 	| postfix_expression PTR_OP IDENTIFIER {
 		structTableNode* structure = getRightMostStructFromPostfixExpression($1, true, errCode, errStr);
@@ -228,17 +235,23 @@ postfix_expression
 		string identifierName = yylval.id;
 		structParam* param = structureParamLookup(structure, identifierName, errCode, errStr);
 		if(errCode) error(errStr, errCode);
-		
+	
+		string newAddr = $1->addr + "->" + identifierName;
 		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, NULL, NULL, NULL, NULL);
-		temp->declSp = param->declSp;
+		temp->declSp = declSpCopy(param->declSp);
 		temp->infoType = INFO_NESTED_STRUCT;
-		
-		$$ = makeNode(strdup("PTR_OP"), strdup("->"), 0, $1, temp , NULL, NULL);
+		temp->addr = newAddr;
+		node *newNode = makeNode(strdup("PTR_OP"), strdup("->"), 0, $1, temp , NULL, NULL);
+		newNode->declSp = declSpCopy(temp->declSp);
+		newNode->infoType = INFO_NESTED_STRUCT;
+		newNode->addr = newAddr;
+		$$ = newNode;
 	}
 	| postfix_expression INC_OP {
 		int retval  = checkIntOrCharOrPointer($1);
 		if(retval) error($1->lexeme, retval);
 		addChild($1, makeNode(strdup("INC_OP"), strdup("++"), 1, NULL, NULL, NULL, NULL));
+		
 		$$ = $1;
 	}
 	| postfix_expression DEC_OP {
@@ -259,7 +272,8 @@ unary_expression
 	| INC_OP unary_expression {
 		int retval  = checkIntOrCharOrPointer($2);
 		if(retval) error($2->lexeme, retval);
-		$$ = makeNode(strdup("INC_OP"), strdup("++"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
+		$$ = makeNode(strdup("INC_OP"), strdup("++"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
+		}
 	| DEC_OP unary_expression {
 		int retval  = checkIntOrCharOrPointer($2);
 		if(retval) error($2->lexeme, retval);
@@ -268,21 +282,38 @@ unary_expression
 		node* unary_operator = $1;
 		node* cast_expression = $2;
 		string name(unary_operator->name);
-		
-		// int retval = checkStringLiteral(cast_expression);
-		// if(!retval)	error(cast_expression->name, TYPE_ERROR);
-		// TODO: hanlde & for pointers int h; int * c = &h; 
+		unary_operator->declSp = cast_expression->declSp;
+
 		if(name == "*" && 
 			(!(cast_expression->infoType == INFO_TYPE_ARRAY || (cast_expression->declSp && cast_expression->declSp->ptrLevel > 0))))
 				error(cast_expression->name, TYPE_ERROR);
-	
-		unary_operator->declSp = cast_expression->declSp;
+
+		if(name == "&"){
+			if(cast_expression->infoType ==INFO_TYPE_STRUCT){
+				structTableNode* structNode = structLookUp(gSymTable, cast_expression->lexeme);
+				if(!structNode){
+					error(cast_expression->lexeme,INVALID_REFERENCE);
+				}else{
+					unary_operator->declSp->ptrLevel++;
+				}
+			}
+			else
+			{
+				symbolTableNode* symNode = lookUp(gSymTable,cast_expression->lexeme);
+				if(!symNode){
+					error(cast_expression->lexeme,INVALID_REFERENCE);
+				}else{
+					unary_operator->declSp->ptrLevel++;
+				}
+			}
+		}
 		addChild(unary_operator, cast_expression);
 		$$ = unary_operator;
 	}
 	| SIZEOF unary_expression {$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| SIZEOF '(' type_name ')'{
 		// TODO: Check validity of type_name 
+		
 		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
 	;
 
@@ -301,16 +332,12 @@ unary_operator
 cast_expression
 	: unary_expression {$$ = $1; }
 	| '(' type_name ')' cast_expression { 
-		// Append typename to front of lexeme
 		string strType = "(TO_";
 		node* type_name = $2;
 		node* cast_expression = $4;
 		int err = canTypecast(cast_expression->declSp, type_name->declSp);
 		if(err) error("", err);
-		strType = strType + getTypeString(type_name->declSp->type) + ")";
-		cast_expression->declSp->type = type_name->declSp->type;
-		string s = strType + string(cast_expression->lexeme); 
-		strcpy(cast_expression->lexeme, s.c_str());
+		typeCastLexeme(cast_expression, type_name->declSp);
 		$$ = cast_expression;
 	}
 	;
@@ -318,32 +345,38 @@ cast_expression
 multiplicative_expression
 	: cast_expression {$$ = $1; }
 	| multiplicative_expression '*' cast_expression { 
-		//  no pointer & no string literal
-		node* temp = makeNodeForExpression($1, $3, "*", errCode, errStr); 
+		//  no pointer & no string literal constNode->lexeme
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "*", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
 		int opCode = getOpMulType(temp, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	| multiplicative_expression '/' cast_expression { 
-		node* temp = makeNodeForExpression($1, $3, "/", errCode, errStr); 
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "/", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
 		int opCode = getOpDivType(temp, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	| multiplicative_expression '%' cast_expression { 
@@ -351,15 +384,18 @@ multiplicative_expression
 		if(retval){
 			error($3->lexeme, SHOULD_NOT_BE_FLOAT);
 		}
-		node* temp = makeNodeForExpression($1, $3, "%", errCode, errStr); 
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "%", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
 			
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
 		emit(OP_MOD, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	;
@@ -367,31 +403,37 @@ multiplicative_expression
 additive_expression
 	: multiplicative_expression { $$ = $1; }
 	| additive_expression '+' multiplicative_expression { 
-		node* temp = makeNodeForExpression($1, $3, "+", errCode, errStr); 
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "+", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
 		int opCode = getOpAddType(temp, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	| additive_expression '-' multiplicative_expression { 
-		node* temp = makeNodeForExpression($1, $3, "-", errCode, errStr); 
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "-", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
 		int opCode = getOpSubType(temp, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	;
@@ -400,276 +442,323 @@ shift_expression
 	: additive_expression { $$ = $1; }
 	| shift_expression LEFT_OP additive_expression { 
 		int retval = checkIntOrChar($3);
-		if(retval){
-			error($3->lexeme, TYPE_ERROR);
-		}
+		if(retval)	error($3->lexeme, TYPE_ERROR);
 		retval = checkIntOrChar($1);
-		if(retval){
-			error($1->lexeme, TYPE_ERROR);
+		if(retval)	error($1->lexeme, TYPE_ERROR);
+		
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "<<", errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+			
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
+		emit(OP_LEFT_SHIFT, $1->addr, $3->addr, newTmp);
+		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
+		$$ = temp; 
 		}
-		string var;
-		retval = implicitTypecastingNotPointerNotStringLiteral($1, $3, var);
-		if(retval){
-			error(var,retval);
-		}
-		$$ = makeNode(strdup("LEFT_OP"), strdup("<<"), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	| shift_expression RIGHT_OP additive_expression { 
 		int retval = checkIntOrChar($3);
-		if(retval){
-			error($3->lexeme, TYPE_ERROR);
-		}
+		if(retval)	error($3->lexeme, TYPE_ERROR);
 		retval = checkIntOrChar($1);
-		if(retval){
-			error($1->lexeme, TYPE_ERROR);
+		if(retval)	error($1->lexeme, TYPE_ERROR);
+		
+		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, ">>", errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+			
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+		tempNode->declSp = declSpCopy($1->declSp);
+		emit(OP_RIGHT_SHIFT, $1->addr, $3->addr, newTmp);
+		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
+		$$ = temp;
 		}
-		string var;
-		retval = implicitTypecastingNotPointerNotStringLiteral($1, $3, var);
-		if(retval){
-			error(var,retval);
-		}
-		$$ = makeNode(strdup("RIGHT_OP"), strdup(">>"), 0, $1, $3, (node*)NULL, (node*)NULL); }
 	;
 
 relational_expression
 	: shift_expression { $$ = $1; }
 	| relational_expression '<' shift_expression { 
-			string var;
-			int retval = implicitTypecastingNotStringLiteral($1, $3, var);
-			if(retval){
-				error(var,retval);
-		}
-		$$ = makeNode(strdup("<"), strdup("<"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
+			if(retval)
+				error(errStr,retval);
+			node* temp = makeNode(strdup("<"), strdup("<"), 0, $1, $3, (node*)NULL, (node*)NULL); 
+			emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			temp->declSp = declSpCopy($1->declSp);
+			$$ = temp;
+			}
 	| relational_expression '>' shift_expression { 
-			string var;
-			int retval = implicitTypecastingNotStringLiteral($1, $3, var);
-			if(retval){
-				error(var,retval);
-		}
-		$$ = makeNode(strdup(">"), strdup(">"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
+			if(retval)
+				error(errStr,retval);
+			node* temp = makeNode(strdup(">"), strdup(">"), 0, $1, $3, (node*)NULL, (node*)NULL); 
+			emitRelop($1, $3, temp, OP_GREATER, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			temp->declSp = declSpCopy($1->declSp);
+			$$ = temp;
+	}
 	| relational_expression LE_OP shift_expression {
-			string var;
-			int retval = implicitTypecastingNotStringLiteral($1, $3, var);
-			if(retval){
-				error(var,retval);
-		}
-	$$ = makeNode(strdup("LE_OP"), strdup("<="), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
+		if(retval)
+			error(errStr,retval);
+		node* temp = makeNode(strdup("LE_OP"), strdup("<="), 0, $1, $3, (node*)NULL, (node*)NULL);
+		emitRelop($1, $3, temp, OP_LEQ, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		temp->declSp = declSpCopy($1->declSp);
+		$$ = temp;
+	}
 	| relational_expression GE_OP shift_expression { 
-			string var;
-			int retval = implicitTypecastingNotStringLiteral($1, $3, var);
-			if(retval){
-				error(var,retval);
-		}
-		$$ = makeNode(strdup("GE_OP"), strdup(">="), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
+		if(retval)
+			error(errStr,retval);
+		node* temp = makeNode(strdup("GE_OP"), strdup(">="), 0, $1, $3, (node*)NULL, (node*)NULL);
+		emitRelop($1, $3, temp, OP_GEQ, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		temp->declSp = declSpCopy($1->declSp);
+		$$ = temp;
+	}
 	;
 
 equality_expression
 	: relational_expression { $$ = $1; }
 	| equality_expression EQ_OP relational_expression {
-		int retval1 = checkPointer($1);
-		int retval2 = checkPointer($3);
-		int x = (retval1 == 0) + (retval2 == 0); 
-		string var;
-		if(x == 2){
-			
-		}else{
-			if(x == 1){
-				if(!retval1){
-					var = $1->lexeme;
-					error(var, POINTER_ERROR);
-				}
-				if(!retval2){
-					var = $3->lexeme;
-					error(var, POINTER_ERROR);
-				}	
-			}
-			// else{
-			// 	// retval1 = checkStringLiteral($1);
-			// 	// retval2 = checkStringLiteral($3);
-			// 	x = (retval1 == 0) + (retval2 == 0); 
-			// 	if(x == 2){
+		node* equality_expression = $1;
+		node* relational_expression = $3;
+		int retval1 = checkPointer(equality_expression);
+		int retval2 = checkPointer(relational_expression);
+		int x = (retval1 == 0) + (retval2 == 0);
+		if(x == 1)
+			error("equality check between pointer and non pointer", POINTER_ERROR);
 
-			// 	}else{
-			// 		if(x == 1){
-			// 			if(!retval1){
-			// 				var = $1->lexeme;
-			// 				error(var,STRING_LITERAL_ERROR);
-			// 			}
-			// 			if(!retval2){
-			// 				var = $3->lexeme;
-			// 				error(var,STRING_LITERAL_ERROR);
-			// 			}
-			// 		}
-				
-			// 	}
-				
-			// }
-		}
-		int rank = giveTypeCastRank($1, $3);
-		if(rank){
-			var = "typecasting error rank";
-			error(var, rank);
-		}	
-		$$ = makeNode(strdup("EQ_OP"), strdup("=="), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		int rank = giveTypeCastRank(equality_expression, relational_expression);
+		if(rank < 0)
+			error("typecasting error rank", rank);
+		int retval = typeCastByRank(equality_expression, relational_expression, rank);
+		if(retval)
+			error("typecasting error rank", retval);
+		node* temp = makeNodeForExpressionByRank(equality_expression, relational_expression, "EQ_OP", "==", rank, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		emitRelop(equality_expression, relational_expression, temp, OP_EQ, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		temp->declSp = declSpCopy($1->declSp);
+		$$ = temp;
+	}
 	| equality_expression NE_OP relational_expression { 
-		int retval1 = checkPointer($1);
-		int retval2 = checkPointer($3);
-		int x = (retval1 == 0) + (retval2 == 0); 
-		string var;
-		if(x == 2){
-			
-		}else{
-			if(x == 1){
-				if(!retval1){
-					var = $1->lexeme;
-					error(var, POINTER_ERROR);
-				}
-				if(!retval2){
-					var = $3->lexeme;
-					error(var, POINTER_ERROR);
-				}	
-			}
-			// else{
-			// 	// retval1 = checkStringLiteral($1);
-			// 	// retval2 = checkStringLiteral($3);
-			// 	x = (retval1 == 0) + (retval2 == 0); 
-			// 	if(x == 2){
+		node* equality_expression = $1;
+		node* relational_expression = $3;
+		int retval1 = checkPointer(equality_expression);
+		int retval2 = checkPointer(relational_expression);
+		int x = (retval1 == 0) + (retval2 == 0);
+		if(x == 1)
+			error("equality check between pointer and non pointer", POINTER_ERROR);
 
-			// 	}else{
-			// 		if(x == 1){
-			// 			if(!retval1){
-			// 				var = $1->lexeme;
-			// 				error(var,STRING_LITERAL_ERROR);
-			// 			}
-			// 			if(!retval2){
-			// 				var = $3->lexeme;
-			// 				error(var,STRING_LITERAL_ERROR);
-			// 			}
-			// 		}
-				
-			// 	}
-				
-			// }
-		}
-		int rank = giveTypeCastRank($1, $3);
-		if(rank){
-			var = "typecasting error rank";
-			error(var, rank);
-		}
-		$$ = makeNode(strdup("NE_OP"), strdup("!="), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		int rank = giveTypeCastRank(equality_expression, relational_expression);
+		if(rank < 0)
+			error("typecasting error rank", rank);
+		int retval = typeCastByRank(equality_expression, relational_expression, rank);
+		if(retval)
+			error("typecasting error rank", retval);
+		node* temp = makeNodeForExpressionByRank(equality_expression, relational_expression, "NE_OP", "!=", rank, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		emitRelop(equality_expression, relational_expression, temp, OP_NEQ, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		temp->declSp = declSpCopy($1->declSp);
+		$$ = temp;
+	}
 	;
 
 and_expression
 	: equality_expression { $$ = $1; }
 	| and_expression '&' equality_expression { 
-		int retval = checkIntOrChar($1);
-		int retval2 = checkIntOrChar($3);
-		if(retval || retval2){
-			error("expression", TYPE_ERROR);
+		node * and_expression = $1;
+		node * equality_expression = $3;
+		int retval = bitwiseImplicitTypecasting(and_expression, equality_expression, errCode,errStr);
+		if(retval < 0){
+			error(errStr, errCode);
 		}
-		$$ = makeNode(strdup("&"), strdup("&"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		node* temp = makeNode(strdup("&"), strdup("&"), 0, and_expression, equality_expression, (node*)NULL, (node*)NULL);
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		emit(OP_AND, and_expression->addr, equality_expression->addr, newTmp);
+		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
+		$$ = temp;
+		}
 	;
+
 
 exclusive_or_expression
 	: and_expression {$$ = $1;}
-	| exclusive_or_expression '^' and_expression { 
-		int retval = checkIntOrChar($1);
-		int retval2 = checkIntOrChar($3);
-		if(retval || retval2){
-			error("expression", TYPE_ERROR);
+	| exclusive_or_expression '^'  and_expression { 
+		node* exclusive_or_expression = $1;
+		node* and_expression = $3;
+		int retval = bitwiseImplicitTypecasting(exclusive_or_expression, and_expression, errCode,errStr);
+		if(retval < 0){
+			error(errStr, errCode);
 		}
-		$$ = makeNode(strdup("^"), strdup("^"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		node* temp = makeNode(strdup("^"), strdup("^"), 0, exclusive_or_expression, and_expression, (node*)NULL, (node*)NULL);
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		emit(OP_XOR, exclusive_or_expression->addr, and_expression->addr, newTmp);
+		temp->addr = newTmp;
+		$$ = temp;
+	}
 	;
 
 inclusive_or_expression
 	: exclusive_or_expression { $$ = $1; }
-	| inclusive_or_expression '|' exclusive_or_expression { 
-		int retval = checkIntOrChar($1);
-		int retval2 = checkIntOrChar($3);
-		if(retval || retval2){
-			error("expression", TYPE_ERROR);
+	| inclusive_or_expression '|'  inclusive_or_expression { 
+		node * inclusive_or_expression1 = $1;
+		node * inclusive_or_expression2 = $3;
+		int retval = bitwiseImplicitTypecasting(inclusive_or_expression1, inclusive_or_expression2, errCode,errStr);
+		if(retval < 0){
+			error(errStr, errCode);
 		}
-		$$ = makeNode(strdup("|"), strdup("|"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+		node* temp = makeNode(strdup("^"), strdup("^"), 0, inclusive_or_expression1, inclusive_or_expression2, (node*)NULL, (node*)NULL);
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error(errStr, errCode);
+		emit(OP_OR, inclusive_or_expression1->addr, inclusive_or_expression2->addr, newTmp);
+		temp->addr = newTmp;
+		$$ = temp;
+	}
 	;
 
 logical_and_expression
 	: inclusive_or_expression {$$ = $1;}
-	| logical_and_expression AND_OP inclusive_or_expression { 
-		//Strings Literals allowed
-		$$ = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| logical_and_expression AND_OP M_marker inclusive_or_expression { 
+		backpatch($1->truelist, $3->quad);
+		node* temp = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $4, (node*)NULL, (node*)NULL); 
+		temp->truelist = $4->truelist;
+		temp->falselist = mergelist($1->falselist, $4->falselist);
+		$$ = temp;
+	}
 	;
 
 logical_or_expression
 	: logical_and_expression { $$ = $1; }
-	| logical_or_expression OR_OP logical_and_expression { 
-		//Strings Literals allowed
-		$$ = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $3, (node*)NULL, (node*)NULL); }
+	| logical_or_expression OR_OP M_marker logical_and_expression { 
+		backpatch($1->falselist, $3->quad);
+		node* temp = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $4, (node*)NULL, (node*)NULL);  
+		temp->truelist = mergelist($1->truelist, $4->truelist);
+		temp->falselist = $4->falselist;
+		$$ = temp;
+		}
 	;
 
+ 
 conditional_expression
 	: logical_or_expression { $$ = $1; }
-	| logical_or_expression '?' expression ':' conditional_expression { 
-		
-		$$ = makeNode(strdup("?:"), strdup("?:"), 0, $1, $3, $5, (node*)NULL); }
+	| logical_or_expression '?' M_marker expression N_marker ':' M_marker conditional_expression {
+		backpatch($1->truelist, $3->quad);
+		backpatch($1->falselist, $7->quad);
+		node* temp = makeNode(strdup("?:"), strdup("?:"), 0, $1, $4, $8, (node*)NULL); 
+		vector<int> tempVec = mergelist( $4->nextlist, $5->nextlist);
+		temp->nextlist = mergelist(tempVec, $8->nextlist);
+		$$ = temp;
+		}
 	;
 
 assignment_expression
 	: conditional_expression { $$ = $1; }
 	| unary_expression assignment_operator assignment_expression { 
-
-		// a = b; (b.type = a.type)
-		// a (op)= b; rank wise typcast of b;
-		// a %= b; b should be int
-		
 		node* unary_expression = $1;
 		node* assignment_expression = $3;
 		node* assignment_operator = $2;
 		if (!unary_expression->declSp) {
 			declSpec* ds = new declSpec();
-			if(!assignment_expression->declSp){
+			if(!assignment_expression->declSp)
 				error(assignment_expression->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
-			}
 			ds->type = assignment_expression->declSp->type;
 			unary_expression->declSp = ds;
 		}
-		else{
-			if(assignment_operator->lexeme == "AND_ASSIGN" || assignment_operator->lexeme == "OR_ASSIGN" || assignment_operator->lexeme == "XOR_ASSIGN" || assignment_operator->lexeme == "LEFT_ASSIGN" || assignment_operator->lexeme == "RIGHT_ASSIGN"){
-				int retval = checkIntOrChar(unary_expression);
-				int retval2 = checkIntOrChar(assignment_expression);
-				if(retval || retval2){
-					error("expression", TYPE_ERROR);
-				}
+		else {
+			string s(assignment_operator->name);
+			if(s == "AND_ASSIGN" || s == "OR_ASSIGN" || s == "XOR_ASSIGN" || s == "LEFT_ASSIGN" || s == "RIGHT_ASSIGN") {
+				//should be only int or char
+				if(checkIntOrChar(unary_expression) || checkIntOrChar(assignment_expression))
+					error("expression should only be int or char", TYPE_ERROR);
 			}
-			else if(assignment_operator->lexeme == "MUL_ASSIGN" || assignment_operator->lexeme == "DIV_ASSIGN" || assignment_operator->lexeme == "ADD_ASSIGN" || assignment_operator->lexeme == "SUB_ASSIGN"){
-				string var;
-        int err = canTypecast(assignment_expression->declSp,unary_expression->declSp);
-        if(!err){
-          error("invalid typecast", err);
-        }
-				int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, var);
-				if(retval){
-					error(var,retval);
-				}
+			if(s=="MUL_ASSIGN" || s=="DIV_ASSIGN" || s=="ADD_ASSIGN" || s=="SUB_ASSIGN" || s=="=") {
+				int retval = canTypecast(assignment_expression->declSp,unary_expression->declSp);
+				if(retval)
+					error("invalid typecast in assignment expression", retval);
 			}
-			else if(assignment_operator->lexeme == "MOD_ASSIGN"){
-				int retval = checkType(assignment_expression->declSp, TYPE_FLOAT, 0);
-				if(retval){
+			if(s == "MOD_ASSIGN") {
+				if(checkType(assignment_expression->declSp, TYPE_FLOAT, 0))
 					error(assignment_expression->lexeme, SHOULD_NOT_BE_FLOAT);
-				}
-				string var;
-				retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, var);
-				if(retval){
-					error(var,retval);
-				}
+				//typecast by rank
+				// int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, errStr);
+				// if(retval)
+					// error(errStr,retval);
 			}
-			int retVal = giveTypeCastRankUnary(unary_expression, assignment_expression);
-			if(retVal){
-				error("error unary type cast", retVal);
-			}
-
 		}
-
-		addChild($2, $unary_expression); addChild($2, assignment_expression); $$ = $2;
+		string resultAddr = unary_expression->addr;
+		string s(assignment_operator->name);
+		int opCode = getOpcodeFromAssignStr(s);
+		if(opCode >= 0) { 
+			//AND_ASSIGN or OR_ASSIGN or XOR_ASSIGN or LEFT_ASSIGN or RIGHT_ASSIGN or MOD_ASSIGN
+			emitOperationAssignment(unary_expression, assignment_expression, opCode, resultAddr, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
 		}
+		else if(s == "=")
+		{
+			bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			if(retval)
+				typeCastLexemeWithEmit(assignment_expression, unary_expression->declSp);
+			emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
+		}
+		else
+		{
+			int rank = giveTypeCastRank(unary_expression, assignment_expression);
+			if(rank < 0)
+				error("giveTypeCastRank error",-rank);
+			
+			int retval = typeCastByRank(unary_expression, assignment_expression, rank);
+			if(retval)
+				error("typecast error",retval);
+			opCode = -1;
+			if(s == "MUL_ASSIGN")
+				opCode = getOpMulType(unary_expression, errCode, errStr);
+			else if(s == "DIV_ASSIGN")
+				opCode = getOpDivType(unary_expression, errCode, errStr);
+			else if(s == "SUB_ASSIGN")
+				opCode = getOpSubType(unary_expression, errCode, errStr);
+			else if(s == "ADD_ASSIGN")
+				opCode = getOpAddType(unary_expression, errCode, errStr);
+			
+			if(errCode || opCode == -1)
+				error(errStr, errCode);
+			emitOperationAssignment(unary_expression, assignment_expression, opCode, resultAddr, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+		}
+		assignment_operator->addr = unary_expression->addr;
+		assignment_operator->declSp = declSpCopy(unary_expression->declSp);
+		addChild(assignment_operator, unary_expression); 
+		addChild(assignment_operator, assignment_expression); 
+		$$ = assignment_operator;
+	}
 	;
 
 assignment_operator
@@ -695,6 +784,7 @@ constant_expression
 	: conditional_expression { $$ = $1; }
 	;
 
+// TODO: check typecasting here in testing, if not done then do it, Wirtten in notes by Sakshi that this might be missing
 declaration
 	: declaration_specifiers ';' { $$ = $1; }
 	| declaration_specifiers init_declarator_list ';' {
@@ -718,8 +808,9 @@ declaration
 				error(lex, ALLOCATION_ERROR);
 			}
 			if(funcDecl){
+				// param* paramcheckValidTypeter = new param();
 				param* paramter = new param();
-				paramter-> declSp = declSpCopy($1->declSp);
+				paramter->declSp = declSpCopy($1->declSp);
 				paramter->paramName = lex;
 				$1->paramList.push_back(paramter);
 			}
@@ -1241,8 +1332,20 @@ expression_statement
 	;
 
 selection_statement
-	: IF '(' expression ')' statement {$$ = makeNode(strdup("IF"), strdup("if"),0, $3, $5, (node*)NULL, (node*)NULL);}
-	| IF '(' expression ')' statement ELSE statement {$$ = makeNode(strdup("IF_ELSE"), strdup("else"),0, $3, $5, $7, (node*)NULL);}
+	: IF '(' expression ')' M_marker statement {
+		backpatch($3->truelist, $5->quad);
+		node * temp = makeNode(strdup("IF"), strdup("if"),0, $3, $6, (node*)NULL, (node*)NULL);
+		temp->nextlist = mergelist($3->falselist, $6->nextlist);
+		$$ = temp;
+	}
+	| IF  '(' expression ')' M_marker statement N_marker ELSE M_marker statement {
+		backpatch($3->truelist, $5->quad);
+		backpatch($3->falselist, $9->quad);
+		node* temp = makeNode(strdup("IF_ELSE"), strdup("else"),0, $3, $6, $10, (node*)NULL);
+		vector<int> tempVec = mergelist($6->nextlist, $7->nextlist);
+		temp->nextlist = mergelist(tempVec, $10->nextlist);
+		$$ = temp;
+	}
 	| SWITCH '(' expression ')' statement {$$ = makeNode(strdup("SWITCH"), strdup("switch"),0, $3, $5, (node*)NULL, (node*)NULL);}
 	;
 
@@ -1414,7 +1517,23 @@ func_marker_1
 			sym_node->declSp = declSpCopy(p->declSp);
 		}
 	}
+	;
 
+M_marker:
+ 	{
+		node* temp = makeDeadNode();
+		temp->quad = nextQuad();
+		$$ = temp;
+	}
+	;
+N_marker:
+ 	{
+		node* temp = makeDeadNode();
+		temp->nextlist = makelist(nextQuad());
+		emit(OP_GOTO, BLANK_STR, BLANK_STR, EMPTY_STR);
+		$$ = temp;
+	}
+	;
 // func_marker_2
 // 	: {
 // 		// TODO: Send type from declaration specifier to function name
@@ -1482,7 +1601,8 @@ int main(int ac, char **av) {
 		if(ac == 3) fileName = av[2];
 		generateDot(root,fileName);
 		printCode();
-		printSymbolTableJSON(gSymTable,0);
+		// printSymbolTableJSON(gSymTable,0);
+		printSymbolTable(gSymTable);
         fclose(fd);
     }
     else

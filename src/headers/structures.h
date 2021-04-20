@@ -54,14 +54,14 @@ struct symbolTableNode {
         arraySize=0;
         paramSize=0;
         isDefined=0;
-        declSp = nullptr;
+        declSp = new declSpec();
     }
 };
 
 struct symbolTable{
     vector<string> symbolOrder;
     map<string, struct symbolTableNode*> symbolTableMap; // <lexeme, struct>
-    struct symbolTable *parent;
+    struct symbolTable* parent;
     int scope; //name for scope : global, main, function name
     vector<struct symbolTable *> childList;
     map<string, struct structTableNode*> structMap;
@@ -88,10 +88,8 @@ struct node
     char *name = NULL;
     char *lexeme = NULL;
     int valType; //in which variable is constant stored
-    long lval;
     int ival;
     float fval;
-    double dval;
     int isLeaf; // DEAD_NODE if declaration node so not ot be printed in AST
     struct node *next;
     struct node *childList = nullptr;
@@ -104,12 +102,17 @@ struct node
     int paramSize = 0;
     vector<struct param*> paramList;
     vector<struct structParam*> structParamList;
+
     string addr; 
+    int quad;
+    vector<int> truelist, falselist, nextlist, continuelist, breaklist;
     node() {
         lexeme = strdup("empty");
         name = strdup("empty");
         next = childList = nullptr;
         declSp = new declSpec();
+        addr = "EMPTY_ADDR";
+        valType = NOT_CONSTANT;
     }
 }; 
 
