@@ -619,18 +619,18 @@ exclusive_or_expression
 
 inclusive_or_expression
 	: exclusive_or_expression { $$ = $1; }
-	| inclusive_or_expression '|' inclusive_or_expression { 
+	| inclusive_or_expression '|' exclusive_or_expression { 
 		node * inclusive_or_expression1 = $1;
-		node * inclusive_or_expression2 = $3;
-		int retval = bitwiseImplicitTypecasting(inclusive_or_expression1, inclusive_or_expression2, errCode,errStr);
+		node * exclusive_or_expression = $3;
+		int retval = bitwiseImplicitTypecasting(inclusive_or_expression1, exclusive_or_expression, errCode,errStr);
 		if(retval < 0){
 			error(errStr, errCode);
 		}
-		node* temp = makeNode(strdup("|"), strdup("|"), 0, inclusive_or_expression1, inclusive_or_expression2, (node*)NULL, (node*)NULL);
+		node* temp = makeNode(strdup("|"), strdup("|"), 0, inclusive_or_expression1, exclusive_or_expression, (node*)NULL, (node*)NULL);
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
-		emit(OP_OR, inclusive_or_expression1->addr, inclusive_or_expression2->addr, newTmp);
+		emit(OP_OR, inclusive_or_expression1->addr, exclusive_or_expression->addr, newTmp);
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
