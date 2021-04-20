@@ -54,4 +54,4 @@ $(BIN)/3AC: $(OBJ)/lex.yy.o $(OBJ)/y.tab.c $(OBJ)/AST.o  $(OBJ)/generateDot.o  $
 
 
 clean: 
-	$(RM) $(OBJ)/* $(BIN)/* ./*.dot ./*.ps ./*.json
+	$(RM) $(OBJ)/* $(BIN)/* ./*.dot ./*.ps ./*.json ./code.txt
