@@ -22,7 +22,7 @@
 			pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
-			constant inden_marker func_marker_1 M_marker N_marker
+			constant inden_marker func_marker_1 M_marker N_marker expressionJump expressionJumpStatement
 // Prototypes
 %{
 	#include <stdio.h>
@@ -779,8 +779,23 @@ assignment_operator
 	;
 
 expression
-	: assignment_expression { $$ = $1; }
-	| expression ',' assignment_expression { if($1){makeSibling($3, $1); $$ = $1;} else $$ = $3;} 
+	: assignment_expression { 
+		$$ = $1; 
+		// if(!$$->truelist.size()) {
+		// 	$$->truelist = makelist(nextQuad());
+    	// 	$$->falselist = makelist(nextQuad()+1);
+		// 	emit(OP_IFGOTO, $1->addr, EMPTY_STR, BLANK_STR);
+    	// 	emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
+		// }
+	}
+	| expression ',' assignment_expression { 
+		if($1){makeSibling($3, $1); $$ = $1;} else $$ = $3;
+		$$->truelist = mergelist($1->truelist, $3->truelist);
+		$$->falselist = mergelist($1->falselist, $3->falselist);
+		$$->nextlist = mergelist($1->nextlist, $3->nextlist);
+		$$->breaklist = mergelist($1->breaklist, $3->breaklist);
+		$$->continuelist = mergelist($1->continuelist, $3->continuelist);
+		} 
 	;
 
 constant_expression
@@ -1269,12 +1284,36 @@ initializer_list
 	;
 
 statement
-	: labeled_statement { $$ = $1; }
-	| compound_statement {$$ = $1; }
-	| expression_statement { $$ = $1; }
-	| selection_statement { $$ = $1; }
-	| iteration_statement { $$ = $1; }
-	| jump_statement { $$ = $1; }
+	: labeled_statement { 
+		$$ = $1;
+		vector<int> tmp = mergelist($1->truelist, $1->falselist);
+		$$->nextlist = mergelist(tmp, $1->nextlist);
+	}
+	| compound_statement { 
+		$$ = $1;
+		vector<int> tmp = mergelist($1->truelist, $1->falselist);
+		$$->nextlist = mergelist(tmp, $1->nextlist);
+	}
+	| expression_statement { 
+		$$ = $1;
+		vector<int> tmp = mergelist($1->truelist, $1->falselist);
+		$$->nextlist = mergelist(tmp, $1->nextlist);
+	}
+	| selection_statement { 
+		$$ = $1;
+		vector<int> tmp = mergelist($1->truelist, $1->falselist);
+		$$->nextlist = mergelist(tmp, $1->nextlist);
+	}
+	| iteration_statement { 
+		$$ = $1;
+		vector<int> tmp = mergelist($1->truelist, $1->falselist);
+		$$->nextlist = mergelist(tmp, $1->nextlist);
+	}
+	| jump_statement { 
+		$$ = $1;
+		vector<int> tmp = mergelist($1->truelist, $1->falselist);
+		$$->nextlist = mergelist(tmp, $1->nextlist);
+	}
 	;
 
 labeled_statement
@@ -1320,12 +1359,16 @@ declaration_list
 
 statement_list
 	: statement { $$ = $1; }
-	| statement_list statement { 
+	| statement_list M_marker statement { 
+		node * temp;
 		if(!strcmp(($1 -> name), "STMT_LIST")){
-			$$ = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);
+			temp = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);
 		} else{ 
-			$$ = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1, $2, (node*)NULL, (node*)NULL);
+			temp = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1, $2, (node*)NULL, (node*)NULL);
 		}
+		backpatch($1->nextlist, $2->quad);
+		temp->nextlist = $3->nextlist;
+		$$=temp;
 	}
 	;
 
@@ -1335,14 +1378,32 @@ expression_statement
 	;
 
 
+expressionJump
+	: expression { 
+		$$ = $1; 
+		if(!$$->truelist.size()) {
+			$$->truelist = makelist(nextQuad());
+    		$$->falselist = makelist(nextQuad()+1);
+			emit(OP_IFGOTO, $1->addr, EMPTY_STR, BLANK_STR);
+    		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
+		}
+	}
+	;
+
+expressionJumpStatement
+	: ';' {$$ = makeNode(strdup(";"), strdup(";"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| expressionJump ';' {makeSibling(makeNode(strdup(";"), strdup(";"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
+	;
+
+
 selection_statement
-	: IF '(' expression  ')' M_marker statement {
+	: IF '(' expressionJump  ')' M_marker statement {
 		backpatch($3->truelist, $5->quad);
 		node * temp = makeNode(strdup("IF"), strdup("if"),0, $3, $6, (node*)NULL, (node*)NULL);
 		temp->nextlist = mergelist($3->falselist, $6->nextlist);
 		$$ = temp;
 	}
-	| IF  '(' expression  ')' M_marker statement ELSE N_marker M_marker statement {
+	| IF  '(' expressionJump  ')' M_marker statement ELSE N_marker M_marker statement {
 		backpatch($3->truelist, $5->quad);
 		backpatch($3->falselist, $9->quad);
 		node* temp = makeNode(strdup("IF_ELSE"), strdup("else"),0, $3, $6, $10, (node*)NULL);
@@ -1350,12 +1411,12 @@ selection_statement
 		temp->nextlist = mergelist(tempVec, $10->nextlist);
 		$$ = temp;
 	}
-	| SWITCH '(' expression ')' statement {$$ = makeNode(strdup("SWITCH"), strdup("switch"),0, $3, $5, (node*)NULL, (node*)NULL);}
+	| SWITCH '(' expressionJump ')' statement {$$ = makeNode(strdup("SWITCH"), strdup("switch"),0, $3, $5, (node*)NULL, (node*)NULL);}
 	;
 
 
 iteration_statement
-	: WHILE '(' M_marker expression ')' M_marker statement {
+	: WHILE '(' M_marker expressionJump ')' M_marker statement {
 		node *m1 = $3, *m2 = $6, *s1 = $7, *e1 = $4;
 		backpatch(s1->nextlist, m1->quad);
 		backpatch(e1->truelist, m2->quad);
@@ -1366,7 +1427,7 @@ iteration_statement
 		$$->nextlist = mergelist(s1->breaklist, e1->falselist);
 		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m1->quad));
 	}
-	| DO M_marker statement WHILE '(' M_marker expression ')' ';' {
+	| DO M_marker statement WHILE '(' M_marker expressionJump ')' ';' {
 		node* s1 = $3, *e1 = $7, *m2 = $2, *m1 = $6;
 		backpatch(s1->nextlist, m1->quad);
 		backpatch(e1->truelist, m2->quad);
@@ -1377,7 +1438,7 @@ iteration_statement
 		$$->nextlist = mergelist(s1->breaklist, e1->falselist);
 		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m2->quad));
 	}
-	| FOR '(' expression_statement M_marker expression_statement ')' M_marker statement {
+	| FOR '(' expression_statement M_marker expressionJumpStatement ')' M_marker statement {
 		node *e1 = $3, *m1 = $4, *e2 = $5, *m3 = $7, *s1 = $8;
 		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m1->quad));
 		backpatch(e2->truelist, m3->quad);
@@ -1387,7 +1448,7 @@ iteration_statement
 		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $8, (node*)NULL);
 		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
 	}
-	| FOR '(' expression_statement M_marker expression_statement M_marker expression N_marker ')' M_marker statement {
+	| FOR '(' expression_statement M_marker expressionJumpStatement M_marker expression N_marker ')' M_marker statement {
 		node *e1 = $3, *m1 = $4, *e2 = $5, *m2 = $6, *e3 = $7, *n1 = $8, *m3 = $10, *s1 = $11;
 		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m2->quad));
 		backpatch(n1->nextlist, m1->quad);
