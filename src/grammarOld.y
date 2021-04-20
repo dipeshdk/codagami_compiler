@@ -272,8 +272,8 @@ argument_expression_list
 unary_expression
 	: postfix_expression {$$ = $1;}
 	| INC_OP unary_expression {
-		// int retval  = checkIntOrCharOrPointer($2);
-		// if(retval) error($2->lexeme, retval);
+		int retval  = checkIntOrCharOrPointer($2);
+		if(retval) error($2->lexeme, retval);
 		string newTmp = generateTemp(errCode);
     	if(errCode)
         	error("Cannot generate Temp",errCode);
@@ -287,8 +287,8 @@ unary_expression
 		$$->addr = $2->addr;
 	}
 	| DEC_OP unary_expression {
-		// int retval  = checkIntOrCharOrPointer($2);
-		// if(retval) error($2->lexeme, retval);
+		int retval  = checkIntOrCharOrPointer($2);
+		if(retval) error($2->lexeme, retval);
 		string newTmp = generateTemp(errCode);
     	if(errCode)
         	error("Cannot generate Temp",errCode);
