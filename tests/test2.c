@@ -1,3 +1,11 @@
+float foo (int x, float y, char z, int c){
+    int a;
+    int b;
+    x = x+a;
+    c = c+b;
+    return 0;
+}
+
 int main() {
     float  f2 = 5.0;
     int a = &f2 ,b = 2,c;

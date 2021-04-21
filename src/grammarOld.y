@@ -40,6 +40,7 @@
 	string errStr;
 	string currFunc = "#prog";
 	vector<node*> case_consts;
+	int offset = 0;
 
 extern "C"
 {
@@ -882,8 +883,12 @@ declaration
 					}
 					emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);
 				}
-			} 
-			
+			}
+
+			sym_node->size = getNodeSize(sym_node, gSymTable);
+			sym_node->offset = offset;
+			offset += getOffsettedSize(sym_node->size);
+
 			curr = curr->next;
 		}
 		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;   
@@ -1629,7 +1634,7 @@ function_definition
 		gSymTable = addChildSymbolTable(gSymTable);
 		// Adding params to symtab
 		symbolTable* curr = gSymTable;
-
+		int tempOffset = 0;
 		for(auto &p: declarator->paramList){
 			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
 			if(retVal) {
@@ -1644,7 +1649,16 @@ function_definition
 			}
 			
 			sym_node->declSp = declSpCopy(p->declSp);
+			sym_node->size = getNodeSize(sym_node, gSymTable);
+			tempOffset += getOffsettedSize(sym_node->size);
 		}
+		for(auto &p: declarator->paramList){
+			string lex = p->paramName;	
+			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+			sym_node->offset = (-1*tempOffset);
+			tempOffset = tempOffset-getOffsettedSize(sym_node->size);
+		}
+		offset = 0;
 	} declaration_list compound_statement { 
 		addChild($2, $4); 
 		addChild($2, $5); 
@@ -1669,6 +1683,7 @@ function_definition
 		gSymTable = addChildSymbolTable(gSymTable);
 		// Adding params to symtab
 		symbolTable* curr = gSymTable;
+		int tempOffset = 0;
 
 		for(auto &p: declarator->paramList){
 			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
@@ -1684,7 +1699,16 @@ function_definition
 			}
 			
 			sym_node->declSp = declSpCopy(p->declSp);
+			sym_node->size = getNodeSize(sym_node, gSymTable);
+			tempOffset += getOffsettedSize(sym_node->size);
 		}
+		for(auto &p: declarator->paramList){
+			string lex = p->paramName;	
+			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+			sym_node->offset = (-1*tempOffset);
+			tempOffset = tempOffset-getOffsettedSize(sym_node->size);
+		}
+		offset = 0;
 	} compound_statement { 
 		addChild($2, $4);
 		$$ = $2;
@@ -1718,7 +1742,7 @@ func_marker_1
 		gSymTable = addChildSymbolTable(gSymTable);
 		// Adding params to symtab
 		symbolTable* curr = gSymTable;
-
+		int tempOffset = 0;
 		for(auto &p: declarator->paramList){
 			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
 			if(retVal) {
@@ -1732,7 +1756,16 @@ func_marker_1
 			}
 			
 			sym_node->declSp = declSpCopy(p->declSp);
+			sym_node->size = getNodeSize(sym_node, gSymTable);
+			tempOffset += getOffsettedSize(sym_node->size);
 		}
+		for(auto &p: declarator->paramList){
+			string lex = p->paramName;	
+			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+			sym_node->offset = (-1*tempOffset);
+			tempOffset = tempOffset-getOffsettedSize(sym_node->size);
+		}
+		offset = 0;
 	}
 	;
 
@@ -1817,10 +1850,11 @@ int main(int ac, char **av) {
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
 		generateDot(root,fileName);
-		printCode();
+		
 		// printSymbolTableJSON(gSymTable,0);
-		// printSymbolTable(gSymTable);
-        fclose(fd);
+		printSymbolTable(gSymTable);
+        printCode();
+		fclose(fd);
     }
     else
         printf("Usage: a.out input_filename [optional]ouput.dot \n");
