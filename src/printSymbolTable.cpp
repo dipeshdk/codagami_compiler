@@ -58,7 +58,9 @@ void printSymbolTable(symbolTable *st) {
             << "infoType: " << elem.second->infoType << " \n"
             << "arraySize: " << elem.second->arraySize << " \n"
             << "paramSize: " << elem.second->paramSize << " \n"
-            << "isDefined: " << elem.second->isDefined << " \n";
+            << "isDefined: " << elem.second->isDefined << " \n"
+            << "size: " << elem.second->size << " \n"
+            << "offset: " << elem.second->offset << " \n";
 
         cout << "declSp: \n";
         printDeclSp(elem.second->declSp);
@@ -96,6 +98,10 @@ void printElem(symbolTableNode* elem, string str) {
     printf("\"paramSize\" : %d,\n", elem->paramSize);
     printf("%s", str.c_str());
     printf("\"isDefined\" : %d,\n", elem->isDefined);
+    printf("%s", str.c_str());
+    printf("\"size\" : %d,\n", elem->size);
+    printf("%s", str.c_str());
+    printf("\"offset\" : %d,\n", elem->offset);
 
     declSpec *ds = elem->declSp;
     if(ds) {
@@ -188,12 +194,12 @@ void printSymbolTableJSON(symbolTable *st, int numTab) {
     int mapSize = st->symbolTableMap.size();
     int j = 0;
     printf("\"symbolOrder\" : [");
-    int offset = 0;
+    // int offset = 0;
     for(int i = 0; i < st->symbolOrder.size(); i++) {
     // for(auto &s: st->symbolOrder){
         // printf("\"%s\", ",s.c_str());
         symbolTableNode *elem = st->symbolTableMap[st->symbolOrder[i]];
-        int size = getNodeSize(elem, st);
+        // int size = getNodeSize(elem, st);
         // if(elem->infoType == INFO_TYPE_ARRAY){
         //     size += getTypeSize(elem->declSp->type)*(elem->arraySize);
         // }
@@ -220,16 +226,16 @@ void printSymbolTableJSON(symbolTable *st, int numTab) {
         printf("%s", str.c_str());
         printf("{\n");
         printf("%s", str.c_str());
-        printf("\"size\" : %d,\n", size);
+        printf("\"size\" : %d,\n", elem->size);
         printf("%s", str.c_str());
-        printf("\"offset\" : %d,\n", offset);
+        printf("\"offset\" : %d,\n", elem->offset);
         printElem(elem, str);
         printf("}");
         if(i < (st->symbolOrder.size()-1)) {
             printf(",");
         }
         printf("\n");
-        offset += size;
+        // offset += size;
 
     }
     printf("]\n");
@@ -277,6 +283,12 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st){
     return size;
 }
 
+int getOffsettedSize(int size){
+    if(size%4 == 0){
+        return size;
+    }
+    return ((size/4) +1)*4;
+}
 
 int getTypeSize(vector<int> &type) {
     if(type.size() != 1) return -CONFLICTING_TYPES;

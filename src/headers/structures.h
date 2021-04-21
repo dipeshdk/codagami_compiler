@@ -45,6 +45,8 @@ struct symbolTableNode {
     int arraySize;
     int paramSize;
     int isDefined; //for functions
+    int size;
+    int offset;
     vector<struct param*> paramList; //for functions, struct and union
     string name;
     struct declSpec *declSp;
