@@ -187,14 +187,52 @@ constant
 postfix_expression
 	: primary_expression { $$ = $1; }
 	| postfix_expression '[' expression ']' {
-		if($3->declSp) {
-			int err = checkTypeArray($3->declSp->type);
-			error($3->lexeme, err);
+		node *postfix_expression = $1;
+		node *expression = $3;
+		if(expression->declSp) 
+		{
+			checkTypeArrayWithTypecast(expression, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
 		}
-		else error($3->lexeme, ARRAY_INDEX_SHOULD_BE_INT);
-		addChild($1,$3);
-		$1->infoType = INFO_TYPE_ARRAY;
-		$$ = $1;
+		else
+		{ 
+			error(expression->lexeme, ARRAY_INDEX_SHOULD_BE_INT);
+		}
+		//_t1 = 4;
+		string sizeTmp = generateTemp(errCode);
+		if(errCode)
+			error("error in temp generation", errCode);
+		if(!postfix_expression->declSp)
+			error("postfix_expression declSp not allocated for array", INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
+		int size = getTypeSize(postfix_expression->declSp->type);
+		if(size < 0)
+			error("invalid array type", -size);
+		emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
+
+		//_t2 = _t1 * n;
+		string indexTmp = generateTemp(errCode);
+		if(errCode)
+			error("error in temp generation", errCode);
+		emit(OP_MULI, sizeTmp, postfix_expression->addr, indexTmp);
+
+		//_t3 = arr + _t2;
+		string pointerTmp = generateTemp(errCode);
+		if(errCode)
+			error("error in temp generation", errCode);
+		emit(OP_ADDI, postfix_expression->addr, indexTmp, pointerTmp);
+	
+		//_t4 = *(_t3);
+		string addrTmp = generateTemp(errCode);
+		string pointerAddr = "*(" + pointerTmp + ")";
+		if(errCode)
+			error("error in temp generation", errCode);
+		emit(OP_ASSIGNMENT, pointerAddr, EMPTY_STR, addrTmp);
+		
+		addChild(postfix_expression, expression);
+		postfix_expression->infoType = INFO_TYPE_ARRAY;
+		postfix_expression->addr = addrTmp;
+		$$ = postfix_expression;
 	}
 	| postfix_expression '(' ')' { // Check with function paramlist111NoParamName111
 		string func_name($1->lexeme);

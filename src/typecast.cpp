@@ -47,11 +47,27 @@ bool typeCastRequired(declSpec* to_ds,  declSpec* from_ds, int &errCode, string 
     return areDifferentTypes(to_ds, from_ds, errCode, errStr);
 }
 
-int checkTypeArray(vector<int> &v){
-    if(checkValidType(v)) return CONFLICTING_TYPES;
-    if(v[0] == TYPE_INT || TYPE_CHAR)
-        return 0;
-    return ARRAY_SIZE_SHOULD_BE_INT;
+void checkTypeArrayWithTypecast(node* idNode, int &errCode, string &errStr){
+    if(!idNode->declSp) {
+        setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, "checkTypeArrayWithTypecast");
+        return;
+    }
+
+    if(checkValidType(idNode->declSp->type)) {
+        setErrorParams(errCode, TYPE_ERROR, errStr, "Array index should be integer or char");
+        return;
+    }
+
+    if(checkType(idNode->declSp, TYPE_CHAR, 0)) {
+        //typecast to int
+        idNode->declSp->type = vector<int>({TYPE_INT});
+        typeCastLexemeWithEmit(idNode, idNode->declSp);
+        return;
+    }else if(!checkType(idNode->declSp, TYPE_INT, 0)) {
+        setErrorParams(errCode, TYPE_ERROR, errStr, "Array index should be integer or char");
+        return;
+    }
+    return;
 }
 
 string getTypeName(int type) {

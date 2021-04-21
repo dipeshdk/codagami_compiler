@@ -10,7 +10,7 @@ string getTypeString(vector<int> type);
 int checkValidType(vector<int> &v);
 bool checkType(declSpec *ds, int typeName, int ptrLevel);
 int canTypecast(declSpec* to_ds,  declSpec* from_ds);
-int checkTypeArray(vector<int> &v);
+void checkTypeArrayWithTypecast(node* idNode, int &errCode, string &errStr);
 bool requiresTypeCasting(declSpec* n1, declSpec* n2);
 
 
