@@ -188,14 +188,15 @@ constant
 postfix_expression
 	: primary_expression { $$ = $1; }
 	| postfix_expression '[' expression ']' {
-		if($3->declSp) {
-			int err = checkTypeArray($3->declSp->type);
-			error($3->lexeme, err);
-		}
-		else error($3->lexeme, ARRAY_INDEX_SHOULD_BE_INT);
-		addChild($1,$3);
-		$1->infoType = INFO_TYPE_ARRAY;
-		$$ = $1;
+		node *postfix_expression = $1;
+		node *expression = $3;
+		string arrayIndexStr = getArrayIndexWithEmit(postfix_expression, expression, errCode, errStr);
+		if(errCode)
+			error(errStr, errCode);
+		addChild(postfix_expression, expression);
+		postfix_expression->infoType = INFO_TYPE_ARRAY;
+		postfix_expression->addr = arrayIndexStr;
+		$$ = postfix_expression;
 	}
 	| postfix_expression '(' ')' { // Check with function paramlist111NoParamName111
 		string func_name($1->lexeme);
