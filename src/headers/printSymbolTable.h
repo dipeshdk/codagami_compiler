@@ -7,6 +7,7 @@ void printDeclSp(declSpec* ds);
 void printElem(symbolTableNode* elem, string str);
 
 int getTypeSize(vector<int> &type);
+int getNodeSize(symbolTableNode* elem, symbolTable* st);
 
 void printToCsvFile(symbolTable *st);
 void printSymbolTableJSON(symbolTable *st, int numTab);

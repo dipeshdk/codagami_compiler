@@ -18,9 +18,9 @@ int backpatch(vector<int> &list, int i){
     for(int index : list){
         if(index > sizeOfList || 
             ((gCode[index]->opCode != OP_GOTO) && 
-            gCode[index]->opCode != OP_IFGOTO))
+            (gCode[index]->opCode != OP_IFGOTO) && (gCode[index]->opCode != OP_IFNEQGOTO)))
             return NOT_GOTO_IN_BACKPATCH;
-        gCode[index]->arg1 = to_string(i);
+        gCode[index]->result = to_string(i);
     }
     return 0;
 }
@@ -130,16 +130,18 @@ int getOpSubType(node* temp, int &errCode, string &errStr){
 }
 
 void emitRelop(node* n1, node* n2, node* temp, int opCode, int& errCode, string &errStr){
-    temp->truelist = makelist(nextQuad());
-    temp->falselist = makelist(nextQuad() + 1);
+    temp->truelist = makelist(nextQuad() + 1);
+    temp->falselist = makelist(nextQuad() + 2);
     string newTmp = generateTemp(errCode);
     if(errCode){
         setErrorParams(errCode, errCode, errStr, temp->name);
         return;
     }
     symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-    tempNode->declSp = declSpCopy(n1->declSp);
+    tempNode->declSp = new declSpec();
+    tempNode->declSp->type.push_back(TYPE_INT);
     temp->addr = newTmp;
+    temp->declSp = declSpCopy(tempNode->declSp);
     emit(opCode, n1->addr, n2->addr, temp->addr);
     emit(OP_IFGOTO, temp->addr, EMPTY_STR, BLANK_STR);
     emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);

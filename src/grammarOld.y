@@ -22,7 +22,7 @@
 			pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
-			constant inden_marker func_marker_1 M_marker N_marker
+			constant inden_marker func_marker_1 M_marker N_marker expressionJump expressionJumpStatement
 // Prototypes
 %{
 	#include <stdio.h>
@@ -39,6 +39,7 @@
 	int errCode=0;
 	string errStr;
 	string currFunc = "#prog";
+	vector<node*> case_consts;
 
 extern "C"
 {
@@ -156,7 +157,6 @@ primary_expression
 		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_CHAR);
 		temp->valType = TYPE_CHAR;
-		printf("char identified: %s\n", yylval.id);
 		setAddr(temp, string(yylval.id));
 		$$ = temp;
 	}
@@ -286,18 +286,21 @@ postfix_expression
 		$$ = newNode;
 	}
 	| postfix_expression INC_OP {
-		int retval  = checkIntOrCharOrPointer($1);
-		if(retval) error($1->lexeme, retval);
-		addChild($1, makeNode(strdup("INC_OP"), strdup("++"), 1, NULL, NULL, NULL, NULL));
-		
+		// int retval  = checkIntOrCharOrPointer($1);
+		// if(retval) error($1->lexeme, retval);
+		// addChild($1, makeNode(strdup("INC_OP"), strdup("++"), 1, NULL, NULL, NULL, NULL));
+		errStr = "use ++" + string($1->lexeme)+ " instead of " + string($1->lexeme) + "++";
+		error(errStr.c_str(), UNSUPPORTED_FUNCTIONALITY);
 		$$ = $1;
 	}
 	| postfix_expression DEC_OP {
-		int retval  = checkIntOrCharOrPointer($1);
-		if(retval) error($1->lexeme, retval);
-		addChild($1, makeNode(strdup("DEC_OP"), strdup("--"), 1, NULL, NULL, NULL, NULL));
+		// int retval  = checkIntOrCharOrPointer($1);
+		// if(retval) error($1->lexeme, retval);
+		// addChild($1, makeNode(strdup("DEC_OP"), strdup("--"), 1, NULL, NULL, NULL, NULL));
+		errStr = "use --" + string($1->lexeme)+ " instead of " + string($1->lexeme) + "--";
+		error(errStr.c_str(), UNSUPPORTED_FUNCTIONALITY);
 		$$ = $1;
-		}
+	}
 	;
 
 argument_expression_list
@@ -310,12 +313,33 @@ unary_expression
 	| INC_OP unary_expression {
 		int retval  = checkIntOrCharOrPointer($2);
 		if(retval) error($2->lexeme, retval);
+		string newTmp = generateTemp(errCode);
+    	if(errCode)
+        	error("Cannot generate Temp",errCode);
+		int opCode = getOpAddType($2, errCode, errStr);
+		if(errCode)
+			error("Cannot generate Temp",errCode);
+        emit(opCode, $2->addr, "1", newTmp);
+    	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $2->addr);
 		$$ = makeNode(strdup("INC_OP"), strdup("++"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
-		}
+		$$->declSp = declSpCopy($2->declSp);
+		$$->addr = $2->addr;
+	}
 	| DEC_OP unary_expression {
 		int retval  = checkIntOrCharOrPointer($2);
 		if(retval) error($2->lexeme, retval);
-		$$ = makeNode(strdup("DEC_OP"), strdup("--"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
+		string newTmp = generateTemp(errCode);
+    	if(errCode)
+        	error("Cannot generate Temp",errCode);
+		int opCode = getOpSubType($2, errCode, errStr);
+		if(errCode)
+			error("Cannot generate Temp",errCode);
+        emit(opCode, $2->addr, "1", newTmp);
+    	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $2->addr);
+		$$ = makeNode(strdup("DEC_OP"), strdup("--"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
+		$$->declSp = declSpCopy($2->declSp);
+		$$->addr = $2->addr;
+	}
 	| unary_operator cast_expression {
 		node* unary_operator = $1;
 		node* cast_expression = $2;
@@ -375,7 +399,7 @@ cast_expression
 		node* cast_expression = $4;
 		int err = canTypecast(cast_expression->declSp, type_name->declSp);
 		if(err) error("", err);
-		typeCastLexeme(cast_expression, type_name->declSp);
+		typeCastLexemeWithEmit(cast_expression, type_name->declSp);
 		$$ = cast_expression;
 	}
 	;
@@ -530,7 +554,6 @@ relational_expression
 			emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
-			temp->declSp = declSpCopy($1->declSp);
 			$$ = temp;
 			}
 	| relational_expression '>' shift_expression { 
@@ -541,7 +564,6 @@ relational_expression
 			emitRelop($1, $3, temp, OP_GREATER, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
-			temp->declSp = declSpCopy($1->declSp);
 			$$ = temp;
 	}
 	| relational_expression LE_OP shift_expression {
@@ -552,7 +574,6 @@ relational_expression
 		emitRelop($1, $3, temp, OP_LEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
-		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	| relational_expression GE_OP shift_expression { 
@@ -563,7 +584,6 @@ relational_expression
 		emitRelop($1, $3, temp, OP_GEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
-		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	;
@@ -591,7 +611,6 @@ equality_expression
 		emitRelop(equality_expression, relational_expression, temp, OP_EQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
-		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	| equality_expression NE_OP relational_expression { 
@@ -615,7 +634,6 @@ equality_expression
 		emitRelop(equality_expression, relational_expression, temp, OP_NEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
-		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	;
@@ -656,25 +674,27 @@ exclusive_or_expression
 			error(errStr, errCode);
 		emit(OP_XOR, exclusive_or_expression->addr, and_expression->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	;
 
 inclusive_or_expression
 	: exclusive_or_expression { $$ = $1; }
-	| inclusive_or_expression '|'  inclusive_or_expression { 
+	| inclusive_or_expression '|' exclusive_or_expression { 
 		node * inclusive_or_expression1 = $1;
-		node * inclusive_or_expression2 = $3;
-		int retval = bitwiseImplicitTypecasting(inclusive_or_expression1, inclusive_or_expression2, errCode,errStr);
+		node * exclusive_or_expression = $3;
+		int retval = bitwiseImplicitTypecasting(inclusive_or_expression1, exclusive_or_expression, errCode,errStr);
 		if(retval < 0){
 			error(errStr, errCode);
 		}
-		node* temp = makeNode(strdup("^"), strdup("^"), 0, inclusive_or_expression1, inclusive_or_expression2, (node*)NULL, (node*)NULL);
+		node* temp = makeNode(strdup("|"), strdup("|"), 0, inclusive_or_expression1, exclusive_or_expression, (node*)NULL, (node*)NULL);
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
-		emit(OP_OR, inclusive_or_expression1->addr, inclusive_or_expression2->addr, newTmp);
+		emit(OP_OR, inclusive_or_expression1->addr, exclusive_or_expression->addr, newTmp);
 		temp->addr = newTmp;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	;
@@ -686,6 +706,7 @@ logical_and_expression
 		node* temp = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $4, (node*)NULL, (node*)NULL); 
 		temp->truelist = $4->truelist;
 		temp->falselist = mergelist($1->falselist, $4->falselist);
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
 	;
@@ -697,6 +718,7 @@ logical_or_expression
 		node* temp = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $4, (node*)NULL, (node*)NULL);  
 		temp->truelist = mergelist($1->truelist, $4->truelist);
 		temp->falselist = $4->falselist;
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	;
@@ -710,24 +732,28 @@ conditional_expression
 		node* temp = makeNode(strdup("?:"), strdup("?:"), 0, $1, $4, $8, (node*)NULL); 
 		vector<int> tempVec = mergelist( $4->nextlist, $5->nextlist);
 		temp->nextlist = mergelist(tempVec, $8->nextlist);
+		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	;
 
 assignment_expression
-	: conditional_expression { $$ = $1; }
-	| unary_expression assignment_operator assignment_expression { 
+	: conditional_expression { $$ = $1;}
+	| unary_expression assignment_operator assignment_expression 
+	{ 
 		node* unary_expression = $1;
 		node* assignment_expression = $3;
 		node* assignment_operator = $2;
-		if (!unary_expression->declSp) {
+		if (!unary_expression->declSp) 
+		{
 			declSpec* ds = new declSpec();
 			if(!assignment_expression->declSp)
 				error(assignment_expression->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
 			ds->type = assignment_expression->declSp->type;
 			unary_expression->declSp = ds;
 		}
-		else {
+		else 
+		{
 			string s(assignment_operator->name);
 			if(s == "AND_ASSIGN" || s == "OR_ASSIGN" || s == "XOR_ASSIGN" || s == "LEFT_ASSIGN" || s == "RIGHT_ASSIGN") {
 				//should be only int or char
@@ -762,8 +788,9 @@ assignment_expression
 			bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
-			if(retval)
+			if(retval){
 				typeCastLexemeWithEmit(assignment_expression, unary_expression->declSp);
+			}
 			emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
 		}
 		else
@@ -814,8 +841,23 @@ assignment_operator
 	;
 
 expression
-	: assignment_expression { $$ = $1; }
-	| expression ',' assignment_expression { if($1){makeSibling($3, $1); $$ = $1;} else $$ = $3;} 
+	: assignment_expression { 
+		$$ = $1; 
+		// if(!$$->truelist.size()) {
+		// 	$$->truelist = makelist(nextQuad());
+    	// 	$$->falselist = makelist(nextQuad()+1);
+		// 	emit(OP_IFGOTO, $1->addr, EMPTY_STR, BLANK_STR);
+    	// 	emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
+		// }
+	}
+	| expression ',' assignment_expression { 
+		if($1){makeSibling($3, $1); $$ = $1;} else $$ = $3;
+		$$->truelist = mergelist($1->truelist, $3->truelist);
+		$$->falselist = mergelist($1->falselist, $3->falselist);
+		$$->nextlist = mergelist($1->nextlist, $3->nextlist);
+		$$->breaklist = mergelist($1->breaklist, $3->breaklist);
+		$$->continuelist = mergelist($1->continuelist, $3->continuelist);
+		} 
 	;
 
 constant_expression
@@ -830,8 +872,10 @@ declaration
 		while(curr){
 			node* temp = curr;
 			string s(curr->name);
+			node* initializer=nullptr;
 			if(s == "="){
 				temp = curr->childList;
+				initializer = temp->next;
 			}
 			
 			if(!temp) continue;
@@ -863,11 +907,26 @@ declaration
 				sym_node->declSp = declSpCopy($1->declSp);
 				if(temp->declSp)
 					sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
+				if(initializer) {
+					//variable initialized
+					int retval = canTypecast(sym_node->declSp, initializer->declSp);
+					if(retval)
+						error("variable assignment error", retval);
+					retval = areDifferentTypes(sym_node->declSp, initializer->declSp, errCode, errStr);
+					if(errCode)
+						error(errStr, errCode);
+					if(retval) {
+						typeCastLexemeWithEmit(initializer, sym_node->declSp);
+					}
+					emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);
+				}
 			} 
 			
 			curr = curr->next;
 		}
-		if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;   
+		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;   
+		makeSibling($2,$1);
+		$$ = $1; 
 	}
 	;
 
@@ -915,7 +974,6 @@ init_declarator
 		node* declaration_specifiers = currDeclSpec;
 		node* declarator = $1;
 		node* initializer = $3;
-    //TODO:  typecasting
 		
 		if(!declarator->declSp){
 			declSpec* ds = new declSpec();
@@ -925,7 +983,9 @@ init_declarator
 			ds->type = initializer->declSp->type;
 			declarator->declSp = ds;
 		}
+		// emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, declarator->addr);
 		$$ = makeNode(strdup("="), strdup("="), 0, declarator, initializer, (node*)NULL, (node*)NULL);
+		$$->addr=$1->addr;
 	}
 	;
 // do not handle
@@ -1122,6 +1182,7 @@ direct_declarator
 		$$ = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$-> infoType = INFO_TYPE_NORMAL;
 		$$->lineNo = line+1;
+		$$->addr = yylval.id;
 	}
 	| '(' declarator ')' { $$ = $2;}
 	| direct_declarator '[' constant_expression ']' {
@@ -1304,26 +1365,96 @@ initializer_list
 	;
 
 statement
-	: labeled_statement { $$ = $1; }
-	| compound_statement {$$ = $1; }
-	| expression_statement { $$ = $1; }
-	| selection_statement { $$ = $1; }
-	| iteration_statement { $$ = $1; }
-	| jump_statement { $$ = $1; }
+	: labeled_statement { 
+		$$ = $1;
+		vector<int> tmp = mergelist($1->truelist, $1->falselist);
+		$$->nextlist = mergelist(tmp, $1->nextlist);
+		$$->breaklist = $1->breaklist;
+		$$->continuelist = $1->continuelist;
+	}
+	| compound_statement { 
+		$$ = $1;
+		vector<int> tmp = mergelist($1->truelist, $1->falselist);
+		$$->nextlist = mergelist(tmp, $1->nextlist);
+		$$->breaklist = $1->breaklist;
+		$$->continuelist = $1->continuelist;
+	}
+	| expression_statement { 
+		$$ = $1;
+		vector<int> tmp = mergelist($1->truelist, $1->falselist);
+		$$->nextlist = mergelist(tmp, $1->nextlist);
+		$$->breaklist = $1->breaklist;
+		$$->continuelist = $1->continuelist;
+	}
+	| selection_statement { 
+		$$ = $1;
+		vector<int> tmp = mergelist($1->truelist, $1->falselist);
+		$$->nextlist = mergelist(tmp, $1->nextlist);
+		$$->breaklist = $1->breaklist;
+		$$->continuelist = $1->continuelist;
+	}
+	| iteration_statement { 
+		$$ = $1;
+		vector<int> tmp = mergelist($1->truelist, $1->falselist);
+		$$->nextlist = mergelist(tmp, $1->nextlist);
+		$$->breaklist = $1->breaklist;
+		$$->continuelist = $1->continuelist;
+	}
+	| jump_statement { 
+		$$ = $1;
+		vector<int> tmp = mergelist($1->truelist, $1->falselist);
+		$$->nextlist = mergelist(tmp, $1->nextlist);
+		$$->breaklist = $1->breaklist;
+		$$->continuelist = $1->continuelist;
+	}
 	;
 
 labeled_statement
-	: IDENTIFIER ':' statement {$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
-	| CASE constant_expression ':' statement { $$ = makeNode(strdup("CASE"), strdup("case"), 0, $2, $4, (node*)NULL, (node*)NULL); }
-	| DEFAULT ':' statement {$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("DEFAULT"), strdup("default"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
+	: IDENTIFIER ':' statement {
+		$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);
+		$$->breaklist = $3->breaklist;
+		$$->continuelist = $3->continuelist;
+	}
+	| CASE constant_expression {
+		// ifgoto
+		vector<int> next = makelist(nextQuad());
+		emit(OP_IFNEQGOTO, case_consts[case_consts.size()-1]->addr, $2->addr, BLANK_STR);
+		// This should go to next case
+		$2->nextlist = mergelist($2->nextlist, next);
+	} ':' statement {
+		// Add goto to nextlist of $$ if not equal
+		$$ = makeNode(strdup("CASE"), strdup("case"), 0, $2, $5, (node*)NULL, (node*)NULL);
+		$$->nextlist = mergelist($2->nextlist, $5->nextlist);
+		
+		$$->breaklist = $5->breaklist;
+		$$->continuelist = $5->continuelist;
+	}
+	| DEFAULT ':' statement {
+		$$ = makeNode(strdup(":"), strdup(":"), 0, makeNode(strdup("DEFAULT"), strdup("default"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);
+		$$->breaklist = $3->breaklist;
+		$$->nextlist = $3->nextlist;
+		$$->continuelist = $3->continuelist;
+	}
 	;
 
 compound_statement
 	: scope_marker '{' '}' { $$ = (node*)NULL; gSymTable = gSymTable->parent;}
-	| scope_marker '{' statement_list '}' { $$ = $3; gSymTable = gSymTable->parent;}
+	| scope_marker '{' statement_list '}' {
+		$$ = $3; gSymTable = gSymTable->parent;
+		$$->breaklist = $3->breaklist;	
+		$$->continuelist = $3->continuelist;
+	}
 	| scope_marker '{' declaration_list '}' {  $$ = $3; gSymTable = gSymTable->parent;}
-	| scope_marker '{' declaration_list statement_list '}' { if($3){$$ = makeNode(strdup("BODY"), strdup("body"), 0, $3, $4, (node*)NULL, (node*)NULL);} else{
-		$$ = $4;} gSymTable = gSymTable->parent;}
+	| scope_marker '{' declaration_list statement_list '}' { 
+		if($3){
+			$$ = makeNode(strdup("BODY"), strdup("body"), 0, $3, $4, (node*)NULL, (node*)NULL);}
+		else{
+			$$ = $4;
+		}
+		gSymTable = gSymTable->parent;
+		$$->breaklist = $4->breaklist;	
+		$$->continuelist = $4->continuelist;
+	}
 	;
 
 scope_marker
@@ -1355,12 +1486,19 @@ declaration_list
 
 statement_list
 	: statement { $$ = $1; }
-	| statement_list statement { 
+	| statement_list M_marker statement { 
+		node * temp;
 		if(!strcmp(($1 -> name), "STMT_LIST")){
-			$$ = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);
+			temp = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);
 		} else{ 
-			$$ = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1, $2, (node*)NULL, (node*)NULL);
+			temp = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1, $2, (node*)NULL, (node*)NULL);
 		}
+		backpatch($1->nextlist, $2->quad);
+		
+		temp->nextlist = $3->nextlist;
+		temp->breaklist = mergelist($1->breaklist, $3->breaklist);
+		temp->continuelist = mergelist($1->continuelist, $3->continuelist);
+		$$=temp;
 	}
 	;
 
@@ -1369,35 +1507,114 @@ expression_statement
 	| expression ';' {makeSibling(makeNode(strdup(";"), strdup(";"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
 	;
 
+
+expressionJump
+	: expression { 
+		$$ = $1; 
+		if(!$$->truelist.size()) {
+			$$->truelist = makelist(nextQuad());
+    		$$->falselist = makelist(nextQuad()+1);
+			emit(OP_IFGOTO, $1->addr, EMPTY_STR, BLANK_STR);
+    		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
+		}
+	}
+	;
+
+expressionJumpStatement
+	: ';' {$$ = makeNode(strdup(";"), strdup(";"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| expressionJump ';' {makeSibling(makeNode(strdup(";"), strdup(";"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1); $$ = $1;}
+	;
+
+
 selection_statement
-	: IF '(' expression ')' M_marker statement {
+	: IF '(' expressionJump  ')' M_marker statement {
 		backpatch($3->truelist, $5->quad);
 		node * temp = makeNode(strdup("IF"), strdup("if"),0, $3, $6, (node*)NULL, (node*)NULL);
 		temp->nextlist = mergelist($3->falselist, $6->nextlist);
+		temp->breaklist = $6->breaklist;
+		temp->continuelist = $6->continuelist;
 		$$ = temp;
 	}
-	| IF  '(' expression ')' M_marker statement N_marker ELSE M_marker statement {
+	| IF  '(' expressionJump  ')' M_marker statement ELSE N_marker M_marker statement {
 		backpatch($3->truelist, $5->quad);
 		backpatch($3->falselist, $9->quad);
 		node* temp = makeNode(strdup("IF_ELSE"), strdup("else"),0, $3, $6, $10, (node*)NULL);
-		vector<int> tempVec = mergelist($6->nextlist, $7->nextlist);
+		vector<int> tempVec = mergelist($6->nextlist, $8->nextlist);
 		temp->nextlist = mergelist(tempVec, $10->nextlist);
+		temp->breaklist = mergelist($5->breaklist, $10->breaklist);
+		temp->continuelist = mergelist($5->continuelist, $10->continuelist);
 		$$ = temp;
 	}
-	| SWITCH '(' expression ')' statement {$$ = makeNode(strdup("SWITCH"), strdup("switch"),0, $3, $5, (node*)NULL, (node*)NULL);}
+	| SWITCH '(' expressionJump {case_consts.push_back($3);} ')' statement {
+		$6->addr = $3->addr;
+		$$ = makeNode(strdup("SWITCH"), strdup("switch"),0, $3, $6, (node*)NULL, (node*)NULL);
+		$$->nextlist = mergelist($6->breaklist, $6->nextlist);
+		$$->nextlist = mergelist($$->nextlist, $3->nextlist);
+		$$->continuelist = $6->continuelist;
+		case_consts.pop_back();
+	}	
 	;
 
+
 iteration_statement
-	: WHILE '(' expression ')' statement {$$ = makeNode(strdup("WHILE"), strdup("while"), 0, $3, $5, (node*)NULL, (node*)NULL);}
-	| DO statement WHILE '(' expression ')' ';' {$$ = makeNode(strdup("DO WHILE"), strdup("do while"), 0, $2, $5, (node*)NULL, (node*)NULL);}
-	| FOR '(' expression_statement expression_statement ')' statement {$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $4, $6, (node*)NULL);}
-	| FOR '(' expression_statement expression_statement expression ')' statement {$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $4, $5, $7);}
+	: WHILE '(' M_marker expressionJump ')' M_marker statement {
+		node *m1 = $3, *m2 = $6, *s1 = $7, *e1 = $4;
+		backpatch(s1->nextlist, m1->quad);
+		backpatch(e1->truelist, m2->quad);
+		backpatch(s1->continuelist, m1->quad);
+
+		$$ = makeNode(strdup("WHILE"), strdup("while"), 0, $4, $7, (node*)NULL, (node*)NULL);
+		
+		$$->nextlist = mergelist(s1->breaklist, e1->falselist);
+		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m1->quad));
+	}
+	| DO M_marker statement WHILE '(' M_marker expressionJump ')' ';' {
+		node* s1 = $3, *e1 = $7, *m2 = $2, *m1 = $6;
+		backpatch(s1->nextlist, m1->quad);
+		backpatch(e1->truelist, m2->quad);
+		backpatch(s1->continuelist, m1->quad);
+		
+		$$ = makeNode(strdup("DO WHILE"), strdup("do while"), 0, $3, $7, (node*)NULL, (node*)NULL);
+		
+		$$->nextlist = mergelist(s1->breaklist, e1->falselist);
+		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m2->quad));
+	}
+	| FOR '(' expression_statement M_marker expressionJumpStatement ')' M_marker statement {
+		node *e1 = $3, *m1 = $4, *e2 = $5, *m3 = $7, *s1 = $8;
+		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m1->quad));
+		backpatch(e2->truelist, m3->quad);
+		backpatch(s1->continuelist, m1->quad);
+		backpatch(s1->nextlist, m1->quad);
+		
+		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $8, (node*)NULL);
+		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
+	}
+	| FOR '(' expression_statement M_marker expressionJumpStatement M_marker expression N_marker ')' M_marker statement {
+		node *e1 = $3, *m1 = $4, *e2 = $5, *m2 = $6, *e3 = $7, *n1 = $8, *m3 = $10, *s1 = $11;
+		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m2->quad));
+		backpatch(n1->nextlist, m1->quad);
+		backpatch(e2->truelist, m3->quad);
+		backpatch(s1->continuelist, m2->quad);
+		backpatch(s1->nextlist, m2->quad);
+
+		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $7, $11);
+		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
+	}
 	;
+
 
 jump_statement
 	: GOTO IDENTIFIER ';' {$$ = makeNode(strdup("GOTO"), strdup("goto"), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
-	| CONTINUE ';'{ $$ = makeNode(strdup("CONTINUE"), strdup("continue"),1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| BREAK ';' { $$ = makeNode(strdup("BREAK"), strdup("break"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| CONTINUE ';'{ 
+		$$ = makeNode(strdup("CONTINUE"), strdup("continue"),1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		$$->continuelist = makelist(nextQuad());
+		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
+	}
+	| BREAK ';' { 
+		$$ = makeNode(strdup("BREAK"), strdup("break"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		$$->breaklist = makelist(nextQuad());
+		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
+	}
 	| RETURN ';' { 
 		symbolTableNode* funcNode = lookUp(gSymTable, currFunc);
 		if(funcNode == nullptr){ // Not in func
@@ -1640,7 +1857,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName);
 		printCode();
 		// printSymbolTableJSON(gSymTable,0);
-		printSymbolTable(gSymTable);
+		// printSymbolTable(gSymTable);
         fclose(fd);
     }
     else

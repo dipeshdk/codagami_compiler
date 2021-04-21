@@ -90,6 +90,7 @@
 #define OP_GEQ 727
 #define OP_ANDAND 728   // &&
 #define OP_OROR 729     // ||
+#define OP_IFNEQGOTO 730 // {OP_IFNEQGOTO, operand1, operand2, gotoAddr if not equal}
  
 #define BLANK_STR "BLANK"
 #define EMPTY_STR "______"
