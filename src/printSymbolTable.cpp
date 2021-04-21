@@ -352,6 +352,18 @@ string getOpName(int opCode) {
         case OP_SUBF: return "OP_SUBF";
         case OP_DIVF: return "OP_DIVF"; 
         case OP_GEQ: return "OP_GEQ"; 
+        case OP_ANDAND : return "OP_ANDAND" ;  
+        case OP_OROR : return "OP_OROR" ;     
+        case OP_IFNEQGOTO : return "OP_IFNEQGOTO" ; 
+        case OP_BEGINFUNC : return "OP_BEGINFUNC" ;
+        case OP_ENDFUNC : return "OP_ENDFUNC" ;
+        case OP_RETURN : return "OP_RETURN" ;
+        case OP_PUSHPARAM : return "OP_PUSHPARAM" ;
+        case OP_POPPARAM : return "OP_POPPARAM" ;
+        case OP_LCALL : return "OP_LCALL"; 
+        case OP_LABEL : return "OP_LABEL"; 
+
+
     }
     return "INVALID OPCODE";
 }
@@ -362,7 +374,27 @@ void printQuad(quadruple* quad, int line) {
         case OP_IFGOTO:
             printf("IF %s THEN GOTO %s\n",quad->arg1.c_str(), quad->result.c_str()); break;
         case OP_GOTO:
-            printf("GOTO %s\n", quad->result.c_str()); break;
+        case OP_BEGINFUNC:
+        case OP_PUSHPARAM:
+        case OP_POPPARAM:
+            printf("%s %s\n",getOpName(quad->opCode).c_str(), quad->result.c_str()); break;
+        case OP_ENDFUNC:
+            printf("END_FUNCTION\n"); break;
+        case OP_RETURN:
+            if(quad->result == BLANK_STR) {
+                printf("Return \n");
+            }else {
+                printf("Return %s\n", quad->result.c_str());
+            }
+            break;
+        case OP_LCALL:
+            if(quad->result == BLANK_STR) {
+                printf("LCALL _%s\n", quad->arg1.c_str());
+            }else {
+                printf("%s = LCALL _%s\n", quad->result.c_str(), quad->arg1.c_str());
+            }
+            break;
+        case OP_LABEL: printf("%s:\n", quad->result.c_str()); break;
         case OP_ASSIGNMENT:
             printf("%s = %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
         case OP_IFNEQGOTO:

@@ -183,7 +183,7 @@ int giveTypeCastRankUnary(node* n1, node* n2){
         int retval=canTypecast(n2->declSp, n1->declSp);
         if(retval)
             return retval;
-        typeCastLexeme(n2, n1->declSp);
+        typeCastLexemeWithEmit(n2, n1->declSp);
     }
     return 0;
 }
