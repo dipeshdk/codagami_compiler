@@ -22,7 +22,7 @@
 			pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
-			constant inden_marker func_marker_1 M_marker N_marker expressionJump expressionJumpStatement
+			constant inden_marker func_marker_1 M_marker N_marker expressionJump expressionJumpStatement 
 // Prototypes
 %{
 	#include <stdio.h>
@@ -203,7 +203,7 @@ postfix_expression
 		$$ = $1;	
 	}
 	| postfix_expression '(' argument_expression_list ')' {
-		checkFuncArgValidity($1, $3, errCode, errStr);
+		checkFuncArgValidityWithParamEmit($1, $3, errCode, errStr);
 		if(errCode) error(errStr, errCode);
 		$1->infoType = INFO_TYPE_FUNC;
 		addChild($1,$3);
@@ -1589,6 +1589,7 @@ jump_statement
 		}
 		
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		emit(OP_RETURN, BLANK_STR, BLANK_STR, BLANK_STR);
 	}
 	| RETURN expression ';' { 
 		symbolTableNode* funcNode = lookUp(gSymTable, currFunc);
@@ -1601,10 +1602,13 @@ jump_statement
 		int err = canTypecast(funcNode->declSp, temp->declSp);;
 		if(err) error("return type isnt valid", err);
 		node* n1 = new node();
-		n1->declSp = funcNode->declSp;
+		n1->declSp = declSpCopy(funcNode->declSp);
+		n1->addr = temp->addr;
 		err = giveTypeCastRankUnary(n1, temp);
 		if(err) error("error n typecasting", err);
+		// temp->addr = n1->addr;
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 0, temp, (node*)NULL, (node*)NULL, (node*)NULL);
+		emit(OP_RETURN, BLANK_STR, BLANK_STR, temp->addr);
     }
 	;
 
@@ -1614,12 +1618,14 @@ translation_unit
 	;
 
 external_declaration
-	: function_definition {$$ = $1;}
+	: function_definition {
+		$$ = $1; 
+		emit(OP_ENDFUNC, BLANK_STR, BLANK_STR, BLANK_STR);}
 	| declaration {$$ = $1;}
 	;
 
 function_definition
-	: declaration_specifiers declarator {
+	: declaration_specifiers  declarator {
 		// TODO: Send type from declaration specifier to function name
 		struct node* declarator = $2; 
 		struct node* declaration_specifiers = $1;
@@ -1659,7 +1665,7 @@ function_definition
 		$$ = $2;
 		currFunc = "#prog"; // Back to main program
 	}
-	| declaration_specifiers declarator {
+	| declaration_specifiers  declarator {
 		// TODO: Send type from declaration specifier to function name
 		struct node* declarator = $2; 
 		struct node* declaration_specifiers = $1;
@@ -1682,9 +1688,14 @@ function_definition
 			if(!sym_node){
 				error(lex, ALLOCATION_ERROR);
 			}
-			
+			// emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, lex);
 			sym_node->declSp = declSpCopy(p->declSp);
 		}
+		
+		string labelName = "_" + string(declarator->lexeme);
+		emit(OP_LABEL, BLANK_STR, BLANK_STR, labelName);
+		// emit(OP_BEGINFUNC, BLANK_STR, BLANK_STR, to_string(offset)); // GCC will set the global variable offset
+		
 	} compound_statement { 
 		addChild($2, $4);
 		$$ = $2;
@@ -1707,6 +1718,7 @@ function_definition
 		currFunc = "#prog";
 	}
 	;
+
 
 func_marker_1
 	: {
@@ -1733,6 +1745,9 @@ func_marker_1
 			
 			sym_node->declSp = declSpCopy(p->declSp);
 		}
+		string labelName = "_" + string(declarator->lexeme);
+		emit(OP_LABEL, labelName, BLANK_STR, BLANK_STR);
+		// emit(OP_BEGINFUNC, offset, BLANK_STR, BLANK_STR); // GCC will set the global variable offset
 	}
 	;
 
@@ -1817,10 +1832,11 @@ int main(int ac, char **av) {
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
 		generateDot(root,fileName);
-		printCode();
+		
 		// printSymbolTableJSON(gSymTable,0);
-		// printSymbolTable(gSymTable);
-        fclose(fd);
+		printSymbolTable(gSymTable);
+        printCode();
+		fclose(fd);
     }
     else
         printf("Usage: a.out input_filename [optional]ouput.dot \n");

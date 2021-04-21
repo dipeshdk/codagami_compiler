@@ -17,6 +17,6 @@ node* declaration_list(node* declaration_list, node* declaration);
 
 node* parameter_declaration(node* declaration_specifiers, node* declarator);
 
-void checkFuncArgValidity(node* postfix_expression, node* argument_expression_list, int &errCode, string &errString);
+void checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_expression_list, int &errCode, string &errString);
 
 #endif

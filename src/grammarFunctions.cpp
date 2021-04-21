@@ -145,7 +145,7 @@ node* parameter_declaration(node* declaration_specifiers, node* declarator){
     return declarator;
 }
 
-void checkFuncArgValidity(node* postfix_expression, node* argument_expression_list, int &errCode, string &errString) {
+void checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_expression_list, int &errCode, string &errString) {
     string func_name = postfix_expression->lexeme;
     string name = postfix_expression->lexeme;
     symbolTableNode* stNode = lookUp(gSymTable, name);
@@ -160,6 +160,7 @@ void checkFuncArgValidity(node* postfix_expression, node* argument_expression_li
     int maxSize = paramList.size();
     int idx = 0;
     node* curr = argument_expression_list;
+    int paramSize = 0;
     while(curr){
         node* temp = curr;
         string s = curr->name;
@@ -185,10 +186,24 @@ void checkFuncArgValidity(node* postfix_expression, node* argument_expression_li
                 setErrorParams(errCode, retval, errString, temp->lexeme);
                 return;
             }
-            typeCastLexeme(temp, paramList[idx]->declSp);
+            typeCastLexemeWithEmit(temp, paramList[idx]->declSp);
         }
+        emit(OP_PUSHPARAM, BLANK_STR, BLANK_STR, temp->addr);
+        paramSize+= getTypeSize(temp->declSp->type);
         idx++;
         curr = curr -> next;
     }
+    if(!postfix_expression->declSp){
+        error(postfix_expression->lexeme,INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
+    }
+    if(postfix_expression->declSp->type[0]!= TYPE_VOID){
+        string newTemp = generateTemp(errCode);
+        if(errCode)
+            error("Cannot generate Temp",errCode);
+        emit(OP_LCALL, func_name, BLANK_STR ,newTemp);
+    }else{
+        emit(OP_LCALL, func_name, BLANK_STR ,BLANK_STR);
+    }
+    emit(OP_POPPARAM, BLANK_STR, BLANK_STR, to_string(paramSize));
     return;
 }
