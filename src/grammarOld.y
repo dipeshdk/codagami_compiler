@@ -945,6 +945,7 @@ init_declarator
 			ds->type = initializer->declSp->type;
 			declarator->declSp = ds;
 		}
+		// emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, declarator->addr);
 		$$ = makeNode(strdup("="), strdup("="), 0, declarator, initializer, (node*)NULL, (node*)NULL);
 		$$->addr=$1->addr;
 	}

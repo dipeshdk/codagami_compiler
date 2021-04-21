@@ -1,0 +1,104 @@
+_foo:
+BeginFunc size;
+.
+.
+.
+.
+.
+.
+.
+return var;
+EndFunc;
+
+
+main:
+    BeginFunc size;
+    .
+    .
+    .
+    .
+    PushParam p1;
+    PushParam p2;
+    PushParam p3;
+    _t = LCall _foo; //if return
+    LCall _foo;
+    PopParam sum(size(pi));
+    .
+    .
+    .
+    return var;
+    EndFunc;
+----------------------------------------------------------------------------------------------------
+offset always starts from function base pointer.
+---------------------------------------------------------------------------------------------------
+handle arrays
+---------------------------------------------------------------------------------
+size of function and identifiers
+---------------------------------------------------------------
+foo {
+        
+        {
+
+        }
+
+        {
+
+        }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1) PushParam t1;
+     /
+2) push retAddr; (is done by LCall)
+2) LCall foo;
+
+-------------------------------------------------
+
+3) push rbp;
+4) mov rsp rbp
+5) copy params to variables
+.
+.
+.
+.
+.
+return::
+5)mov return value to rax
+6) pop rbp (reset old base pointer)
+7) jump to (sp) (top of stack is return addr) || or retq (is done by retq)
+
+back to caller:
+set rax to return variable
+popParams (size of params);
+
+
+a = b * c + foo(5,a) - b;
+{
+    int a;
+    a=6;
+    {
+        asdfsd
+        {
+            fdsafsd
+            {
+                 b = 2 *  a; 
+            }
+        }
+    } 
+}
