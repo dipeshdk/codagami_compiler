@@ -1242,13 +1242,8 @@ direct_declarator
 		$$ = temp;
 	}
 	| direct_declarator '[' ']' {
-		node* temp = $1;
-		temp->infoType = INFO_TYPE_ARRAY;
-		if(!temp->declSp){
-			temp->declSp = new declSpec();
-		}
-		temp->declSp->ptrLevel++;
-		$$ = temp;
+		error($1->lexeme, ARRAY_SIZE_NOT_CONSTANT);
+		$$ = NULL;
 	}
 	| direct_declarator '(' parameter_type_list ')' { 
 		node* direct_declarator = $1;	
