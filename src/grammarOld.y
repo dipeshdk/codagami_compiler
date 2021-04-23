@@ -334,7 +334,11 @@ unary_expression
 			if(errCode)
 				error(errStr, errCode);
 		}
-		else if(name == "!") opCode = OP_LOGICAL_NOT;
+		else if(name == "!") {
+			opCode = OP_LOGICAL_NOT;
+			unary_operator->truelist = cast_expression->falselist;
+			unary_operator->falselist = cast_expression->truelist;
+		}
 		// nothing to do for unary plus
 
 		if(opCode != -1) {
@@ -346,6 +350,9 @@ unary_expression
 		}
 
 		addChild(unary_operator, cast_expression);
+		unary_operator->nextlist = cast_expression->nextlist;
+		unary_operator->continuelist = cast_expression->continuelist;
+		unary_operator->breaklist = cast_expression->breaklist;
 		$$ = unary_operator;
 	}
 	| SIZEOF unary_expression {$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
