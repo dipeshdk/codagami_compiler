@@ -932,6 +932,7 @@ declaration
 			if(funcDecl){
 				// param* paramcheckValidTypeter = new param();
 				param* paramter = new param();
+				paramter->infoType = $2->infoType;
 				paramter->declSp = declSpCopy($1->declSp);
 				paramter->paramName = lex;
 				$1->paramList.push_back(paramter);
@@ -1378,8 +1379,8 @@ parameter_declaration
 	 }
 	| declaration_specifiers { 
 		node* declaration_specifiers = $1;
-
 		param *parameter = new param();
+		parameter->infoType = declaration_specifiers->infoType;
 		if(!parameter->declSp) {
 			parameter->declSp = new declSpec();
 		}
