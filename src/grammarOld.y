@@ -366,13 +366,32 @@ unary_expression
 		unary_operator->breaklist = cast_expression->breaklist;
 		$$ = unary_operator;
 	}
-	| SIZEOF unary_expression {$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| SIZEOF unary_expression {
+		if(strcmp(($2 -> name), "IDENTIFIER")){
+			error("Argument to sizeof must be identifier", DEFAULT_ERROR);
+		}
+		symbolTableNode* sym_node = lookUp(gSymTable, $2->lexeme);
+		if(!sym_node){
+			error($2->lexeme, UNDECLARED_SYMBOL);
+		}
+		string newTmp = generateTemp(errCode);
+    	if(errCode)
+        	error("Cannot generate Temp",errCode);
+    	emit(OP_ASSIGNMENT, to_string(getNodeSize(sym_node, gSymTable)), EMPTY_STR, newTmp);
+		
+		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
+		$$->declSp->type.push_back(TYPE_INT);
+		$$->addr = newTmp;
+	}
 	| SIZEOF '(' type_name ')'{
 		// TODO: Check validity of type_name 
 		string newTmp = generateTemp(errCode);
     	if(errCode)
         	error("Cannot generate Temp",errCode);
-    	// emit(OP_ASSIGNMENT, to_string(getNodeSize($3)), EMPTY_STR, newTmp);
+    	symbolTableNode* sym_node = new symbolTableNode();
+		sym_node->declSp = declSpCopy($3->declSp);
+		sym_node->infoType = $3->infoType;
+		emit(OP_ASSIGNMENT, to_string(getNodeSize(sym_node, gSymTable)), EMPTY_STR, newTmp);
 		
 		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$->declSp->type.push_back(TYPE_INT);
@@ -926,6 +945,7 @@ declaration
 			if(funcDecl){
 				// param* paramcheckValidTypeter = new param();
 				param* paramter = new param();
+				paramter->infoType = $2->infoType;
 				paramter->declSp = declSpCopy($1->declSp);
 				paramter->paramName = lex;
 				$1->paramList.push_back(paramter);
@@ -1288,13 +1308,8 @@ direct_declarator
 		$$ = temp;
 	}
 	| direct_declarator '[' ']' {
-		node* temp = $1;
-		temp->infoType = INFO_TYPE_ARRAY;
-		if(!temp->declSp){
-			temp->declSp = new declSpec();
-		}
-		temp->declSp->ptrLevel++;
-		$$ = temp;
+		error($1->lexeme, ARRAY_SIZE_NOT_CONSTANT);
+		$$ = NULL;
 	}
 	| direct_declarator '(' parameter_type_list ')' { 
 		//function declaration
@@ -1686,7 +1701,7 @@ iteration_statement
 		$$ = makeNode(strdup("WHILE"), strdup("while"), 0, $4, $7, (node*)NULL, (node*)NULL);
 		
 		$$->nextlist = mergelist(s1->breaklist, e1->falselist);
-		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m1->quad));
+		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m1->quad));
 	}
 	| DO M_marker statement WHILE '(' M_marker expressionJump ')' ';' {
 		node* s1 = $3, *e1 = $7, *m2 = $2, *m1 = $6;
@@ -1703,11 +1718,11 @@ iteration_statement
 		$$ = makeNode(strdup("DO WHILE"), strdup("do while"), 0, $3, $7, (node*)NULL, (node*)NULL);
 		
 		$$->nextlist = mergelist(s1->breaklist, e1->falselist);
-		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m2->quad));
+		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m2->quad));
 	}
 	| FOR '(' expression_statement M_marker expressionJumpStatement ')' M_marker statement {
 		node *e1 = $3, *m1 = $4, *e2 = $5, *m3 = $7, *s1 = $8;
-		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m1->quad));
+		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m1->quad));
 		int retval = backpatch(e2->truelist, m3->quad);
 		if(retval)
 			error("backpatch error", retval);
@@ -1853,9 +1868,9 @@ function_definition
 		funcNode->paramWidth = tempOffset-rbp_size;
 		
 		string labelName = "_" + string(declarator->lexeme);
-		emit(OP_LABEL, BLANK_STR, BLANK_STR, labelName);
+		emit(OP_LABEL, EMPTY_STR, EMPTY_STR, labelName);
     //TODO: backpatch 
-    // emit(OP_BEGINFUNC, BLANK_STR, BLANK_STR, EMPTY_STR); // GCC will set the global variable offset
+    // emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, EMPTY_STR); // GCC will set the global variable offset
 		
 		for(auto &p: declarator->paramList){
 			string lex = p->paramName;	
@@ -1930,9 +1945,9 @@ func_marker_1
     
 
 		string labelName = "_" + string(declarator->lexeme);
-		emit(OP_LABEL, labelName, BLANK_STR, BLANK_STR);
+		emit(OP_LABEL, EMPTY_STR, EMPTY_STR,labelName);
     //TODO: backpatch offset
-		// emit(OP_BEGINFUNC, BLANK_STR, BLANK_STR, EMPTY_STR); // GCC will set the global variable offset 
+		// emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, EMPTY_STR); // GCC will set the global variable offset 
 		funcNode->paramWidth = tempOffset-rbp_size;
 		for(auto &p: declarator->paramList){
 			string lex = p->paramName;	

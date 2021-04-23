@@ -5,6 +5,11 @@ int checkValidType(vector<int> &v) {
     return 0;
 }
 
+bool checkTypeWrapperWithStruct(declSpec* ds1, declSpec*ds2){
+    bool c1 = (ds1->type[0] == TYPE_STRUCT && ds1->lexeme == ds2->lexeme);
+    bool c2 = checkType(ds1, ds2->type[0], ds2->ptrLevel);
+    return (c1 && c2);
+}
 
 bool checkType(declSpec *ds, int typeName, int ptrLevel) {
     if(checkValidType(ds->type) || ds->type[0] != typeName || ds->ptrLevel != ptrLevel) return false;
@@ -133,6 +138,7 @@ int checkPointer(node* root){
 int getTypeRank(vector<int> &type) {
     if(type.size() != 1)  -TYPE_ERROR;
     switch(type[0]) {
+        case TYPE_STRUCT: return 5;
         case TYPE_FLOAT: return 4;
         case TYPE_INT: return 3;
         case TYPE_CHAR: return 2;

@@ -1,4 +1,4 @@
-void bubble_sort(int arr[], int n){
+void bubble_sort(int *arr, int n){
     int i, j;
     for(i = 0; i < n-2; ++i){
         for(j = 0; j < n-i-1; ++j){
@@ -14,7 +14,7 @@ void bubble_sort(int arr[], int n){
 
 int main(){
     int n = 10;
-    int arr[n] = {5, 4, 7, 2, 9, 10, 1, 3, 6, 8};
+    int arr[10] = {5, 4, 7, 2, 9, 10, 1, 3, 6, 8};
     bubble_sort(arr, n);
     return 0;
 }
