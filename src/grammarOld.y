@@ -334,7 +334,11 @@ unary_expression
 			if(errCode)
 				error(errStr, errCode);
 		}
-		else if(name == "!") opCode = OP_LOGICAL_NOT;
+		else if(name == "!") {
+			opCode = OP_LOGICAL_NOT;
+			unary_operator->truelist = cast_expression->falselist;
+			unary_operator->falselist = cast_expression->truelist;
+		}
 		// nothing to do for unary plus
 
 		if(opCode != -1) {
@@ -346,6 +350,9 @@ unary_expression
 		}
 
 		addChild(unary_operator, cast_expression);
+		unary_operator->nextlist = cast_expression->nextlist;
+		unary_operator->continuelist = cast_expression->continuelist;
+		unary_operator->breaklist = cast_expression->breaklist;
 		$$ = unary_operator;
 	}
 	| SIZEOF unary_expression {
@@ -405,6 +412,7 @@ cast_expression
 		int err = canTypecast(cast_expression->declSp, type_name->declSp);
 		if(err) error("", err);
 		typeCastLexemeWithEmit(cast_expression, type_name->declSp);
+		makeSibling(cast_expression, type_name);
 		$$ = cast_expression;
 	}
 	;
@@ -858,10 +866,10 @@ assignment_expression
 		}
 		assignment_operator->addr = unary_expression->addr;
 		assignment_operator->declSp = declSpCopy(unary_expression->declSp);
-		addChild(assignment_operator, unary_expression); 
-		addChild(assignment_operator, assignment_expression); 
 		assignment_operator->nextlist = mergelist(assignment_operator->nextlist, unary_expression->nextlist);
 		assignment_operator->nextlist = mergelist(assignment_operator->nextlist, assignment_expression->nextlist);
+		addChild(assignment_operator, unary_expression); 
+		addChild(assignment_operator, assignment_expression); 
 		$$ = assignment_operator;
 	}
 	;
@@ -881,15 +889,7 @@ assignment_operator
 	;
 
 expression
-	: assignment_expression { 
-		$$ = $1; 
-		// if(!$$->truelist.size()) {
-		// 	$$->truelist = makelist(nextQuad());
-    	// 	$$->falselist = makelist(nextQuad()+1);
-		// 	emit(OP_IFGOTO, $1->addr, EMPTY_STR, BLANK_STR);
-    	// 	emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
-		// }
-	}
+	: assignment_expression { $$ = $1; }
 	| expression ',' assignment_expression { 
 		if($1){makeSibling($3, $1); $$ = $1;} else $$ = $3;
 		$$->truelist = mergelist($1->truelist, $3->truelist);
@@ -1582,10 +1582,10 @@ statement_list
 	: statement { $$ = $1; }
 	| statement_list M_marker statement { 
 		node * temp;
-		if(!strcmp(($1 -> name), "STMT_LIST")){
-			temp = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1 -> childList, $2, (node*)NULL, (node*)NULL);
+		if(!strcmp(($1->name), "STMT_LIST")){
+			temp = makeNode(strdup("STMT_LIST"), strdup("STMT_LIST"), 0, $1->childList, $3, (node*)NULL, (node*)NULL);
 		} else{ 
-			temp = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1, $2, (node*)NULL, (node*)NULL);
+			temp = makeNode(strdup("STMT_LIST"), strdup("STMT_LIST"), 0, $1, $3, (node*)NULL, (node*)NULL);
 		}
 		int retval = backpatch($1->nextlist, $2->quad);
 		if(retval)
