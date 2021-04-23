@@ -22,7 +22,7 @@
 			pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
-			constant inden_marker func_marker_1 M_marker N_marker expressionJump expressionJumpStatement 
+			constant inden_marker func_marker_1 M_marker N_marker expressionJump expressionJumpStatement conditional_marker
 // Prototypes
 %{
 	#include <stdio.h>
@@ -43,6 +43,8 @@
 	int offset = 0;
 	int rbp_size = 4;
 	string funcName;
+	string ternaryTemp = BLANK_STR;
+
 
 extern "C"
 {
@@ -198,6 +200,7 @@ postfix_expression
 		addChild(postfix_expression, expression);
 		postfix_expression->infoType = INFO_TYPE_ARRAY;
 		postfix_expression->addr = arrayIndexStr;
+		postfix_expression->declSp->ptrLevel++;
 		$$ = postfix_expression;
 	}
 	| postfix_expression '(' ')' { // Check with function paramlist111NoParamName111
@@ -312,29 +315,36 @@ unary_expression
 		string name(unary_operator->name);
 		unary_operator->declSp = cast_expression->declSp;
 
-		if(name == "*" && 
-			(!(cast_expression->infoType == INFO_TYPE_ARRAY || (cast_expression->declSp && cast_expression->declSp->ptrLevel > 0))))
-				error(cast_expression->name, TYPE_ERROR);
-
-		if(name == "&"){
-			if(cast_expression->infoType ==INFO_TYPE_STRUCT){
-				structTableNode* structNode = structLookUp(gSymTable, cast_expression->lexeme);
-				if(!structNode){
-					error(cast_expression->lexeme,INVALID_REFERENCE);
-				}else{
-					unary_operator->declSp->ptrLevel++;
-				}
-			}
-			else
-			{
-				symbolTableNode* symNode = lookUp(gSymTable,cast_expression->lexeme);
-				if(!symNode){
-					error(cast_expression->lexeme,INVALID_REFERENCE);
-				}else{
-					unary_operator->declSp->ptrLevel++;
-				}
-			}
+		int opCode = -1;
+		if(name == "*"){
+			if(!(cast_expression->infoType == INFO_TYPE_ARRAY || (cast_expression->declSp && cast_expression->declSp->ptrLevel > 0)))
+				error(cast_expression->name, NON_POINTER_DEFERENCE);
+			unary_operator->addr = "*(" + cast_expression->addr + ")";
+			unary_operator->declSp->ptrLevel--;
 		}
+		else if(name == "&") {
+			opCode = OP_ADDR;
+			unary_operator->declSp->ptrLevel++;
+		}
+		else if(name == "-") opCode = OP_UNARY_MINUS;
+		else if(name == "~") {
+			opCode = OP_BITWISE_NOT;
+			//type should be int or char
+			bitwiseTypecastingSingleNode(cast_expression, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+		}
+		else if(name == "!") opCode = OP_LOGICAL_NOT;
+		// nothing to do for unary plus
+
+		if(opCode != -1) {
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error("Cannot generate Temp", errCode);
+			emit(opCode, cast_expression->addr, EMPTY_STR, newTmp);
+			unary_operator->addr = newTmp;
+		}
+
 		addChild(unary_operator, cast_expression);
 		$$ = unary_operator;
 	}
@@ -350,6 +360,9 @@ unary_expression
 		$$->declSp->type.push_back(TYPE_INT);
 		$$->addr = newTmp;
 	}
+
+		
+
 	;
 
 unary_operator
@@ -396,7 +409,7 @@ multiplicative_expression
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
-		}
+	}
 	| multiplicative_expression '/' cast_expression { 
 		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "/", errCode, errStr); 
 		if(errCode)
@@ -413,7 +426,7 @@ multiplicative_expression
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
-		}
+	}
 	| multiplicative_expression '%' cast_expression { 
 		int retval = checkType($3->declSp,TYPE_FLOAT,0);
 		if(retval){
@@ -432,7 +445,7 @@ multiplicative_expression
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
-		}
+	}
 	;
 
 additive_expression
@@ -675,7 +688,9 @@ inclusive_or_expression
 logical_and_expression
 	: inclusive_or_expression {$$ = $1;}
 	| logical_and_expression AND_OP M_marker inclusive_or_expression { 
-		backpatch($1->truelist, $3->quad);
+		int retval = backpatch($1->truelist, $3->quad);
+		if(retval)
+			error("backpatch error", retval);
 		node* temp = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $4, (node*)NULL, (node*)NULL); 
 		temp->truelist = $4->truelist;
 		temp->falselist = mergelist($1->falselist, $4->falselist);
@@ -687,7 +702,9 @@ logical_and_expression
 logical_or_expression
 	: logical_and_expression { $$ = $1; }
 	| logical_or_expression OR_OP M_marker logical_and_expression { 
-		backpatch($1->falselist, $3->quad);
+		int retval = backpatch($1->falselist, $3->quad);
+		if(retval)
+			error("backpatch error", retval);
 		node* temp = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $4, (node*)NULL, (node*)NULL);  
 		temp->truelist = mergelist($1->truelist, $4->truelist);
 		temp->falselist = $4->falselist;
@@ -699,15 +716,44 @@ logical_or_expression
  
 conditional_expression
 	: logical_or_expression { $$ = $1; }
-	| logical_or_expression '?' M_marker expression N_marker ':' M_marker conditional_expression {
-		backpatch($1->truelist, $3->quad);
-		backpatch($1->falselist, $7->quad);
+	| logical_or_expression '?' M_marker expression conditional_marker N_marker ':' M_marker conditional_expression {
+		int retval = backpatch($1->truelist, $3->quad);
+		if(retval)
+			error("backpatch error", retval);
+		retval = backpatch($1->falselist, $8->quad);
+		if(retval)
+			error("backpatch error", retval);
 		node* temp = makeNode(strdup("?:"), strdup("?:"), 0, $1, $4, $8, (node*)NULL); 
-		vector<int> tempVec = mergelist( $4->nextlist, $5->nextlist);
-		temp->nextlist = mergelist(tempVec, $8->nextlist);
+		vector<int> tempVec = mergelist( $4->nextlist, $6->nextlist);
+		temp->nextlist = mergelist(tempVec, $9->nextlist);
 		temp->declSp = declSpCopy($1->declSp);
-		$$ = temp;
+		emit(OP_ASSIGNMENT, $9->addr, EMPTY_STR, ternaryTemp);
+		retval  = backpatchAssignment($5->nextlist, $4->addr);
+		if(retval)
+		{
+			error("Invalid Assignment Backpatch", retval);
 		}
+		temp->addr = ternaryTemp;
+		$$ = temp;
+		ternaryTemp = BLANK_STR;
+		}
+	;
+
+conditional_marker:
+	{
+		if(ternaryTemp != BLANK_STR){
+			error("Nested ternary operation not supported", UNSUPPORTED_FUNCTIONALITY);
+		}
+		ternaryTemp= generateTemp(errCode);
+    	if(errCode)
+        	error("Cannot generate Temp",errCode);
+		
+		node* temp = makeDeadNode();
+		temp->nextlist = makelist(nextQuad());
+		emit(OP_ASSIGNMENT, BLANK_STR, EMPTY_STR, ternaryTemp); 
+		$$ = temp;
+		
+	}
 	;
 
 assignment_expression
@@ -795,6 +841,8 @@ assignment_expression
 		assignment_operator->declSp = declSpCopy(unary_expression->declSp);
 		addChild(assignment_operator, unary_expression); 
 		addChild(assignment_operator, assignment_expression); 
+		assignment_operator->nextlist = mergelist(assignment_operator->nextlist, unary_expression->nextlist);
+		assignment_operator->nextlist = mergelist(assignment_operator->nextlist, assignment_expression->nextlist);
 		$$ = assignment_operator;
 	}
 	;
@@ -875,6 +923,34 @@ declaration
 				sym_node->declSp = declSpCopy($1->declSp);
 				if(temp->declSp)
 					sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
+				temp->declSp = sym_node->declSp;
+				if(initializer) {
+					//array initializtion
+					node *currInit = initializer;
+					int ind = 0;
+					if(!temp->declSp) 
+						error(temp->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
+
+					int size = getTypeSize(temp->declSp->type);
+					if(size < 0){
+						error("invalid array type", -size);
+					}
+					//_t1 = 4;
+					string sizeTmp = generateTemp(errCode);
+					if(errCode){
+						error("error in temp generation", errCode);
+					}
+					emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
+
+					while(currInit) {
+						string addr = emitArrayIndexGetAddr(temp->addr, to_string(ind), sizeTmp, errCode, errStr);
+						if(errCode)
+							error(errStr,errCode);
+						emit(OP_ASSIGNMENT, currInit->addr, EMPTY_STR ,addr);
+						currInit = currInit->next;
+						ind++;
+					}
+				}
 			}
 			else {
 				sym_node->declSp = declSpCopy($1->declSp);
@@ -892,7 +968,7 @@ declaration
 					if(retval) {
 						typeCastLexemeWithEmit(initializer, sym_node->declSp);
 					}
-					emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);
+					emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);					
 				}
 			}
 
@@ -919,7 +995,10 @@ declaration_specifiers
 		$$ = temp;
 		// currDeclSpec = $$;
 	}
-	| type_specifier {$$ = $1; currDeclSpec = $$;} 
+	| type_specifier {
+    $$ = $1;
+    currDeclSpec = $$;
+  } 
 	| type_specifier declaration_specifiers {
 		if($1){makeSibling($2,$1);} 
 		node *temp = $2;
@@ -953,6 +1032,7 @@ init_declarator
 		node* declarator = $1;
 		node* initializer = $3;
 		
+		//TODO: Why?? Should be error?
 		if(!declarator->declSp){
 			declSpec* ds = new declSpec();
 			if(!initializer->declSp){
@@ -1034,9 +1114,8 @@ struct_or_union
 		temp->infoType = INFO_TYPE_STRUCT;
 		$$ = temp;}
 	| UNION {
-		node* temp = makeNode(strdup("UNION"), strdup("union"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		temp->infoType = INFO_TYPE_UNION;
-		$$ = temp;}
+		error("Union type is not supported",UNSUPPORTED_FUNCTIONALITY);
+	}
 	;
 
 struct_declaration_list
@@ -1165,16 +1244,27 @@ direct_declarator
 	| '(' declarator ')' { $$ = $2;}
 	| direct_declarator '[' constant_expression ']' {
 		node* temp = $1;
-		int err;
-		int asize = getValueFromConstantExpression(temp, err);
-		if(err){
-			error(temp->lexeme, err);
+		int asize = getValueFromConstantExpression($3, errCode);
+		if(errCode){
+			error(temp->lexeme, errCode);
 		}
 		temp->infoType = INFO_TYPE_ARRAY;
 		temp->arraySize = asize;
+		if(!temp->declSp){
+			temp->declSp = new declSpec();
+		}
+		temp->declSp->ptrLevel++;
 		$$ = temp;
 	}
-	| direct_declarator '[' ']' {$$ = $1; }
+	| direct_declarator '[' ']' {
+		node* temp = $1;
+		temp->infoType = INFO_TYPE_ARRAY;
+		if(!temp->declSp){
+			temp->declSp = new declSpec();
+		}
+		temp->declSp->ptrLevel++;
+		$$ = temp;
+	}
 	| direct_declarator '(' parameter_type_list ')' { 
 		node* direct_declarator = $1;	
 		node* parameter_type_list = $3;	
@@ -1478,8 +1568,9 @@ statement_list
 		} else{ 
 			temp = makeNode(strdup("STMT_LIST"), strdup("statement list"), 0, $1, $2, (node*)NULL, (node*)NULL);
 		}
-		backpatch($1->nextlist, $2->quad);
-		
+		int retval = backpatch($1->nextlist, $2->quad);
+		if(retval)
+			error("backpatch error", retval);
 		temp->nextlist = $3->nextlist;
 		temp->breaklist = mergelist($1->breaklist, $3->breaklist);
 		temp->continuelist = mergelist($1->continuelist, $3->continuelist);
@@ -1513,7 +1604,9 @@ expressionJumpStatement
 
 selection_statement
 	: IF '(' expressionJump  ')' M_marker statement {
-		backpatch($3->truelist, $5->quad);
+		int retval = backpatch($3->truelist, $5->quad);
+		if(retval)
+			error("backpatch error", retval);
 		node * temp = makeNode(strdup("IF"), strdup("if"),0, $3, $6, (node*)NULL, (node*)NULL);
 		temp->nextlist = mergelist($3->falselist, $6->nextlist);
 		temp->breaklist = $6->breaklist;
@@ -1521,8 +1614,12 @@ selection_statement
 		$$ = temp;
 	}
 	| IF  '(' expressionJump  ')' M_marker statement ELSE N_marker M_marker statement {
-		backpatch($3->truelist, $5->quad);
-		backpatch($3->falselist, $9->quad);
+		int retval = backpatch($3->truelist, $5->quad);
+		if(retval)
+			error("backpatch error", retval);
+		retval = backpatch($3->falselist, $9->quad);
+		if(retval)
+			error("backpatch error", retval);
 		node* temp = makeNode(strdup("IF_ELSE"), strdup("else"),0, $3, $6, $10, (node*)NULL);
 		vector<int> tempVec = mergelist($6->nextlist, $8->nextlist);
 		temp->nextlist = mergelist(tempVec, $10->nextlist);
@@ -1544,9 +1641,15 @@ selection_statement
 iteration_statement
 	: WHILE '(' M_marker expressionJump ')' M_marker statement {
 		node *m1 = $3, *m2 = $6, *s1 = $7, *e1 = $4;
-		backpatch(s1->nextlist, m1->quad);
-		backpatch(e1->truelist, m2->quad);
-		backpatch(s1->continuelist, m1->quad);
+		int retval = backpatch(s1->nextlist, m1->quad);
+		if(retval)
+			error("backpatch error", retval);
+		retval = backpatch(e1->truelist, m2->quad);
+		if(retval)
+			error("backpatch error", retval);
+		retval = backpatch(s1->continuelist, m1->quad);
+		if(retval)
+			error("backpatch error", retval);
 
 		$$ = makeNode(strdup("WHILE"), strdup("while"), 0, $4, $7, (node*)NULL, (node*)NULL);
 		
@@ -1555,9 +1658,15 @@ iteration_statement
 	}
 	| DO M_marker statement WHILE '(' M_marker expressionJump ')' ';' {
 		node* s1 = $3, *e1 = $7, *m2 = $2, *m1 = $6;
-		backpatch(s1->nextlist, m1->quad);
-		backpatch(e1->truelist, m2->quad);
-		backpatch(s1->continuelist, m1->quad);
+		int retval = backpatch(s1->nextlist, m1->quad);
+		if(retval)
+			error("backpatch error", retval);
+		retval = backpatch(e1->truelist, m2->quad);
+		if(retval)
+			error("backpatch error", retval);
+		retval = backpatch(s1->continuelist, m1->quad);
+		if(retval)
+			error("backpatch error", retval);
 		
 		$$ = makeNode(strdup("DO WHILE"), strdup("do while"), 0, $3, $7, (node*)NULL, (node*)NULL);
 		
@@ -1567,20 +1676,34 @@ iteration_statement
 	| FOR '(' expression_statement M_marker expressionJumpStatement ')' M_marker statement {
 		node *e1 = $3, *m1 = $4, *e2 = $5, *m3 = $7, *s1 = $8;
 		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m1->quad));
-		backpatch(e2->truelist, m3->quad);
-		backpatch(s1->continuelist, m1->quad);
-		backpatch(s1->nextlist, m1->quad);
+		int retval = backpatch(e2->truelist, m3->quad);
+		if(retval)
+			error("backpatch error", retval);
+		retval = backpatch(s1->continuelist, m1->quad);
+		if(retval)
+			error("backpatch error", retval);
+		retval = backpatch(s1->nextlist, m1->quad);
+		if(retval)
+			error("backpatch error", retval);
 		
 		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $8, (node*)NULL);
 		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
 	}
 	| FOR '(' expression_statement M_marker expressionJumpStatement M_marker expression N_marker ')' M_marker statement {
 		node *e1 = $3, *m1 = $4, *e2 = $5, *m2 = $6, *e3 = $7, *n1 = $8, *m3 = $10, *s1 = $11;
-		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m2->quad));
-		backpatch(n1->nextlist, m1->quad);
-		backpatch(e2->truelist, m3->quad);
-		backpatch(s1->continuelist, m2->quad);
-		backpatch(s1->nextlist, m2->quad);
+		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m2->quad));
+		int retval = backpatch(n1->nextlist, m1->quad);
+		if(retval)
+			error("backpatch error", retval);
+		retval = backpatch(e2->truelist, m3->quad);
+		if(retval)
+			error("backpatch error", retval);
+		retval = backpatch(s1->continuelist, m2->quad);
+		if(retval)
+			error("backpatch error", retval);
+		retval = backpatch(s1->nextlist, m2->quad);
+		if(retval)
+			error("backpatch error", retval);
 
 		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $7, $11);
 		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
@@ -1668,13 +1791,10 @@ function_definition
 				error(p->paramName, retVal);
 			}
 			string lex = p->paramName;
-			cout << lex << endl;
-			
 			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
 			if(!sym_node){
 				error(lex, ALLOCATION_ERROR);
 			}
-			
 			sym_node->declSp = declSpCopy(p->declSp);
 			sym_node->infoType = p->infoType;
 			sym_node->size = getNodeSize(sym_node, gSymTable);
@@ -1727,13 +1847,16 @@ function_definition
 				error(p->paramName, retVal);
 			}
 			string lex = p->paramName;
-			cout << lex << endl;
-			
 			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
 			if(!sym_node){
 				error(lex, ALLOCATION_ERROR);
 			}
+      // cout<< sym_node->name << " "<< p->declSp->type[0] <<endl;
 			// emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, lex);
+      if(p->declSp->type[0] == TYPE_STRUCT){
+        sym_node->infoType = INFO_TYPE_STRUCT;
+      }
+      sym_node->infoType = p->infoType;
 			sym_node->declSp = declSpCopy(p->declSp);
 			sym_node->infoType = p->infoType;
 			sym_node->size = getNodeSize(sym_node, gSymTable);
@@ -1804,7 +1927,10 @@ func_marker_1
 			if(!sym_node){
 				error(lex, ALLOCATION_ERROR);
 			}
-			
+			if(p->declSp->type[0] == TYPE_STRUCT){
+        sym_node->infoType = INFO_TYPE_STRUCT;
+      }
+      sym_node->infoType = p->infoType;
 			sym_node->declSp = declSpCopy(p->declSp);
 			sym_node->infoType = p->infoType;
 			sym_node->size = getNodeSize(sym_node, gSymTable);
@@ -1839,7 +1965,7 @@ N_marker:
  	{
 		node* temp = makeDeadNode();
 		temp->nextlist = makelist(nextQuad());
-		emit(OP_GOTO, BLANK_STR, BLANK_STR, EMPTY_STR);
+		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
 		$$ = temp;
 	}
 	;
