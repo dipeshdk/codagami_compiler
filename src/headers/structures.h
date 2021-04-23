@@ -23,6 +23,7 @@ struct declSpec
 struct param{
     struct declSpec *declSp;
     string paramName;
+    int infoType;
     param() {
         declSp = new declSpec();
         paramName="empty";
