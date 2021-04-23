@@ -1024,9 +1024,8 @@ struct_or_union
 		temp->infoType = INFO_TYPE_STRUCT;
 		$$ = temp;}
 	| UNION {
-		node* temp = makeNode(strdup("UNION"), strdup("union"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		temp->infoType = INFO_TYPE_UNION;
-		$$ = temp;}
+		error("Union type is not supported",UNSUPPORTED_FUNCTIONALITY);
+	}
 	;
 
 struct_declaration_list
@@ -1874,7 +1873,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName);
 		
 		// printSymbolTableJSON(gSymTable,0);
-		printSymbolTable(gSymTable);
+		// printSymbolTable(gSymTable);
         printCode();
 		fclose(fd);
     }
