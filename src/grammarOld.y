@@ -1668,7 +1668,7 @@ iteration_statement
 		$$ = makeNode(strdup("WHILE"), strdup("while"), 0, $4, $7, (node*)NULL, (node*)NULL);
 		
 		$$->nextlist = mergelist(s1->breaklist, e1->falselist);
-		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m1->quad));
+		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m1->quad));
 	}
 	| DO M_marker statement WHILE '(' M_marker expressionJump ')' ';' {
 		node* s1 = $3, *e1 = $7, *m2 = $2, *m1 = $6;
@@ -1685,11 +1685,11 @@ iteration_statement
 		$$ = makeNode(strdup("DO WHILE"), strdup("do while"), 0, $3, $7, (node*)NULL, (node*)NULL);
 		
 		$$->nextlist = mergelist(s1->breaklist, e1->falselist);
-		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m2->quad));
+		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m2->quad));
 	}
 	| FOR '(' expression_statement M_marker expressionJumpStatement ')' M_marker statement {
 		node *e1 = $3, *m1 = $4, *e2 = $5, *m3 = $7, *s1 = $8;
-		emit(OP_GOTO, BLANK_STR, BLANK_STR, to_string(m1->quad));
+		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m1->quad));
 		int retval = backpatch(e2->truelist, m3->quad);
 		if(retval)
 			error("backpatch error", retval);
@@ -1749,7 +1749,7 @@ jump_statement
 		}
 		
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		emit(OP_RETURN, BLANK_STR, BLANK_STR, BLANK_STR);
+		emit(OP_RETURN, EMPTY_STR, EMPTY_STR, EMPTY_STR);
 	}
 	| RETURN expression ';' { 
 		symbolTableNode* funcNode = lookUp(gSymTable, currFunc);
@@ -1880,9 +1880,9 @@ function_definition
 		funcNode->paramWidth = tempOffset-rbp_size;
 		
 		string labelName = "_" + string(declarator->lexeme);
-		emit(OP_LABEL, BLANK_STR, BLANK_STR, labelName);
+		emit(OP_LABEL, EMPTY_STR, EMPTY_STR, labelName);
     //TODO: backpatch 
-    // emit(OP_BEGINFUNC, BLANK_STR, BLANK_STR, EMPTY_STR); // GCC will set the global variable offset
+    // emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, EMPTY_STR); // GCC will set the global variable offset
 		
 		for(auto &p: declarator->paramList){
 			string lex = p->paramName;	
@@ -1953,9 +1953,9 @@ func_marker_1
     
 
 		string labelName = "_" + string(declarator->lexeme);
-		emit(OP_LABEL, labelName, BLANK_STR, BLANK_STR);
+		emit(OP_LABEL, EMPTY_STR, EMPTY_STR,labelName);
     //TODO: backpatch offset
-		// emit(OP_BEGINFUNC, BLANK_STR, BLANK_STR, EMPTY_STR); // GCC will set the global variable offset 
+		// emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, EMPTY_STR); // GCC will set the global variable offset 
 		funcNode->paramWidth = tempOffset-rbp_size;
 		for(auto &p: declarator->paramList){
 			string lex = p->paramName;	
