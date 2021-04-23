@@ -108,7 +108,6 @@ int checkIntOrChar(node* root) {
         || checkType(root->declSp, TYPE_CHAR, 0)) return 0;
 
     return TYPE_ERROR;
-
 }
 
 int checkStringLiteralDecl(declSpec* root){
@@ -224,31 +223,33 @@ int typeCastByRank(node*n1, node*n2, int rank) {
     return 0;
 }
 
-int bitwiseImplicitTypecasting(node*n1, node*n2, int& errCode, string& errStr){
-    // if type is char convert it to int
-    int retval = checkIntOrChar(n1);
-    int retval2 = checkIntOrChar(n2);
-    if(retval || retval2){
+
+int bitwiseTypecastingSingleNode(node* n, int& errCode, string& errStr) {
+    int retval = checkIntOrChar(n);
+    if(retval){
         setErrorParams(errCode, TYPE_ERROR, errStr, "type bitwise expression");
         return -TYPE_ERROR;
     }
-    if(!n1->declSp) {
-        setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, n1->lexeme);
+    if(!n->declSp) {
+        setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, n->lexeme);
         return -INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
     }
-    if(!n2->declSp) {
-        setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, n2->lexeme);
-        return -INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    if(n->declSp->type[0] == TYPE_CHAR){
+        declSpec * ds = new declSpec();
+        ds->type.push_back(TYPE_INT);
+        typeCastLexemeWithEmit(n, ds);
     }
-    declSpec * ds = new declSpec();
-    ds->type.push_back(TYPE_INT);
-    if(n1->declSp->type[0] == TYPE_CHAR){
-        typeCastLexemeWithEmit(n1, ds);
-    }
-    if(n2->declSp->type[0] == TYPE_CHAR){
-        typeCastLexemeWithEmit(n2, ds);
-    }
-    errCode = 0;
+    return 0;
+}
+
+int bitwiseImplicitTypecasting(node*n1, node*n2, int& errCode, string& errStr){
+    // if type is char convert it to int
+    int ret1 = bitwiseTypecastingSingleNode(n1, errCode, errStr);
+    if(ret1)
+        return ret1;
+    int ret2 = bitwiseTypecastingSingleNode(n2, errCode, errStr);
+    if(ret2)
+        return ret2;
     return 0;
 }
 

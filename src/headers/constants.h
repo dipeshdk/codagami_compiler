@@ -49,6 +49,7 @@
 #define VOID_ERROR 123
 #define UNSUPPORTED_FUNCTIONALITY 125
 #define NOT_A_CHAR 126
+#define NON_POINTER_DEFERENCE 127
 
 
 #define INFO_TYPE_NORMAL 201
@@ -75,7 +76,7 @@
 #define OP_NOR 712
 #define OP_OR 713
 #define OP_AND 714
-#define OP_NOT 715
+#define OP_LOGICAL_NOT 715
 #define OP_XOR 716
 #define OP_EQ 717
 #define OP_NEQ 718
@@ -98,6 +99,9 @@
 #define OP_POPPARAM 735
 #define OP_LCALL 736    
 #define OP_LABEL 737
+#define OP_ADDR 738
+#define OP_BITWISE_NOT 739
+
 
 #define BLANK_STR "BLANK"
 #define EMPTY_STR "______"

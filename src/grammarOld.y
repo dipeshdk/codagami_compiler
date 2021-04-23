@@ -311,36 +311,42 @@ unary_expression
 		string name(unary_operator->name);
 		unary_operator->declSp = cast_expression->declSp;
 
-		if(name == "*" && 
-			(!(cast_expression->infoType == INFO_TYPE_ARRAY || (cast_expression->declSp && cast_expression->declSp->ptrLevel > 0))))
-				error(cast_expression->name, TYPE_ERROR);
-
-		if(name == "&"){
-			if(cast_expression->infoType ==INFO_TYPE_STRUCT){
-				structTableNode* structNode = structLookUp(gSymTable, cast_expression->lexeme);
-				if(!structNode){
-					error(cast_expression->lexeme,INVALID_REFERENCE);
-				}else{
-					unary_operator->declSp->ptrLevel++;
-				}
-			}
-			else
-			{
-				symbolTableNode* symNode = lookUp(gSymTable,cast_expression->lexeme);
-				if(!symNode){
-					error(cast_expression->lexeme,INVALID_REFERENCE);
-				}else{
-					unary_operator->declSp->ptrLevel++;
-				}
-			}
+		int opCode = -1;
+		if(name == "*"){
+			if(!(cast_expression->infoType == INFO_TYPE_ARRAY || (cast_expression->declSp && cast_expression->declSp->ptrLevel > 0)))
+				error(cast_expression->name, NON_POINTER_DEFERENCE);
+			unary_operator->addr = "*(" + cast_expression->addr + ")";
+			unary_operator->declSp->ptrLevel--;
 		}
+		else if(name == "&") {
+			opCode = OP_ADDR;
+			unary_operator->declSp->ptrLevel++;
+		}
+		else if(name == "-") opCode = OP_UNARY_MINUS;
+		else if(name == "~") {
+			opCode = OP_BITWISE_NOT;
+			//type should be int or char
+			bitwiseTypecastingSingleNode(cast_expression, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+		}
+		else if(name == "!") opCode = OP_LOGICAL_NOT;
+		// nothing to do for unary plus
+
+		if(opCode != -1) {
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error("Cannot generate Temp", errCode);
+			emit(opCode, cast_expression->addr, EMPTY_STR, newTmp);
+			unary_operator->addr = newTmp;
+		}
+
 		addChild(unary_operator, cast_expression);
 		$$ = unary_operator;
 	}
 	| SIZEOF unary_expression {$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| SIZEOF '(' type_name ')'{
 		// TODO: Check validity of type_name 
-		
 		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
 	;
 
