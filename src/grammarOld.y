@@ -1750,7 +1750,7 @@ jump_statement
 		}
 		
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		emit(OP_RETURN, EMPTY_STR, EMPTY_STR, EMPTY_STR);
+		emit(OP_RETURN, BLANK_STR, BLANK_STR, BLANK_STR);
 	}
 	| RETURN expression ';' { 
 		symbolTableNode* funcNode = lookUp(gSymTable, currFunc);
