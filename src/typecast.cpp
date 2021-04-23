@@ -13,9 +13,17 @@ bool checkType(declSpec *ds, int typeName, int ptrLevel) {
 
 
 int canTypecast(declSpec* to_ds,  declSpec* from_ds){
+
     if(!to_ds || !from_ds)
         return CONFLICTING_TYPES;
 
+    int rank1 = getTypeRank(to_ds->type); 
+    int rank2 = getTypeRank(from_ds->type);
+    //struct-1 to struct-2 not allowed
+    if (rank1 == 5 && rank2 == 5 && (to_ds->lexeme != from_ds->lexeme)){
+        setErrorParams(errCode, TYPE_ERROR, errStr, "cannot type cast structs");
+        return false;
+    }
     // float char* not allowed 
     if((checkType(to_ds, TYPE_FLOAT,0) && checkType(from_ds, TYPE_CHAR, 1) )
      || (checkType(from_ds, TYPE_FLOAT,0) && checkType(to_ds, TYPE_CHAR, 1))) 
