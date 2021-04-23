@@ -25,6 +25,16 @@ int backpatch(vector<int> &list, int i){
     return 0;
 }
 
+int backpatchAssignment(vector<int> &list, string operand){
+    int sizeOfList = gCode.size();
+    for(int index : list){
+        if(index > sizeOfList || 
+            (gCode[index]->arg1 != BLANK_STR))
+            return NOT_GOTO_IN_BACKPATCH;
+        gCode[index]->arg1 = operand;
+    }
+    return 0;
+}
 void emit(int opCode, string arg1, string arg2, string result){
     quadruple* quad = new quadruple();
     quad->opCode = opCode;

@@ -9,7 +9,7 @@ vector<int> makelist();
 vector<int> mergelist(vector<int> &list1,vector<int> &list2);
 
 int backpatch(vector<int> &list, int i);
-
+int backpatchAssignment(vector<int> &list, string operand);
 void emit(int opCode, string arg1, string arg2, string result);
 
 int nextQuad();
