@@ -1156,16 +1156,27 @@ direct_declarator
 	| '(' declarator ')' { $$ = $2;}
 	| direct_declarator '[' constant_expression ']' {
 		node* temp = $1;
-		int err;
-		int asize = getValueFromConstantExpression(temp, err);
-		if(err){
-			error(temp->lexeme, err);
+		int asize = getValueFromConstantExpression($3, errCode);
+		if(errCode){
+			error(temp->lexeme, errCode);
 		}
 		temp->infoType = INFO_TYPE_ARRAY;
 		temp->arraySize = asize;
+		if(!temp->declSp){
+			temp->declSp = new declSpec();
+		}
+		temp->declSp->ptrLevel++;
 		$$ = temp;
 	}
-	| direct_declarator '[' ']' {$$ = $1; }
+	| direct_declarator '[' ']' {
+		node* temp = $1;
+		temp->infoType = INFO_TYPE_ARRAY;
+		if(!temp->declSp){
+			temp->declSp = new declSpec();
+		}
+		temp->declSp->ptrLevel++;
+		$$ = temp;
+	}
 	| direct_declarator '(' parameter_type_list ')' { 
 		node* direct_declarator = $1;	
 		node* parameter_type_list = $3;	
