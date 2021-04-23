@@ -27,6 +27,7 @@ void typeCastLexeme(node* temp, declSpec* dp);
 void typeCastLexemeWithEmit(node* temp, declSpec* dp);
 int typeCastByRank(node*n1, node*n2, int rank);
 
+int bitwiseTypecastingSingleNode(node* n, int& errCode, string& errStr);
 int bitwiseImplicitTypecasting(node*n1, node*n2, int& errCode, string& errStr);
 int implicitTypecastingNotPointerNotStringLiteral(node*n1, node*n2, string& var);
 int implicitTypecastingNotStringLiteral(node*n1, node*n2, string& var);

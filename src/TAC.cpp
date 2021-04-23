@@ -25,6 +25,16 @@ int backpatch(vector<int> &list, int i){
     return 0;
 }
 
+int backpatchAssignment(vector<int> &list, string operand){
+    int sizeOfList = gCode.size();
+    for(int index : list){
+        if(index > sizeOfList || 
+            (gCode[index]->arg1 != BLANK_STR))
+            return NOT_GOTO_IN_BACKPATCH;
+        gCode[index]->arg1 = operand;
+    }
+    return 0;
+}
 void emit(int opCode, string arg1, string arg2, string result){
     quadruple* quad = new quadruple();
     quad->opCode = opCode;
@@ -199,6 +209,31 @@ int getOpcodeFromAssignStr(string s){
     return -INVALID_ARGS;
 }
 
+string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCode, string &errStr) {
+    //_t2 = _t1 * n;
+    string indexTmp = generateTemp(errCode);
+    if(errCode) {
+        setErrorParams(errCode, errCode, errStr, "error in temp generation");
+        return EMPTY_STR;
+    }
+    emit(OP_MULI, sizeTemp, ind, indexTmp);
+
+    //_t3 = arr + _t2;
+    string pointerTmp = generateTemp(errCode);
+    if(errCode) {
+        setErrorParams(errCode, errCode, errStr, "error in temp generation");
+        return EMPTY_STR;
+    }
+    emit(OP_ADDI, arr, indexTmp, pointerTmp);
+
+    if(errCode){
+        setErrorParams(errCode, errCode, errStr, "error in temp generation");
+        return EMPTY_STR;
+    }
+    string pointerAddr = "*(" + pointerTmp + ")";
+    return pointerAddr;
+}
+
 string getArrayIndexWithEmit(node *postfix_expression , node *expression, int &errCode, string &errStr){
     if(expression->declSp) 
 		{
@@ -211,46 +246,23 @@ string getArrayIndexWithEmit(node *postfix_expression , node *expression, int &e
 			setErrorParams(errCode, ARRAY_INDEX_SHOULD_BE_INT, errStr, expression->lexeme);
             return EMPTY_STR;
 		}
-        
-		//_t1 = 4;
-		string sizeTmp = generateTemp(errCode);
-		if(errCode){
-            setErrorParams(errCode, errCode, errStr, "error in temp generation");
-            return EMPTY_STR;
-        }
-		if(!postfix_expression->declSp){
+
+        if(!postfix_expression->declSp){
             setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, "postfix_expression declSp not allocated for array");
             return EMPTY_STR;
         }
-		int size = getTypeSize(postfix_expression->declSp->type);
-		if(size < 0){
+        int size = getTypeSize(postfix_expression->declSp->type);
+        if(size < 0){
             setErrorParams(errCode, -size, errStr, "invalid array type");
             return EMPTY_STR;
         }
-		emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
+        //_t1 = 4;
+        string sizeTmp = generateTemp(errCode);
+        if(errCode){
+            setErrorParams(errCode, errCode, errStr, "error in temp generation");
+            return EMPTY_STR;
+        }
+        emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
 
-		//_t2 = _t1 * n;
-		string indexTmp = generateTemp(errCode);
-		if(errCode) {
-            setErrorParams(errCode, errCode, errStr, "error in temp generation");
-            return EMPTY_STR;
-        }
-		emit(OP_MULI, sizeTmp, expression->addr, indexTmp);
-
-		//_t3 = arr + _t2;
-		string pointerTmp = generateTemp(errCode);
-		if(errCode) {
-            setErrorParams(errCode, errCode, errStr, "error in temp generation");
-            return EMPTY_STR;
-        }
-		emit(OP_ADDI, postfix_expression->addr, indexTmp, pointerTmp);
-	
-		//_t4 = *(_t3);
-		string addrTmp = generateTemp(errCode);
-		if(errCode){
-            setErrorParams(errCode, errCode, errStr, "error in temp generation");
-            return EMPTY_STR;
-        }
-		string pointerAddr = "*(" + pointerTmp + ")";
-        return pointerAddr;
+        return emitArrayIndexGetAddr(postfix_expression->addr, expression->addr, sizeTmp, errCode, errStr);
 }

@@ -253,7 +253,7 @@ void printSymbolTableJSON(symbolTable *st, int numTab) {
 int getNodeSize(symbolTableNode* elem, symbolTable* st){
     int size = 0;
     if(elem->infoType == INFO_TYPE_ARRAY){
-        if(elem->declSp->ptrLevel > 0){
+        if(elem->declSp->ptrLevel > 1){
             size += 8*(elem->arraySize);
         }
         else size += getTypeSize(elem->declSp->type)*(elem->arraySize);
@@ -325,45 +325,45 @@ void printStructTable(map<string, struct structTableNode*> &structMap, int scope
 
 string getOpName(int opCode) {
     switch(opCode){
-        case OP_GOTO: return "OP_GOTO";
-        case OP_ADDI: return "OP_ADDI";
-        case OP_MULI: return "OP_MULI";
-        case OP_IFGOTO: return "OP_IFGOTO";
-        case OP_SUBI: return "OP_SUBI";
-        case OP_ASSIGNMENT: return "OP_ASSIGNMENT";
-        case OP_UNARY_MINUS: return "OP_UNARY_MINUS";
-        case OP_DIVI: return "OP_DIVI";
-        case OP_CALL: return "OP_CALL";
-        case OP_LEFT_SHIFT: return "OP_LEFT_SHIFT";
-        case OP_RIGHT_SHIFT: return "OP_RIGHT_SHIFT";
-        case OP_NOR: return "OP_NOR";
-        case OP_OR: return "OP_OR";
-        case OP_AND: return "OP_AND";
-        case OP_NOT: return "OP_NOT";
-        case OP_XOR: return "OP_XOR";
-        case OP_EQ: return "OP_EQ";
-        case OP_NEQ: return "OP_NEQ";
-        case OP_LEQ: return "OP_LEQ";
-        case OP_GREATER: return "OP_GREATER";
-        case OP_LESS: return "OP_LESS";
-        case OP_MOD: return "OP_MOD";
-        case OP_ADDF: return "OP_ADDF";
-        case OP_MULF: return "OP_MULF";
-        case OP_SUBF: return "OP_SUBF";
-        case OP_DIVF: return "OP_DIVF"; 
-        case OP_GEQ: return "OP_GEQ"; 
-        case OP_ANDAND : return "OP_ANDAND" ;  
-        case OP_OROR : return "OP_OROR" ;     
-        case OP_IFNEQGOTO : return "OP_IFNEQGOTO" ; 
-        case OP_BEGINFUNC : return "OP_BEGINFUNC" ;
-        case OP_ENDFUNC : return "OP_ENDFUNC" ;
-        case OP_RETURN : return "OP_RETURN" ;
-        case OP_PUSHPARAM : return "OP_PUSHPARAM" ;
-        case OP_POPPARAM : return "OP_POPPARAM" ;
-        case OP_LCALL : return "OP_LCALL"; 
-        case OP_LABEL : return "OP_LABEL"; 
-
-
+        case OP_GOTO: return "GOTO";
+        case OP_ADDI: return "ADDI";
+        case OP_MULI: return "MULI";
+        case OP_IFGOTO: return "IFGOTO";
+        case OP_SUBI: return "SUBI";
+        case OP_ASSIGNMENT: return "ASSIGNMENT";
+        case OP_UNARY_MINUS: return "UNARY_MINUS";
+        case OP_DIVI: return "DIVI";
+        case OP_CALL: return "CALL";
+        case OP_LEFT_SHIFT: return "LEFT_SHIFT";
+        case OP_RIGHT_SHIFT: return "RIGHT_SHIFT";
+        case OP_NOR: return "NOR";
+        case OP_OR: return "OR";
+        case OP_AND: return "AND";
+        case OP_XOR: return "XOR";
+        case OP_EQ: return "EQ";
+        case OP_NEQ: return "NEQ";
+        case OP_LEQ: return "LEQ";
+        case OP_GREATER: return "GREATER";
+        case OP_LESS: return "LESS";
+        case OP_MOD: return "MOD";
+        case OP_ADDF: return "ADDF";
+        case OP_MULF: return "MULF";
+        case OP_SUBF: return "SUBF";
+        case OP_DIVF: return "DIVF"; 
+        case OP_GEQ: return "GEQ"; 
+        case OP_ANDAND : return "ANDAND" ;  
+        case OP_OROR : return "OROR" ;     
+        case OP_IFNEQGOTO : return "IFNEQGOTO" ; 
+        case OP_BEGINFUNC : return "BEGINFUNC" ;
+        case OP_ENDFUNC : return "ENDFUNC" ;
+        case OP_RETURN : return "RETURN" ;
+        case OP_PUSHPARAM : return "PUSHPARAM" ;
+        case OP_POPPARAM : return "POPPARAM" ;
+        case OP_LCALL : return "LCALL"; 
+        case OP_LABEL : return "LABEL"; 
+        case OP_BITWISE_NOT: return "BITWISE_NOT";
+        case OP_LOGICAL_NOT: return "LOGICAL_NOT";
+        case OP_ADDR: return "ADDR";
     }
     return "INVALID OPCODE";
 }
@@ -399,6 +399,11 @@ void printQuad(quadruple* quad, int line) {
             printf("%s = %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
         case OP_IFNEQGOTO:
             printf("IF %s <> %s GOTO %s\n", quad->arg1.c_str(), quad->arg2.c_str(), quad->result.c_str()); break;
+        case OP_UNARY_MINUS:
+        case OP_BITWISE_NOT:
+        case OP_LOGICAL_NOT:
+        case OP_ADDR:
+            printf("%s = %s %s\n", quad->result.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str()); break;
         default:
             printf("%s = %s %s %s\n", quad->result.c_str(),  quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());
     }
