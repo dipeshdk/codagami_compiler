@@ -23,10 +23,12 @@ struct declSpec
 struct param{
     int infoType;
     struct declSpec *declSp;
+    int infoType;
     string paramName;
     param() {
         declSp = new declSpec();
         paramName="empty";
+        infoType = INFO_TYPE_NORMAL;
     }
 };
 
@@ -47,6 +49,7 @@ struct symbolTableNode {
     int paramSize;
     int isDefined; //for functions
     int size;
+    int paramWidth;
     int offset;
     vector<struct param*> paramList; //for functions, struct and union
     string name;
