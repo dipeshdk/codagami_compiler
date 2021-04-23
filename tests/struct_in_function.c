@@ -35,6 +35,11 @@ struct coord foo2 (){
     return 2; 
 }
 
+struct coord* foo2 (){
+  struct coord2 x;
+  return (&x)->a;
+}
+
 
 int main() {
     float  f2;

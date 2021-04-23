@@ -20,17 +20,37 @@ int canTypecast(declSpec* to_ds,  declSpec* from_ds){
     int rank1 = getTypeRank(to_ds->type); 
     int rank2 = getTypeRank(from_ds->type);
     //struct to any other not allowed
+    /* 
+      struct to int : not allowed
+      struct to int* : not allowed
+      struct* to int* : allowed
+    */
     if((rank1 == 5 && rank2 != 5) || (rank1 != 5 && rank2 == 5)){
-        setErrorParams(errCode, TYPE_ERROR, errStr, "cannot type cast");
-        return TYPE_ERROR;
-    }
-    //struct-1 to struct-2 not allowed
-    if (rank1 == 5 && rank2 == 5){
-        if(to_ds->lexeme != from_ds->lexeme){
+        if(to_ds->ptrLevel == 0 && from_ds->ptrLevel == 0){
+            setErrorParams(errCode, TYPE_ERROR, errStr, "cannot type cast");
+            return TYPE_ERROR;
+        }
+        if(rank2 == 5 && from_ds->ptrLevel == 0 && to_ds->ptrLevel > 0){
             setErrorParams(errCode, TYPE_ERROR, errStr, "cannot type cast structs");
             return TYPE_ERROR;
         }
-        if(to_ds->ptrLevel != from_ds->ptrLevel){
+    }
+    //struct-1 to struct-2 not allowed
+    /* 
+      struct1 to struct2 : not allowed
+      struct1* to struct2 : not allowed
+      struct1* to struct2* : allowed
+    */
+    if (rank1 == 5 && rank2 == 5){
+        int ptr1 = to_ds->ptrLevel;
+        int ptr2 = from_ds->ptrLevel;
+        if(to_ds->lexeme != from_ds->lexeme){
+            if(ptr1+ptr2 < 2){
+                setErrorParams(errCode, TYPE_ERROR, errStr, "cannot type cast structs");
+                return TYPE_ERROR;
+            }
+        }
+        if(ptr1 == 0 && ptr2 > 0 || ptr2 == 0 && ptr1 > 0){
             setErrorParams(errCode, TYPE_ERROR, errStr, "different ptr levels of structs");
             return TYPE_ERROR;
         }
