@@ -1874,7 +1874,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName);
 		
 		// printSymbolTableJSON(gSymTable,0);
-		printSymbolTable(gSymTable);
+		// printSymbolTable(gSymTable);
         printCode();
 		fclose(fd);
     }
