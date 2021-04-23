@@ -272,7 +272,7 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st){
                     else size+= getTypeSize(i->declSp->type);
             }
         }
-        
+        size = getOffsettedSize(size);
     }
     else if(elem->declSp && elem->declSp->ptrLevel){
         size += 8;

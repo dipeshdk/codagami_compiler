@@ -348,13 +348,32 @@ unary_expression
 		addChild(unary_operator, cast_expression);
 		$$ = unary_operator;
 	}
-	| SIZEOF unary_expression {$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| SIZEOF unary_expression {
+		if(strcmp(($2 -> name), "IDENTIFIER")){
+			error("Argument to sizeof must be identifier", DEFAULT_ERROR);
+		}
+		symbolTableNode* sym_node = lookUp(gSymTable, $2->lexeme);
+		if(!sym_node){
+			error($2->lexeme, UNDECLARED_SYMBOL);
+		}
+		string newTmp = generateTemp(errCode);
+    	if(errCode)
+        	error("Cannot generate Temp",errCode);
+    	emit(OP_ASSIGNMENT, to_string(getNodeSize(sym_node, gSymTable)), EMPTY_STR, newTmp);
+		
+		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
+		$$->declSp->type.push_back(TYPE_INT);
+		$$->addr = newTmp;
+	}
 	| SIZEOF '(' type_name ')'{
 		// TODO: Check validity of type_name 
 		string newTmp = generateTemp(errCode);
     	if(errCode)
         	error("Cannot generate Temp",errCode);
-    	// emit(OP_ASSIGNMENT, to_string(getNodeSize($3)), EMPTY_STR, newTmp);
+    	symbolTableNode* sym_node = new symbolTableNode();
+		sym_node->declSp = declSpCopy($3->declSp);
+		sym_node->infoType = $3->infoType;
+		emit(OP_ASSIGNMENT, to_string(getNodeSize(sym_node, gSymTable)), EMPTY_STR, newTmp);
 		
 		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$->declSp->type.push_back(TYPE_INT);
