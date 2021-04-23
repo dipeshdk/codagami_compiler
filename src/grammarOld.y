@@ -1191,7 +1191,12 @@ direct_declarator
 		// Not handled: Add to symbol table with appropriate type??, also add to function arguments
 		$$ = $1;
 	}
-	| direct_declarator '(' ')' { $$ = $1; }
+	| direct_declarator '(' ')' { 
+		string fn($1->lexeme);
+		funcName = fn;
+		$1->infoType = INFO_TYPE_FUNC;
+		$$ = $1;
+	}
 	;
 
 pointer
@@ -1650,7 +1655,7 @@ function_definition
 		addFunctionSymbol(declaration_specifiers, declarator);
 		struct symbolTableNode* funcNode = lookUp(gSymTable, funcName);
 		if(!funcNode){
-			error("Func"+funcName+"not found", DEFAULT_ERROR);
+			error("Func "+funcName+" not found", DEFAULT_ERROR);
 		}
 		funcDecl = 1;
 		gSymTable = addChildSymbolTable(gSymTable);
@@ -1672,8 +1677,6 @@ function_definition
 			
 			sym_node->declSp = declSpCopy(p->declSp);
 			sym_node->infoType = p->infoType;
-			// cout << "Info Type = " << p->infoType << endl;
-			// cout << "Func param name = " << p->paramName << endl;
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			tempOffset += getOffsettedSize(sym_node->size);
 		}
@@ -1709,7 +1712,7 @@ function_definition
 
 		struct symbolTableNode* funcNode = lookUp(gSymTable, funcName);
 		if(!funcNode){
-			error("Func"+funcName+"not found", DEFAULT_ERROR);
+			error("Func "+funcName+" not found", DEFAULT_ERROR);
 		}
 
 		funcDecl = 1;
@@ -1733,15 +1736,11 @@ function_definition
 			// emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, lex);
 			sym_node->declSp = declSpCopy(p->declSp);
 			sym_node->infoType = p->infoType;
-			// cout << "Info Type = " << p->infoType << endl;
-			// cout << "Func param name = " << p->paramName << endl;
 			sym_node->size = getNodeSize(sym_node, gSymTable);
-			cout << "Size = " << sym_node->size << endl;
 			tempOffset += getOffsettedSize(sym_node->size);
 		}
 
 		funcNode->paramWidth = tempOffset-rbp_size;
-		cout << "Width = " << funcNode->paramWidth << endl;
 		
 		string labelName = "_" + string(declarator->lexeme);
 		emit(OP_LABEL, BLANK_STR, BLANK_STR, labelName);
@@ -1787,7 +1786,7 @@ func_marker_1
 
 		struct symbolTableNode* funcNode = lookUp(gSymTable, funcName);
 		if(!funcNode){
-			error("Func"+funcName+"not found", DEFAULT_ERROR);
+			error("Func "+funcName+" not found", DEFAULT_ERROR);
 		}
 		funcDecl = 1;
 		gSymTable = addChildSymbolTable(gSymTable);
@@ -1808,8 +1807,6 @@ func_marker_1
 			
 			sym_node->declSp = declSpCopy(p->declSp);
 			sym_node->infoType = p->infoType;
-			// cout << "Info Type = " << p->infoType << endl;
-			// cout << "Func param name = " << p->paramName << endl;
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			tempOffset += getOffsettedSize(sym_node->size);
 		}
