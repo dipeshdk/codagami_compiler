@@ -139,6 +139,7 @@ node* parameter_declaration(node* declaration_specifiers, node* declarator){
     if(declarator->declSp) {
         parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
     }
+    parameter->infoType = declaration_specifiers->infoType;
     parameter->paramName = declarator->lexeme;
     declarator->paramList.push_back(parameter);
 

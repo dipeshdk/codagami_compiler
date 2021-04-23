@@ -1663,6 +1663,7 @@ function_definition
         // p->infoType = INFO_TYPE_STRUCT;
         sym_node->infoType = INFO_TYPE_STRUCT;
       }
+      sym_node->infoType = p->infoType;
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			tempOffset += getOffsettedSize(sym_node->size);
 		}
@@ -1716,6 +1717,7 @@ function_definition
       if(p->declSp->type[0] == TYPE_STRUCT){
         sym_node->infoType = INFO_TYPE_STRUCT;
       }
+      sym_node->infoType = p->infoType;
 			sym_node->declSp = declSpCopy(p->declSp);
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			tempOffset += getOffsettedSize(sym_node->size);
@@ -1782,6 +1784,7 @@ func_marker_1
 			if(p->declSp->type[0] == TYPE_STRUCT){
         sym_node->infoType = INFO_TYPE_STRUCT;
       }
+      sym_node->infoType = p->infoType;
 			sym_node->declSp = declSpCopy(p->declSp);
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			tempOffset += getOffsettedSize(sym_node->size);
