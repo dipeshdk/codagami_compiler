@@ -909,7 +909,10 @@ declaration_specifiers
 		$$ = temp;
 		// currDeclSpec = $$;
 	}
-	| type_specifier {$$ = $1; currDeclSpec = $$;} 
+	| type_specifier {
+    $$ = $1;
+    currDeclSpec = $$;
+  } 
 	| type_specifier declaration_specifiers {
 		if($1){makeSibling($2,$1);} 
 		node *temp = $2;
@@ -1648,14 +1651,18 @@ function_definition
 				error(p->paramName, retVal);
 			}
 			string lex = p->paramName;
-			cout << lex << endl;
+			// cout << lex << endl;
 			
 			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
 			if(!sym_node){
 				error(lex, ALLOCATION_ERROR);
 			}
-			
+			// cout<< sym_node->name << " "<< p->declSp->type[0] <<endl;
 			sym_node->declSp = declSpCopy(p->declSp);
+      if(p->declSp->type[0] == TYPE_STRUCT){
+        // p->infoType = INFO_TYPE_STRUCT;
+        sym_node->infoType = INFO_TYPE_STRUCT;
+      }
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			tempOffset += getOffsettedSize(sym_node->size);
 		}
@@ -1698,13 +1705,17 @@ function_definition
 				error(p->paramName, retVal);
 			}
 			string lex = p->paramName;
-			cout << lex << endl;
+			// cout << lex << endl;
 			
 			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
 			if(!sym_node){
 				error(lex, ALLOCATION_ERROR);
 			}
+      // cout<< sym_node->name << " "<< p->declSp->type[0] <<endl;
 			// emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, lex);
+      if(p->declSp->type[0] == TYPE_STRUCT){
+        sym_node->infoType = INFO_TYPE_STRUCT;
+      }
 			sym_node->declSp = declSpCopy(p->declSp);
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			tempOffset += getOffsettedSize(sym_node->size);
@@ -1768,7 +1779,9 @@ func_marker_1
 			if(!sym_node){
 				error(lex, ALLOCATION_ERROR);
 			}
-			
+			if(p->declSp->type[0] == TYPE_STRUCT){
+        sym_node->infoType = INFO_TYPE_STRUCT;
+      }
 			sym_node->declSp = declSpCopy(p->declSp);
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			tempOffset += getOffsettedSize(sym_node->size);
@@ -1874,7 +1887,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName);
 		
 		// printSymbolTableJSON(gSymTable,0);
-		// printSymbolTable(gSymTable);
+		printSymbolTable(gSymTable);
         printCode();
 		fclose(fd);
     }

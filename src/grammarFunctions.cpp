@@ -142,6 +142,8 @@ node* parameter_declaration(node* declaration_specifiers, node* declarator){
     parameter->paramName = declarator->lexeme;
     declarator->paramList.push_back(parameter);
 
+    // cout<<"parameter_declaration: "<< parameter->paramName<< " " << parameter->declSp->type[0] <<endl;
+
     return declarator;
 }
 
