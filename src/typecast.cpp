@@ -8,6 +8,7 @@ int checkValidType(vector<int> &v) {
 
 bool checkType(declSpec *ds, int typeName, int ptrLevel) {
     if(checkValidType(ds->type) || ds->type[0] != typeName || ds->ptrLevel != ptrLevel) return false;
+    // cout << "return from check type" << endl;
     return true;
 }
 

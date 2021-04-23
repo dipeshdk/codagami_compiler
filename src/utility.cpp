@@ -137,6 +137,12 @@ void error(string var, int error_code) {
 		case NON_POINTER_DEFERENCE:
 			str = "Deferencing a non-pointer";
 			break;
+		case UNDEFINED_FUNCTION:
+			str = "Function is not defined";
+			break;
+		case MISMATCH_DEFINITION_DECLARATION:
+			str = "Function declaration and definition do not match.";
+			break;
 		default:
 			break;
 	}

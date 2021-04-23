@@ -42,7 +42,6 @@
 	vector<node*> case_consts;
 	int offset = 0;
 	int rbp_size = 4;
-	string funcName;
 	string ternaryTemp = BLANK_STR;
 
 
@@ -205,7 +204,19 @@ postfix_expression
 	}
 	| postfix_expression '(' ')' { // Check with function paramlist111NoParamName111
 		string func_name($1->lexeme);
-		if($1->paramList.size() > 0) error(func_name, INVALID_ARGS_IN_FUNC_CALL);
+		if(!($1->paramList.size() == 0 
+			|| ($1->paramList.size()==1 && $1->paramList[0]->declSp 
+				&& $1->paramList[0]->declSp->type.size() == 1
+				&& $1->paramList[0]->declSp->type[0] == TYPE_VOID) ))	
+			error(func_name, INVALID_ARGS_IN_FUNC_CALL);
+		string name = $1->lexeme;
+		symbolTableNode* stNode = lookUp(gSymTable, name);
+		if(!stNode || stNode->infoType != INFO_TYPE_FUNC || !stNode->declSp) {
+			error(name, SYMBOL_NOT_FOUND);
+		}
+		if(!stNode->isDefined) {
+			error(name, UNDEFINED_FUNCTION);
+		}
 		$1->infoType = INFO_TYPE_FUNC;
 		$$ = $1;	
 	}
@@ -910,6 +921,8 @@ declaration
 			if(!sym_node){
 				error(lex, ALLOCATION_ERROR);
 			}
+
+			//TODO: Why??
 			if(funcDecl){
 				// param* paramcheckValidTypeter = new param();
 				param* paramter = new param();
@@ -917,7 +930,18 @@ declaration
 				paramter->paramName = lex;
 				$1->paramList.push_back(paramter);
 			}
-			if(temp->infoType == INFO_TYPE_ARRAY){
+
+			if(temp->infoType == INFO_TYPE_FUNC) {
+				sym_node->infoType = INFO_TYPE_FUNC;
+				sym_node->isDefined = false;
+				sym_node->paramSize = temp->paramSize;
+				sym_node->paramList = temp->paramList;
+				sym_node->declSp = declSpCopy($1->declSp);
+				if(temp->declSp)
+					sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
+			}
+			else if(temp->infoType == INFO_TYPE_ARRAY)
+			{
 				sym_node->infoType = INFO_TYPE_ARRAY;
 				sym_node->arraySize = temp->arraySize;
 				sym_node->declSp = declSpCopy($1->declSp);
@@ -937,7 +961,7 @@ declaration
 					}
 					//_t1 = 4;
 					string sizeTmp = generateTemp(errCode);
-					if(errCode){
+					if(errCode) {
 						error("error in temp generation", errCode);
 					}
 					emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
@@ -951,8 +975,7 @@ declaration
 						ind++;
 					}
 				}
-			}
-			else {
+			} else {
 				sym_node->declSp = declSpCopy($1->declSp);
 				sym_node->infoType = $1->infoType;
 				if(temp->declSp)
@@ -971,13 +994,16 @@ declaration
 					emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);					
 				}
 			}
-
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			sym_node->offset = offset;
 			offset += getOffsettedSize(sym_node->size);
-
 			curr = curr->next;
 		}
+		// struct symbolTableNode* funcNode = lookUp(gSymTable, "foo");
+		// if(funcNode){
+		// 	cout <<"fuck" << endl;
+		// 	printDeclSp(funcNode->declSp);
+		// }
 		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;   
 		makeSibling($2,$1);
 		$$ = $1; 
@@ -1021,6 +1047,8 @@ declaration_specifiers
 init_declarator_list
 	: init_declarator {  $$ = $1;  }
 	| init_declarator_list ',' init_declarator { 
+		if($3->infoType == INFO_TYPE_FUNC || $1->infoType == INFO_TYPE_FUNC)
+			error("Cannot declare multiple functions in one line", UNSUPPORTED_FUNCTIONALITY);
 		if($1){makeSibling($3,$1);$$ = $1;} else $$ = $3;
 	} 
 	;
@@ -1032,6 +1060,9 @@ init_declarator
 		node* declarator = $1;
 		node* initializer = $3;
 		
+		if(declarator->infoType == INFO_TYPE_FUNC)
+			error("Cannot assign to a function", UNSUPPORTED_FUNCTIONALITY);
+
 		//TODO: Why?? Should be error?
 		if(!declarator->declSp){
 			declSpec* ds = new declSpec();
@@ -1041,11 +1072,11 @@ init_declarator
 			ds->type = initializer->declSp->type;
 			declarator->declSp = ds;
 		}
-		// emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, declarator->addr);
 		$$ = makeNode(strdup("="), strdup("="), 0, declarator, initializer, (node*)NULL, (node*)NULL);
 		$$->addr=$1->addr;
 	}
 	;
+
 // do not handle
 storage_class_specifier
 	: TYPEDEF {$$ = NULL; error("TYPEDEF", UNSUPPORTED_FUNCTIONALITY);}
@@ -1266,15 +1297,15 @@ direct_declarator
 		$$ = temp;
 	}
 	| direct_declarator '(' parameter_type_list ')' { 
+		//function declaration
 		node* direct_declarator = $1;	
 		node* parameter_type_list = $3;	
-		string fn($1->lexeme);
-		funcName = fn;
-		// Done: Add parameters to symbol table with appropriate types, also add to function arguments
+		string funcName($1->lexeme);
 
 		direct_declarator->paramList = parameter_type_list->paramList;
 		direct_declarator->paramSize = parameter_type_list->paramSize;
 		direct_declarator->infoType = INFO_TYPE_FUNC;
+		direct_declarator->addr = funcName;
 		$$=direct_declarator;
 	}
 	| direct_declarator '(' identifier_list ')' { 
@@ -1282,9 +1313,9 @@ direct_declarator
 		$$ = $1;
 	}
 	| direct_declarator '(' ')' { 
-		string fn($1->lexeme);
-		funcName = fn;
+		string funcName($1->lexeme);
 		$1->infoType = INFO_TYPE_FUNC;
+		$1->addr = funcName;
 		$$ = $1;
 	}
 	;
@@ -1334,6 +1365,8 @@ parameter_type_list
 		$$ = parameter_list;
 	 }
 	| parameter_list ',' ELLIPSIS { 
+		//TODO: UNHANDLED
+		error("ELLIPSIS", UNSUPPORTED_FUNCTIONALITY);
 		makeSibling(makeNode(strdup("ELLIPSIS"), strdup("..."), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $1);
 		node* parameter_list = $1;
 		parameter_list->paramSize = INF_PARAM_LIST;
@@ -1356,25 +1389,24 @@ parameter_list
 
 parameter_declaration
 	: declaration_specifiers declarator { 
+		//TODO: UNHANDLED
+		// error("FUNCTION DECLARATION WITH IDENTIFIER NAME. Use only type names in declaration.", UNSUPPORTED_FUNCTIONALITY);
 		$$ = parameter_declaration($1, $2);
 	}
 	| declaration_specifiers abstract_declarator { 
 		//TODO: difference in abstract_declarator and declarator
+		//TODO: UNHANDLED
+		// error("FUNCTION DECLARATION WITH ABSTRACT DECLATOR. Use only type names in declaration.", UNSUPPORTED_FUNCTIONALITY);
 		$$ = parameter_declaration($1, $2);
 	 }
 	| declaration_specifiers { 
 		node* declaration_specifiers = $1;
-
 		param *parameter = new param();
-		if(!parameter->declSp) {
-			parameter->declSp = new declSpec();
-		}
-		if(declaration_specifiers->declSp) {
-			parameter->declSp = declSpCopy(declaration_specifiers->declSp);
-		}
-		parameter->paramName = "111NoParamName111";
+		if(!declaration_specifiers->declSp) 
+			error("no decl sp in declaration specifier parameter_declaration", INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
+		parameter->declSp = declSpCopy(declaration_specifiers->declSp);
+		parameter->paramName = UNNAMED_PARAM;
 		declaration_specifiers->paramList.push_back(parameter);
-
 		$$ = declaration_specifiers; 
 	}
 	;
@@ -1773,63 +1805,18 @@ external_declaration
 function_definition
 	: declaration_specifiers  declarator {
 		// TODO: Send type from declaration specifier to function name
-		struct node* declarator = $2; 
-		struct node* declaration_specifiers = $1;
-		addFunctionSymbol(declaration_specifiers, declarator);
-		struct symbolTableNode* funcNode = lookUp(gSymTable, funcName);
-		if(!funcNode){
-			error("Func "+funcName+" not found", DEFAULT_ERROR);
-		}
-		funcDecl = 1;
-		gSymTable = addChildSymbolTable(gSymTable);
-		// Adding params to symtab
-		symbolTable* curr = gSymTable;
-		int tempOffset = rbp_size;
-		for(auto &p: declarator->paramList){
-			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
-			if(retVal) {
-				error(p->paramName, retVal);
-			}
-			string lex = p->paramName;
-			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-			if(!sym_node){
-				error(lex, ALLOCATION_ERROR);
-			}
-			sym_node->declSp = declSpCopy(p->declSp);
-			sym_node->infoType = p->infoType;
-			sym_node->size = getNodeSize(sym_node, gSymTable);
-			tempOffset += getOffsettedSize(sym_node->size);
-		}
-		funcNode->paramWidth = tempOffset-rbp_size;
-		for(auto &p: declarator->paramList){
-			string lex = p->paramName;	
-			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-			sym_node->offset = (-1*tempOffset);
-			tempOffset = tempOffset-getOffsettedSize(sym_node->size);
-		}
-		offset = 0;
+		//UNSUPPORTED_FUNCTIONALITY
+		error("Use function definitions of type int foo(int a, int b){...}", UNSUPPORTED_FUNCTIONALITY);
 	} declaration_list compound_statement { 
-		addChild($2, $4); 
-		addChild($2, $5); 
-	 	
-		node* declaration_specifiers = $1; // type
-		node* declarator = $2; // func , param list
-		
-		for(auto &u: $4->paramList){
-			$2->paramList.push_back(u);
-		}
-
-		$$ = $2;
-		currFunc = "#prog"; // Back to main program
+		//UNSUPPORTED_FUNCTIONALITY
+		error("Use function definitions of type int foo(int a, int b){...}", UNSUPPORTED_FUNCTIONALITY);
 	}
 	| declaration_specifiers  declarator {
 		// TODO: Send type from declaration specifier to function name
 		struct node* declarator = $2; 
 		struct node* declaration_specifiers = $1;
-		
-		
 		addFunctionSymbol(declaration_specifiers, declarator);
-
+		string funcName = $2->addr;
 		struct symbolTableNode* funcNode = lookUp(gSymTable, funcName);
 		if(!funcNode){
 			error("Func "+funcName+" not found", DEFAULT_ERROR);
@@ -1883,6 +1870,9 @@ function_definition
 		currFunc = "#prog";
 	}
 	| declarator func_marker_1 declaration_list compound_statement { 
+		//UNSUPPORTED_FUNCTIONALITY
+		error("Use function definitions of type int foo(int a, int b){...}", UNSUPPORTED_FUNCTIONALITY);
+		
 		addChild($1, $3); 
 		addChild($1, $4);
 		node* declarator = $1; // func , param list
@@ -1894,6 +1884,7 @@ function_definition
 		currFunc = "#prog";
 	}
 	| declarator func_marker_1 compound_statement { 
+		//TODO: NO EMIT
 		addChild($1, $3);
 		$$ = $1;
 		currFunc = "#prog";
@@ -1906,7 +1897,7 @@ func_marker_1
 		// Send type from declaration specifier to function name
 		struct node* declarator = currDecl;
 		addFunctionSymbol(NULL, declarator);
-
+		string funcName =  declarator->addr;
 		struct symbolTableNode* funcNode = lookUp(gSymTable, funcName);
 		if(!funcNode){
 			error("Func "+funcName+" not found", DEFAULT_ERROR);
@@ -2037,7 +2028,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName);
 		
 		// printSymbolTableJSON(gSymTable,0);
-		printSymbolTable(gSymTable);
+		// printSymbolTable(gSymTable);
         printCode();
 		fclose(fd);
     }

@@ -154,8 +154,12 @@ void checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_
     symbolTableNode* stNode = lookUp(gSymTable, name);
     
     if(!stNode || stNode->infoType != INFO_TYPE_FUNC || !stNode->declSp) {
-        errCode = SYMBOL_NOT_FOUND;
-        errString = name;
+        setErrorParams(errCode, SYMBOL_NOT_FOUND, errString, name);
+        return;
+    }
+
+    if(!stNode->isDefined) {
+        setErrorParams(errCode, UNDEFINED_FUNCTION, errString, name);
         return;
     }
     

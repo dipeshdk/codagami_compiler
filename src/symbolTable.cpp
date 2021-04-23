@@ -24,7 +24,6 @@ struct symbolTableNode* lookUp(symbolTable* st, string name) {
 
 int insertSymbol(symbolTable* st, int lineNo, string name){
     if(st->symbolTableMap.find(name) != st->symbolTableMap.end()) {
-        cout << "\nsymbol name: " << name << "\n";
         return SYMBOL_ALREADY_EXISTS;
     }
     symbolTableNode* node = new symbolTableNode();
@@ -95,16 +94,40 @@ int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
     string name = declarator->lexeme;
 
     currFunc = name;
-    // cout << "addFunctionSymbol: name: " << name << " scope " << gSymTable->scope << "\n";
     int retVal = insertSymbol(gSymTable, declarator->lineNo, name);
     if(retVal == SYMBOL_ALREADY_EXISTS) {
-        //TODO: Later
-        error("Symbol "+name+"already exists", retVal);        
-    }
-    
-    if(retVal) {
+        struct symbolTableNode* funcNode = lookUp(gSymTable, name);
+        if(funcNode->infoType != INFO_TYPE_FUNC)
+            error("Symbol "+name+" not a function", retVal);      
+        if(funcNode->isDefined)
+            error("Function "+name+" already definded", retVal);      
+        //check function type
+        if(declaration_specifiers) {
+            if(!declaration_specifiers->declSp || !funcNode->declSp || funcNode->declSp->type.size() != 1)
+                error("addFunctionSymbol", INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
+            //check return type of function
+            // if(
+                // !checkType(declaration_specifiers->declSp, funcNode->declSp->type[0], funcNode->declSp->ptrLevel)
+                // (funcNode->declSp->type[0] == TYPE_STRUCT && funcNode->declSp->lexeme != declaration_specifiers->declSp->lexeme)) 
+                // error(name, MISMATCH_DEFINITION_DECLARATION);
+        }
+        //check paramlist
+        if(declarator->paramList.size() != funcNode->paramList.size()) 
+            error("different number of parameters in function " + name, MISMATCH_DEFINITION_DECLARATION);
+        for(int i = 0; i < funcNode->paramList.size(); i++) {
+            if(funcNode->paramList[i]->declSp->type != declarator->paramList[i]->declSp->type
+            || funcNode->paramList[i]->declSp->ptrLevel != declarator->paramList[i]->declSp->ptrLevel
+            || (funcNode->paramList[i]->declSp->type[0] == TYPE_STRUCT 
+                 && funcNode->paramList[i]->declSp->lexeme != declarator->paramList[i]->declSp->lexeme))
+               error("different parameter types in function " + name, MISMATCH_DEFINITION_DECLARATION);
+            funcNode->paramList[i]->paramName = declarator->paramList[i]->paramName;
+        }
+
+        funcNode->isDefined=true;
+        return 0;
+    }else if(retVal) {
         //error checks
-        error("", retVal);
+        error("addFunctionSymbol error", retVal);
     }
     symbolTableNode* sym_node = gSymTable->symbolTableMap[name];
     if(!sym_node) return ALLOCATION_ERROR;
@@ -118,6 +141,7 @@ int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
         sym_node->declSp = ds;
     }
     sym_node->paramList = declarator->paramList;
+    sym_node->isDefined = true;
     return 0;
 }
 
