@@ -109,8 +109,9 @@ int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
     symbolTableNode* sym_node = gSymTable->symbolTableMap[name];
     if(!sym_node) return ALLOCATION_ERROR;
     sym_node->infoType = INFO_TYPE_FUNC;
-    if(declaration_specifiers)
-        sym_node->declSp = declaration_specifiers->declSp;
+    if(declaration_specifiers){
+        sym_node->declSp = declSpCopy(declaration_specifiers->declSp);
+    }
     else{
         cout << "NO declspecs" <<endl;
         declSpec* ds = new declSpec();
@@ -118,6 +119,7 @@ int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
         sym_node->declSp = ds;
     }
     sym_node->paramList = declarator->paramList;
+    sym_node->declSp->ptrLevel = declarator->declSp->ptrLevel;
     return 0;
 }
 
