@@ -262,16 +262,18 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st){
         size += 8;
     }
     else if(elem->infoType == INFO_TYPE_STRUCT){
-        if(!elem->declSp){
-            structTableNode* n = st->structMap[elem->declSp->lexeme];
+        // if(elem->declSp){
+            // structTableNode* n = st->structMap[elem->declSp->lexeme];
+            
+            structTableNode* n = structLookUp(st, elem->declSp->lexeme);
             for(auto i: n->paramList){
-                if(!i->declSp)
+                if(i->declSp)
                     if(i->declSp->ptrLevel > 0){
                         size += 8;
                     }
                     else size+= getTypeSize(i->declSp->type);
             }
-        }
+        // }
         
     }
     else if(elem->declSp && elem->declSp->ptrLevel){

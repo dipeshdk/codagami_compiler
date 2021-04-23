@@ -340,8 +340,15 @@ unary_expression
 	| SIZEOF unary_expression {$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| SIZEOF '(' type_name ')'{
 		// TODO: Check validity of type_name 
+		string newTmp = generateTemp(errCode);
+    	if(errCode)
+        	error("Cannot generate Temp",errCode);
+    	// emit(OP_ASSIGNMENT, to_string(getNodeSize($3)), EMPTY_STR, newTmp);
 		
-		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
+		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);
+		$$->declSp->type.push_back(TYPE_INT);
+		$$->addr = newTmp;
+	}
 	;
 
 unary_operator
@@ -870,6 +877,7 @@ declaration
 			}
 			else {
 				sym_node->declSp = declSpCopy($1->declSp);
+				sym_node->infoType = $1->infoType;
 				if(temp->declSp)
 					sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
 				if(initializer) {
@@ -1875,7 +1883,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName);
 		
 		// printSymbolTableJSON(gSymTable,0);
-		// printSymbolTable(gSymTable);
+		printSymbolTable(gSymTable);
         printCode();
 		fclose(fd);
     }
