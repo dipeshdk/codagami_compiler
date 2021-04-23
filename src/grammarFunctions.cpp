@@ -139,6 +139,9 @@ node* parameter_declaration(node* declaration_specifiers, node* declarator){
     if(declarator->declSp) {
         parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
     }
+    parameter->infoType = declaration_specifiers->infoType;
+    cout << "Info Type " << declaration_specifiers->infoType << endl;
+    cout << "Param Name = " << declarator->lexeme << endl;
     parameter->paramName = declarator->lexeme;
     declarator->paramList.push_back(parameter);
 

@@ -1665,6 +1665,9 @@ function_definition
 			}
 			
 			sym_node->declSp = declSpCopy(p->declSp);
+			sym_node->infoType = p->infoType;
+			// cout << "Info Type = " << p->infoType << endl;
+			// cout << "Func param name = " << p->paramName << endl;
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			tempOffset += getOffsettedSize(sym_node->size);
 		}
@@ -1715,7 +1718,11 @@ function_definition
 			}
 			// emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, lex);
 			sym_node->declSp = declSpCopy(p->declSp);
+			sym_node->infoType = p->infoType;
+			// cout << "Info Type = " << p->infoType << endl;
+			// cout << "Func param name = " << p->paramName << endl;
 			sym_node->size = getNodeSize(sym_node, gSymTable);
+			cout << "Size = " << sym_node->size << endl;
 			tempOffset += getOffsettedSize(sym_node->size);
 		}
 		
@@ -1779,6 +1786,9 @@ func_marker_1
 			}
 			
 			sym_node->declSp = declSpCopy(p->declSp);
+			sym_node->infoType = p->infoType;
+			// cout << "Info Type = " << p->infoType << endl;
+			// cout << "Func param name = " << p->paramName << endl;
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			tempOffset += getOffsettedSize(sym_node->size);
 		}
@@ -1788,7 +1798,7 @@ func_marker_1
 		emit(OP_LABEL, labelName, BLANK_STR, BLANK_STR);
     //TODO: backpatch offset
 		// emit(OP_BEGINFUNC, BLANK_STR, BLANK_STR, EMPTY_STR); // GCC will set the global variable offset 
-
+		
 		for(auto &p: declarator->paramList){
 			string lex = p->paramName;	
 			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];

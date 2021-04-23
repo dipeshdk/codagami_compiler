@@ -22,10 +22,12 @@ struct declSpec
 
 struct param{
     struct declSpec *declSp;
+    int infoType;
     string paramName;
     param() {
         declSp = new declSpec();
         paramName="empty";
+        infoType = INFO_TYPE_NORMAL;
     }
 };
 

@@ -262,7 +262,7 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st){
         size += 8;
     }
     else if(elem->infoType == INFO_TYPE_STRUCT){
-        // if(elem->declSp){
+        if(elem->declSp){
             // structTableNode* n = st->structMap[elem->declSp->lexeme];
             
             structTableNode* n = structLookUp(st, elem->declSp->lexeme);
@@ -273,7 +273,7 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st){
                     }
                     else size+= getTypeSize(i->declSp->type);
             }
-        // }
+        }
         
     }
     else if(elem->declSp && elem->declSp->ptrLevel){
