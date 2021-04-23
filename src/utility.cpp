@@ -134,6 +134,9 @@ void error(string var, int error_code) {
 		case DEFAULT_ERROR:
 			str = "";
 			break;
+		case NON_POINTER_DEFERENCE:
+			str = "Deferencing a non-pointer";
+			break;
 		default:
 			break;
 	}
