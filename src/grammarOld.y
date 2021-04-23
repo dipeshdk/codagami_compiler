@@ -196,6 +196,7 @@ postfix_expression
 		addChild(postfix_expression, expression);
 		postfix_expression->infoType = INFO_TYPE_ARRAY;
 		postfix_expression->addr = arrayIndexStr;
+		postfix_expression->declSp->ptrLevel++;
 		$$ = postfix_expression;
 	}
 	| postfix_expression '(' ')' { // Check with function paramlist111NoParamName111
