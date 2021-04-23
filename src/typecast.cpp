@@ -20,10 +20,16 @@ int canTypecast(declSpec* to_ds,  declSpec* from_ds){
     int rank1 = getTypeRank(to_ds->type); 
     int rank2 = getTypeRank(from_ds->type);
     //struct-1 to struct-2 not allowed
-    if (rank1 == 5 && rank2 == 5 && (to_ds->lexeme != from_ds->lexeme)){
-        setErrorParams(errCode, TYPE_ERROR, errStr, "cannot type cast structs");
-        return false;
-    }
+    if (rank1 == 5 && rank2 == 5){
+        if(to_ds->lexeme != from_ds->lexeme){
+            setErrorParams(errCode, TYPE_ERROR, errStr, "cannot type cast structs");
+            return false;
+        }
+        if(to_ds->ptrLevel != from_ds->ptrLevel){
+            setErrorParams(errCode, TYPE_ERROR, errStr, "different ptr levels of structs");
+            return false;
+        }
+    } 
     // float char* not allowed 
     if((checkType(to_ds, TYPE_FLOAT,0) && checkType(from_ds, TYPE_CHAR, 1) )
      || (checkType(from_ds, TYPE_FLOAT,0) && checkType(to_ds, TYPE_CHAR, 1))) 
