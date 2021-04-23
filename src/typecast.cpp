@@ -132,6 +132,7 @@ int checkPointer(node* root){
 int getTypeRank(vector<int> &type) {
     if(type.size() != 1)  -TYPE_ERROR;
     switch(type[0]) {
+        case TYPE_STRUCT: return 5;
         case TYPE_FLOAT: return 4;
         case TYPE_INT: return 3;
         case TYPE_CHAR: return 2;
