@@ -42,6 +42,7 @@
 	vector<node*> case_consts;
 	int offset = 0;
 	int rbp_size = 4;
+	string funcName;
 
 extern "C"
 {
@@ -1177,6 +1178,8 @@ direct_declarator
 	| direct_declarator '(' parameter_type_list ')' { 
 		node* direct_declarator = $1;	
 		node* parameter_type_list = $3;	
+		string fn($1->lexeme);
+		funcName = fn;
 		// Done: Add parameters to symbol table with appropriate types, also add to function arguments
 
 		direct_declarator->paramList = parameter_type_list->paramList;
@@ -1645,7 +1648,10 @@ function_definition
 		struct node* declarator = $2; 
 		struct node* declaration_specifiers = $1;
 		addFunctionSymbol(declaration_specifiers, declarator);
-
+		struct symbolTableNode* funcNode = lookUp(gSymTable, funcName);
+		if(!funcNode){
+			error("Func"+funcName+"not found", DEFAULT_ERROR);
+		}
 		funcDecl = 1;
 		gSymTable = addChildSymbolTable(gSymTable);
 		// Adding params to symtab
@@ -1671,6 +1677,7 @@ function_definition
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			tempOffset += getOffsettedSize(sym_node->size);
 		}
+		funcNode->paramWidth = tempOffset-rbp_size;
 		for(auto &p: declarator->paramList){
 			string lex = p->paramName;	
 			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
@@ -1696,7 +1703,14 @@ function_definition
 		// TODO: Send type from declaration specifier to function name
 		struct node* declarator = $2; 
 		struct node* declaration_specifiers = $1;
+		
+		
 		addFunctionSymbol(declaration_specifiers, declarator);
+
+		struct symbolTableNode* funcNode = lookUp(gSymTable, funcName);
+		if(!funcNode){
+			error("Func"+funcName+"not found", DEFAULT_ERROR);
+		}
 
 		funcDecl = 1;
 		gSymTable = addChildSymbolTable(gSymTable);
@@ -1725,6 +1739,9 @@ function_definition
 			cout << "Size = " << sym_node->size << endl;
 			tempOffset += getOffsettedSize(sym_node->size);
 		}
+
+		funcNode->paramWidth = tempOffset-rbp_size;
+		cout << "Width = " << funcNode->paramWidth << endl;
 		
 		string labelName = "_" + string(declarator->lexeme);
 		emit(OP_LABEL, BLANK_STR, BLANK_STR, labelName);
@@ -1768,6 +1785,10 @@ func_marker_1
 		struct node* declarator = currDecl;
 		addFunctionSymbol(NULL, declarator);
 
+		struct symbolTableNode* funcNode = lookUp(gSymTable, funcName);
+		if(!funcNode){
+			error("Func"+funcName+"not found", DEFAULT_ERROR);
+		}
 		funcDecl = 1;
 		gSymTable = addChildSymbolTable(gSymTable);
 		// Adding params to symtab
@@ -1798,7 +1819,7 @@ func_marker_1
 		emit(OP_LABEL, labelName, BLANK_STR, BLANK_STR);
     //TODO: backpatch offset
 		// emit(OP_BEGINFUNC, BLANK_STR, BLANK_STR, EMPTY_STR); // GCC will set the global variable offset 
-		
+		funcNode->paramWidth = tempOffset-rbp_size;
 		for(auto &p: declarator->paramList){
 			string lex = p->paramName;	
 			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];

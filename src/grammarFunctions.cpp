@@ -207,6 +207,7 @@ void checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_
     }else{
         emit(OP_LCALL, func_name, BLANK_STR ,BLANK_STR);
     }
+    paramSize = stNode->paramWidth;
     emit(OP_POPPARAM, BLANK_STR, BLANK_STR, to_string(paramSize));
     return;
 }
