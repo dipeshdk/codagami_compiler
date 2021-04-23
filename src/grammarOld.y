@@ -394,7 +394,7 @@ multiplicative_expression
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
-		}
+	}
 	| multiplicative_expression '/' cast_expression { 
 		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "/", errCode, errStr); 
 		if(errCode)
@@ -411,7 +411,7 @@ multiplicative_expression
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
-		}
+	}
 	| multiplicative_expression '%' cast_expression { 
 		int retval = checkType($3->declSp,TYPE_FLOAT,0);
 		if(retval){
@@ -430,7 +430,7 @@ multiplicative_expression
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
-		}
+	}
 	;
 
 additive_expression
@@ -873,6 +873,34 @@ declaration
 				sym_node->declSp = declSpCopy($1->declSp);
 				if(temp->declSp)
 					sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
+				temp->declSp = sym_node->declSp;
+				if(initializer) {
+					//array initializtion
+					node *currInit = initializer;
+					int ind = 0;
+					if(!temp->declSp) 
+						error(temp->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
+
+					int size = getTypeSize(temp->declSp->type);
+					if(size < 0){
+						error("invalid array type", -size);
+					}
+					//_t1 = 4;
+					string sizeTmp = generateTemp(errCode);
+					if(errCode){
+						error("error in temp generation", errCode);
+					}
+					emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
+
+					while(currInit) {
+						string addr = emitArrayIndexGetAddr(temp->addr, to_string(ind), sizeTmp, errCode, errStr);
+						if(errCode)
+							error(errStr,errCode);
+						emit(OP_ASSIGNMENT, currInit->addr, EMPTY_STR ,addr);
+						currInit = currInit->next;
+						ind++;
+					}
+				}
 			}
 			else {
 				sym_node->declSp = declSpCopy($1->declSp);
@@ -889,7 +917,7 @@ declaration
 					if(retval) {
 						typeCastLexemeWithEmit(initializer, sym_node->declSp);
 					}
-					emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);
+					emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);					
 				}
 			}
 
@@ -950,6 +978,7 @@ init_declarator
 		node* declarator = $1;
 		node* initializer = $3;
 		
+		//TODO: Why?? Should be error?
 		if(!declarator->declSp){
 			declSpec* ds = new declSpec();
 			if(!initializer->declSp){
