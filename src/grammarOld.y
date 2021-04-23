@@ -41,6 +41,7 @@
 	string currFunc = "#prog";
 	vector<node*> case_consts;
 	int offset = 0;
+	int rbp_size = 4;
 
 extern "C"
 {
@@ -1641,7 +1642,7 @@ function_definition
 		gSymTable = addChildSymbolTable(gSymTable);
 		// Adding params to symtab
 		symbolTable* curr = gSymTable;
-		int tempOffset = 0;
+		int tempOffset = rbp_size;
 		for(auto &p: declarator->paramList){
 			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
 			if(retVal) {
@@ -1690,7 +1691,7 @@ function_definition
 		gSymTable = addChildSymbolTable(gSymTable);
 		// Adding params to symtab
 		symbolTable* curr = gSymTable;
-		int tempOffset = 0;
+		int tempOffset = rbp_size;
 
 		for(auto &p: declarator->paramList){
 			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
@@ -1756,7 +1757,7 @@ func_marker_1
 		gSymTable = addChildSymbolTable(gSymTable);
 		// Adding params to symtab
 		symbolTable* curr = gSymTable;
-		int tempOffset = 0;
+		int tempOffset = rbp_size;
 		for(auto &p: declarator->paramList){
 			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
 			if(retVal) {
