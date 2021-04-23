@@ -1,8 +1,10 @@
 int foo(int a, char b){
     int x,y;
-    char g;
+    {char g;
     x = a * b + g;
-    return g;
+    }
+    y = a * b ;
+    return y;
 }
 
 int main(){
