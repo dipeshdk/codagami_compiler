@@ -22,7 +22,7 @@ node* makeDeadNode(){
 	newNode->declSp = new declSpec();
     newNode->childList = NULL;
     newNode->next = NULL;
-	newNode->name = strdup("Dead Node");
+	newNode->name = strdup("Dead Node");	
 	return newNode;
 }
 

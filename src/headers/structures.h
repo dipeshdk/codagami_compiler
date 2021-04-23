@@ -21,7 +21,6 @@ struct declSpec
 };
 
 struct param{
-    int infoType;
     struct declSpec *declSp;
     string paramName;
     param() {
