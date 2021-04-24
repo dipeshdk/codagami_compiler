@@ -53,5 +53,8 @@ $(BIN)/3AC: $(OBJ)/lex.yy.o $(OBJ)/y.tab.c $(OBJ)/AST.o  $(OBJ)/generateDot.o  $
 	$(GPP) -o $(BIN)/3AC $(OBJ)/lex.yy.o $(OBJ)/y.tab.c  $(OBJ)/AST.o  $(OBJ)/generateDot.o  $(OBJ)/grammarFunctions.o  $(OBJ)/printSymbolTable.o  $(OBJ)/symbolTable.o $(OBJ)/TAC.o $(OBJ)/typecast.o $(OBJ)/utility.o
 
 
-clean: 
+
+clean:
+	$(RM) ./*.dot ./*.ps ./*.json ./code.txt symbolTableJson/*
+realclean: 
 	$(RM) $(OBJ)/* $(BIN)/* ./*.dot ./*.ps ./*.json ./code.txt
