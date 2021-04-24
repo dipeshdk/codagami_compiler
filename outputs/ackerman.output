@@ -6,8 +6,8 @@
 3.   IF 1t THEN GOTO 5
 4.   GOTO 8
 5.   2t = n ADDI 1
-6.   Return 2t
-7.   GOTO BLANK
+6.   m = 2t
+7.   GOTO 38
 8.   3t = m GREATER 0
 9.   IF 3t THEN GOTO 11
 10.   GOTO 21
@@ -20,13 +20,13 @@
 17.   6t = LCALL _ack
 18.   POPPARAM 8
 19.   Return ack
-20.   GOTO BLANK
+20.   GOTO 38
 21.   7t = m GREATER 0
 22.   IF 7t THEN GOTO 24
-23.   GOTO BLANK
+23.   GOTO 38
 24.   8t = n GREATER 0
 25.   IF 8t THEN GOTO 27
-26.   GOTO BLANK
+26.   GOTO 38
 27.   9t = m SUBI 1
 28.   10t = n SUBI 1
 29.   PUSHPARAM m

@@ -21,9 +21,9 @@
 18.   r = 'b'
 19.   4t = LOGICAL_NOT c
 20.   IF 4t THEN GOTO 22
-21.   GOTO BLANK
+21.   GOTO 39
 22.   IF a THEN GOTO 24
-23.   GOTO BLANK
+23.   GOTO 39
 24.   5t = ( CHAR_TO_INT ) p
 25.   6t = 5t MULI c
 26.   7t = 6t ADDI b
@@ -31,14 +31,14 @@
 28.   IF 8t THEN GOTO 30
 29.   GOTO 32
 30.   Return 0
-31.   GOTO BLANK
+31.   GOTO 39
 32.   9t = ( CHAR_TO_INT ) p
 33.   10t = 9t MULI c
 34.   11t = 10t ADDI b
 35.   12t = 11t ADDI 1
 36.   13t = a EQ 12t
-37.   IF 13t THEN GOTO BLANK
-38.   GOTO BLANK
+37.   IF 13t THEN GOTO 39
+38.   GOTO 39
 39.   END_FUNCTION
 
 

@@ -6,12 +6,12 @@
 3.   IF 1t THEN GOTO 5
 4.   GOTO 7
 5.   Return 0
-6.   GOTO BLANK
+6.   GOTO 18
 7.   2t = n EQ 0
 8.   IF 2t THEN GOTO 10
 9.   GOTO 12
 10.   Return 1
-11.   GOTO BLANK
+11.   GOTO 18
 12.   3t = n SUBI 1
 13.   PUSHPARAM 3t
 14.   4t = LCALL _hofstaderFemale
@@ -26,12 +26,12 @@
 22.   IF 6t THEN GOTO 24
 23.   GOTO 26
 24.   Return 0
-25.   GOTO BLANK
+25.   GOTO 37
 26.   7t = n EQ 0
 27.   IF 7t THEN GOTO 29
 28.   GOTO 31
 29.   Return 0
-30.   GOTO BLANK
+30.   GOTO 37
 31.   8t = n SUBI 1
 32.   PUSHPARAM 8t
 33.   9t = LCALL _hofstaderMale

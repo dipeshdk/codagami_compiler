@@ -4,7 +4,7 @@
 1.   BEGINFUNC 16
 2.   1t = first LESS last
 3.   IF 1t THEN GOTO 5
-4.   GOTO BLANK
+4.   GOTO 84
 5.   pivot = first
 6.   i = first
 7.   j = last

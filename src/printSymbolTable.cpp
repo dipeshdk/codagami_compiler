@@ -232,11 +232,7 @@ void printSymbolTableJSON(symbolTable *st, int numTab, int printTemps) {
 int getNodeSize(symbolTableNode* elem, symbolTable* st){
     int size = 0;
     if(elem->infoType == INFO_TYPE_ARRAY){
-        if(elem->declSp->ptrLevel >= 1){
-            size += 8*(elem->arraySize);
-        }
-        else size += getTypeSize(elem->declSp->type)*(elem->arraySize);
-
+        size += 8;
     }
     else if(elem->infoType == INFO_TYPE_FUNC){
         size += 8;
@@ -261,6 +257,16 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st){
         size += getTypeSize(elem->declSp->type);
     }
     return size;
+}
+
+int getArraySize(symbolTableNode* sym_node){
+    if(sym_node->infoType == INFO_TYPE_ARRAY){
+        if(sym_node->declSp->ptrLevel > 1){
+            return 8*(sym_node->arraySize);
+        }
+        else return getTypeSize(sym_node->declSp->type)*(sym_node->arraySize);
+    }
+    return 0;
 }
 
 int getOffsettedSize(int size){

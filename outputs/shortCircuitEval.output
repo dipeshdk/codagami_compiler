@@ -40,7 +40,7 @@
 35.   8t = ( INT_TO_FLOAT ) d
 36.   9t = bar EQ 8t
 37.   IF 9t THEN GOTO 39
-38.   GOTO BLANK
+38.   GOTO 41
 39.   10t = ( FLOAT_TO_INT ) 34.90
 40.   b = 10t
 41.   END_FUNCTION
