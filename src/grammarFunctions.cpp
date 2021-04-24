@@ -155,10 +155,10 @@ void checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_
         return;
     }
 
-    if(!stNode->isDefined) {
-        setErrorParams(errCode, UNDEFINED_FUNCTION, errString, name);
-        return;
-    }
+    // if(!stNode->isDefined) {
+    //     setErrorParams(errCode, UNDEFINED_FUNCTION, errString, name);
+    //     return;
+    // }
     
     vector<struct param*> paramList = stNode->paramList; 
     int maxSize = paramList.size();

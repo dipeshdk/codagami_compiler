@@ -214,9 +214,9 @@ postfix_expression
 		if(!stNode || stNode->infoType != INFO_TYPE_FUNC || !stNode->declSp) {
 			error(name, SYMBOL_NOT_FOUND);
 		}
-		if(!stNode->isDefined) {
-			error(name, UNDEFINED_FUNCTION);
-		}
+		// if(!stNode->isDefined) {
+			// error(name, UNDEFINED_FUNCTION);
+		// }
 		$1->infoType = INFO_TYPE_FUNC;
 		$$ = $1;	
 	}
