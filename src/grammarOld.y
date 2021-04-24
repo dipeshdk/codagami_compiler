@@ -2081,7 +2081,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName);
 		
 		// printSymbolTable(gSymTable);
-		// printSymbolTableJSON(gSymTable,0,0);
+		printSymbolTableJSON(gSymTable,0,0);
         printCode(codeFilename);
 
 		fclose(fd);
