@@ -847,8 +847,10 @@ assignment_expression
 				error(errStr, errCode);
 			if(retval){
 				typeCastLexemeWithEmit(assignment_expression, unary_expression->declSp);
+         cout << "line 850 \n";
 			}
 			emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
+      cout << "line 852 \n";
 		}
 		else
 		{
@@ -882,6 +884,7 @@ assignment_expression
 		addChild(assignment_operator, unary_expression); 
 		addChild(assignment_operator, assignment_expression); 
 		$$ = assignment_operator;
+    cout << "line 887\n";
 	}
 	;
 
@@ -1502,6 +1505,7 @@ statement
 		$$->continuelist = $1->continuelist;
 	}
 	| expression_statement { 
+    cout << "statement line 1508\n";
 		$$ = $1;
 		vector<int> tmp = mergelist($1->truelist, $1->falselist);
 		$$->nextlist = mergelist(tmp, $1->nextlist);
@@ -1576,6 +1580,7 @@ compound_statement
 		gSymTable = gSymTable->parent;
 		$$->breaklist = $4->breaklist;	
 		$$->continuelist = $4->continuelist;
+    cout << "line 1582: compound_statement\n";
 	}
 	;
 
@@ -1883,6 +1888,7 @@ function_definition
 		addChild($2, $4);
 		$$ = $2;
 		currFunc = "#prog";
+    cout<< "line 1891\n";
 	}
 	| declarator func_marker_1 declaration_list compound_statement { 
 		//UNSUPPORTED_FUNCTIONALITY

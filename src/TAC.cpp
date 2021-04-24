@@ -171,7 +171,11 @@ string emitTypeCast(node* node, declSpec *toDs, int &errCode, string &errStr) {
         setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, node->lexeme);
         return BLANK_STR;
     }
-    string typeCastAddr = "( " +getTypeName(node->declSp->type[0]) + "_TO_" + getTypeName(toDs->type[0]) + " ) " + node->addr; 
+    string from_type = getTypeName(node->declSp->type[0]);
+    if(node->declSp->ptrLevel > 0) from_type += "*";
+    string to_type = getTypeName(toDs->type[0]);
+    if(toDs->ptrLevel > 0) to_type += "*";
+    string typeCastAddr = "( " + from_type + "_TO_" + to_type + " ) " + node->addr; 
     emit(OP_ASSIGNMENT, typeCastAddr , EMPTY_STR, newTmp);
     return newTmp;
 }

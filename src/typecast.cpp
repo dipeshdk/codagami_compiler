@@ -80,7 +80,7 @@ bool areDifferentTypes(declSpec* to_ds,  declSpec* from_ds, int &errCode, string
         setErrorParams(errCode, rank2, errStr, "cannot type cast");
         return false;
     }
-    return rank1 != rank2;
+    return ((rank1 != rank2) || (from_ds->ptrLevel != to_ds->ptrLevel));
 }
 
 bool typeCastRequired(declSpec* to_ds,  declSpec* from_ds, int &errCode, string &errStr){
@@ -346,6 +346,8 @@ bool requiresTypeCasting(declSpec* n1, declSpec* n2){
 }
 
 node* makeNodeForExpressionByRank(node* n1, node* n2, string name, string lexeme, int rank, int& errCode, string& errStr) {
+      cout<< "created temp " << rank <<endl;
+
     if(rank < 0){
         setErrorParams(errCode, rank, errStr, errStr);
         return nullptr;
@@ -358,6 +360,7 @@ node* makeNodeForExpressionByRank(node* n1, node* n2, string name, string lexeme
         default:  temp->declSp = n1->declSp;  break;
     }
     string type = getTypeName(temp->declSp->type[0]);
+    // if(temp->declSp->ptrLevel>0) type += "*"; // not sure as of yet type for operator.
     string new_lexeme = lexeme + "(" + type + ")";
     temp->lexeme = strcpy(new char[new_lexeme.length() + 1], new_lexeme.c_str());
     return temp;
@@ -368,5 +371,6 @@ node* makeNodeForExpressionByRank(node* n1, node* n2, string name, string lexeme
 
 node* makeNodeForExpressionNotPointerNotString(node* n1, node* n2, string name, int& errCode, string& errStr) {
     int rank = implicitTypecastingNotPointerNotStringLiteral(n1, n2, errStr);
+    cout<< "hello there\n";
     return makeNodeForExpressionByRank(n1, n2, name, name, rank, errCode, errStr);
 }
