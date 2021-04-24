@@ -219,15 +219,20 @@ postfix_expression
 		// if(!stNode->isDefined) {
 			// error(name, UNDEFINED_FUNCTION);
 		// }
+		string retTemp = checkFuncArgValidityWithParamEmit($1, nullptr, errCode, errStr);
+		if(errCode) error(errStr, errCode);
 		$1->infoType = INFO_TYPE_FUNC;
 		$$ = $1;	
+		$$->addr = retTemp;
 	}
 	| postfix_expression '(' argument_expression_list ')' {
-		checkFuncArgValidityWithParamEmit($1, $3, errCode, errStr);
+		string retTemp = checkFuncArgValidityWithParamEmit($1, $3, errCode, errStr);
 		if(errCode) error(errStr, errCode);
 		$1->infoType = INFO_TYPE_FUNC;
 		addChild($1,$3);
 		$$ = $1;
+		$$->addr = retTemp;
+
 	}
 	| postfix_expression '.' IDENTIFIER { 
 		node * postfix_expression = $1;
@@ -816,87 +821,92 @@ assignment_expression
 		node* unary_expression = $1;
 		node* assignment_expression = $3;
 		node* assignment_operator = $2;
-		if (!unary_expression->declSp) 
-		{
-			declSpec* ds = new declSpec();
-			if(!assignment_expression->declSp)
-				error(assignment_expression->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
-			ds->type = assignment_expression->declSp->type;
-			unary_expression->declSp = ds;
-		}
-		else 
-		{
+		if(assignment_expression->addr != EMPTY_STR) {
+			if (!unary_expression->declSp) 
+			{
+				declSpec* ds = new declSpec();
+				if(!assignment_expression->declSp)
+					error(assignment_expression->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
+				ds->type = assignment_expression->declSp->type;
+				unary_expression->declSp = ds;
+			}
+			else 
+			{
+				string s(assignment_operator->name);
+				if(s == "AND_ASSIGN" || s == "OR_ASSIGN" || s == "XOR_ASSIGN" || s == "LEFT_ASSIGN" || s == "RIGHT_ASSIGN") {
+					//should be only int or char
+					if(checkIntOrChar(unary_expression) || checkIntOrChar(assignment_expression))
+						error("expression should only be int or char", TYPE_ERROR);
+				}
+				if(s=="MUL_ASSIGN" || s=="DIV_ASSIGN" || s=="ADD_ASSIGN" || s=="SUB_ASSIGN" || s=="=") {
+					int retval = canTypecast(assignment_expression->declSp,unary_expression->declSp);
+					if(retval)
+						error("invalid typecast in assignment expression", retval);
+				}
+				if(s == "MOD_ASSIGN") {
+					if(checkType(assignment_expression->declSp, TYPE_FLOAT, 0))
+						error(assignment_expression->lexeme, SHOULD_NOT_BE_FLOAT);
+					//typecast by rank
+					// int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, errStr);
+					// if(retval)
+						// error(errStr,retval);
+				}
+			}
+			string resultAddr = unary_expression->addr;
 			string s(assignment_operator->name);
-			if(s == "AND_ASSIGN" || s == "OR_ASSIGN" || s == "XOR_ASSIGN" || s == "LEFT_ASSIGN" || s == "RIGHT_ASSIGN") {
-				//should be only int or char
-				if(checkIntOrChar(unary_expression) || checkIntOrChar(assignment_expression))
-					error("expression should only be int or char", TYPE_ERROR);
+			int opCode = getOpcodeFromAssignStr(s);
+			if(opCode >= 0) { 
+				//AND_ASSIGN or OR_ASSIGN or XOR_ASSIGN or LEFT_ASSIGN or RIGHT_ASSIGN or MOD_ASSIGN
+				emitOperationAssignment(unary_expression, assignment_expression, opCode, resultAddr, errCode, errStr);
+				if(errCode)
+					error(errStr, errCode);
 			}
-			if(s=="MUL_ASSIGN" || s=="DIV_ASSIGN" || s=="ADD_ASSIGN" || s=="SUB_ASSIGN" || s=="=") {
-				int retval = canTypecast(assignment_expression->declSp,unary_expression->declSp);
+			else if(s == "=")
+			{
+				bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
+				if(errCode)
+					error(errStr, errCode);
+				if(retval){
+					typeCastLexemeWithEmit(assignment_expression, unary_expression->declSp);
+				}
+				emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
+			}
+			else
+			{
+				int rank = giveTypeCastRank(unary_expression, assignment_expression);
+				if(rank < 0)
+					error("giveTypeCastRank error",-rank);
+				
+				int retval = typeCastByRank(unary_expression, assignment_expression, rank);
 				if(retval)
-					error("invalid typecast in assignment expression", retval);
+					error("typecast error",retval);
+				opCode = -1;
+				if(s == "MUL_ASSIGN")
+					opCode = getOpMulType(unary_expression, errCode, errStr);
+				else if(s == "DIV_ASSIGN")
+					opCode = getOpDivType(unary_expression, errCode, errStr);
+				else if(s == "SUB_ASSIGN")
+					opCode = getOpSubType(unary_expression, errCode, errStr);
+				else if(s == "ADD_ASSIGN")
+					opCode = getOpAddType(unary_expression, errCode, errStr);
+				
+				if(errCode || opCode == -1)
+					error(errStr, errCode);
+				emitOperationAssignment(unary_expression, assignment_expression, opCode, resultAddr, errCode, errStr);
+				if(errCode)
+					error(errStr, errCode);
 			}
-			if(s == "MOD_ASSIGN") {
-				if(checkType(assignment_expression->declSp, TYPE_FLOAT, 0))
-					error(assignment_expression->lexeme, SHOULD_NOT_BE_FLOAT);
-				//typecast by rank
-				// int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, errStr);
-				// if(retval)
-					// error(errStr,retval);
-			}
+			assignment_operator->addr = unary_expression->addr;
+			assignment_operator->declSp = declSpCopy(unary_expression->declSp);
+			assignment_operator->nextlist = mergelist(assignment_operator->nextlist, unary_expression->nextlist);
+			assignment_operator->nextlist = mergelist(assignment_operator->nextlist, assignment_expression->nextlist);
+			addChild(assignment_operator, unary_expression); 
+			addChild(assignment_operator, assignment_expression); 
+			$$ = assignment_operator;
+		}else {
+			error("Assignment of return value of a void function" ,UNSUPPORTED_FUNCTIONALITY);
 		}
-		string resultAddr = unary_expression->addr;
-		string s(assignment_operator->name);
-		int opCode = getOpcodeFromAssignStr(s);
-		if(opCode >= 0) { 
-			//AND_ASSIGN or OR_ASSIGN or XOR_ASSIGN or LEFT_ASSIGN or RIGHT_ASSIGN or MOD_ASSIGN
-			emitOperationAssignment(unary_expression, assignment_expression, opCode, resultAddr, errCode, errStr);
-			if(errCode)
-				error(errStr, errCode);
-		}
-		else if(s == "=")
-		{
-			bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
-			if(errCode)
-				error(errStr, errCode);
-			if(retval){
-				typeCastLexemeWithEmit(assignment_expression, unary_expression->declSp);
-			}
-			emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
-		}
-		else
-		{
-			int rank = giveTypeCastRank(unary_expression, assignment_expression);
-			if(rank < 0)
-				error("giveTypeCastRank error",-rank);
-			
-			int retval = typeCastByRank(unary_expression, assignment_expression, rank);
-			if(retval)
-				error("typecast error",retval);
-			opCode = -1;
-			if(s == "MUL_ASSIGN")
-				opCode = getOpMulType(unary_expression, errCode, errStr);
-			else if(s == "DIV_ASSIGN")
-				opCode = getOpDivType(unary_expression, errCode, errStr);
-			else if(s == "SUB_ASSIGN")
-				opCode = getOpSubType(unary_expression, errCode, errStr);
-			else if(s == "ADD_ASSIGN")
-				opCode = getOpAddType(unary_expression, errCode, errStr);
-			
-			if(errCode || opCode == -1)
-				error(errStr, errCode);
-			emitOperationAssignment(unary_expression, assignment_expression, opCode, resultAddr, errCode, errStr);
-			if(errCode)
-				error(errStr, errCode);
-		}
-		assignment_operator->addr = unary_expression->addr;
-		assignment_operator->declSp = declSpCopy(unary_expression->declSp);
-		assignment_operator->nextlist = mergelist(assignment_operator->nextlist, unary_expression->nextlist);
-		assignment_operator->nextlist = mergelist(assignment_operator->nextlist, assignment_expression->nextlist);
-		addChild(assignment_operator, unary_expression); 
-		addChild(assignment_operator, assignment_expression); 
-		$$ = assignment_operator;
+		
 	}
 	;
 
@@ -2071,7 +2081,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName);
 		
 		// printSymbolTable(gSymTable);
-		printSymbolTableJSON(gSymTable,0,0);
+		// printSymbolTableJSON(gSymTable,0,0);
         printCode(codeFilename);
 
 		fclose(fd);
