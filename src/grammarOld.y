@@ -2042,8 +2042,9 @@ int main(int ac, char **av) {
 		if(ac == 3) fileName = av[2];
 		generateDot(root,fileName);
 		
-		// printSymbolTableJSON(gSymTable,0);
 		// printSymbolTable(gSymTable);
+		printSymbolTableJSON(gSymTable,0,0);
+		
         printCode();
 		fclose(fd);
     }
