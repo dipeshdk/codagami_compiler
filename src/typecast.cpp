@@ -177,9 +177,9 @@ int checkPointer(node* root){
 int getTypeRank(vector<int> &type) {
     if(type.size() != 1)  -TYPE_ERROR;
     switch(type[0]) {
-        case TYPE_STRUCT: return 5;
-        case TYPE_FLOAT: return 4;
-        case TYPE_INT: return 3;
+        case TYPE_STRUCT: return 6;
+        case TYPE_FLOAT: return 5;
+        case TYPE_INT: return 4;
         case TYPE_CHAR: return 2;
         case TYPE_VOID: return 1;
     }
@@ -199,6 +199,8 @@ int giveTypeCastRank(node* n1, node* n2){
     */
     int rank1 = getTypeRank(v1); 
     int rank2 = getTypeRank(v2);
+    if(n1->declSp->ptrLevel > 0) rank1 = 3;
+    if(n2->declSp->ptrLevel > 0) rank2 = 3;
     if(rank1 < 0)
         return rank1;
     if(rank2 < 0)
@@ -327,13 +329,18 @@ int implicitTypecastingNotPointerNotStringLiteral(node*n1, node*n2, string& var)
 
 //TODO: check use in grammarOld.y
 int implicitTypecastingNotStringLiteral(node*n1, node*n2, string& var){
+    
     int rank = giveTypeCastRank(n1, n2);
     if(rank < 0){
         var = "typecasting error rank";
-        return -rank;
+        return rank;
     }
-    typeCastByRank(n1, n2, rank);
-    return 0;
+    int retval = typeCastByRank(n1, n2, rank);
+    if(retval){
+        cout << "error in implicitTypecastingNotStringLiteral\n";
+        return retval;
+    }
+    return rank;
 }
 
 
@@ -346,8 +353,6 @@ bool requiresTypeCasting(declSpec* n1, declSpec* n2){
 }
 
 node* makeNodeForExpressionByRank(node* n1, node* n2, string name, string lexeme, int rank, int& errCode, string& errStr) {
-      cout<< "created temp " << rank <<endl;
-
     if(rank < 0){
         setErrorParams(errCode, rank, errStr, errStr);
         return nullptr;
@@ -371,6 +376,43 @@ node* makeNodeForExpressionByRank(node* n1, node* n2, string name, string lexeme
 
 node* makeNodeForExpressionNotPointerNotString(node* n1, node* n2, string name, int& errCode, string& errStr) {
     int rank = implicitTypecastingNotPointerNotStringLiteral(n1, n2, errStr);
-    cout<< "hello there\n";
+    return makeNodeForExpressionByRank(n1, n2, name, name, rank, errCode, errStr);
+}
+
+node* makeNodeForExpressionNotStringForAddition(node* n1, node* n2, string name, int& errCode, string& errStr) {
+    int retval1 = checkPointer(n1);
+    int retval2 = checkPointer(n2);
+    int rank1 = getTypeRank(n1->declSp->type);
+    int rank2 = getTypeRank(n2->declSp->type);
+    if(!retval1){
+      if(!retval2){
+        errStr = "invalid operands to binary +";
+        setErrorParams(errCode, POINTER_ERROR , errStr, errStr);
+        return nullptr;
+      }
+      if(rank2 != 4 && rank2 != 2){
+        errStr = "invalid operands to binary +";
+        setErrorParams(errCode, POINTER_ERROR , errStr, errStr);
+        return nullptr;
+      }
+    }
+    else if(!retval2){
+      if(!retval1){
+        errStr = "invalid operands to binary +";
+        setErrorParams(errCode, POINTER_ERROR , errStr, errStr);
+        return nullptr;
+      } 
+      if(rank1 != 4 && rank1 != 2){
+        errStr = "invalid operands to binary +";
+        setErrorParams(errCode, POINTER_ERROR , errStr, errStr);
+        return nullptr;
+      }
+    }
+    int rank = implicitTypecastingNotStringLiteral(n1, n2, errStr);
+    if(rank < 0){
+        errStr = "invalid operands to binary +";
+        setErrorParams(errCode, TYPE_ERROR , errStr, errStr);
+        return nullptr;
+    }
     return makeNodeForExpressionByRank(n1, n2, name, name, rank, errCode, errStr);
 }

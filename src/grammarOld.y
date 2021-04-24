@@ -489,7 +489,7 @@ multiplicative_expression
 additive_expression
 	: multiplicative_expression { $$ = $1; }
 	| additive_expression '+' multiplicative_expression { 
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "+", errCode, errStr); 
+		node* temp = makeNodeForExpressionNotStringForAddition($1, $3, "+", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
 		string newTmp = generateTemp(errCode);
@@ -572,8 +572,8 @@ relational_expression
 	: shift_expression { $$ = $1; }
 	| relational_expression '<' shift_expression { 
 			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
-			if(retval)
-				error(errStr,retval);
+			if(retval < 0)
+				error(errStr,-retval);
 			node* temp = makeNode(strdup("<"), strdup("<"), 0, $1, $3, (node*)NULL, (node*)NULL); 
 			emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
 			if(errCode)
@@ -582,8 +582,8 @@ relational_expression
 			}
 	| relational_expression '>' shift_expression { 
 			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
-			if(retval)
-				error(errStr,retval);
+			if(retval < 0)
+				error(errStr,-retval);
 			node* temp = makeNode(strdup(">"), strdup(">"), 0, $1, $3, (node*)NULL, (node*)NULL); 
 			emitRelop($1, $3, temp, OP_GREATER, errCode, errStr);
 			if(errCode)
@@ -592,8 +592,8 @@ relational_expression
 	}
 	| relational_expression LE_OP shift_expression {
 		int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
-		if(retval)
-			error(errStr,retval);
+		if(retval < 0)
+			error(errStr,-retval);
 		node* temp = makeNode(strdup("LE_OP"), strdup("<="), 0, $1, $3, (node*)NULL, (node*)NULL);
 		emitRelop($1, $3, temp, OP_LEQ, errCode, errStr);
 		if(errCode)
@@ -602,8 +602,8 @@ relational_expression
 	}
 	| relational_expression GE_OP shift_expression { 
 		int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
-		if(retval)
-			error(errStr,retval);
+		if(retval < 0)
+			error(errStr,-retval);
 		node* temp = makeNode(strdup("GE_OP"), strdup(">="), 0, $1, $3, (node*)NULL, (node*)NULL);
 		emitRelop($1, $3, temp, OP_GEQ, errCode, errStr);
 		if(errCode)
@@ -847,10 +847,8 @@ assignment_expression
 				error(errStr, errCode);
 			if(retval){
 				typeCastLexemeWithEmit(assignment_expression, unary_expression->declSp);
-         cout << "line 850 \n";
 			}
 			emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
-      cout << "line 852 \n";
 		}
 		else
 		{
@@ -884,7 +882,6 @@ assignment_expression
 		addChild(assignment_operator, unary_expression); 
 		addChild(assignment_operator, assignment_expression); 
 		$$ = assignment_operator;
-    cout << "line 887\n";
 	}
 	;
 
@@ -1505,7 +1502,6 @@ statement
 		$$->continuelist = $1->continuelist;
 	}
 	| expression_statement { 
-    cout << "statement line 1508\n";
 		$$ = $1;
 		vector<int> tmp = mergelist($1->truelist, $1->falselist);
 		$$->nextlist = mergelist(tmp, $1->nextlist);
@@ -1580,7 +1576,6 @@ compound_statement
 		gSymTable = gSymTable->parent;
 		$$->breaklist = $4->breaklist;	
 		$$->continuelist = $4->continuelist;
-    cout << "line 1582: compound_statement\n";
 	}
 	;
 
@@ -1888,7 +1883,6 @@ function_definition
 		addChild($2, $4);
 		$$ = $2;
 		currFunc = "#prog";
-    cout<< "line 1891\n";
 	}
 	| declarator func_marker_1 declaration_list compound_statement { 
 		//UNSUPPORTED_FUNCTIONALITY
