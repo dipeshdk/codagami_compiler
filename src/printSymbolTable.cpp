@@ -189,7 +189,7 @@ void printElem(symbolTableNode* elem, string str, int printTemps) {
 
 void printSymbolTableJSON(symbolTable *st, int numTab, int printTemps) {
     stringstream ss;  
-    ss << "symbolTable" << st->scope << ".json";
+    ss << "symbolTableJson/symbolTable" << st->scope << ".json";
     string fileName;
     ss >> fileName;
     FILE *jsonFile = freopen(fileName.c_str(), "w", stdout);
