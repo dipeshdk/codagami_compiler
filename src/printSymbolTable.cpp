@@ -380,7 +380,7 @@ void printQuad(quadruple* quad, int line) {
         case OP_POPPARAM:
             printf("%s %s\n",getOpName(quad->opCode).c_str(), quad->result.c_str()); break;
         case OP_ENDFUNC:
-            printf("END_FUNCTION\n"); break;
+            printf("END_FUNCTION\n\n"); break;
         case OP_RETURN:
             if(quad->result == BLANK_STR) {
                 printf("Return \n");
