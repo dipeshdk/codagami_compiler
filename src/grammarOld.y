@@ -1032,6 +1032,7 @@ declaration
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			sym_node->offset = offset;
 			offset += getOffsettedSize(sym_node->size);
+			offset += getArraySize(sym_node);
 			curr = curr->next;
 		}
 		// struct symbolTableNode* funcNode = lookUp(gSymTable, "foo");

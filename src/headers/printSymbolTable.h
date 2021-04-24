@@ -14,6 +14,7 @@ void printToCsvFile(symbolTable *st);
 void printSymbolTableJSON(symbolTable *st, int numTab, int printTemps);
 void printStructTable(map<string, struct structTableNode*> &structMap, int scope);
 void printSymbolTable(symbolTable *st);
+int getArraySize(symbolTableNode* sym_node);
 
 string getOpName(int opCode);
 void printCode(char* filename);
