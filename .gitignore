@@ -48,6 +48,8 @@
 /src/*.output
 /src/*.json
 
+/symbolTableJson/*
+
 *.json
 *.dot
 *.ps
