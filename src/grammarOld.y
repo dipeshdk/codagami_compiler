@@ -496,20 +496,20 @@ multiplicative_expression
 additive_expression
 	: multiplicative_expression { $$ = $1; }
 	| additive_expression '+' multiplicative_expression { 
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "+", errCode, errStr); 
+		node* temp = makeNodeForExpressionNotStringForAddition($1, $3, "+", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
 		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
+		tempNode->declSp = declSpCopy(temp->declSp);
 		int opCode = getOpAddType(temp, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
+		// temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	| additive_expression '-' multiplicative_expression { 
@@ -579,8 +579,8 @@ relational_expression
 	: shift_expression { $$ = $1; }
 	| relational_expression '<' shift_expression { 
 			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
-			if(retval)
-				error(errStr,retval);
+			if(retval < 0)
+				error(errStr,-retval);
 			node* temp = makeNode(strdup("<"), strdup("<"), 0, $1, $3, (node*)NULL, (node*)NULL); 
 			emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
 			if(errCode)
@@ -589,8 +589,8 @@ relational_expression
 			}
 	| relational_expression '>' shift_expression { 
 			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
-			if(retval)
-				error(errStr,retval);
+			if(retval < 0)
+				error(errStr,-retval);
 			node* temp = makeNode(strdup(">"), strdup(">"), 0, $1, $3, (node*)NULL, (node*)NULL); 
 			emitRelop($1, $3, temp, OP_GREATER, errCode, errStr);
 			if(errCode)
@@ -599,8 +599,8 @@ relational_expression
 	}
 	| relational_expression LE_OP shift_expression {
 		int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
-		if(retval)
-			error(errStr,retval);
+		if(retval < 0)
+			error(errStr,-retval);
 		node* temp = makeNode(strdup("LE_OP"), strdup("<="), 0, $1, $3, (node*)NULL, (node*)NULL);
 		emitRelop($1, $3, temp, OP_LEQ, errCode, errStr);
 		if(errCode)
@@ -609,8 +609,8 @@ relational_expression
 	}
 	| relational_expression GE_OP shift_expression { 
 		int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
-		if(retval)
-			error(errStr,retval);
+		if(retval < 0)
+			error(errStr,-retval);
 		node* temp = makeNode(strdup("GE_OP"), strdup(">="), 0, $1, $3, (node*)NULL, (node*)NULL);
 		emitRelop($1, $3, temp, OP_GEQ, errCode, errStr);
 		if(errCode)

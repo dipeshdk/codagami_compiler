@@ -31,12 +31,12 @@ int canTypecast(declSpec* to_ds,  declSpec* from_ds){
       struct to int* : not allowed
       struct* to int* : allowed
     */
-    if((rank1 == 5 && rank2 != 5) || (rank1 != 5 && rank2 == 5)){
+    if((rank1 == 6 && rank2 != 6) || (rank1 != 6 && rank2 == 6)){
         if(to_ds->ptrLevel == 0 && from_ds->ptrLevel == 0){
             setErrorParams(errCode, TYPE_ERROR, errStr, "cannot type cast");
             return TYPE_ERROR;
         }
-        if(rank2 == 5 && from_ds->ptrLevel == 0 && to_ds->ptrLevel > 0){
+        if(rank2 == 6 && from_ds->ptrLevel == 0 && to_ds->ptrLevel > 0){
             setErrorParams(errCode, TYPE_ERROR, errStr, "cannot type cast structs");
             return TYPE_ERROR;
         }
@@ -47,7 +47,7 @@ int canTypecast(declSpec* to_ds,  declSpec* from_ds){
       struct1* to struct2 : not allowed
       struct1* to struct2* : allowed
     */
-    if (rank1 == 5 && rank2 == 5){
+    if (rank1 == 6 && rank2 == 6){
         int ptr1 = to_ds->ptrLevel;
         int ptr2 = from_ds->ptrLevel;
         if(to_ds->lexeme != from_ds->lexeme){
@@ -65,7 +65,6 @@ int canTypecast(declSpec* to_ds,  declSpec* from_ds){
     if((checkType(to_ds, TYPE_FLOAT,0) && checkType(from_ds, TYPE_CHAR, 1) )
      || (checkType(from_ds, TYPE_FLOAT,0) && checkType(to_ds, TYPE_CHAR, 1))) 
         return CONFLICTING_TYPES;
-
     return 0;
 }
 
@@ -80,7 +79,7 @@ bool areDifferentTypes(declSpec* to_ds,  declSpec* from_ds, int &errCode, string
         setErrorParams(errCode, rank2, errStr, "cannot type cast");
         return false;
     }
-    return rank1 != rank2;
+    return ((rank1 != rank2) || (from_ds->ptrLevel != to_ds->ptrLevel));
 }
 
 bool typeCastRequired(declSpec* to_ds,  declSpec* from_ds, int &errCode, string &errStr){
@@ -177,9 +176,9 @@ int checkPointer(node* root){
 int getTypeRank(vector<int> &type) {
     if(type.size() != 1)  -TYPE_ERROR;
     switch(type[0]) {
-        case TYPE_STRUCT: return 5;
-        case TYPE_FLOAT: return 4;
-        case TYPE_INT: return 3;
+        case TYPE_STRUCT: return 6;
+        case TYPE_FLOAT: return 5;
+        case TYPE_INT: return 4;
         case TYPE_CHAR: return 2;
         case TYPE_VOID: return 1;
     }
@@ -199,6 +198,8 @@ int giveTypeCastRank(node* n1, node* n2){
     */
     int rank1 = getTypeRank(v1); 
     int rank2 = getTypeRank(v2);
+    if(n1->declSp->ptrLevel > 0) rank1 = 3;
+    if(n2->declSp->ptrLevel > 0) rank2 = 3;
     if(rank1 < 0)
         return rank1;
     if(rank2 < 0)
@@ -327,13 +328,18 @@ int implicitTypecastingNotPointerNotStringLiteral(node*n1, node*n2, string& var)
 
 //TODO: check use in grammarOld.y
 int implicitTypecastingNotStringLiteral(node*n1, node*n2, string& var){
+    
     int rank = giveTypeCastRank(n1, n2);
     if(rank < 0){
         var = "typecasting error rank";
-        return -rank;
+        return rank;
     }
-    typeCastByRank(n1, n2, rank);
-    return 0;
+    int retval = typeCastByRank(n1, n2, rank);
+    if(retval){
+        cout << "error in implicitTypecastingNotStringLiteral\n";
+        return retval;
+    }
+    return rank;
 }
 
 
@@ -358,6 +364,7 @@ node* makeNodeForExpressionByRank(node* n1, node* n2, string name, string lexeme
         default:  temp->declSp = n1->declSp;  break;
     }
     string type = getTypeName(temp->declSp->type[0]);
+    // if(temp->declSp->ptrLevel>0) type += "*"; // not sure as of yet type for operator.
     string new_lexeme = lexeme + "(" + type + ")";
     temp->lexeme = strcpy(new char[new_lexeme.length() + 1], new_lexeme.c_str());
     return temp;
@@ -368,5 +375,43 @@ node* makeNodeForExpressionByRank(node* n1, node* n2, string name, string lexeme
 
 node* makeNodeForExpressionNotPointerNotString(node* n1, node* n2, string name, int& errCode, string& errStr) {
     int rank = implicitTypecastingNotPointerNotStringLiteral(n1, n2, errStr);
+    return makeNodeForExpressionByRank(n1, n2, name, name, rank, errCode, errStr);
+}
+
+node* makeNodeForExpressionNotStringForAddition(node* n1, node* n2, string name, int& errCode, string& errStr) {
+    int retval1 = checkPointer(n1);
+    int retval2 = checkPointer(n2);
+    int rank1 = getTypeRank(n1->declSp->type);
+    int rank2 = getTypeRank(n2->declSp->type);
+    if(!retval1){
+      if(!retval2){
+        errStr = "invalid operands to binary +";
+        setErrorParams(errCode, POINTER_ERROR , errStr, errStr);
+        return nullptr;
+      }
+      if(rank2 != 4 && rank2 != 2){
+        errStr = "invalid operands to binary +";
+        setErrorParams(errCode, POINTER_ERROR , errStr, errStr);
+        return nullptr;
+      }
+    }
+    else if(!retval2){
+      if(!retval1){
+        errStr = "invalid operands to binary +";
+        setErrorParams(errCode, POINTER_ERROR , errStr, errStr);
+        return nullptr;
+      } 
+      if(rank1 != 4 && rank1 != 2){
+        errStr = "invalid operands to binary +";
+        setErrorParams(errCode, POINTER_ERROR , errStr, errStr);
+        return nullptr;
+      }
+    }
+    int rank = implicitTypecastingNotStringLiteral(n1, n2, errStr);
+    if(rank < 0){
+        errStr = "invalid operands to binary +";
+        setErrorParams(errCode, TYPE_ERROR , errStr, errStr);
+        return nullptr;
+    }
     return makeNodeForExpressionByRank(n1, n2, name, name, rank, errCode, errStr);
 }
