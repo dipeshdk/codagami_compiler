@@ -150,3 +150,10 @@ void error(string var, int error_code) {
 	cout << "\nERROR: " << str << " on line number: " << line+1 << endl;
 	exit(error_code);
 }
+
+void copyList(node* n1, node *n2) {
+	n1->continuelist = n2->continuelist;
+	n1->nextlist = n2->nextlist;
+	n1->truelist = n2->truelist;
+	n1->falselist = n2->falselist;
+}

@@ -1034,11 +1034,6 @@ declaration
 			offset += getOffsettedSize(sym_node->size);
 			curr = curr->next;
 		}
-		// struct symbolTableNode* funcNode = lookUp(gSymTable, "foo");
-		// if(funcNode){
-		// 	cout <<"fuck" << endl;
-		// 	printDeclSp(funcNode->declSp);
-		// }
 		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;   
 		makeSibling($2,$1);
 		$$ = $1; 
@@ -1158,7 +1153,7 @@ struct_or_union_specifier
 
 		$$ = struct_or_union_specifier($1,name);	
 	} 
-	| struct_or_union '{' struct_declaration_list '}' {cout << "488 feature not included"<< endl; $$ = NULL;} // segfault will come whenever this will be running
+	| struct_or_union '{' struct_declaration_list '}' {$$ = NULL;} // segfault will come whenever this will be running
 	| struct_or_union  IDENTIFIER {
 		string name(previ); //TODO: wrong name, uses previ
 		
@@ -1578,10 +1573,9 @@ compound_statement
 	: scope_marker '{' '}' { $$ = (node*)NULL; gSymTable = gSymTable->parent;}
 	| scope_marker '{' statement_list '}' {
 		$$ = $3; gSymTable = gSymTable->parent;
-		$$->breaklist = $3->breaklist;	
-		$$->continuelist = $3->continuelist;
+		copyList($$, $3);
 	}
-	| scope_marker '{' declaration_list '}' {  $$ = $3; gSymTable = gSymTable->parent;}
+	| scope_marker '{' declaration_list '}' {  $$ = $3; gSymTable = gSymTable->parent; copyList($$, $3);}
 	| scope_marker '{' declaration_list statement_list '}' { 
 		if($3){
 			$$ = makeNode(strdup("BODY"), strdup("body"), 0, $3, $4, (node*)NULL, (node*)NULL);}
@@ -1589,8 +1583,7 @@ compound_statement
 			$$ = $4;
 		}
 		gSymTable = gSymTable->parent;
-		$$->breaklist = $4->breaklist;	
-		$$->continuelist = $4->continuelist;
+		copyList($$, $4);
 	}
 	;
 
@@ -1828,6 +1821,7 @@ translation_unit
 external_declaration
 	: function_definition {
 		$$ = $1; 
+		backpatch($$->nextlist, nextQuad());
 		emit(OP_ENDFUNC, BLANK_STR, BLANK_STR, BLANK_STR);}
 	| declaration {$$ = $1;}
 	;
@@ -1904,6 +1898,10 @@ function_definition
 			error("backpatchBeginFunc", retval);
 		funcBeginQuad = -1;
 		currFunc = "#prog";
+		vector<int> v1 = mergelist($4->truelist, $4->falselist);
+		vector<int> v2 = mergelist(v1, $4->nextlist);
+		vector<int> v3 = mergelist(v2, $4->breaklist);
+		$$->nextlist = v3;
 	}
 	| declarator func_marker_1 declaration_list compound_statement { 
 		//UNSUPPORTED_FUNCTIONALITY
