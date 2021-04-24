@@ -176,6 +176,7 @@ string emitTypeCast(node* node, declSpec *toDs, int &errCode, string &errStr) {
     string to_type = getTypeName(toDs->type[0]);
     if(toDs->ptrLevel > 0) to_type += "*";
     string typeCastAddr = "( " + from_type + "_TO_" + to_type + " ) " + node->addr; 
+    // cout << node->declSp->ptrLevel << " " << toDs->ptrLevel << " "<< typeCastAddr << endl;
     emit(OP_ASSIGNMENT, typeCastAddr , EMPTY_STR, newTmp);
     return newTmp;
 }

@@ -496,13 +496,13 @@ additive_expression
 		if(errCode)
 			error(errStr, errCode);
 		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
+		tempNode->declSp = declSpCopy(temp->declSp);
 		int opCode = getOpAddType(temp, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
+		// temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
 	| additive_expression '-' multiplicative_expression { 

@@ -31,12 +31,12 @@ int canTypecast(declSpec* to_ds,  declSpec* from_ds){
       struct to int* : not allowed
       struct* to int* : allowed
     */
-    if((rank1 == 5 && rank2 != 5) || (rank1 != 5 && rank2 == 5)){
+    if((rank1 == 6 && rank2 != 6) || (rank1 != 6 && rank2 == 6)){
         if(to_ds->ptrLevel == 0 && from_ds->ptrLevel == 0){
             setErrorParams(errCode, TYPE_ERROR, errStr, "cannot type cast");
             return TYPE_ERROR;
         }
-        if(rank2 == 5 && from_ds->ptrLevel == 0 && to_ds->ptrLevel > 0){
+        if(rank2 == 6 && from_ds->ptrLevel == 0 && to_ds->ptrLevel > 0){
             setErrorParams(errCode, TYPE_ERROR, errStr, "cannot type cast structs");
             return TYPE_ERROR;
         }
@@ -47,7 +47,7 @@ int canTypecast(declSpec* to_ds,  declSpec* from_ds){
       struct1* to struct2 : not allowed
       struct1* to struct2* : allowed
     */
-    if (rank1 == 5 && rank2 == 5){
+    if (rank1 == 6 && rank2 == 6){
         int ptr1 = to_ds->ptrLevel;
         int ptr2 = from_ds->ptrLevel;
         if(to_ds->lexeme != from_ds->lexeme){
@@ -65,7 +65,6 @@ int canTypecast(declSpec* to_ds,  declSpec* from_ds){
     if((checkType(to_ds, TYPE_FLOAT,0) && checkType(from_ds, TYPE_CHAR, 1) )
      || (checkType(from_ds, TYPE_FLOAT,0) && checkType(to_ds, TYPE_CHAR, 1))) 
         return CONFLICTING_TYPES;
-
     return 0;
 }
 
