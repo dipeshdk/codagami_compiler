@@ -253,11 +253,11 @@ void printSymbolTableJSON(symbolTable *st, int numTab) {
 int getNodeSize(symbolTableNode* elem, symbolTable* st){
     int size = 0;
     if(elem->infoType == INFO_TYPE_ARRAY){
-        size += 8;
-        //if(elem->declSp->ptrLevel > 1){
-        //    size += 8*(elem->arraySize);
-        //}
-        //else size += getTypeSize(elem->declSp->type)*(elem->arraySize);
+        if(elem->declSp->ptrLevel >= 1){
+            size += 8*(elem->arraySize);
+        }
+        else size += getTypeSize(elem->declSp->type)*(elem->arraySize);
+
     }
     else if(elem->infoType == INFO_TYPE_FUNC){
         size += 8;

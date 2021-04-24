@@ -134,7 +134,7 @@ void error(string var, int error_code) {
 			str = "";
 			break;
 		case NON_POINTER_DEFERENCE:
-			str = "Deferencing a non-pointer";
+			str = "Dereferencing a non-pointer";
 			break;
 		case UNDEFINED_FUNCTION:
 			str = "Function is not defined";
