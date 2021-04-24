@@ -1032,6 +1032,7 @@ declaration
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			sym_node->offset = offset;
 			offset += getOffsettedSize(sym_node->size);
+			offset += getArraySize(sym_node);
 			curr = curr->next;
 		}
 		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;   
@@ -2069,9 +2070,10 @@ int main(int ac, char **av) {
 		if(ac == 3) fileName = av[2];
 		generateDot(root,fileName);
 		
-		// printSymbolTableJSON(gSymTable,0);
 		// printSymbolTable(gSymTable);
+		printSymbolTableJSON(gSymTable,0,0);
         printCode(codeFilename);
+
 		fclose(fd);
     }
     else

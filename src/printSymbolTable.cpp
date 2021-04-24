@@ -1,5 +1,8 @@
 #include "headers/allInclude.h" 
 
+bool isTempVar(string varName){
+    return isdigit(varName[0]);
+}
 void printDeclSp(declSpec* ds) {
     cout << "   Printing Decl Sp\n";
     if(!ds) {
@@ -86,9 +89,14 @@ void printSymbolTable(symbolTable *st) {
 }
 
 
-void printElem(symbolTableNode* elem, string str) {
+void printElem(symbolTableNode* elem, string str, int printTemps) {
     
-    printf("%s", str.c_str());
+    // printf("%s", str.c_str());
+    if(printTemps == 0){
+        if(isTempVar(elem->name)){
+            return;
+        }
+    }
     printf("\"name\" : \"%s\",\n", elem->name.c_str());
     printf("%s", str.c_str());
     printf("\"infoType\" : %d,\n", elem->infoType);
@@ -127,19 +135,20 @@ void printElem(symbolTableNode* elem, string str) {
         printf("\",\n");
     }
     printf("%s", str.c_str());
-    printf("\"paramList\" : \n");
-    printf("%s", str.c_str());
+    printf("\"paramList\" : [\n");
+    // printf("%s", str.c_str());
     str += "\t";
-    printf("[\n");
+    // printf("[\n");
     int paramListSize = elem->paramList.size();
     int i = 0;
     for(param* t : elem->paramList) {
         printf("%s", str.c_str());
         printf("{\n");
         printf("%s", str.c_str());
-        printf("\"name\" : \"%s\"\n", t->paramName.c_str());
+        printf("\"name\" : \"%s\"", t->paramName.c_str());
         ds = t->declSp;
         if(ds) {
+            // printf("%s", str.c_str());
             printf(",\n");
             printf("%s", str.c_str());
             printf("\"ptrLevel\" : %d,\n", ds->ptrLevel);
@@ -168,20 +177,22 @@ void printElem(symbolTableNode* elem, string str) {
             }
             printf("\n");
             i++;
+        }else{
+            printf("\n");
         }
     }
-    printf("%s", str.c_str());
+    printf("%s", str.c_str()+1);
     printf("]\n");
     str.pop_back();
     printf("%s", str.c_str());
 }
 
-void printSymbolTableJSON(symbolTable *st, int numTab) {
+void printSymbolTableJSON(symbolTable *st, int numTab, int printTemps) {
     stringstream ss;  
-    ss << "symbolTable" << st->scope << ".json";
+    ss << "symbolTableJson/symbolTable" << st->scope << ".json";
     string fileName;
     ss >> fileName;
-    freopen(fileName.c_str(), "w", stdout);
+    FILE *jsonFile = freopen(fileName.c_str(), "w", stdout);
     string str;
     for(int i = 0; i < numTab; i++) {
         str += '\t';
@@ -193,71 +204,35 @@ void printSymbolTableJSON(symbolTable *st, int numTab) {
     printf("\"scope\" : %d,\n", st->scope);
     int mapSize = st->symbolTableMap.size();
     int j = 0;
+    printf("%s", str.c_str());
     printf("\"symbolOrder\" : [");
     // int offset = 0;
     for(int i = 0; i < st->symbolOrder.size(); i++) {
-    // for(auto &s: st->symbolOrder){
-        // printf("\"%s\", ",s.c_str());
         symbolTableNode *elem = st->symbolTableMap[st->symbolOrder[i]];
-        // int size = getNodeSize(elem, st);
-        // if(elem->infoType == INFO_TYPE_ARRAY){
-        //     size += getTypeSize(elem->declSp->type)*(elem->arraySize);
-        // }
-        // else if(elem->infoType == INFO_TYPE_FUNC){
-        //     size += 8;
-        // }
-        // else if(elem->infoType == INFO_TYPE_STRUCT){
-        //     if(!elem->declSp){
-        //         structTableNode* n = st->structMap[elem->declSp->lexeme];
-        //         for(auto i: n->paramList){
-        //             if(!i->declSp)
-        //                 size+= getTypeSize(i->declSp->type);
-        //         }
-        //     }
-            
-        // }
-        // else if(elem->declSp && elem->declSp->ptrLevel){
-        //     size += 8;
-        // }
-        // else{
-        //     size += getTypeSize(elem->declSp->type);
-        // }
-        
         printf("%s", str.c_str());
         printf("{\n");
         printf("%s", str.c_str());
-        printf("\"size\" : %d,\n", elem->size);
-        printf("%s", str.c_str());
-        printf("\"offset\" : %d,\n", elem->offset);
-        printElem(elem, str);
+        printElem(elem, str, printTemps);
         printf("}");
         if(i < (st->symbolOrder.size()-1)) {
             printf(",");
         }
         printf("\n");
-        // offset += size;
-
     }
-    printf("]\n");
     printf("%s", str.c_str());
+    printf("]\n");
+    printf("%s", str.c_str()+1);
     printf("}\n");
-    // str.pop_back();
-    // printStructTable(st->structMap, st->scope);
     for(symbolTable *child : st->childList) {
-        printSymbolTableJSON(child, numTab);
+        printSymbolTableJSON(child, numTab, printTemps);
     }   
-
-    freopen(fileName.c_str(), "w", stdout);
+    fclose (jsonFile);
 }
 
 int getNodeSize(symbolTableNode* elem, symbolTable* st){
     int size = 0;
     if(elem->infoType == INFO_TYPE_ARRAY){
-        if(elem->declSp->ptrLevel >= 1){
-            size += 8*(elem->arraySize);
-        }
-        else size += getTypeSize(elem->declSp->type)*(elem->arraySize);
-
+        size += 8;
     }
     else if(elem->infoType == INFO_TYPE_FUNC){
         size += 8;
@@ -282,6 +257,16 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st){
         size += getTypeSize(elem->declSp->type);
     }
     return size;
+}
+
+int getArraySize(symbolTableNode* sym_node){
+    if(sym_node->infoType == INFO_TYPE_ARRAY){
+        if(sym_node->declSp->ptrLevel > 1){
+            return 8*(sym_node->arraySize);
+        }
+        else return getTypeSize(sym_node->declSp->type)*(sym_node->arraySize);
+    }
+    return 0;
 }
 
 int getOffsettedSize(int size){
