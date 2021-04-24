@@ -1,0 +1,21 @@
+
+==================== Printing 3AC Code ==================
+0.   _main:
+1.   BEGINFUNC 8
+2.   IF 1 THEN GOTO 4
+3.   GOTO 6
+4.   1t = 3
+5.   GOTO 14
+6.   2t = 5 EQ 6
+7.   IF 2t THEN GOTO 9
+8.   GOTO 11
+9.   3t = 7
+10.   GOTO 14
+11.   3t = 8
+12.   1t = 3t
+13.   a = 1t
+14.   Return 0
+15.   END_FUNCTION
+
+
+====================================================

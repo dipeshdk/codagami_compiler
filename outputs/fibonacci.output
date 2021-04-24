@@ -1,0 +1,42 @@
+
+==================== Printing 3AC Code ==================
+0.   _fibonacci:
+1.   BEGINFUNC 16
+2.   prev = 0
+3.   curr = 1
+4.   fib = 0
+5.   i = 0
+6.   1t = n EQ 0
+7.   IF 1t THEN GOTO 9
+8.   GOTO 10
+9.   Return 0
+10.   2t = n EQ 1
+11.   IF 2t THEN GOTO 13
+12.   GOTO 14
+13.   Return 1
+14.   i = 2
+15.   3t = i LEQ n
+16.   IF 3t THEN GOTO 21
+17.   GOTO 26
+18.   4t = i ADDI 1
+19.   i = 4t
+20.   GOTO 15
+21.   5t = prev ADDI curr
+22.   fib = 5t
+23.   prev = curr
+24.   curr = fib
+25.   GOTO 18
+26.   Return fib
+27.   END_FUNCTION
+
+28.   _main:
+29.   BEGINFUNC 8
+30.   n = 4
+31.   PUSHPARAM n
+32.   6t = LCALL _fibonacci
+33.   POPPARAM 4
+34.   fib = fibonacci
+35.   END_FUNCTION
+
+
+====================================================

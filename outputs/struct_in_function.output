@@ -1,0 +1,19 @@
+
+==================== Printing 3AC Code ==================
+0.   _foo1:
+1.   BEGINFUNC 8
+2.   Return x
+3.   END_FUNCTION
+
+4.   _foo2:
+5.   BEGINFUNC 8
+6.   Return x
+7.   END_FUNCTION
+
+8.   _main:
+9.   BEGINFUNC 40
+10.   *(f1) = foo1
+11.   END_FUNCTION
+
+
+====================================================

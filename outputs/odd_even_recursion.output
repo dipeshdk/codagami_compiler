@@ -1,0 +1,36 @@
+
+==================== Printing 3AC Code ==================
+0.   _odd:
+1.   BEGINFUNC 0
+2.   PUSHPARAM x
+3.   1t = LCALL _even
+4.   POPPARAM 0
+5.   2t = x ADDI even
+6.   x = 2t
+7.   Return x
+8.   END_FUNCTION
+
+9.   _even:
+10.   BEGINFUNC 0
+11.   3t = y LESS 10000
+12.   IF 3t THEN GOTO 14
+13.   GOTO 20
+14.   PUSHPARAM y
+15.   4t = LCALL _odd
+16.   POPPARAM 4
+17.   5t = 2 MULI odd
+18.   6t = y ADDI 5t
+19.   y = 6t
+20.   Return y
+21.   END_FUNCTION
+
+22.   _main:
+23.   BEGINFUNC 0
+24.   PUSHPARAM 1
+25.   7t = LCALL _even
+26.   POPPARAM 4
+27.   Return 0
+28.   END_FUNCTION
+
+
+====================================================

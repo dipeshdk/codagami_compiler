@@ -1,0 +1,23 @@
+
+==================== Printing 3AC Code ==================
+0.   _foo:
+1.   BEGINFUNC 4
+2.   1t = ( INT_TO_FLOAT ) *(a)
+3.   2t = 1t ADDF f
+4.   3t = ( FLOAT_TO_INT ) 2t
+5.   x = 3t
+6.   Return x
+7.   END_FUNCTION
+
+8.   _main:
+9.   BEGINFUNC 8
+10.   4t = ( INT_TO_INT ) 5
+11.   PUSHPARAM 4t
+12.   PUSHPARAM f
+13.   5t = LCALL _foo
+14.   POPPARAM 12
+15.   a = foo
+16.   END_FUNCTION
+
+
+====================================================

@@ -1,0 +1,96 @@
+
+==================== Printing 3AC Code ==================
+0.   _bubble_sort:
+1.   BEGINFUNC 12
+2.   i = 0
+3.   1t = n SUBI 2
+4.   2t = i LESS 1t
+5.   IF 2t THEN GOTO 10
+6.   GOTO 48
+7.   3t = i ADDI 1
+8.   i = 3t
+9.   GOTO 3
+10.   j = 0
+11.   4t = n SUBI i
+12.   5t = 4t SUBI 1
+13.   6t = j LESS 5t
+14.   IF 6t THEN GOTO 19
+15.   GOTO 7
+16.   7t = j ADDI 1
+17.   j = 7t
+18.   GOTO 11
+19.   8t = 4
+20.   9t = 8t MULI j
+21.   10t = arr ADDI 9t
+22.   11t = j ADDI 1
+23.   12t = 4
+24.   13t = 12t MULI 11t
+25.   14t = arr ADDI 13t
+26.   15t = *(10t) LESS *(14t)
+27.   IF 15t THEN GOTO 29
+28.   GOTO 16
+29.   16t = 4
+30.   17t = 16t MULI j
+31.   18t = arr ADDI 17t
+32.   temp = *(18t)
+33.   19t = 4
+34.   20t = 19t MULI j
+35.   21t = arr ADDI 20t
+36.   22t = j ADDI 1
+37.   23t = 4
+38.   24t = 23t MULI 22t
+39.   25t = arr ADDI 24t
+40.   *(21t) = *(25t)
+41.   26t = j ADDI 1
+42.   27t = 4
+43.   28t = 27t MULI 26t
+44.   29t = arr ADDI 28t
+45.   *(29t) = temp
+46.   GOTO 16
+47.   GOTO 7
+48.   Return 
+49.   END_FUNCTION
+
+50.   _main:
+51.   BEGINFUNC 84
+52.   n = 10
+53.   30t = 80
+54.   31t = 30t MULI 0
+55.   32t = arr ADDI 31t
+56.   *(32t) = 5
+57.   33t = 30t MULI 1
+58.   34t = arr ADDI 33t
+59.   *(34t) = 4
+60.   35t = 30t MULI 2
+61.   36t = arr ADDI 35t
+62.   *(36t) = 7
+63.   37t = 30t MULI 3
+64.   38t = arr ADDI 37t
+65.   *(38t) = 2
+66.   39t = 30t MULI 4
+67.   40t = arr ADDI 39t
+68.   *(40t) = 9
+69.   41t = 30t MULI 5
+70.   42t = arr ADDI 41t
+71.   *(42t) = 10
+72.   43t = 30t MULI 6
+73.   44t = arr ADDI 43t
+74.   *(44t) = 1
+75.   45t = 30t MULI 7
+76.   46t = arr ADDI 45t
+77.   *(46t) = 3
+78.   47t = 30t MULI 8
+79.   48t = arr ADDI 47t
+80.   *(48t) = 6
+81.   49t = 30t MULI 9
+82.   50t = arr ADDI 49t
+83.   *(50t) = 8
+84.   PUSHPARAM arr
+85.   PUSHPARAM n
+86.   LCALL _bubble_sort
+87.   POPPARAM 12
+88.   Return 0
+89.   END_FUNCTION
+
+
+====================================================

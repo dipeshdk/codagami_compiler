@@ -1,0 +1,54 @@
+
+==================== Printing 3AC Code ==================
+0.   _ack:
+1.   BEGINFUNC 0
+2.   1t = m EQ 0
+3.   IF 1t THEN GOTO 5
+4.   GOTO 8
+5.   2t = n ADDI 1
+6.   Return 2t
+7.   GOTO BLANK
+8.   3t = m GREATER 0
+9.   IF 3t THEN GOTO 11
+10.   GOTO 21
+11.   4t = n EQ 0
+12.   IF 4t THEN GOTO 14
+13.   GOTO 21
+14.   5t = m SUBI 1
+15.   PUSHPARAM 5t
+16.   PUSHPARAM 1
+17.   6t = LCALL _ack
+18.   POPPARAM 8
+19.   Return ack
+20.   GOTO BLANK
+21.   7t = m GREATER 0
+22.   IF 7t THEN GOTO 24
+23.   GOTO BLANK
+24.   8t = n GREATER 0
+25.   IF 8t THEN GOTO 27
+26.   GOTO BLANK
+27.   9t = m SUBI 1
+28.   10t = n SUBI 1
+29.   PUSHPARAM m
+30.   PUSHPARAM 10t
+31.   11t = LCALL _ack
+32.   POPPARAM 8
+33.   PUSHPARAM 9t
+34.   PUSHPARAM ack
+35.   12t = LCALL _ack
+36.   POPPARAM 8
+37.   Return ack
+38.   END_FUNCTION
+
+39.   _main:
+40.   BEGINFUNC 4
+41.   PUSHPARAM 1
+42.   PUSHPARAM 2
+43.   13t = LCALL _ack
+44.   POPPARAM 8
+45.   A = ack
+46.   Return 0
+47.   END_FUNCTION
+
+
+====================================================
