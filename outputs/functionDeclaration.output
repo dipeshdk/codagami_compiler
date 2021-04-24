@@ -11,12 +11,12 @@
 
 8.   _main:
 9.   BEGINFUNC 8
-10.   4t = ( INT_TO_INT ) 5
+10.   4t = ( INT_TO_INT* ) 5
 11.   PUSHPARAM 4t
 12.   PUSHPARAM f
 13.   5t = LCALL _foo
 14.   POPPARAM 12
-15.   a = foo
+15.   a = 5t
 16.   END_FUNCTION
 
 

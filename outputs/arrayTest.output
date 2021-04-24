@@ -1,23 +1,25 @@
 
 ==================== Printing 3AC Code ==================
 0.   _main:
-1.   BEGINFUNC 568
+1.   BEGINFUNC 162
 2.   s = 10
 3.   1t = 4
 4.   2t = 1t MULI 2
 5.   3t = arr ADDI 2t
-6.   4t = ( FLOAT_TO_INT ) 19.0
+6.   4t = ( FLOAT_TO_INT* ) 19.0
 7.   *(3t) = 4t
 8.   5t = s SUBI 2
 9.   6t = 4
 10.   7t = 6t MULI 5t
 11.   8t = arr ADDI 7t
-12.   k = *(8t)
-13.   9t = 1
-14.   10t = 9t MULI 3
-15.   11t = crr ADDI 10t
-16.   *(11t) = 'q'
-17.   END_FUNCTION
+12.   9t = ( INT*_TO_INT ) *(8t)
+13.   k = 9t
+14.   10t = 1
+15.   11t = 10t MULI 3
+16.   12t = crr ADDI 11t
+17.   13t = ( CHAR_TO_CHAR* ) 'q'
+18.   *(12t) = 13t
+19.   END_FUNCTION
 
 
 ====================================================

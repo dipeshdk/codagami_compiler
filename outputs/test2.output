@@ -14,7 +14,7 @@
 10.   BEGINFUNC 40
 11.   f2 = 5.0
 12.   4t = ADDR f2
-13.   5t = ( FLOAT_TO_INT ) 4t
+13.   5t = ( FLOAT*_TO_INT ) 4t
 14.   a = 5t
 15.   b = 2
 16.   6t = ( INT_TO_FLOAT ) a

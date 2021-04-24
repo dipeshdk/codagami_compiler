@@ -4,13 +4,13 @@
 1.   BEGINFUNC 16
 2.   1t = first LESS last
 3.   IF 1t THEN GOTO 5
-4.   GOTO 84
+4.   GOTO 88
 5.   pivot = first
 6.   i = first
 7.   j = last
 8.   2t = i LESS j
 9.   IF 2t THEN GOTO 11
-10.   GOTO 57
+10.   GOTO 59
 11.   3t = 4
 12.   4t = 3t MULI i
 13.   5t = number ADDI 4t
@@ -44,80 +44,89 @@
 41.   21t = 4
 42.   22t = 21t MULI i
 43.   23t = number ADDI 22t
-44.   temp = *(23t)
-45.   24t = 4
-46.   25t = 24t MULI i
-47.   26t = number ADDI 25t
-48.   27t = 4
-49.   28t = 27t MULI j
-50.   29t = number ADDI 28t
-51.   *(26t) = *(29t)
-52.   30t = 4
-53.   31t = 30t MULI j
-54.   32t = number ADDI 31t
-55.   *(32t) = temp
-56.   GOTO 8
-57.   33t = 4
-58.   34t = 33t MULI pivot
-59.   35t = number ADDI 34t
-60.   temp = *(35t)
-61.   36t = 4
-62.   37t = 36t MULI pivot
-63.   38t = number ADDI 37t
+44.   24t = ( INT*_TO_INT ) *(23t)
+45.   temp = 24t
+46.   25t = 4
+47.   26t = 25t MULI i
+48.   27t = number ADDI 26t
+49.   28t = 4
+50.   29t = 28t MULI j
+51.   30t = number ADDI 29t
+52.   *(27t) = *(30t)
+53.   31t = 4
+54.   32t = 31t MULI j
+55.   33t = number ADDI 32t
+56.   34t = ( INT_TO_INT* ) temp
+57.   *(33t) = 34t
+58.   GOTO 8
+59.   35t = 4
+60.   36t = 35t MULI pivot
+61.   37t = number ADDI 36t
+62.   38t = ( INT*_TO_INT ) *(37t)
+63.   temp = 38t
 64.   39t = 4
-65.   40t = 39t MULI j
+65.   40t = 39t MULI pivot
 66.   41t = number ADDI 40t
-67.   *(38t) = *(41t)
-68.   42t = 4
-69.   43t = 42t MULI j
-70.   44t = number ADDI 43t
-71.   *(44t) = temp
-72.   45t = j SUBI 1
-73.   PUSHPARAM number
-74.   PUSHPARAM first
-75.   PUSHPARAM 45t
-76.   LCALL _quicksort
-77.   POPPARAM 8
-78.   46t = j ADDI 1
-79.   PUSHPARAM number
-80.   PUSHPARAM 46t
-81.   PUSHPARAM last
-82.   LCALL _quicksort
-83.   POPPARAM 8
-84.   END_FUNCTION
+67.   42t = 4
+68.   43t = 42t MULI j
+69.   44t = number ADDI 43t
+70.   *(41t) = *(44t)
+71.   45t = 4
+72.   46t = 45t MULI j
+73.   47t = number ADDI 46t
+74.   48t = ( INT_TO_INT* ) temp
+75.   *(47t) = 48t
+76.   49t = j SUBI 1
+77.   PUSHPARAM number
+78.   PUSHPARAM first
+79.   PUSHPARAM 49t
+80.   LCALL _quicksort
+81.   POPPARAM 16
+82.   50t = j ADDI 1
+83.   PUSHPARAM number
+84.   PUSHPARAM 50t
+85.   PUSHPARAM last
+86.   LCALL _quicksort
+87.   POPPARAM 16
+88.   END_FUNCTION
 
-85.   _main:
-86.   BEGINFUNC 204
-87.   count = 5
-88.   47t = 4
-89.   48t = 47t MULI 0
-90.   49t = number ADDI 48t
-91.   *(49t) = 88
-92.   50t = 4
-93.   51t = 50t MULI 1
-94.   52t = number ADDI 51t
-95.   53t = UNARY_MINUS 9
-96.   *(52t) = 53t
-97.   54t = 4
-98.   55t = 54t MULI 2
-99.   56t = number ADDI 55t
-100.   *(56t) = 90
-101.   57t = 4
-102.   58t = 57t MULI 3
-103.   59t = number ADDI 58t
-104.   *(59t) = 5
-105.   60t = 4
-106.   61t = 60t MULI 4
-107.   62t = number ADDI 61t
-108.   *(62t) = 20
-109.   63t = count SUBI 1
-110.   PUSHPARAM number
-111.   PUSHPARAM 0
-112.   PUSHPARAM 63t
-113.   LCALL _quicksort
-114.   POPPARAM 8
-115.   Return 0
-116.   END_FUNCTION
+89.   _main:
+90.   BEGINFUNC 112
+91.   count = 5
+92.   51t = 4
+93.   52t = 51t MULI 0
+94.   53t = number ADDI 52t
+95.   54t = ( INT_TO_INT* ) 88
+96.   *(53t) = 54t
+97.   55t = 4
+98.   56t = 55t MULI 1
+99.   57t = number ADDI 56t
+100.   58t = UNARY_MINUS 9
+101.   59t = ( INT_TO_INT* ) 58t
+102.   *(57t) = 59t
+103.   60t = 4
+104.   61t = 60t MULI 2
+105.   62t = number ADDI 61t
+106.   63t = ( INT_TO_INT* ) 90
+107.   *(62t) = 63t
+108.   64t = 4
+109.   65t = 64t MULI 3
+110.   66t = number ADDI 65t
+111.   67t = ( INT_TO_INT* ) 5
+112.   *(66t) = 67t
+113.   68t = 4
+114.   69t = 68t MULI 4
+115.   70t = number ADDI 69t
+116.   71t = ( INT_TO_INT* ) 20
+117.   *(70t) = 71t
+118.   72t = count SUBI 1
+119.   PUSHPARAM number
+120.   PUSHPARAM 0
+121.   PUSHPARAM 72t
+122.   LCALL _quicksort
+123.   POPPARAM 16
+124.   Return 0
+125.   END_FUNCTION
 
 
 ====================================================

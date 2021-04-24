@@ -2083,12 +2083,10 @@ int main(int ac, char **av) {
 		// printSymbolTable(gSymTable);
 		printSymbolTableJSON(gSymTable,0,0);
         printCode(codeFilename);
-
 		fclose(fd);
     }
     else
         printf("Usage: a.out input_filename [optional]ouput.dot \n");
-
 	return 0; 
 }
 

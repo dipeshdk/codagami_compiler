@@ -36,12 +36,12 @@
 30.   PUSHPARAM x
 31.   14t = LCALL _derivFunc
 32.   POPPARAM 4
-33.   15t = func DIVF derivFunc
+33.   15t = 13t DIVF 14t
 34.   h = 15t
 35.   PUSHPARAM h
 36.   16t = LCALL _abs
 37.   POPPARAM 4
-38.   17t = abs GEQ EPSILON
+38.   17t = 16t GEQ EPSILON
 39.   IF 17t THEN GOTO 41
 40.   GOTO 52
 41.   PUSHPARAM x
@@ -50,7 +50,7 @@
 44.   PUSHPARAM x
 45.   19t = LCALL _derivFunc
 46.   POPPARAM 4
-47.   20t = func DIVF derivFunc
+47.   20t = 18t DIVF 19t
 48.   h = 20t
 49.   21t = x SUBF h
 50.   x = 21t
