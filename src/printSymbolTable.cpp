@@ -257,6 +257,7 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st){
             size += 8*(elem->arraySize);
         }
         else size += getTypeSize(elem->declSp->type)*(elem->arraySize);
+
     }
     else if(elem->infoType == INFO_TYPE_FUNC){
         size += 8;
@@ -272,7 +273,7 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st){
                     else size+= getTypeSize(i->declSp->type);
             }
         }
-        
+        size = getOffsettedSize(size);
     }
     else if(elem->declSp && elem->declSp->ptrLevel){
         size += 8;

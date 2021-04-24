@@ -5,9 +5,15 @@ int checkValidType(vector<int> &v) {
     return 0;
 }
 
+bool checkTypeWrapperWithStruct(declSpec* ds1, declSpec*ds2){
+    bool c1 = (ds1->type[0] == TYPE_STRUCT && ds1->lexeme == ds2->lexeme);
+    bool c2 = checkType(ds1, ds2->type[0], ds2->ptrLevel);
+    return (c1 && c2);
+}
 
 bool checkType(declSpec *ds, int typeName, int ptrLevel) {
     if(checkValidType(ds->type) || ds->type[0] != typeName || ds->ptrLevel != ptrLevel) return false;
+    // cout << "return from check type" << endl;
     return true;
 }
 

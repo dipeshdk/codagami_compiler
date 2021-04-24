@@ -23,7 +23,6 @@ void quicksort(int number[25],int first,int last){
       number[j]=temp;
       quicksort(number,first,j-1);
       quicksort(number,j+1,last);
-
    }
 }
 

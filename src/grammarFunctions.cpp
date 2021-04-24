@@ -139,12 +139,9 @@ node* parameter_declaration(node* declaration_specifiers, node* declarator){
     if(declarator->declSp) {
         parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
     }
-    parameter->infoType = declaration_specifiers->infoType;
+    parameter->infoType = declarator->infoType;
     parameter->paramName = declarator->lexeme;
     declarator->paramList.push_back(parameter);
-
-    // cout<<"parameter_declaration: "<< parameter->paramName<< " " << parameter->declSp->type[0] <<endl;
-
     return declarator;
 }
 
@@ -154,8 +151,12 @@ void checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_
     symbolTableNode* stNode = lookUp(gSymTable, name);
     
     if(!stNode || stNode->infoType != INFO_TYPE_FUNC || !stNode->declSp) {
-        errCode = SYMBOL_NOT_FOUND;
-        errString = name;
+        setErrorParams(errCode, SYMBOL_NOT_FOUND, errString, name);
+        return;
+    }
+
+    if(!stNode->isDefined) {
+        setErrorParams(errCode, UNDEFINED_FUNCTION, errString, name);
         return;
     }
     
@@ -191,6 +192,7 @@ void checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_
             }
             typeCastLexemeWithEmit(temp, paramList[idx]->declSp);
         }
+        temp->infoType = paramList[idx]->infoType;
         emit(OP_PUSHPARAM, BLANK_STR, BLANK_STR, temp->addr);
         paramSize+= getTypeSize(temp->declSp->type);
         idx++;

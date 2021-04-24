@@ -28,22 +28,21 @@ int copyPtrLevel(node* temp, node* from) {
     return 0;
 }
 
-// TODO: might be buggy (input type char)
+
 int getValueFromConstantExpression(node* constant_expression, int &err) {
-    err=0;
     int val = 0;
     if(!constant_expression) {
         err = INVALID_ARGS;
         return val;
     }
-    switch(constant_expression->valType){
+	switch(constant_expression->valType){
         case TYPE_INT: 
             val = constant_expression->ival;
             break;
         case TYPE_FLOAT:
-            err = TYPE_ERROR;
-            break;
         default:
+		    err = TYPE_ERROR;
+			return val;
             break; 
     }
     return val;
@@ -136,6 +135,12 @@ void error(string var, int error_code) {
 			break;
 		case NON_POINTER_DEFERENCE:
 			str = "Dereferencing a non-pointer";
+			break;
+		case UNDEFINED_FUNCTION:
+			str = "Function is not defined";
+			break;
+		case MISMATCH_DEFINITION_DECLARATION:
+			str = "Function declaration and definition do not match.";
 			break;
 		default:
 			break;
