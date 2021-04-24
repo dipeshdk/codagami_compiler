@@ -1,0 +1,35 @@
+
+==================== Printing 3AC Code ==================
+0.   _binaryScr:
+1.   BEGINFUNC 4
+2.   1t = UNARY_MINUS 1
+3.   Return 1t
+4.   END_FUNCTION
+
+5.   _main:
+6.   BEGINFUNC 44
+7.   2t = 40
+8.   3t = 2t MULI 0
+9.   4t = a ADDI 3t
+10.   *(4t) = 12
+11.   5t = 2t MULI 1
+12.   6t = a ADDI 5t
+13.   *(6t) = 13
+14.   7t = 2t MULI 2
+15.   8t = a ADDI 7t
+16.   *(8t) = 21
+17.   9t = 2t MULI 3
+18.   10t = a ADDI 9t
+19.   *(10t) = 36
+20.   11t = 2t MULI 4
+21.   12t = a ADDI 11t
+22.   *(12t) = 40
+23.   PUSHPARAM a
+24.   13t = LCALL _binaryScr
+25.   POPPARAM 8
+26.   result = binaryScr
+27.   Return 0
+28.   END_FUNCTION
+
+
+====================================================

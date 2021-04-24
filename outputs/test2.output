@@ -1,0 +1,40 @@
+
+==================== Printing 3AC Code ==================
+0.   _foo:
+1.   BEGINFUNC 8
+2.   1t = x ADDI a
+3.   x = 1t
+4.   2t = c ADDI b
+5.   c = 2t
+6.   3t = ( INT_TO_FLOAT ) 0
+7.   Return 3t
+8.   END_FUNCTION
+
+9.   _main:
+10.   BEGINFUNC 40
+11.   f2 = 5.0
+12.   4t = ADDR f2
+13.   5t = ( FLOAT_TO_INT ) 4t
+14.   a = 5t
+15.   b = 2
+16.   6t = ( INT_TO_FLOAT ) a
+17.   7t = ( INT_TO_FLOAT ) b
+18.   8t = 6t ADDF 7t
+19.   9t = ( FLOAT_TO_INT ) 8t
+20.   f1 = 9t
+21.   10t = ( INT_TO_FLOAT ) 10
+22.   11t = f2 NEQ 10t
+23.   IF 11t THEN GOTO 25
+24.   GOTO 31
+25.   12t = a ADDI 1
+26.   a = 12t
+27.   GOTO 31
+28.   13t = b ADDI 1
+29.   b = 13t
+30.   GOTO 21
+31.   14t = a ADDI 3
+32.   a = 14t
+33.   END_FUNCTION
+
+
+====================================================

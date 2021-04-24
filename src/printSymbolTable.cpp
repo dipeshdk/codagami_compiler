@@ -359,7 +359,7 @@ void printQuad(quadruple* quad, int line) {
         case OP_POPPARAM:
             printf("%s %s\n",getOpName(quad->opCode).c_str(), quad->result.c_str()); break;
         case OP_ENDFUNC:
-            printf("END_FUNCTION\n"); break;
+            printf("END_FUNCTION\n\n"); break;
         case OP_RETURN:
             if(quad->result == BLANK_STR) {
                 printf("Return \n");
@@ -389,8 +389,8 @@ void printQuad(quadruple* quad, int line) {
     }
 }
 
-void printCode() {
-    freopen("code.txt", "w", stdout);
+void printCode(char* filename) {
+    freopen(filename, "w", stdout);
     cout << "\n==================== Printing 3AC Code ==================\n";
     int n = gCode.size();
     for(int i = 0; i < n; i++) {

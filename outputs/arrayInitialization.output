@@ -1,0 +1,36 @@
+
+==================== Printing 3AC Code ==================
+0.   _foo:
+1.   BEGINFUNC 4
+2.   1t = 4
+3.   2t = 1t MULI 2
+4.   3t = a ADDI 2t
+5.   b = *(3t)
+6.   END_FUNCTION
+
+7.   _main:
+8.   BEGINFUNC 40
+9.   4t = 40
+10.   5t = 4t MULI 0
+11.   6t = a ADDI 5t
+12.   *(6t) = 1
+13.   7t = 4t MULI 1
+14.   8t = a ADDI 7t
+15.   *(8t) = 2
+16.   9t = 4t MULI 2
+17.   10t = a ADDI 9t
+18.   *(10t) = 3
+19.   11t = 4t MULI 3
+20.   12t = a ADDI 11t
+21.   *(12t) = 4
+22.   13t = 4t MULI 4
+23.   14t = a ADDI 13t
+24.   *(14t) = 5
+25.   PUSHPARAM a
+26.   LCALL _foo
+27.   POPPARAM 0
+28.   Return 0
+29.   END_FUNCTION
+
+
+====================================================

@@ -1,0 +1,29 @@
+
+==================== Printing 3AC Code ==================
+0.   _foo:
+1.   BEGINFUNC 12
+2.   1t = ( CHAR_TO_INT ) b
+3.   2t = a MULI 1t
+4.   3t = ( CHAR_TO_INT ) g
+5.   4t = 2t ADDI 3t
+6.   x = 4t
+7.   5t = ( CHAR_TO_INT ) b
+8.   6t = a MULI 5t
+9.   y = 6t
+10.   Return y
+11.   END_FUNCTION
+
+12.   _main:
+13.   BEGINFUNC 16
+14.   y = 0
+15.   7t = ( FLOAT_TO_INT ) g
+16.   PUSHPARAM 7t
+17.   PUSHPARAM k
+18.   8t = LCALL _foo
+19.   POPPARAM 8
+20.   x = 0
+21.   Return 0
+22.   END_FUNCTION
+
+
+====================================================

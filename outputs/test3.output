@@ -1,0 +1,11 @@
+
+==================== Printing 3AC Code ==================
+0.   _main:
+1.   BEGINFUNC 4
+2.   1t = ( CHAR_TO_INT ) EMPTY_ADDR
+3.   b = 1t
+4.   Return 0
+5.   END_FUNCTION
+
+
+====================================================

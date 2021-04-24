@@ -1,0 +1,87 @@
+
+==================== Printing 3AC Code ==================
+0.   _binaryScr:
+1.   BEGINFUNC 4
+2.   1t = high GEQ low
+3.   IF 1t THEN GOTO 5
+4.   GOTO 38
+5.   2t = high SUBI low
+6.   3t = 2t DIVI 2
+7.   4t = low ADDI 3t
+8.   mid = 4t
+9.   5t = 4
+10.   6t = 5t MULI mid
+11.   7t = a ADDI 6t
+12.   8t = *(7t) EQ m
+13.   IF 8t THEN GOTO 15
+14.   GOTO 16
+15.   Return mid
+16.   9t = 4
+17.   10t = 9t MULI mid
+18.   11t = a ADDI 10t
+19.   12t = *(11t) GREATER m
+20.   IF 12t THEN GOTO 22
+21.   GOTO 30
+22.   13t = mid SUBI 1
+23.   PUSHPARAM a
+24.   PUSHPARAM low
+25.   PUSHPARAM 13t
+26.   PUSHPARAM m
+27.   14t = LCALL _binaryScr
+28.   POPPARAM 12
+29.   Return binaryScr
+30.   15t = mid ADDI 1
+31.   PUSHPARAM a
+32.   PUSHPARAM 15t
+33.   PUSHPARAM high
+34.   PUSHPARAM m
+35.   16t = LCALL _binaryScr
+36.   POPPARAM 12
+37.   Return binaryScr
+38.   17t = UNARY_MINUS 1
+39.   Return 17t
+40.   END_FUNCTION
+
+41.   _main:
+42.   BEGINFUNC 56
+43.   18t = 40
+44.   19t = 18t MULI 0
+45.   20t = a ADDI 19t
+46.   *(20t) = 12
+47.   21t = 18t MULI 1
+48.   22t = a ADDI 21t
+49.   *(22t) = 13
+50.   23t = 18t MULI 2
+51.   24t = a ADDI 23t
+52.   *(24t) = 21
+53.   25t = 18t MULI 3
+54.   26t = a ADDI 25t
+55.   *(26t) = 36
+56.   27t = 18t MULI 4
+57.   28t = a ADDI 27t
+58.   *(28t) = 40
+59.   n = 4
+60.   m = 21
+61.   29t = n SUBI 1
+62.   PUSHPARAM a
+63.   PUSHPARAM 0
+64.   PUSHPARAM 29t
+65.   PUSHPARAM m
+66.   30t = LCALL _binaryScr
+67.   POPPARAM 12
+68.   result = binaryScr
+69.   31t = UNARY_MINUS 1
+70.   32t = result EQ 31t
+71.   IF 32t THEN GOTO 73
+72.   GOTO 76
+73.   33t = UNARY_MINUS 2
+74.   34t = 33t
+75.   GOTO 79
+76.   35t = result ADDI 1
+77.   34t = 35t
+78.   result = 34t
+79.   Return 0
+80.   END_FUNCTION
+
+
+====================================================

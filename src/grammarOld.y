@@ -22,7 +22,7 @@
 			pointer type_qualifier_list parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
-			constant inden_marker func_marker_1 M_marker N_marker expressionJump expressionJumpStatement conditional_marker
+			constant inden_marker func_marker_1 M_marker N_marker expressionJump expressionJumpStatement conditional_marker logical_or_expressionJumpStatement
 // Prototypes
 %{
 	#include <stdio.h>
@@ -42,7 +42,9 @@
 	vector<node*> case_consts;
 	int offset = 0;
 	int rbp_size = 4;
-	string ternaryTemp = BLANK_STR;
+	stack<string> ternaryTempStack;
+	// string ternaryTemp = BLANK_STR;
+	int funcBeginQuad = -1;
 
 
 extern "C"
@@ -751,10 +753,21 @@ logical_or_expression
 		}
 	;
 
- 
+logical_or_expressionJumpStatement
+	: logical_or_expression {
+		$$=$1;
+		if(!$$->truelist.size()) {
+			$$->truelist = makelist(nextQuad());
+    		$$->falselist = makelist(nextQuad()+1);
+			emit(OP_IFGOTO, $1->addr, EMPTY_STR, BLANK_STR);
+    		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
+		}
+	}
+	;
+
 conditional_expression
 	: logical_or_expression { $$ = $1; }
-	| logical_or_expression '?' M_marker expression conditional_marker N_marker ':' M_marker conditional_expression {
+	| logical_or_expressionJumpStatement '?' M_marker expression conditional_marker N_marker ':' M_marker conditional_expression {
 		int retval = backpatch($1->truelist, $3->quad);
 		if(retval)
 			error("backpatch error", retval);
@@ -765,27 +778,29 @@ conditional_expression
 		vector<int> tempVec = mergelist( $4->nextlist, $6->nextlist);
 		temp->nextlist = mergelist(tempVec, $9->nextlist);
 		temp->declSp = declSpCopy($1->declSp);
-		emit(OP_ASSIGNMENT, $9->addr, EMPTY_STR, ternaryTemp);
+		emit(OP_ASSIGNMENT, $9->addr, EMPTY_STR, ternaryTempStack.top());
 		retval  = backpatchAssignment($5->nextlist, $4->addr);
 		if(retval)
 		{
 			error("Invalid Assignment Backpatch", retval);
 		}
-		temp->addr = ternaryTemp;
+		temp->addr = ternaryTempStack.top();
 		$$ = temp;
-		ternaryTemp = BLANK_STR;
+		ternaryTempStack.pop();
+		// ternaryTemp = BLANK_STR;
 		}
 	;
 
 conditional_marker:
 	{
-		if(ternaryTemp != BLANK_STR){
-			error("Nested ternary operation not supported", UNSUPPORTED_FUNCTIONALITY);
-		}
-		ternaryTemp= generateTemp(errCode);
-    	if(errCode)
+		// if(ternaryTemp != BLANK_STR){
+		// 	error("Nested ternary operation not supported", UNSUPPORTED_FUNCTIONALITY);
+		// }
+		string ternaryTemp= generateTemp(errCode);
+		if(errCode)
         	error("Cannot generate Temp",errCode);
-		
+		ternaryTempStack.push(ternaryTemp);
+    		
 		node* temp = makeDeadNode();
 		temp->nextlist = makelist(nextQuad());
 		emit(OP_ASSIGNMENT, BLANK_STR, EMPTY_STR, ternaryTemp); 
@@ -975,7 +990,7 @@ declaration
 					if(!temp->declSp) 
 						error(temp->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
 
-					int size = getTypeSize(temp->declSp->type);
+					int size = getNodeSize(sym_node, gSymTable);
 					if(size < 0){
 						error("invalid array type", -size);
 					}
@@ -1820,10 +1835,10 @@ external_declaration
 function_definition
 	: declaration_specifiers  declarator {
 		// TODO: Send type from declaration specifier to function name
-		//UNSUPPORTED_FUNCTIONALITY
+		// UNSUPPORTED_FUNCTIONALITY
 		error("Use function definitions of type int foo(int a, int b){...}", UNSUPPORTED_FUNCTIONALITY);
 	} declaration_list compound_statement { 
-		//UNSUPPORTED_FUNCTIONALITY
+		// UNSUPPORTED_FUNCTIONALITY
 		error("Use function definitions of type int foo(int a, int b){...}", UNSUPPORTED_FUNCTIONALITY);
 	}
 	| declaration_specifiers  declarator {
@@ -1869,8 +1884,10 @@ function_definition
 		
 		string labelName = "_" + string(declarator->lexeme);
 		emit(OP_LABEL, EMPTY_STR, EMPTY_STR, labelName);
-    //TODO: backpatch 
-    // emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, EMPTY_STR); // GCC will set the global variable offset
+		if(funcBeginQuad != -1)
+			error("Internal funcBeginQuad not -1", INVALID_ARGS_IN_FUNC_CALL);
+		funcBeginQuad = nextQuad();
+    	emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, BLANK_STR); // GCC will set the global variable offset
 		
 		for(auto &p: declarator->paramList){
 			string lex = p->paramName;	
@@ -1882,26 +1899,26 @@ function_definition
 	} compound_statement { 
 		addChild($2, $4);
 		$$ = $2;
+		int retval = backpatchBeginFunc(funcBeginQuad, offset);
+		if(retval)
+			error("backpatchBeginFunc", retval);
+		funcBeginQuad = -1;
 		currFunc = "#prog";
 	}
 	| declarator func_marker_1 declaration_list compound_statement { 
 		//UNSUPPORTED_FUNCTIONALITY
 		error("Use function definitions of type int foo(int a, int b){...}", UNSUPPORTED_FUNCTIONALITY);
-		
-		addChild($1, $3); 
-		addChild($1, $4);
-		node* declarator = $1; // func , param list
-		
-		for(auto &u: $3->paramList){
-			$1->paramList.push_back(u);
-		}
-		$$ = $1;
-		currFunc = "#prog";
 	}
 	| declarator func_marker_1 compound_statement { 
+		//UNSUPPORTED_FUNCTIONALITY
+		error("Use function definitions of type int foo(int a, int b){...}", UNSUPPORTED_FUNCTIONALITY);
 		//TODO: NO EMIT
 		addChild($1, $3);
 		$$ = $1;
+		int retval = backpatchBeginFunc(funcBeginQuad, offset);
+		if(retval)
+			error("backpatchBeginFunc", retval);
+		funcBeginQuad = -1;
 		currFunc = "#prog";
 	}
 	;
@@ -1946,8 +1963,11 @@ func_marker_1
 
 		string labelName = "_" + string(declarator->lexeme);
 		emit(OP_LABEL, EMPTY_STR, EMPTY_STR,labelName);
-    //TODO: backpatch offset
-		// emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, EMPTY_STR); // GCC will set the global variable offset 
+    //	TODO: backpatch offset
+		if(funcBeginQuad != -1)
+			error("Internal funcBeginQuad not -1", INVALID_ARGS_IN_FUNC_CALL);
+		funcBeginQuad = nextQuad();
+		emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, BLANK_STR); // GCC will set the global variable offset 
 		funcNode->paramWidth = tempOffset-rbp_size;
 		for(auto &p: declarator->paramList){
 			string lex = p->paramName;	
@@ -2014,11 +2034,20 @@ int main(int ac, char **av) {
     FILE    *fd;
     if (ac >= 2)
     {
+		char* codeFilename;
+		if(ac == 2) {
+			codeFilename = strdup("code.txt");
+		}else {
+			codeFilename = av[2];
+		}
+
         if (!(fd = fopen(av[1], "r")))
         {
             perror(" Error: ");
             return (-1);
         }
+
+		
         yyset_in(fd);
         
         // Make the first symbol table with global scope
@@ -2044,8 +2073,8 @@ int main(int ac, char **av) {
 		
 		// printSymbolTable(gSymTable);
 		printSymbolTableJSON(gSymTable,0,0);
-		
-        printCode();
+        printCode(codeFilename);
+
 		fclose(fd);
     }
     else

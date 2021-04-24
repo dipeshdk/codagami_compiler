@@ -35,6 +35,15 @@ int backpatchAssignment(vector<int> &list, string operand){
     }
     return 0;
 }
+
+int backpatchBeginFunc(int funcBeginQuad, int offset) {
+    if(funcBeginQuad < 0 ||funcBeginQuad > gCode.size() || 
+        (gCode[funcBeginQuad]->result != BLANK_STR))
+        return NOT_GOTO_IN_BACKPATCH;
+    gCode[funcBeginQuad]->result = to_string(offset);
+    return 0;
+}
+
 void emit(int opCode, string arg1, string arg2, string result){
     quadruple* quad = new quadruple();
     quad->opCode = opCode;

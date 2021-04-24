@@ -1,4 +1,4 @@
-int binaryScr(int a[], int low, int high, int m)
+int binaryScr(int a[5], int low, int high, int m)
 {
     if (high >= low) {
         int mid = low + (high - low) / 2;
