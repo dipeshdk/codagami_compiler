@@ -410,8 +410,8 @@ void printQuad(quadruple* quad, int line) {
     }
 }
 
-void printCode() {
-    freopen("code.txt", "w", stdout);
+void printCode(char* filename) {
+    freopen(filename, "w", stdout);
     cout << "\n==================== Printing 3AC Code ==================\n";
     int n = gCode.size();
     for(int i = 0; i < n; i++) {

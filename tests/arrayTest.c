@@ -1,9 +1,9 @@
 int main(){
     int s = 10;
-    float k;
-    int arr[s];
+    int arr[10];
+    int k;
     float brr[10];
-    char crr[s*5];
+    char crr[50];
     arr[2] = 19.0;
     k = arr[s-2];
     crr[3] = 'q';

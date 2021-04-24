@@ -16,5 +16,5 @@ void printStructTable(map<string, struct structTableNode*> &structMap, int scope
 void printSymbolTable(symbolTable *st);
 
 string getOpName(int opCode);
-void printCode();
+void printCode(char* filename);
 #endif
