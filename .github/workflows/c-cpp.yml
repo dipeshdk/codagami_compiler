@@ -2,7 +2,7 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ ci ]
+    branches: [ srthkdb-patch-1 ]
   pull_request:
     branches: [ main ]
 
