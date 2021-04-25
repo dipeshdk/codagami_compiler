@@ -51,6 +51,7 @@ void emit(int opCode, string arg1, string arg2, string result){
     quad->arg2 = arg2;
     quad->result = result;
     gCode.push_back(quad);
+    codeSTVec.push_back(gSymTable);
 }
 
 int nextQuad(){

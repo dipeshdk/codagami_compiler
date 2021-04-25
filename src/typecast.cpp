@@ -31,12 +31,12 @@ int canTypecast(declSpec* to_ds,  declSpec* from_ds){
       struct to int* : not allowed
       struct* to int* : allowed
     */
-    if((rank1 == 6 && rank2 != 6) || (rank1 != 6 && rank2 == 6)){
+    if((rank1 == RANK_TYPE_STRUCT && rank2 != RANK_TYPE_STRUCT) || (rank1 != RANK_TYPE_STRUCT && rank2 == RANK_TYPE_STRUCT)){
         if(to_ds->ptrLevel == 0 && from_ds->ptrLevel == 0){
             setErrorParams(errCode, TYPE_ERROR, errStr, "cannot type cast");
             return TYPE_ERROR;
         }
-        if(rank2 == 6 && from_ds->ptrLevel == 0 && to_ds->ptrLevel > 0){
+        if(rank2 == RANK_TYPE_STRUCT && from_ds->ptrLevel == 0 && to_ds->ptrLevel > 0){
             setErrorParams(errCode, TYPE_ERROR, errStr, "cannot type cast structs");
             return TYPE_ERROR;
         }
@@ -47,7 +47,7 @@ int canTypecast(declSpec* to_ds,  declSpec* from_ds){
       struct1* to struct2 : not allowed
       struct1* to struct2* : allowed
     */
-    if (rank1 == 6 && rank2 == 6){
+    if (rank1 == RANK_TYPE_STRUCT && rank2 == RANK_TYPE_STRUCT){
         int ptr1 = to_ds->ptrLevel;
         int ptr2 = from_ds->ptrLevel;
         if(to_ds->lexeme != from_ds->lexeme){
@@ -176,11 +176,11 @@ int checkPointer(node* root){
 int getTypeRank(vector<int> &type) {
     if(type.size() != 1)  -TYPE_ERROR;
     switch(type[0]) {
-        case TYPE_STRUCT: return 6;
-        case TYPE_FLOAT: return 5;
-        case TYPE_INT: return 4;
-        case TYPE_CHAR: return 2;
-        case TYPE_VOID: return 1;
+        case TYPE_STRUCT: return RANK_TYPE_STRUCT;
+        case TYPE_FLOAT: return RANK_TYPE_FLOAT;
+        case TYPE_INT: return RANK_TYPE_INT;
+        case TYPE_CHAR: return RANK_TYPE_CHAR;
+        case TYPE_VOID: return RANK_TYPE_VOID;
     }
     return -TYPE_ERROR;
 }
@@ -198,8 +198,8 @@ int giveTypeCastRank(node* n1, node* n2){
     */
     int rank1 = getTypeRank(v1); 
     int rank2 = getTypeRank(v2);
-    if(n1->declSp->ptrLevel > 0) rank1 = 3;
-    if(n2->declSp->ptrLevel > 0) rank2 = 3;
+    if(n1->declSp->ptrLevel > 0) rank1 = RANK_TYPE_POINTER;
+    if(n2->declSp->ptrLevel > 0) rank2 = RANK_TYPE_POINTER;
     if(rank1 < 0)
         return rank1;
     if(rank2 < 0)
@@ -389,7 +389,7 @@ node* makeNodeForExpressionNotStringForAddition(node* n1, node* n2, string name,
         setErrorParams(errCode, POINTER_ERROR , errStr, errStr);
         return nullptr;
       }
-      if(rank2 != 4 && rank2 != 2){
+      if(rank2 != RANK_TYPE_INT && rank2 != RANK_TYPE_CHAR){
         errStr = "invalid operands to binary +";
         setErrorParams(errCode, POINTER_ERROR , errStr, errStr);
         return nullptr;
@@ -401,7 +401,7 @@ node* makeNodeForExpressionNotStringForAddition(node* n1, node* n2, string name,
         setErrorParams(errCode, POINTER_ERROR , errStr, errStr);
         return nullptr;
       } 
-      if(rank1 != 4 && rank1 != 2){
+      if(rank1 != RANK_TYPE_INT && rank1 != RANK_TYPE_CHAR){
         errStr = "invalid operands to binary +";
         setErrorParams(errCode, POINTER_ERROR , errStr, errStr);
         return nullptr;
