@@ -177,3 +177,17 @@ bool isConstant(string s){
     //         return true; 
     // }
 }
+
+string hexString(string decStr) {
+    stringstream ss;
+    ss << "0x" << hex << getNumberFromConstAddr(decStr);
+    return ss.str();
+}
+
+int getNumberFromConstAddr(string s) {
+    int a;
+    stringstream ss;
+    ss << s;
+    ss >> a;
+    return a;
+}

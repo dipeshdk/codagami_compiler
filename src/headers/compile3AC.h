@@ -53,6 +53,7 @@ void freeRegAndMoveToStack(int regInd);
 
 void asmOpAssignment(int quadNo);
 
+
 void asmOpMod(int quadNo);
 
 void asmOpGeq(int quadNo);
@@ -62,3 +63,60 @@ void asmOpAndAnd(int quadNo);
 void asmOpOrOr(int quadNo);
 
 void asmOpIfNeqGoto(int quadNo);
+
+void asmOpUnaryOperator(string op, int quadNo);
+
+void asmOpUnaryMinus(int quadNo);
+
+void asmOpUnaryLogicalNot(int quadNo);
+
+void asmOpDivI(int quadNo);
+
+int getReg(int quadNo, string varValue);
+
+int getRegToFree();
+
+void freeReg(int regInd);
+
+void useReg(int regInd, int quadNo, string varValue);
+
+void freeRegAndMoveToStack(int regInd);
+
+void asmOpAssignment(int quadNo);
+
+string evaluate(string op, string arg1, string arg2);
+
+void emitAsmForBinaryOperator(string op, int quadNo);
+
+void asmOpLogicalOr(int quadNo);
+
+void asmOpLogicalAnd(int quadNo);
+
+void asmOpLogicalXor(int quadNo);
+
+void asmOpAddI(int quadNo);
+
+void asmOpMulI(int quadNo);
+
+void asmOpSubI(int quadNo);
+
+void asmOpCompareEqual(int quadNo);
+
+void asmOpLeftShift(int quadNo);
+
+void asmOpRightShift(int quadNo);
+
+void emitAsm(string optr, vector<string> operands);
+
+void errorAsm(string str, int errCode);
+
+int getOffset(string varName, symbolTable* st);
+
+bool isGlobal(string varName, symbolTable* st);
+
+int getGlobalAddress(string varName, symbolTable* st);
+
+string getVariableAddr(string varName, symbolTable* st) ;
+
+void initializeRegs();
+

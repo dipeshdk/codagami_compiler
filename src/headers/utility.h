@@ -19,4 +19,8 @@ void error(string var, int error_code);
 void copyList(node* n1, node *n2);
 
 bool isConstant(string s);
+
+string hexString(string decStr);
+
+int getNumberFromConstAddr(string s);
 #endif
