@@ -53,6 +53,17 @@ void freeRegAndMoveToStack(int regInd);
 
 void asmOpAssignment(int quadNo);
 
+
+void asmOpMod(int quadNo);
+
+void asmOpGeq(int quadNo);
+
+void asmOpAndAnd(int quadNo);
+
+void asmOpOrOr(int quadNo);
+
+void asmOpIfNeqGoto(int quadNo);
+
 void asmOpUnaryOperator(string op, int quadNo);
 
 void asmOpUnaryMinus(int quadNo);
@@ -108,3 +119,4 @@ int getGlobalAddress(string varName, symbolTable* st);
 string getVariableAddr(string varName, symbolTable* st) ;
 
 void initializeRegs();
+
