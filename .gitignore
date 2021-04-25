@@ -55,4 +55,6 @@
 *.ps
 temp
 code.txt
+*.s
+
 
