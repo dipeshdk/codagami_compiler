@@ -1,7 +1,7 @@
 #include "headers/allInclude.h"
 #define NOT_CONSTANT_EXCEPTION 601
 #define NUM_REGISTER 8
-
+#define CONSTANT "__constant__"
 using namespace std;
 
 vector<reg*> regVec;
@@ -38,15 +38,22 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_ASSIGNMENT: 
         asmOpAssignment(quadNo);
         break;
+    
+    // amigo
     case OP_UNARY_MINUS:
-        // dipesh 
+        // asmOpUnaryMinus(quadNo);  
         break;
-    case OP_DIVI: 
+    case OP_DIVI:
+        // asmOpDivI(quadNo);  
         break;
     case OP_LEFT_SHIFT: 
+        // asmOpLeftShift(quadNo);  
         break;
     case OP_RIGHT_SHIFT: 
+        // asmOpRightShift(quadNo);  
         break;
+    // amigo's Work end here
+    
     case OP_NOR: 
         break;
     case OP_OR: 
@@ -108,7 +115,56 @@ void emitAssemblyForQuad(int quadNo) {
     }
 }
 
+/*  Currently our compiler doesn't support negative numbers,
+    it takes negative numbers as UNARY_MINUS abs(number). 
+    This is in contrast with what GCC do.
+    Thus, our unary minus implementation will depend on this.
+    Currently, I am implementing it in a way such that the final
+    result of the asm code is same as that of GCC. */
 
+void asmOpUnaryMinus(int quadNo){
+    // emit(OP_UNARY_MINUS, cast_expression->addr, EMPTY_STR, newTmp);
+    quadruple *quad = gCode[quadNo];
+    symbolTable *st = codeSTVec[quadNo];
+
+    if(isConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    
+    string resultAddr = getVariableAddr(quad->result, st);
+    int regInd = -1;
+    string regName = CONSTANT;
+
+    if(isConstant(quad->arg1)) {
+        regInd = getReg(quadNo, CONSTANT);
+        regName = regVec[regInd]->regName;
+        emitAsm("movl", {"$"+quad->arg1, regName});
+    }else{
+        string argAddr = getVariableAddr(quad->arg1, st);
+        regInd = getReg(quadNo, quad->arg1);
+        regName = regVec[regInd]->regName;
+        emitAsm("mov", {argAddr, regName});
+    }
+    // neg register
+    if(regName == CONSTANT){
+        errorAsm("Register not assigned properly.", REGISTER_ASSIGNMENT_ERROR);
+        return;
+    }
+    emitAsm("neg", {regName});
+    // move the value of this register at resultAddr        
+    emitAsm("mov", {regName, resultAddr});
+}
+
+void asmOpDivI(int quadNo){
+
+}
+
+void asmOpLeftShift(int quadNo){
+
+}
+
+void asmOpRightShift(int quadNo){
+
+}
 
 
 void emitAsm(string optr, vector<string> operands){
@@ -125,6 +181,8 @@ void errorAsm(string str, int errCode){
         case UNDEFINED_SCOPE_STNODE_ERROR:
             errStr = "Internal Error.";
             break;
+        case REGISTER_ASSIGNMENT_ERROR:
+            errStr = "Internal Error.";
         default:
             break;
     }

@@ -2113,7 +2113,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName);
 		
 		// printSymbolTable(gSymTable);
-		emitAssemblyFrom3AC();
+		// emitAssemblyFrom3AC();
 		printSymbolTableJSON(gSymTable,0,1);
         printCode(codeFilename);
 		
