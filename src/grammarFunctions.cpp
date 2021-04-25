@@ -206,6 +206,7 @@ void checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_
         if(errCode)
             error("Cannot generate Temp",errCode);
         emit(OP_LCALL, func_name, BLANK_STR ,newTemp);
+        addTempDetails(newTemp, gSymTable, postfix_expression);
     }else{
         emit(OP_LCALL, func_name, BLANK_STR ,BLANK_STR);
     }

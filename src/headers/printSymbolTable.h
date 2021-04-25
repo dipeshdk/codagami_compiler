@@ -9,6 +9,7 @@ void printElem(symbolTableNode* elem, string str, int printTemps);
 int getTypeSize(vector<int> &type);
 int getNodeSize(symbolTableNode* elem, symbolTable* st);
 int getOffsettedSize(int size);
+void addTempDetails(string name, symbolTable* symtab, node* node);
 
 void printToCsvFile(symbolTable *st);
 void printSymbolTableJSON(symbolTable *st, int numTab, int printTemps);
