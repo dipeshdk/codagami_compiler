@@ -55,4 +55,5 @@
 *.ps
 temp
 code.txt
+*.s
 symbolTable.txt
