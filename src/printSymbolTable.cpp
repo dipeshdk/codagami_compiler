@@ -336,7 +336,6 @@ string getOpName(int opCode) {
         case OP_CALL: return "CALL";
         case OP_LEFT_SHIFT: return "LEFT_SHIFT";
         case OP_RIGHT_SHIFT: return "RIGHT_SHIFT";
-        case OP_NOR: return "NOR";
         case OP_OR: return "OR";
         case OP_AND: return "AND";
         case OP_XOR: return "XOR";

@@ -762,6 +762,12 @@ logical_and_expression
 		node* temp = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $4, (node*)NULL, (node*)NULL); 
 		temp->truelist = $4->truelist;
 		temp->falselist = mergelist($1->falselist, $4->falselist);
+		string newTmp = generateTemp(errCode);
+		if(errCode){
+			error("temp gen internal error",errCode);
+		}
+		emit(OP_ANDAND, $1->addr, $4->addr, newTmp);
+		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 	}
@@ -776,6 +782,12 @@ logical_or_expression
 		node* temp = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $4, (node*)NULL, (node*)NULL);  
 		temp->truelist = mergelist($1->truelist, $4->truelist);
 		temp->falselist = $4->falselist;
+		string newTmp = generateTemp(errCode);
+		if(errCode){
+			error("temp gen internal error",errCode);
+		}
+		emit(OP_OROR, $1->addr, $4->addr, newTmp);
+		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
 		$$ = temp;
 		}
