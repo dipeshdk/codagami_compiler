@@ -7,6 +7,7 @@ symbolTable* gTempSymbolMap;
 symbolTable* gSymTable;
 set<int> validTypes = {TYPE_CHAR, TYPE_INT, TYPE_FLOAT, TYPE_VOID, TYPE_STRUCT};
 vector<struct quadruple*> gCode;
+vector<symbolTable*> codeSTVec;
 
 // grammar.y check if nullptr then it is error.
 struct symbolTableNode* lookUp(symbolTable* st, string name) {
