@@ -1,6 +1,8 @@
 #include "headers/allInclude.h"
+#define NOT_CONSTANT_EXCEPTION 601
 
-int emitAssemblyForQuad(quadruple *quad, int &errCode, int &errStr) {
+int emitAssemblyForQuad(int quadNo, int &errCode, int &errStr) {
+    quadruple *quad = gCode[quadNo];
     switch(quad->opCode) {
     case OP_GOTO:
         asmOpGoto();
@@ -9,12 +11,16 @@ int emitAssemblyForQuad(quadruple *quad, int &errCode, int &errStr) {
         asmOpAddI();
         break;
     case OP_MULI: 
+        asmOpMulI();
         break;
     case OP_IFGOTO: 
+        asmOpIfGoto();
         break;
     case OP_SUBI: 
+        asmOpSubI();
         break;
     case OP_ASSIGNMENT: 
+        asmOpAssignment(quad);
         // OP_ASSIN: arg1, result
         // symbolTableNode *arg1 = 
         // if(result is not constant) {
@@ -100,6 +106,89 @@ int emitAssemblyForQuad(quadruple *quad, int &errCode, int &errStr) {
     }
 }
 
+
+void printASM() {
+    for(pair<string, vector<string>> p : gAsm) {
+        string res = p.first;
+        res += "    ";
+        int n = p.second.size();
+        for(int i = 0; i < n; i++) {
+            res += p.second[i];
+            if(i < (n-1)) res += ", ";
+        }
+        cout << res << "\n";
+    }
+}
+
+void emitAsm(string operator, vector<string> operands){
+    gASM.push_back({operator, operands});
+}
+
+void errorAsm(string str, int errCode){
+    string errStr;
+    switch(errCode){
+        case ASSIGNMENT_TO_CONSTANT_ERROR:
+            errStr = "Cannot assign value to a constant.";
+    }
+    errStr += " ";
+    errStr += str;
+    cout << "ERROR: " << errStr << endl;
+    exit(errCode);
+}
+
+string getVariableAddr() {
+    
+}
+
 void asmOpGoto(){
     
+}
+
+void asmOpAddI(){
+
+}
+
+bool isConstant(string s){
+    try{
+        int x = stoi(s);
+        throw NOT_CONSTANT_EXCEPTION;
+    }
+    catch(int exp){
+        if(exp == NOT_CONSTANT_EXCEPTION)   return false;
+        else    return true; 
+    }
+}
+
+void asmOpAssignment(int quadNo){
+    // OP_ASSIN: arg1, result
+    // symbolTableNode *arg1 = 
+    // if(result is not constant) {
+    //     if(arg1 is constant) {
+    //         movl   $constant,-result.offset(%rbp)
+    //         //movl   $0x5,-0xc(%rbp)
+    //     }else {
+    //         mov      -result.offset(%rbp), %eax
+    //         mov      %eax, -arg1.offset(%rbp)
+    //         //mov    -0xc(%rbp),%eax
+    //         //mov    %eax,-0x8(%rbp)
+    //     }
+    // }else {
+        //error, result cannot be a constant
+    // }
+    quadruple *quad = gCode[quadNo];
+    symbolTable *st = codeSTVec[quadNo];
+    
+    if(!isConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR); //does not print line number
+    
+    //result is not constant
+    // -result.offset(%rbp)
+    string resultAddr = getVariableAddr(quad->result, st);
+    if(isConstant(quad->arg1)) {
+        emitAsm("movl", {"$"+quad->arg1, resultAddr});
+    }else {
+        string reg = getReg();
+        emitAsm("mov", {getVariableAddr(quad->arg1, st), reg});
+        emitAsm("mov", {reg, resultAddr});
+    }
 }

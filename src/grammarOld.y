@@ -845,6 +845,9 @@ assignment_expression
 		node* unary_expression = $1;
 		node* assignment_expression = $3;
 		node* assignment_operator = $2;
+    if(unary_expression->name == "CONSTANT"){
+      error(unary_expression->lexeme, ASSIGNMENT_TO_CONSTANT_ERROR);
+    }
 		if(assignment_expression->addr != EMPTY_STR) {
 			if (!unary_expression->declSp) 
 			{

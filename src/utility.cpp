@@ -142,6 +142,9 @@ void error(string var, int error_code) {
 		case MISMATCH_DEFINITION_DECLARATION:
 			str = "Function declaration and definition do not match.";
 			break;
+    case ASSIGNMENT_TO_CONSTANT_ERROR:
+			str = "Assignment to a constant not allowed";
+			break;
 		default:
 			break;
 	}
