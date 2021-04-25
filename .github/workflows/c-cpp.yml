@@ -4,7 +4,7 @@ on:
   push:
     branches: [ srthkdb-patch-1 ]
   pull_request:
-    branches: [ main ]
+    branches: [ srthkdb-patch-1 ]
 
 jobs:
   build:
