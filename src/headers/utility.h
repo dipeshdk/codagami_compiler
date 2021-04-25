@@ -17,4 +17,6 @@ void setErrorParams(int &errCode, int code, string &errString, string str);
 void error(string var, int error_code);
 
 void copyList(node* n1, node *n2);
+
+bool isConstant(string s);
 #endif

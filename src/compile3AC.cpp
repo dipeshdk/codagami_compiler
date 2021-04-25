@@ -1,41 +1,42 @@
 #include "headers/allInclude.h"
 #define NOT_CONSTANT_EXCEPTION 601
+#define NUM_REGISTER 8
 
-int emitAssemblyForQuad(int quadNo, int &errCode, int &errStr) {
+using namespace std;
+
+vector<reg*> regVec;
+vector< pair<string, vector<string>> > gAsm;
+vector<string> regNames({"%rax" , "%rcx" , "%rdx" , "%rbx" , "%rsp" , "%rbp" , "%rsi" , "%rdi"});
+
+void emitAssemblyFrom3AC() {
+    initializeRegs();
+    for(int quadNo = 0; quadNo < gCode.size(); quadNo++) {
+        emitAssemblyForQuad(quadNo);
+    }
+    printASM();
+}
+
+
+void emitAssemblyForQuad(int quadNo) {
     quadruple *quad = gCode[quadNo];
     switch(quad->opCode) {
     case OP_GOTO:
-        asmOpGoto();
+        // asmOpGoto();
         break;
     case OP_ADDI: 
-        asmOpAddI();
+        // asmOpAddI();
         break;
     case OP_MULI: 
-        asmOpMulI();
+        // asmOpMulI();
         break;
     case OP_IFGOTO: 
-        asmOpIfGoto();
+        // asmOpIfGoto();
         break;
     case OP_SUBI: 
-        asmOpSubI();
+        // asmOpSubI();
         break;
     case OP_ASSIGNMENT: 
-        asmOpAssignment(quad);
-        // OP_ASSIN: arg1, result
-        // symbolTableNode *arg1 = 
-        // if(result is not constant) {
-        //     if(arg1 is constant) {
-        //         movl   $constant,-result.offset(%rbp)
-        //         //movl   $0x5,-0xc(%rbp)
-        //     }else {
-        //         mov      -result.offset(%rbp), %eax
-        //         mov      %eax, -arg1.offset(%rbp)
-        //         //mov    -0xc(%rbp),%eax
-        //         //mov    %eax,-0x8(%rbp)
-        //     }
-        // }else {
-            //error, result cannot be a constant
-        // }
+        asmOpAssignment(quadNo);
         break;
     case OP_UNARY_MINUS: 
         break;
@@ -107,28 +108,24 @@ int emitAssemblyForQuad(int quadNo, int &errCode, int &errStr) {
 }
 
 
-void printASM() {
-    for(pair<string, vector<string>> p : gAsm) {
-        string res = p.first;
-        res += "    ";
-        int n = p.second.size();
-        for(int i = 0; i < n; i++) {
-            res += p.second[i];
-            if(i < (n-1)) res += ", ";
-        }
-        cout << res << "\n";
-    }
+
+
+void emitAsm(string optr, vector<string> operands){
+    gAsm.push_back({optr, operands});
 }
 
-void emitAsm(string operator, vector<string> operands){
-    gASM.push_back({operator, operands});
-}
 
 void errorAsm(string str, int errCode){
     string errStr;
     switch(errCode){
         case ASSIGNMENT_TO_CONSTANT_ERROR:
             errStr = "Cannot assign value to a constant.";
+            break;
+        case UNDEFINED_SCOPE_STNODE_ERROR:
+            errStr = "Internal Error.";
+            break;
+        default:
+            break;
     }
     errStr += " ";
     errStr += str;
@@ -136,49 +133,110 @@ void errorAsm(string str, int errCode){
     exit(errCode);
 }
 
-string getVariableAddr() {
-    
-}
 
-void asmOpGoto(){
-    
-}
-
-void asmOpAddI(){
-
-}
-
-bool isConstant(string s){
-    try{
-        int x = stoi(s);
-        throw NOT_CONSTANT_EXCEPTION;
+int getOffset(string varName, symbolTable* st){
+    symbolTableNode* sym_node = lookUp(st, varName);
+    if(sym_node == nullptr){
+        error(varName, SYMBOL_NOT_FOUND);
     }
-    catch(int exp){
-        if(exp == NOT_CONSTANT_EXCEPTION)   return false;
-        else    return true; 
+    int offset = sym_node->offset;
+    offset += sym_node->size;
+    return -1*offset;
+}
+
+
+bool isGlobal(string varName, symbolTable* st) {
+    symbolTableNode* sym_node = lookUp(st, varName);
+    if(sym_node == nullptr){
+        error(varName, SYMBOL_NOT_FOUND);
+    }
+    if(sym_node->scope == -1)
+        errorAsm("scope of variable not defined", UNDEFINED_SCOPE_STNODE_ERROR);
+    return sym_node->scope == GLOBAL_SCOPE_NUM;
+}
+
+int getGlobalAddress(string varName, symbolTable* st){
+    symbolTableNode* sym_node = lookUp(st, varName);
+    if(sym_node == nullptr){
+        error(varName, SYMBOL_NOT_FOUND);
+    }
+    // TODO: global offset(starting address of the program) need to be added here to get the absolute address of the variable
+    return sym_node->offset;
+}
+
+
+string getVariableAddr(string varName, symbolTable* st) {
+    int offset;
+    if(isGlobal(varName, st)) {
+        //UNSUPPORTED FUNCTION
+        error("globals are unsupported", UNSUPPORTED_FUNCTIONALITY);
+        //TODO: return absolute addr
+        offset = getGlobalAddress(varName, st);
+        return to_string(offset);
+    }
+    offset = getOffset(varName, st);
+    return to_string(offset) + "(%rbp)";
+}
+
+// void asmOpGoto(){
+    
+// }
+
+// void asmOpAddI(){
+
+// }
+
+void initializeRegs() {
+    regVec = vector<reg*>(NUM_REGISTER);
+    for(int i = 0; i < NUM_REGISTER; i++) {
+        regVec[i] = new reg();
+        regVec[i]->isFree = true;
+        regVec[i]->regName = regNames[i];
     }
 }
+
+int getReg(int quadNo, string varValue) {
+    for(int i = 0; i < NUM_REGISTER; i++) {
+        if(regVec[i]->isFree) {
+            useReg(i, quadNo, varValue);
+            return i;
+        }
+    }
+    int ind = getRegToFree();
+    freeRegAndMoveToStack(ind);
+    useReg(ind, quadNo, varValue);
+    return ind;
+}
+
+int getRegToFree(){
+    // TODO: returns index of reg to free if all regs are used
+    return 0;
+}
+
+void freeReg(int regInd) {
+    regVec[regInd]->isFree = true;
+}
+
+void useReg(int regInd, int quadNo, string varValue) {
+    regVec[regInd]->isFree = false;
+    regVec[regInd]->quadNo = quadNo;
+    regVec[regInd]->varValue = varValue;
+}
+
+void freeRegAndMoveToStack(int regInd) {
+    //TODO: free a reg by moving its data to a location and then
+    if(isConstant(regVec[regInd]->varValue)) return;
+
+    string resultAddr = getVariableAddr(regVec[regInd]->varValue, codeSTVec[regVec[regInd]->quadNo]);
+    emitAsm("mov", {regVec[regInd]->regName, resultAddr});
+}
+
 
 void asmOpAssignment(int quadNo){
-    // OP_ASSIN: arg1, result
-    // symbolTableNode *arg1 = 
-    // if(result is not constant) {
-    //     if(arg1 is constant) {
-    //         movl   $constant,-result.offset(%rbp)
-    //         //movl   $0x5,-0xc(%rbp)
-    //     }else {
-    //         mov      -result.offset(%rbp), %eax
-    //         mov      %eax, -arg1.offset(%rbp)
-    //         //mov    -0xc(%rbp),%eax
-    //         //mov    %eax,-0x8(%rbp)
-    //     }
-    // }else {
-        //error, result cannot be a constant
-    // }
     quadruple *quad = gCode[quadNo];
     symbolTable *st = codeSTVec[quadNo];
     
-    if(!isConstant(quad->result))
+    if(isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR); //does not print line number
     
     //result is not constant
@@ -187,8 +245,11 @@ void asmOpAssignment(int quadNo){
     if(isConstant(quad->arg1)) {
         emitAsm("movl", {"$"+quad->arg1, resultAddr});
     }else {
-        string reg = getReg();
-        emitAsm("mov", {getVariableAddr(quad->arg1, st), reg});
-        emitAsm("mov", {reg, resultAddr});
+        string argAddr = getVariableAddr(quad->arg1, st);
+        int regInd = getReg(quadNo, quad->arg1);
+        string regName = regVec[regInd]->regName;
+        emitAsm("mov", {argAddr, regName});
+        emitAsm("mov", {regName, resultAddr});
+        freeReg(regInd);
     }
 }

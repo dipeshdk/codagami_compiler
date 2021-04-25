@@ -418,3 +418,20 @@ void printCode(char* filename) {
     }
     cout << "\n====================================================\n";
 }
+
+void printASM() {
+    freopen("asmOut.asm", "w", stdout);
+    cout << "\n====================================printing assembly===================================\n" << endl;
+    int lineNo = 0;
+    for(pair<string, vector<string>> p : gAsm) {
+        string res = p.first;
+        res += "    ";
+        int n = p.second.size();
+        for(int i = 0; i < n; i++) {
+            res += p.second[i];
+            if(i < (n-1)) res += ", ";
+        }
+        cout << lineNo++ << ".  " << res << "\n";
+    }
+    cout << "\n====================================assembly===================================\n" << endl;
+}
