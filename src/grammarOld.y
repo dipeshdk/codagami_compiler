@@ -308,6 +308,7 @@ unary_expression
 			error("Cannot generate Temp",errCode);
         emit(opCode, $2->addr, "1", newTmp);
     	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $2->addr);
+		addTempDetails(newTmp, gSymTable, $2);
 		$$ = makeNode(strdup("INC_OP"), strdup("++"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$->declSp = declSpCopy($2->declSp);
 		$$->addr = $2->addr;
@@ -323,6 +324,7 @@ unary_expression
 			error("Cannot generate Temp",errCode);
         emit(opCode, $2->addr, "1", newTmp);
     	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $2->addr);
+		addTempDetails(newTmp, gSymTable, $2);
 		$$ = makeNode(strdup("DEC_OP"), strdup("--"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$->declSp = declSpCopy($2->declSp);
 		$$->addr = $2->addr;
@@ -365,6 +367,7 @@ unary_expression
 				error("Cannot generate Temp", errCode);
 			emit(opCode, cast_expression->addr, EMPTY_STR, newTmp);
 			unary_operator->addr = newTmp;
+			addTempDetails(newTmp, gSymTable, unary_operator);
 		}
 
 		addChild(unary_operator, cast_expression);
@@ -388,6 +391,11 @@ unary_expression
 		
 		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$->declSp->type.push_back(TYPE_INT);
+		sym_node = lookUp(gSymTable, newTmp);
+		sym_node->size = 4;
+		sym_node->offset = offset;
+		sym_node->declSp->type.push_back(TYPE_INT);
+		offset += 4;
 		$$->addr = newTmp;
 	}
 	| SIZEOF '(' type_name ')'{
@@ -402,6 +410,11 @@ unary_expression
 		
 		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$->declSp->type.push_back(TYPE_INT);
+		sym_node = lookUp(gSymTable, newTmp);
+		sym_node->size = 4;
+		sym_node->offset = offset;
+		sym_node->declSp->type.push_back(TYPE_INT);
+		offset += 4;
 		$$->addr = newTmp;
 	}
 
@@ -453,6 +466,7 @@ multiplicative_expression
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
+		addTempDetails(newTmp, gSymTable, $1);
 		$$ = temp;
 	}
 	| multiplicative_expression '/' cast_expression { 
@@ -470,6 +484,7 @@ multiplicative_expression
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
+		addTempDetails(newTmp, gSymTable, $1);
 		$$ = temp;
 	}
 	| multiplicative_expression '%' cast_expression { 
@@ -489,6 +504,7 @@ multiplicative_expression
 		emit(OP_MOD, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
+		addTempDetails(newTmp, gSymTable, $1);
 		$$ = temp;
 	}
 	;
@@ -510,6 +526,7 @@ additive_expression
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
 		// temp->declSp = declSpCopy($1->declSp);
+		addTempDetails(newTmp, gSymTable, temp);
 		$$ = temp;
 		}
 	| additive_expression '-' multiplicative_expression { 
@@ -527,6 +544,7 @@ additive_expression
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
+		addTempDetails(newTmp, gSymTable, $1);
 		$$ = temp;
 		}
 	;
@@ -551,6 +569,7 @@ shift_expression
 		emit(OP_LEFT_SHIFT, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
+		addTempDetails(newTmp, gSymTable, $1);
 		$$ = temp; 
 		}
 	| shift_expression RIGHT_OP additive_expression { 
@@ -571,6 +590,7 @@ shift_expression
 		emit(OP_RIGHT_SHIFT, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
+		addTempDetails(newTmp, gSymTable, $1);
 		$$ = temp;
 		}
 	;
@@ -685,6 +705,7 @@ and_expression
 		emit(OP_AND, and_expression->addr, equality_expression->addr, newTmp);
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
+		addTempDetails(newTmp, gSymTable, $1);
 		$$ = temp;
 		}
 	;
@@ -706,6 +727,7 @@ exclusive_or_expression
 		emit(OP_XOR, exclusive_or_expression->addr, and_expression->addr, newTmp);
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
+		addTempDetails(newTmp, gSymTable, $1);
 		$$ = temp;
 	}
 	;
@@ -726,6 +748,7 @@ inclusive_or_expression
 		emit(OP_OR, inclusive_or_expression1->addr, exclusive_or_expression->addr, newTmp);
 		temp->addr = newTmp;
 		temp->declSp = declSpCopy($1->declSp);
+		addTempDetails(newTmp, gSymTable, $1);
 		$$ = temp;
 	}
 	;
@@ -792,6 +815,7 @@ conditional_expression
 		temp->addr = ternaryTempStack.top();
 		$$ = temp;
 		ternaryTempStack.pop();
+		addTempDetails($$->addr, gSymTable, $4);
 		// ternaryTemp = BLANK_STR;
 		}
 	;
@@ -1004,13 +1028,18 @@ declaration
 					if(size < 0){
 						error("invalid array type", -size);
 					}
-					//_t1 = 4;
+					// _t1 = 4;
 					string sizeTmp = generateTemp(errCode);
 					if(errCode) {
 						error("error in temp generation", errCode);
 					}
 					emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
-
+					symbolTableNode* sym_node = lookUp(gSymTable, sizeTmp);
+					sym_node->size = 4;
+					sym_node->offset = offset;
+					sym_node->declSp->type.push_back(TYPE_INT);
+					offset += 4;
+					
 					while(currInit) {
 						string addr = emitArrayIndexGetAddr(temp->addr, to_string(ind), sizeTmp, errCode, errStr);
 						if(errCode)
@@ -2081,7 +2110,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName);
 		
 		// printSymbolTable(gSymTable);
-		printSymbolTableJSON(gSymTable,0,0);
+		printSymbolTableJSON(gSymTable,0,1);
         printCode(codeFilename);
 		fclose(fd);
     }

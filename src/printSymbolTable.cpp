@@ -1,5 +1,7 @@
 #include "headers/allInclude.h" 
 
+extern int offset;
+
 bool isTempVar(string varName){
     return isdigit(varName[0]);
 }
@@ -287,6 +289,18 @@ int getTypeSize(vector<int> &type) {
     return -CONFLICTING_TYPES;
 }
 
+void addTempDetails(string name, symbolTable* symtab, node* node){
+    symbolTableNode* sym_node = lookUp(symtab, name);
+    int size = 8;
+    if(node->declSp->ptrLevel == 0){
+        size = getTypeSize(node->declSp->type);
+    }
+    sym_node->declSp = declSpCopy(node->declSp);
+    sym_node->size = size;
+    sym_node->offset = offset;
+    offset += size;
+    return;
+}
 
 void printStructTable(map<string, struct structTableNode*> &structMap, int scope) {
     cout << "\n\n=============Printing struct table (scope: " << scope << ")====================\n\n";

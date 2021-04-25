@@ -1,5 +1,7 @@
 #include "headers/allInclude.h" 
 
+extern int offset;
+
 vector<int> makelist(int i){
     return vector<int>{i};
 }
@@ -165,6 +167,12 @@ void emitRelop(node* n1, node* n2, node* temp, int opCode, int& errCode, string 
     emit(opCode, n1->addr, n2->addr, temp->addr);
     emit(OP_IFGOTO, temp->addr, EMPTY_STR, BLANK_STR);
     emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
+    symbolTableNode* sym_node = lookUp(gSymTable, newTmp);
+	sym_node->size = 4;
+	sym_node->offset = offset;
+	sym_node->declSp->type.push_back(TYPE_INT);
+	offset += 4;
+    return;
 }
 
 
@@ -188,6 +196,9 @@ string emitTypeCast(node* node, declSpec *toDs, int &errCode, string &errStr) {
     string typeCastAddr = "( " + from_type + "_TO_" + to_type + " ) " + node->addr; 
     // cout << node->declSp->ptrLevel << " " << toDs->ptrLevel << " "<< typeCastAddr << endl;
     emit(OP_ASSIGNMENT, typeCastAddr , EMPTY_STR, newTmp);
+    tempNode->size = getNodeSize(tempNode, gSymTable);
+    tempNode->offset = offset;
+    offset += tempNode->size;
     return newTmp;
 }
 
@@ -212,6 +223,9 @@ void emitOperationAssignment(node* unary_expression, node* assignment_expression
 
     emit(opCode, unary_expression->addr, assignment_expression->addr, newTmp);
     emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, resultAddr);
+    tempNode->size = getNodeSize(tempNode, gSymTable);
+    tempNode->offset = offset;
+    offset += tempNode->size;
 }  
 
 int getOpcodeFromAssignStr(string s){
@@ -232,6 +246,11 @@ string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCo
         return EMPTY_STR;
     }
     emit(OP_MULI, sizeTemp, ind, indexTmp);
+    symbolTableNode* sym_node = lookUp(gSymTable, indexTmp);
+	sym_node->size = 4;
+	sym_node->offset = offset;
+	sym_node->declSp->type.push_back(TYPE_INT);
+	offset += 4;
 
     //_t3 = arr + _t2;
     string pointerTmp = generateTemp(errCode);
@@ -240,6 +259,12 @@ string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCo
         return EMPTY_STR;
     }
     emit(OP_ADDI, arr, indexTmp, pointerTmp);
+    sym_node = lookUp(gSymTable, pointerTmp);
+	sym_node->size = 8;
+	sym_node->offset = offset;
+    sym_node->declSp->ptrLevel = 1;
+	sym_node->declSp->type.push_back(TYPE_INT);
+	offset += 4;
 
     if(errCode){
         setErrorParams(errCode, errCode, errStr, "error in temp generation");
@@ -278,6 +303,11 @@ string getArrayIndexWithEmit(node *postfix_expression , node *expression, int &e
             return EMPTY_STR;
         }
         emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
+        symbolTableNode* sym_node = lookUp(gSymTable, sizeTmp);
+		sym_node->size = 4;
+		sym_node->offset = offset;
+		sym_node->declSp->type.push_back(TYPE_INT);
+		offset += 4;
 
         return emitArrayIndexGetAddr(postfix_expression->addr, expression->addr, sizeTmp, errCode, errStr);
 }
