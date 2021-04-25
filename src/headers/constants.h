@@ -94,8 +94,8 @@
 #define OP_RIGHT_SHIFT 711
 
 //rythm
-#define OP_NOR 712
-#define OP_OR 713
+#define OP_NOR 712 //zarurat hai kya, mips me hai, x86 me nahi
+#define OP_OR 713 //
 #define OP_AND 714
 #define OP_LOGICAL_NOT 715
 #define OP_XOR 716

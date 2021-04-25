@@ -254,3 +254,40 @@ void asmOpAssignment(int quadNo){
         freeReg(regInd);
     }
 }
+
+
+void emitAsmForOperator(string op, int quadNo){
+    quadruple *quad = gCode[quadNo];
+    symbolTable *st = codeSTVec[quadNo];
+    
+    if(isConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR); 
+    
+    string resultAddr = getVariableAddr(quad->result, st);
+    string arg1Addr;
+    string arg2Addr;
+    int regInd = getReg(quadNo, quad->arg1);
+    string regName = regVec[regInd]->regName;
+    if(isConstant(quad->arg1)){
+        arg1Addr = "$" + quad->arg1;
+        emitAsm("movl", {arg1Addr, regName});
+    }else{
+        arg1Addr = getVariableAddr(quad->arg1, st);
+        emitAsm("mov", {arg1Addr, regName});
+    }
+    if(isConstant(quad->arg2)){
+        arg2Addr = "$" + quad->arg2;
+    }else{
+        arg2Addr = getVariableAddr(quad->arg2, st);
+    }
+    emitAsm(op, {arg2Addr, regName});
+    emitAsm("mov", {regName,resultAddr});
+    freeReg(regInd);
+}
+
+void asmOpLogicalOr(int quadNo){
+    emitAsmForOperator("or", quadNo);
+}
+void asmOpLogicalAnd(int quadNo){
+    emitAsmForOperator("and", quadNo);
+}
