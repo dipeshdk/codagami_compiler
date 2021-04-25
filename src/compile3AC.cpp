@@ -2,9 +2,11 @@
 
 int emitAssemblyForQuad(quadruple *quad, int &errCode, int &errStr) {
     switch(quad->opCode) {
-    case OP_GOTO: 
+    case OP_GOTO:
+        asmOpGoto();
         break;
     case OP_ADDI: 
+        asmOpAddI();
         break;
     case OP_MULI: 
         break;
@@ -96,4 +98,8 @@ int emitAssemblyForQuad(quadruple *quad, int &errCode, int &errStr) {
     default:
         break;
     }
+}
+
+void asmOpGoto(){
+    
 }
