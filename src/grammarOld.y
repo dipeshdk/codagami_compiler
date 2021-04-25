@@ -219,15 +219,20 @@ postfix_expression
 		// if(!stNode->isDefined) {
 			// error(name, UNDEFINED_FUNCTION);
 		// }
+		string retTemp = checkFuncArgValidityWithParamEmit($1, nullptr, errCode, errStr);
+		if(errCode) error(errStr, errCode);
 		$1->infoType = INFO_TYPE_FUNC;
 		$$ = $1;	
+		$$->addr = retTemp;
 	}
 	| postfix_expression '(' argument_expression_list ')' {
-		checkFuncArgValidityWithParamEmit($1, $3, errCode, errStr);
+		string retTemp = checkFuncArgValidityWithParamEmit($1, $3, errCode, errStr);
 		if(errCode) error(errStr, errCode);
 		$1->infoType = INFO_TYPE_FUNC;
 		addChild($1,$3);
 		$$ = $1;
+		$$->addr = retTemp;
+
 	}
 	| postfix_expression '.' IDENTIFIER { 
 		node * postfix_expression = $1;
@@ -507,21 +512,21 @@ multiplicative_expression
 additive_expression
 	: multiplicative_expression { $$ = $1; }
 	| additive_expression '+' multiplicative_expression { 
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "+", errCode, errStr); 
+		node* temp = makeNodeForExpressionNotStringForAddition($1, $3, "+", errCode, errStr); 
 		if(errCode)
 			error(errStr, errCode);
 		string newTmp = generateTemp(errCode);
 		if(errCode)
 			error(errStr, errCode);
 		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
+		tempNode->declSp = declSpCopy(temp->declSp);
 		int opCode = getOpAddType(temp, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		emit(opCode, $1->addr, $3->addr, newTmp);
 		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
+		// temp->declSp = declSpCopy($1->declSp);
+		addTempDetails(newTmp, gSymTable, temp);
 		$$ = temp;
 		}
 	| additive_expression '-' multiplicative_expression { 
@@ -594,8 +599,8 @@ relational_expression
 	: shift_expression { $$ = $1; }
 	| relational_expression '<' shift_expression { 
 			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
-			if(retval)
-				error(errStr,retval);
+			if(retval < 0)
+				error(errStr,-retval);
 			node* temp = makeNode(strdup("<"), strdup("<"), 0, $1, $3, (node*)NULL, (node*)NULL); 
 			emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
 			if(errCode)
@@ -604,8 +609,8 @@ relational_expression
 			}
 	| relational_expression '>' shift_expression { 
 			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
-			if(retval)
-				error(errStr,retval);
+			if(retval < 0)
+				error(errStr,-retval);
 			node* temp = makeNode(strdup(">"), strdup(">"), 0, $1, $3, (node*)NULL, (node*)NULL); 
 			emitRelop($1, $3, temp, OP_GREATER, errCode, errStr);
 			if(errCode)
@@ -614,8 +619,8 @@ relational_expression
 	}
 	| relational_expression LE_OP shift_expression {
 		int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
-		if(retval)
-			error(errStr,retval);
+		if(retval < 0)
+			error(errStr,-retval);
 		node* temp = makeNode(strdup("LE_OP"), strdup("<="), 0, $1, $3, (node*)NULL, (node*)NULL);
 		emitRelop($1, $3, temp, OP_LEQ, errCode, errStr);
 		if(errCode)
@@ -624,8 +629,8 @@ relational_expression
 	}
 	| relational_expression GE_OP shift_expression { 
 		int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
-		if(retval)
-			error(errStr,retval);
+		if(retval < 0)
+			error(errStr,-retval);
 		node* temp = makeNode(strdup("GE_OP"), strdup(">="), 0, $1, $3, (node*)NULL, (node*)NULL);
 		emitRelop($1, $3, temp, OP_GEQ, errCode, errStr);
 		if(errCode)
@@ -840,87 +845,92 @@ assignment_expression
 		node* unary_expression = $1;
 		node* assignment_expression = $3;
 		node* assignment_operator = $2;
-		if (!unary_expression->declSp) 
-		{
-			declSpec* ds = new declSpec();
-			if(!assignment_expression->declSp)
-				error(assignment_expression->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
-			ds->type = assignment_expression->declSp->type;
-			unary_expression->declSp = ds;
-		}
-		else 
-		{
+		if(assignment_expression->addr != EMPTY_STR) {
+			if (!unary_expression->declSp) 
+			{
+				declSpec* ds = new declSpec();
+				if(!assignment_expression->declSp)
+					error(assignment_expression->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
+				ds->type = assignment_expression->declSp->type;
+				unary_expression->declSp = ds;
+			}
+			else 
+			{
+				string s(assignment_operator->name);
+				if(s == "AND_ASSIGN" || s == "OR_ASSIGN" || s == "XOR_ASSIGN" || s == "LEFT_ASSIGN" || s == "RIGHT_ASSIGN") {
+					//should be only int or char
+					if(checkIntOrChar(unary_expression) || checkIntOrChar(assignment_expression))
+						error("expression should only be int or char", TYPE_ERROR);
+				}
+				if(s=="MUL_ASSIGN" || s=="DIV_ASSIGN" || s=="ADD_ASSIGN" || s=="SUB_ASSIGN" || s=="=") {
+					int retval = canTypecast(assignment_expression->declSp,unary_expression->declSp);
+					if(retval)
+						error("invalid typecast in assignment expression", retval);
+				}
+				if(s == "MOD_ASSIGN") {
+					if(checkType(assignment_expression->declSp, TYPE_FLOAT, 0))
+						error(assignment_expression->lexeme, SHOULD_NOT_BE_FLOAT);
+					//typecast by rank
+					// int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, errStr);
+					// if(retval)
+						// error(errStr,retval);
+				}
+			}
+			string resultAddr = unary_expression->addr;
 			string s(assignment_operator->name);
-			if(s == "AND_ASSIGN" || s == "OR_ASSIGN" || s == "XOR_ASSIGN" || s == "LEFT_ASSIGN" || s == "RIGHT_ASSIGN") {
-				//should be only int or char
-				if(checkIntOrChar(unary_expression) || checkIntOrChar(assignment_expression))
-					error("expression should only be int or char", TYPE_ERROR);
+			int opCode = getOpcodeFromAssignStr(s);
+			if(opCode >= 0) { 
+				//AND_ASSIGN or OR_ASSIGN or XOR_ASSIGN or LEFT_ASSIGN or RIGHT_ASSIGN or MOD_ASSIGN
+				emitOperationAssignment(unary_expression, assignment_expression, opCode, resultAddr, errCode, errStr);
+				if(errCode)
+					error(errStr, errCode);
 			}
-			if(s=="MUL_ASSIGN" || s=="DIV_ASSIGN" || s=="ADD_ASSIGN" || s=="SUB_ASSIGN" || s=="=") {
-				int retval = canTypecast(assignment_expression->declSp,unary_expression->declSp);
+			else if(s == "=")
+			{
+				bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
+				if(errCode)
+					error(errStr, errCode);
+				if(retval){
+					typeCastLexemeWithEmit(assignment_expression, unary_expression->declSp);
+				}
+				emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
+			}
+			else
+			{
+				int rank = giveTypeCastRank(unary_expression, assignment_expression);
+				if(rank < 0)
+					error("giveTypeCastRank error",-rank);
+				
+				int retval = typeCastByRank(unary_expression, assignment_expression, rank);
 				if(retval)
-					error("invalid typecast in assignment expression", retval);
+					error("typecast error",retval);
+				opCode = -1;
+				if(s == "MUL_ASSIGN")
+					opCode = getOpMulType(unary_expression, errCode, errStr);
+				else if(s == "DIV_ASSIGN")
+					opCode = getOpDivType(unary_expression, errCode, errStr);
+				else if(s == "SUB_ASSIGN")
+					opCode = getOpSubType(unary_expression, errCode, errStr);
+				else if(s == "ADD_ASSIGN")
+					opCode = getOpAddType(unary_expression, errCode, errStr);
+				
+				if(errCode || opCode == -1)
+					error(errStr, errCode);
+				emitOperationAssignment(unary_expression, assignment_expression, opCode, resultAddr, errCode, errStr);
+				if(errCode)
+					error(errStr, errCode);
 			}
-			if(s == "MOD_ASSIGN") {
-				if(checkType(assignment_expression->declSp, TYPE_FLOAT, 0))
-					error(assignment_expression->lexeme, SHOULD_NOT_BE_FLOAT);
-				//typecast by rank
-				// int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, errStr);
-				// if(retval)
-					// error(errStr,retval);
-			}
+			assignment_operator->addr = unary_expression->addr;
+			assignment_operator->declSp = declSpCopy(unary_expression->declSp);
+			assignment_operator->nextlist = mergelist(assignment_operator->nextlist, unary_expression->nextlist);
+			assignment_operator->nextlist = mergelist(assignment_operator->nextlist, assignment_expression->nextlist);
+			addChild(assignment_operator, unary_expression); 
+			addChild(assignment_operator, assignment_expression); 
+			$$ = assignment_operator;
+		}else {
+			error("Assignment of return value of a void function" ,UNSUPPORTED_FUNCTIONALITY);
 		}
-		string resultAddr = unary_expression->addr;
-		string s(assignment_operator->name);
-		int opCode = getOpcodeFromAssignStr(s);
-		if(opCode >= 0) { 
-			//AND_ASSIGN or OR_ASSIGN or XOR_ASSIGN or LEFT_ASSIGN or RIGHT_ASSIGN or MOD_ASSIGN
-			emitOperationAssignment(unary_expression, assignment_expression, opCode, resultAddr, errCode, errStr);
-			if(errCode)
-				error(errStr, errCode);
-		}
-		else if(s == "=")
-		{
-			bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
-			if(errCode)
-				error(errStr, errCode);
-			if(retval){
-				typeCastLexemeWithEmit(assignment_expression, unary_expression->declSp);
-			}
-			emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
-		}
-		else
-		{
-			int rank = giveTypeCastRank(unary_expression, assignment_expression);
-			if(rank < 0)
-				error("giveTypeCastRank error",-rank);
-			
-			int retval = typeCastByRank(unary_expression, assignment_expression, rank);
-			if(retval)
-				error("typecast error",retval);
-			opCode = -1;
-			if(s == "MUL_ASSIGN")
-				opCode = getOpMulType(unary_expression, errCode, errStr);
-			else if(s == "DIV_ASSIGN")
-				opCode = getOpDivType(unary_expression, errCode, errStr);
-			else if(s == "SUB_ASSIGN")
-				opCode = getOpSubType(unary_expression, errCode, errStr);
-			else if(s == "ADD_ASSIGN")
-				opCode = getOpAddType(unary_expression, errCode, errStr);
-			
-			if(errCode || opCode == -1)
-				error(errStr, errCode);
-			emitOperationAssignment(unary_expression, assignment_expression, opCode, resultAddr, errCode, errStr);
-			if(errCode)
-				error(errStr, errCode);
-		}
-		assignment_operator->addr = unary_expression->addr;
-		assignment_operator->declSp = declSpCopy(unary_expression->declSp);
-		assignment_operator->nextlist = mergelist(assignment_operator->nextlist, unary_expression->nextlist);
-		assignment_operator->nextlist = mergelist(assignment_operator->nextlist, assignment_expression->nextlist);
-		addChild(assignment_operator, unary_expression); 
-		addChild(assignment_operator, assignment_expression); 
-		$$ = assignment_operator;
+		
 	}
 	;
 
@@ -1064,11 +1074,6 @@ declaration
 			offset += getArraySize(sym_node);
 			curr = curr->next;
 		}
-		// struct symbolTableNode* funcNode = lookUp(gSymTable, "foo");
-		// if(funcNode){
-		// 	cout <<"fuck" << endl;
-		// 	printDeclSp(funcNode->declSp);
-		// }
 		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;   
 		makeSibling($2,$1);
 		$$ = $1; 
@@ -1188,7 +1193,7 @@ struct_or_union_specifier
 
 		$$ = struct_or_union_specifier($1,name);	
 	} 
-	| struct_or_union '{' struct_declaration_list '}' {cout << "488 feature not included"<< endl; $$ = NULL;} // segfault will come whenever this will be running
+	| struct_or_union '{' struct_declaration_list '}' {$$ = NULL;} // segfault will come whenever this will be running
 	| struct_or_union  IDENTIFIER {
 		string name(previ); //TODO: wrong name, uses previ
 		
@@ -1608,10 +1613,9 @@ compound_statement
 	: scope_marker '{' '}' { $$ = (node*)NULL; gSymTable = gSymTable->parent;}
 	| scope_marker '{' statement_list '}' {
 		$$ = $3; gSymTable = gSymTable->parent;
-		$$->breaklist = $3->breaklist;	
-		$$->continuelist = $3->continuelist;
+		copyList($$, $3);
 	}
-	| scope_marker '{' declaration_list '}' {  $$ = $3; gSymTable = gSymTable->parent;}
+	| scope_marker '{' declaration_list '}' {  $$ = $3; gSymTable = gSymTable->parent; copyList($$, $3);}
 	| scope_marker '{' declaration_list statement_list '}' { 
 		if($3){
 			$$ = makeNode(strdup("BODY"), strdup("body"), 0, $3, $4, (node*)NULL, (node*)NULL);}
@@ -1619,8 +1623,7 @@ compound_statement
 			$$ = $4;
 		}
 		gSymTable = gSymTable->parent;
-		$$->breaklist = $4->breaklist;	
-		$$->continuelist = $4->continuelist;
+		copyList($$, $4);
 	}
 	;
 
@@ -1858,6 +1861,7 @@ translation_unit
 external_declaration
 	: function_definition {
 		$$ = $1; 
+		backpatch($$->nextlist, nextQuad());
 		emit(OP_ENDFUNC, BLANK_STR, BLANK_STR, BLANK_STR);}
 	| declaration {$$ = $1;}
 	;
@@ -1934,6 +1938,10 @@ function_definition
 			error("backpatchBeginFunc", retval);
 		funcBeginQuad = -1;
 		currFunc = "#prog";
+		vector<int> v1 = mergelist($4->truelist, $4->falselist);
+		vector<int> v2 = mergelist(v1, $4->nextlist);
+		vector<int> v3 = mergelist(v2, $4->breaklist);
+		$$->nextlist = v3;
 	}
 	| declarator func_marker_1 declaration_list compound_statement { 
 		//UNSUPPORTED_FUNCTIONALITY
@@ -2104,12 +2112,10 @@ int main(int ac, char **av) {
 		// printSymbolTable(gSymTable);
 		printSymbolTableJSON(gSymTable,0,1);
         printCode(codeFilename);
-
 		fclose(fd);
     }
     else
         printf("Usage: a.out input_filename [optional]ouput.dot \n");
-
 	return 0; 
 }
 

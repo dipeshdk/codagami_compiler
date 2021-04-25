@@ -225,10 +225,10 @@ void printSymbolTableJSON(symbolTable *st, int numTab, int printTemps) {
     printf("]\n");
     printf("%s", str.c_str()+1);
     printf("}\n");
+    fclose (jsonFile);  
     for(symbolTable *child : st->childList) {
         printSymbolTableJSON(child, numTab, printTemps);
-    }   
-    fclose (jsonFile);
+    }  
 }
 
 int getNodeSize(symbolTableNode* elem, symbolTable* st){

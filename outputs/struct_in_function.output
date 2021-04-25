@@ -12,8 +12,9 @@
 
 8.   _main:
 9.   BEGINFUNC 40
-10.   *(f1) = foo1
-11.   END_FUNCTION
+10.   1t = LCALL _foo1
+11.   *(f1) = 1t
+12.   END_FUNCTION
 
 
 ====================================================

@@ -7,8 +7,8 @@
 4.   END_FUNCTION
 
 5.   _main:
-6.   BEGINFUNC 44
-7.   2t = 40
+6.   BEGINFUNC 32
+7.   2t = 8
 8.   3t = 2t MULI 0
 9.   4t = a ADDI 3t
 10.   *(4t) = 12
@@ -27,7 +27,7 @@
 23.   PUSHPARAM a
 24.   13t = LCALL _binaryScr
 25.   POPPARAM 8
-26.   result = binaryScr
+26.   result = 13t
 27.   Return 0
 28.   END_FUNCTION
 

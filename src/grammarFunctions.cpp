@@ -145,14 +145,14 @@ node* parameter_declaration(node* declaration_specifiers, node* declarator){
     return declarator;
 }
 
-void checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_expression_list, int &errCode, string &errString) {
+string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_expression_list, int &errCode, string &errString) {
     string func_name = postfix_expression->lexeme;
     string name = postfix_expression->lexeme;
     symbolTableNode* stNode = lookUp(gSymTable, name);
     
     if(!stNode || stNode->infoType != INFO_TYPE_FUNC || !stNode->declSp) {
         setErrorParams(errCode, SYMBOL_NOT_FOUND, errString, name);
-        return;
+        return EMPTY_STR;
     }
 
     // if(!stNode->isDefined) {
@@ -160,11 +160,13 @@ void checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_
     //     return;
     // }
     
+
     vector<struct param*> paramList = stNode->paramList; 
     int maxSize = paramList.size();
     int idx = 0;
     node* curr = argument_expression_list;
     int paramSize = 0;
+    string newTemp = EMPTY_STR;
     while(curr){
         node* temp = curr;
         string s = curr->name;
@@ -172,23 +174,23 @@ void checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_
         if(!temp) continue;
         if(idx >= maxSize) {
             setErrorParams(errCode, INVALID_ARGS_IN_FUNC_CALL, errString, temp->lexeme);
-            return;
+            return EMPTY_STR;
         }
         if(!temp->declSp || !paramList[idx]->declSp){
             setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errString, temp->lexeme);
-            return;
+            return EMPTY_STR; 
         }
         int retval = canTypecast(temp->declSp, paramList[idx]->declSp);
         if(retval){
             setErrorParams(errCode, INVALID_ARGS_IN_FUNC_CALL, errString, temp->lexeme);
-            return;
+            return EMPTY_STR;
         }
         //if valid but different types then typcast temp to paramList[idx]'s type
         if(requiresTypeCasting(temp->declSp, paramList[idx]->declSp)) {
             retval=canTypecast(paramList[idx]->declSp, temp->declSp);
             if(retval){
                 setErrorParams(errCode, retval, errString, temp->lexeme);
-                return;
+                return EMPTY_STR;
             }
             typeCastLexemeWithEmit(temp, paramList[idx]->declSp);
         }
@@ -198,11 +200,15 @@ void checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_
         idx++;
         curr = curr -> next;
     }
+    if(idx != paramList.size()) {
+        setErrorParams(errCode, INVALID_ARGS_IN_FUNC_CALL, errString, func_name);
+        return EMPTY_STR;
+    }
     if(!postfix_expression->declSp){
         error(postfix_expression->lexeme,INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
     }
     if(postfix_expression->declSp->type[0]!= TYPE_VOID){
-        string newTemp = generateTemp(errCode);
+        newTemp = generateTemp(errCode);
         if(errCode)
             error("Cannot generate Temp",errCode);
         emit(OP_LCALL, func_name, BLANK_STR ,newTemp);
@@ -211,6 +217,7 @@ void checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_
         emit(OP_LCALL, func_name, BLANK_STR ,BLANK_STR);
     }
     paramSize = stNode->paramWidth;
-    emit(OP_POPPARAM, BLANK_STR, BLANK_STR, to_string(paramSize));
-    return;
+    if(paramSize)
+        emit(OP_POPPARAM, BLANK_STR, BLANK_STR, to_string(paramSize));
+    return newTemp;
 }

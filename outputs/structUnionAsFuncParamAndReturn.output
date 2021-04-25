@@ -29,7 +29,7 @@
 24.   PUSHPARAM point2
 25.   6t = LCALL _calculateDistanceSquare
 26.   POPPARAM -200
-27.   dist = calculateDistanceSquare
+27.   dist = 6t
 28.   PUSHPARAM point1
 29.   LCALL _xProjection
 30.   POPPARAM -100

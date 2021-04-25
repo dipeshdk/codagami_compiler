@@ -59,7 +59,7 @@ void error(string var, int error_code) {
 	string str;
 	switch(error_code) {
 		case SYMBOL_ALREADY_EXISTS:
-			str = "SYMBOL_ALREADY_EXISTS";
+			str = "redeclaration of";
 			break;
 		case ALLOCATION_ERROR:
 			str = "ALLOCATION_ERROR";
@@ -68,22 +68,22 @@ void error(string var, int error_code) {
 			str = "Invalid arguments passed to the function ";
 			break;
 		case CONFLICTING_TYPES:
-			str = "Conflicting type of declaration ";
+			str = "Conflicting types for";
 			break;
 		case UNDECLARED_SYMBOL:
 			str = "Undeclared symbol ";
 			break;		
 		case TYPE_ERROR:
-			str = "TYPE_ERROR";
+			str = "incompatible types.";
 			break;
 		case ARRAY_SIZE_NOT_CONSTANT:
 			str = "Array size should be a constant ";
 			break;
 		case ARRAY_SIZE_SHOULD_BE_INT:
-			str = "Array size should be a integer ";
+			str = "size of array has non-integer type.";
 			break;
 		case ARRAY_INDEX_SHOULD_BE_INT:
-			str = "Array index should be a integer ";
+			str = "index of array has non-integer type.";
 			break;
 		case INVALID_ARGS_IN_FUNC_CALL:
 			str = "Invalid aruments in function call ";
@@ -92,10 +92,10 @@ void error(string var, int error_code) {
 			str = "Conflicting type of storage class ";
 			break;
 		case SYMBOL_NOT_FOUND:
-			str = "Symbol used before declaration ";
+			str = "undeclared symbol";
 			break;
 		case STRUCT_NOT_DECLARED:
-			str = "Undeclared struct ";
+			str = "Undeclared struct. storage size isn’t known for";
 			break;
 		case INVALID_SYNTAX:
 			str = "Invalid Syntax ";
@@ -110,7 +110,7 @@ void error(string var, int error_code) {
 			str = "Invalid struct param ";
 			break;
 		case INTERNAL_ERROR_DECL_SP_NOT_DEFINED:
-			str = "INTERNAL_ERROR_DECL_SP_NOT_DEFINED";
+			str = "INTERNAL_ERROR: Declaraton Specifier not defined";
 			break;
 		case POINTER_ERROR:
 			str = "Invalid Operand Of Type Pointer";
@@ -134,7 +134,7 @@ void error(string var, int error_code) {
 			str = "";
 			break;
 		case NON_POINTER_DEFERENCE:
-			str = "Dereferencing a non-pointer";
+			str = "invalid type argument of unary *";
 			break;
 		case UNDEFINED_FUNCTION:
 			str = "Function is not defined";
@@ -149,4 +149,11 @@ void error(string var, int error_code) {
 	str+=var;
 	cout << "\nERROR: " << str << " on line number: " << line+1 << endl;
 	exit(error_code);
+}
+
+void copyList(node* n1, node *n2) {
+	n1->continuelist = n2->continuelist;
+	n1->nextlist = n2->nextlist;
+	n1->truelist = n2->truelist;
+	n1->falselist = n2->falselist;
 }

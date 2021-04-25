@@ -12,8 +12,15 @@
 #define TYPE_VOID 504
 #define TYPE_STRUCT 505
 #define TYPE_STRING_LITERAL 506
-# define NOT_CONSTANT 507
+#define NOT_CONSTANT 507
 
+#define RANK_TYPE_STRUCT 6
+#define RANK_TYPE_FLOAT 5
+#define RANK_TYPE_INT 4
+#define RANK_TYPE_POINTER 3
+#define RANK_TYPE_CHAR 2
+#define RANK_TYPE_VOID 1
+ 
 #define SIZE_CHAR 1
 #define SIZE_SHORT 2
 #define SIZE_INT 4 

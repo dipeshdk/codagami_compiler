@@ -26,5 +26,6 @@ extern vector<struct quadruple*> gCode;
 extern set<int> validTypes;
 
 extern node* root;
+extern vector<symbolTable*> codeSTVec;
 
 #endif

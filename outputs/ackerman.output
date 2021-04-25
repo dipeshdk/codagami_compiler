@@ -6,8 +6,8 @@
 3.   IF 1t THEN GOTO 5
 4.   GOTO 8
 5.   2t = n ADDI 1
-6.   Return 2t
-7.   GOTO BLANK
+6.   m = 2t
+7.   GOTO 38
 8.   3t = m GREATER 0
 9.   IF 3t THEN GOTO 11
 10.   GOTO 21
@@ -19,14 +19,14 @@
 16.   PUSHPARAM 1
 17.   6t = LCALL _ack
 18.   POPPARAM 8
-19.   Return ack
-20.   GOTO BLANK
+19.   Return 6t
+20.   GOTO 38
 21.   7t = m GREATER 0
 22.   IF 7t THEN GOTO 24
-23.   GOTO BLANK
+23.   GOTO 38
 24.   8t = n GREATER 0
 25.   IF 8t THEN GOTO 27
-26.   GOTO BLANK
+26.   GOTO 38
 27.   9t = m SUBI 1
 28.   10t = n SUBI 1
 29.   PUSHPARAM m
@@ -34,21 +34,41 @@
 31.   11t = LCALL _ack
 32.   POPPARAM 8
 33.   PUSHPARAM 9t
-34.   PUSHPARAM ack
+34.   PUSHPARAM 11t
 35.   12t = LCALL _ack
 36.   POPPARAM 8
-37.   Return ack
+37.   Return 12t
 38.   END_FUNCTION
 
-39.   _main:
-40.   BEGINFUNC 4
-41.   PUSHPARAM 1
-42.   PUSHPARAM 2
-43.   13t = LCALL _ack
-44.   POPPARAM 8
-45.   A = ack
-46.   Return 0
+39.   _fov:
+40.   BEGINFUNC 0
+41.   x = 5
+42.   Return 
+43.   END_FUNCTION
+
+44.   _goo:
+45.   BEGINFUNC 4
+46.   Return f
 47.   END_FUNCTION
+
+48.   _main:
+49.   BEGINFUNC 4
+50.   PUSHPARAM 1
+51.   PUSHPARAM 2
+52.   13t = LCALL _ack
+53.   POPPARAM 8
+54.   A = 13t
+55.   PUSHPARAM 68
+56.   LCALL _fov
+57.   POPPARAM 4
+58.   14t = LCALL _goo
+59.   A = 14t
+60.   PUSHPARAM A
+61.   LCALL _fov
+62.   POPPARAM 4
+63.   15t = LCALL _goo
+64.   Return 0
+65.   END_FUNCTION
 
 
 ====================================================

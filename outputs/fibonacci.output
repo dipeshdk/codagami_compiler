@@ -35,7 +35,7 @@
 31.   PUSHPARAM n
 32.   6t = LCALL _fibonacci
 33.   POPPARAM 4
-34.   fib = fibonacci
+34.   fib = 6t
 35.   END_FUNCTION
 
 

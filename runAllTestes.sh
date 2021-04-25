@@ -2,6 +2,7 @@ fileNames=("ackerman.c" "arrayInitialization.c" "arrayTest.c" "binarySearchRecur
 
 make
 mkdir outputs
+mkdir symbolTableJson
 for f in "${fileNames[@]}"
 do
 out="${f%.c}".output
