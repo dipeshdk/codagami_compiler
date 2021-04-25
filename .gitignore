@@ -60,3 +60,4 @@ symbolTable.txt
 *.o
 *.asm
 .vscode/*
+.vscode/settings.json

@@ -1,7 +1,7 @@
 int main(){
     int b;
     int f;
-    f=b;
+    5=b;
     b=1;
     b=f;
 }
