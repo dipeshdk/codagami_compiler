@@ -34,6 +34,7 @@ int insertSymbol(symbolTable* st, int lineNo, string name){
     st->symbolOrder.push_back(name);
     node->name = name;
     node->lineNo = lineNo;
+    node->scope = st->scope;
     st->symbolTableMap[name] = node;
     return 0;
 }

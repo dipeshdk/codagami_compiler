@@ -28,4 +28,8 @@ extern set<int> validTypes;
 extern node* root;
 extern vector<symbolTable*> codeSTVec;
 
+extern vector<reg*> regVec;
+extern vector< pair<string, vector<string>> > gAsm;
+extern vector<string> regNames;
+
 #endif

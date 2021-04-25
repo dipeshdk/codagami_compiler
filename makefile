@@ -44,13 +44,16 @@ $(OBJ)/utility.o: $(SRC)/utility.cpp $(HEADER)/constants.h $(HEADER)/structures.
 $(OBJ)/AST.o: $(SRC)/AST.cpp $(HEADER)/constants.h $(HEADER)/structures.h $(HEADER)/allInclude.h
 	$(GPP) -c $(SRC)/AST.cpp -o $(OBJ)/AST.o
 
+$(OBJ)/compile3AC.o: $(SRC)/compile3AC.cpp $(HEADER)/compile3AC.h $(HEADER)/constants.h $(HEADER)/structures.h $(HEADER)/allInclude.h
+	$(GPP) -c $(SRC)/compile3AC.cpp -o $(OBJ)/compile3AC.o
+
 #-----------------------------------------------------------------------------------------------
 
 $(OBJ)/lex.yy.o: $(OBJ)/lex.yy.c
 	$(CC) -o $(OBJ)/lex.yy.o -c $(OBJ)/lex.yy.c
 
-$(BIN)/3AC: $(OBJ)/lex.yy.o $(OBJ)/y.tab.c $(OBJ)/AST.o  $(OBJ)/generateDot.o  $(OBJ)/grammarFunctions.o  $(OBJ)/printSymbolTable.o  $(OBJ)/symbolTable.o $(OBJ)/TAC.o $(OBJ)/typecast.o $(OBJ)/utility.o
-	$(GPP) -o $(BIN)/3AC $(OBJ)/lex.yy.o $(OBJ)/y.tab.c  $(OBJ)/AST.o  $(OBJ)/generateDot.o  $(OBJ)/grammarFunctions.o  $(OBJ)/printSymbolTable.o  $(OBJ)/symbolTable.o $(OBJ)/TAC.o $(OBJ)/typecast.o $(OBJ)/utility.o
+$(BIN)/3AC: $(OBJ)/lex.yy.o $(OBJ)/y.tab.c $(OBJ)/AST.o  $(OBJ)/generateDot.o  $(OBJ)/grammarFunctions.o  $(OBJ)/printSymbolTable.o  $(OBJ)/symbolTable.o $(OBJ)/TAC.o $(OBJ)/typecast.o $(OBJ)/utility.o $(OBJ)/compile3AC.o
+	$(GPP) -o $(BIN)/3AC $(OBJ)/lex.yy.o $(OBJ)/y.tab.c  $(OBJ)/AST.o  $(OBJ)/generateDot.o  $(OBJ)/grammarFunctions.o  $(OBJ)/printSymbolTable.o  $(OBJ)/symbolTable.o $(OBJ)/TAC.o $(OBJ)/typecast.o $(OBJ)/utility.o $(OBJ)/compile3AC.o
 
 
 

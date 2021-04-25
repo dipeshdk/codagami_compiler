@@ -845,6 +845,9 @@ assignment_expression
 		node* unary_expression = $1;
 		node* assignment_expression = $3;
 		node* assignment_operator = $2;
+		if(unary_expression->name == "CONSTANT"){
+			error(unary_expression->lexeme, ASSIGNMENT_TO_CONSTANT_ERROR);
+		}
 		if(assignment_expression->addr != EMPTY_STR) {
 			if (!unary_expression->declSp) 
 			{
@@ -2110,8 +2113,10 @@ int main(int ac, char **av) {
 		generateDot(root,fileName);
 		
 		// printSymbolTable(gSymTable);
+		emitAssemblyFrom3AC();
 		printSymbolTableJSON(gSymTable,0,1);
         printCode(codeFilename);
+		
 		fclose(fd);
     }
     else

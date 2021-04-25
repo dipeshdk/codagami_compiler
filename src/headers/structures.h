@@ -53,13 +53,14 @@ struct symbolTableNode {
     vector<struct param*> paramList; //for functions, struct and union
     string name;
     struct declSpec *declSp;
-
+    int scope;
     symbolTableNode() {
         infoType = INFO_TYPE_NORMAL;
         arraySize=0;
         paramSize=0;
         isDefined=true;
         declSp = new declSpec();
+        scope = -1;
     }
 };
 
@@ -124,6 +125,17 @@ struct node
 struct quadruple {
     int opCode;
     string arg1, arg2, result;
+};
+
+struct reg{
+    bool isFree;
+    string varValue;
+    int quadNo;
+    string regName;
+    
+    reg() {
+        isFree = true;
+    }
 };
 
 #endif

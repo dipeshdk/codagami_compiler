@@ -142,6 +142,9 @@ void error(string var, int error_code) {
 		case MISMATCH_DEFINITION_DECLARATION:
 			str = "Function declaration and definition do not match.";
 			break;
+    case ASSIGNMENT_TO_CONSTANT_ERROR:
+			str = "Assignment to a constant not allowed";
+			break;
 		default:
 			break;
 	}
@@ -156,4 +159,21 @@ void copyList(node* n1, node *n2) {
 	n1->nextlist = n2->nextlist;
 	n1->truelist = n2->truelist;
 	n1->falselist = n2->falselist;
+}
+
+bool isConstant(string s){
+	for (char const &c : s) {
+        if (!(c >= '0' && c <= '9')) return false;
+    }
+    return true;
+    // try{
+    //     int x = stoi(s);
+    //     throw NOT_CONSTANT_EXCEPTION;
+    // }
+    // catch(int exp){
+    //     if(exp == NOT_CONSTANT_EXCEPTION)
+    //        return false;
+    //     else    
+    //         return true; 
+    // }
 }

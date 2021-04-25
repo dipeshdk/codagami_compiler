@@ -49,6 +49,40 @@ foo {
 
 
 
+==================== Printing 3AC Code ==================
+0.   _main:
+1.   BEGINFUNC 12
+endbr64 
+push   %rbp
+mov    %rsp,%rbp
+
+
+2.   a = 5
+movl   $0x5,-0xc(%rbp)
+
+3.   b = 3
+movl   $0x3,-0x8(%rbp)
+
+4.   1t = a ADDI b
+5.   c = 1t
+mov    -0xc(%rbp),%edx
+mov    -0x8(%rbp),%eax
+add    %edx,%eax
+mov    %eax,-0x4(%rbp)
+
+
+6.   END_FUNCTION
+mov    $0x0,%eax
+pop    %rbp
+retq   
+
+
+
+====================================================
+
+
+
+
 
 
 
