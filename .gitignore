@@ -55,7 +55,7 @@
 *.ps
 temp
 code.txt
-*.s
+# *.s
 symbolTable.txt
 *.o
 *.asm
