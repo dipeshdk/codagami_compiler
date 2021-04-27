@@ -99,14 +99,19 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpLogicalXor(quadNo);
         break;
     case OP_EQ: 
+        asmOpEq(quadNo);
         break;
     case OP_NEQ: 
+        asmOpNeq(quadNo);
         break;
     case OP_LEQ: 
+        asmOpLeq(quadNo);
         break;
     case OP_GREATER: 
+        asmOpGreater(quadNo);
         break;
     case OP_LESS: 
+        asmOpLess(quadNo);
         break;
     case OP_MOD: 
         asmOpMod(quadNo);
@@ -646,8 +651,7 @@ void asmOpMod(int quadNo){
     emitAsm("mov", {"%edx", resultAddr});
     return;
 }
-
-void asmOpGeq(int quadNo){
+void asmOpComp(int quadNo, string asm_comp){
 //    8:	8b 45 f4             	mov    -0xc(%rbp),%eax
 //    b:	3b 45 f8             	cmp    -0x8(%rbp),%eax
 //    e:	0f 9d c0             	setge  %al
@@ -674,11 +678,35 @@ void asmOpGeq(int quadNo){
     }
     int regInd = getReg(quadNo, quad->arg1);
     string regName = regVec[regInd]->regName;
-    emitAsm("setge", {regName});
+    emitAsm(asm_comp, {regName});
     emitAsm("movz", {regName, "%eax"});
     emitAsm("mov", {"%eax", resultAddr});
     freeReg(regInd);
     return;
+}
+
+void asmOpGeq(int quad){
+  asmOpComp(quad, "setge");
+}
+
+void asmOpLeq(int quad){
+  asmOpComp(quad, "setle");
+}
+
+void asmOpGreater(int quad){
+  asmOpComp(quad, "setg");
+}
+
+void asmOpLess(int quad){
+  asmOpComp(quad, "setl");
+}
+
+void asmOpEq(int quad){
+  asmOpComp(quad, "sete");
+}
+
+void asmOpNeq(int quad){
+  asmOpComp(quad, "setne");
 }
 
 void asmOpAndAnd(int quadNo){

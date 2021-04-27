@@ -49,12 +49,23 @@ void useReg(int regInd, int quadNo, string varValue);
 
 void freeRegAndMoveToStack(int regInd);
 
-void asmOpAssignment(int quadNo);
-
-
-void asmOpMod(int quadNo);
+void asmOpComp(int quadNo, string asm_comp);
 
 void asmOpGeq(int quadNo);
+
+void asmOpLeq(int quadNo);
+
+void asmOpEq(int quadNo);
+
+void asmOpNeq(int quad);
+
+void asmOpGreater(int quadNo);
+
+void asmOpLess(int quadNo);
+
+void asmOpAssignment(int quadNo);
+
+void asmOpMod(int quadNo);
 
 void asmOpAndAnd(int quadNo);
 
