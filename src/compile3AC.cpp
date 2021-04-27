@@ -15,12 +15,21 @@ vector<string> regNames({"%eax", "%ecx", "%edx", "%ebx", "%esp", "%ebp", "%esi",
 stack<string> funcNameStack;
 stack<int> funcSizeStack;
 vector<pair<string, string>> globalDataPair;
+vector<int> quad_instr_begin;
+vector<pair<int, int> > asm_backpatch_list;
+
+string currFunc = "#prog";
+int instr_num = 0;
 
 void emitAssemblyFrom3AC() {
   funcNameStack.push(GLOBAL);
   initializeRegs();
   for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
+    quad_instr_begin.push_back(instr_num);
     emitAssemblyForQuad(quadNo);
+  }
+  for(auto p: asm_backpatch_list){
+    // gAsm[p.first] // p.first is the asm instruction number and p.second is the quad number
   }
   setUpGlobalData();
   printAsm();
@@ -172,6 +181,7 @@ void asmOpLabel(int quadNo) {
   emitAsm(label, {});
   string funcName = gCode[quadNo]->result;
   funcNameStack.push(funcName);
+  currFunc = funcName;
 }
 
 void asmOpReturn(int quadNo) {
@@ -218,6 +228,7 @@ void amsOpLCall(int quadNo) {
 }
 
 void emitFuncStart() {
+  instr_num = 0;
   emitAsm("endbr64", {});
   emitAsm("push", {"%rbp"});
   emitAsm("mov", {"%rsp", "%rbp"});
@@ -457,7 +468,7 @@ int getOffset(string varName, symbolTable *st) {
     error(varName, SYMBOL_NOT_FOUND);
   }
   int offset = sym_node->offset;
-  offset += sym_node->size;
+  offset += getOffsettedSize(sym_node->size);
   return -1 * offset;
 }
 
@@ -616,7 +627,7 @@ void asmOpMod(int quadNo) {
 
   string resultAddr = getVariableAddr(quad->result, st);
   if (isConstant(quad->arg1)) {
-    emitAsm("mov", {"$" + quad->arg1, "%eax"});
+    emitAsm("mov", {"$" + hexString(quad->arg1), "%eax"});
   } else {
     string argAddr = getVariableAddr(quad->arg1, st);
     // int regInd = getReg(quadNo, quad->arg1);
@@ -627,7 +638,7 @@ void asmOpMod(int quadNo) {
   }
   emitAsm("cltd", {});
   if (isConstant(quad->arg2)) {
-    emitAsm("idiv", {"$" + quad->arg2});
+    emitAsm("idiv", {"$" + hexString(quad->arg2)});
   } else {
     string argAddr = getVariableAddr(quad->arg2, st);
     // int regInd = getReg(quadNo, quad->arg1);
@@ -653,13 +664,13 @@ void asmOpComp(int quadNo, string asm_comp) {
 
   string resultAddr = getVariableAddr(quad->result, st);
   if (isConstant(quad->arg1)) {
-    emitAsm("mov", {"$" + quad->arg1, "%eax"});
+    emitAsm("mov", {"$" + hexString(quad->arg1), "%eax"});
   } else {
     string argAddr = getVariableAddr(quad->arg1, st);
     emitAsm("mov", {argAddr, "%eax"});
   }
   if (isConstant(quad->arg2)) {
-    emitAsm("cmp", {"$" + quad->arg2, "%eax"});
+    emitAsm("cmp", {"$" + hexString(quad->arg2), "%eax"});
   } else {
     string argAddr = getVariableAddr(quad->arg2, st);
     emitAsm("cmp", {argAddr, "%eax"});
@@ -715,22 +726,22 @@ void asmOpAndAnd(int quadNo) {
 
   string resultAddr = getVariableAddr(quad->result, st);
   if (isConstant(quad->arg1)) {
-    emitAsm("cmp", {"$0", "$" + quad->arg1});
+    emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg1)});
   } else {
     string argAddr = getVariableAddr(quad->arg1, st);
-    emitAsm("cmp", {"$0", argAddr});
+    emitAsm("cmp", {"$0x0", argAddr});
   }
   emitAsm("je", {to_string(gAsm.size() + 5)});  // Jump to mov 0x0
   if (isConstant(quad->arg2)) {
-    emitAsm("cmp", {"$0", "$" + quad->arg2});
+    emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg2)});
   } else {
     string argAddr = getVariableAddr(quad->arg2, st);
-    emitAsm("cmp", {"$0", argAddr});
+    emitAsm("cmp", {"$0x0", argAddr});
   }
   emitAsm("je", {to_string(gAsm.size() + 3)});  // Jump to mov 0x0
-  emitAsm("mov", {"$1", "%eax"});
+  emitAsm("mov", {"$0x1", "%eax"});
   emitAsm("jmp", {to_string(gAsm.size() + 2)});
-  emitAsm("$0", {"%eax"});
+  emitAsm("mov", {"0x0", "%eax"});
   emitAsm("mov", {"%eax", resultAddr});
   return;
 }
@@ -751,22 +762,22 @@ void asmOpOrOr(int quadNo) {
 
   string resultAddr = getVariableAddr(quad->result, st);
   if (isConstant(quad->arg1)) {
-    emitAsm("cmp", {"$0", "$" + quad->arg1});
+    emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg1)});
   } else {
     string argAddr = getVariableAddr(quad->arg1, st);
-    emitAsm("cmp", {"$0", argAddr});
+    emitAsm("cmp", {"$0x0", argAddr});
   }
   emitAsm("jne", {to_string(gAsm.size() + 3)});  // Jump to mov 0x0
   if (isConstant(quad->arg2)) {
-    emitAsm("cmp", {"$0", "$" + quad->arg2});
+    emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg2)});
   } else {
     string argAddr = getVariableAddr(quad->arg2, st);
-    emitAsm("cmp", {"$0", argAddr});
+    emitAsm("cmp", {"$0x0", argAddr});
   }
   emitAsm("je", {to_string(gAsm.size() + 3)});  // Jump to mov 0x0
-  emitAsm("mov", {"$1", "%eax"});
+  emitAsm("mov", {"$0x1", "%eax"});
   emitAsm("jmp", {to_string(gAsm.size() + 2)});
-  emitAsm("$0", {"%eax"});
+  emitAsm("mov", {"0x0", "%eax"});
   emitAsm("mov", {"%eax", resultAddr});
   return;
 }
@@ -787,7 +798,7 @@ void asmOpIfGoto(int quadNo) {
   symbolTable *st = codeSTVec[quadNo];
 
   if (isConstant(quad->arg1)) {
-    emitAsm("cmpl", {"$0x0", "$" + quad->arg1});
+    emitAsm("cmpl", {"$0x0", "$" + hexString(quad->arg1)});
   } else {
     string argAddr1 = getVariableAddr(quad->arg1, st);
     int regInd      = getReg(quadNo, quad->arg1);
@@ -825,14 +836,14 @@ void asmOpIfNeqGoto(int quadNo) {
 
   if (isConstant(quad->arg1)) {
     if (isConstant(quad->arg2)) {
-      emitAsm("cmp", {"$" + quad->arg1, "$" + quad->arg2});
+      emitAsm("cmp", {"$" + hexString(quad->arg1), "$" + hexString(quad->arg2)});
     } else {
       string argAddr = getVariableAddr(quad->arg2, st);
-      emitAsm("cmp", {"$" + quad->arg1, argAddr});
+      emitAsm("cmp", {"$" + hexString(quad->arg1), argAddr});
     }
   } else if (isConstant(quad->arg2)) {
     string argAddr = getVariableAddr(quad->arg1, st);
-    emitAsm("cmp", {"$" + quad->arg2, argAddr});
+    emitAsm("cmp", {"$" + hexString(quad->arg2), argAddr});
   } else {
     string argAddr1 = getVariableAddr(quad->arg1, st);
     string argAddr2 = getVariableAddr(quad->arg2, st);
