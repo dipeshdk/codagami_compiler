@@ -19,5 +19,5 @@ int getArraySize(symbolTableNode* sym_node);
 
 string getOpName(int opCode);
 void printCode(char* filename);
-void printASM();
+void printASMText();
 #endif

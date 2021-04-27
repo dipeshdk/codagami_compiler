@@ -170,6 +170,7 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
     node* curr = argument_expression_list;
     int paramSize = 0;
     string newTemp = EMPTY_STR;
+    vector<node*> arguments;
     while(curr){
         node* temp = curr;
         string s = curr->name;
@@ -198,8 +199,9 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
             typeCastLexemeWithEmit(temp, paramList[idx]->declSp);
         }
         temp->infoType = paramList[idx]->infoType;
-        emit(OP_PUSHPARAM, BLANK_STR, BLANK_STR, temp->addr);
-        paramSize+= getTypeSize(temp->declSp->type);
+        arguments.push_back(temp);
+        // emit(OP_PUSHPARAM, BLANK_STR, BLANK_STR, temp->addr);
+        // paramSize+= getTypeSize(temp->declSp->type);
         idx++;
         curr = curr -> next;
     }
@@ -210,6 +212,20 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
     if(!postfix_expression->declSp){
         error(postfix_expression->lexeme,INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
     }
+
+    // Doing this in LCall
+    // Assuming no required value in regs 
+    for(int i = 0; i < min(6, maxSize); i++) {
+        //mov to reg
+        emit(OP_MOV, gArgRegs[i], EMPTY_STR , arguments[i]->addr);
+    }
+
+    for(int i = maxSize-1; i >= 6; i--) {
+        //push param
+        emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, arguments[i]->addr);
+        paramSize+= getTypeSize(arguments[i]->declSp->type);
+    }
+
     if(postfix_expression->declSp->type[0]!= TYPE_VOID){
         newTemp = generateTemp(errCode);
         if(errCode)
@@ -217,11 +233,13 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         emit(OP_LCALL, func_name, BLANK_STR ,newTemp);
         addTempDetails(newTemp, gSymTable, postfix_expression);
     }else{
-        emit(OP_LCALL, func_name, BLANK_STR ,BLANK_STR);
+        emit(OP_LCALL, func_name, EMPTY_STR ,EMPTY_STR);
     }
-    paramSize = stNode->paramWidth;
+
+    // paramSize = stNode->paramWidth;
     if(paramSize)
-        emit(OP_POPPARAM, BLANK_STR, BLANK_STR, to_string(paramSize));
+        emit(OP_POPPARAM, EMPTY_STR, EMPTY_STR, to_string(paramSize));
+    stNode->callPopSize = paramSize;
     return newTemp;
 }
 

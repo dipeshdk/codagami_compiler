@@ -29,8 +29,6 @@ void emitAssemblyFrom3AC();
 
 void emitAssemblyForQuad(int quadNo);
 
-void emitAsm(string optr, vector<string> operands);
-
 void errorAsm(string str, int errCode);
 
 int getOffset(string varName, symbolTable* st);
@@ -131,3 +129,26 @@ string getVariableAddr(string varName, symbolTable* st) ;
 
 void initializeRegs();
 
+void amsOpLCall(int quadNo);
+
+void asmOPMoveFuncParam(int quadNo);
+
+void asmOpPushparam(int quadNo);
+
+void asmOpPopparam(int quad);
+
+void asmOpLabel(int quadNo);
+
+void asmOpReturn(int quadNo);
+
+void asmOpEndFunc(int quadNo);
+
+void emitFuncStart();
+
+void asmOpBeginFunc(int quadNo);
+
+void printAsm();
+
+void printASMData();
+
+void setUpGlobalData();

@@ -31,5 +31,9 @@ extern vector<symbolTable*> codeSTVec;
 extern vector<reg*> regVec;
 extern vector< pair<string, vector<string>> > gAsm;
 extern vector<string> regNames;
+extern vector<string> gArgRegs;
 
+extern stack<string> funcNameStack;
+extern stack<int> funcSizeStack;
+extern vector<pair<string, string>> globalDataPair;
 #endif

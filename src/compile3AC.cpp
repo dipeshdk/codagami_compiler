@@ -4,20 +4,48 @@
 #define CONSTANT "__constant__"
 #define EAX_REGISTER_INDEX 0
 #define EDX_REGISTER_INDEX 2
-
+#define RBP_REGISTER_INDEX 5
+#define RSP_REGISTER_INDEX 4
+#define GLOBAL "global"
+#define GLOBAL_SIZE 0
 
 using namespace std;
 
 vector<reg*> regVec;
 vector< pair<string, vector<string>> > gAsm;
 vector<string> regNames({"%rax" , "%rcx" , "%rdx" , "%rbx" , "%rsp" , "%rbp" , "%rsi" , "%rdi"});
+stack<string> funcNameStack;
+stack<int> funcSizeStack;
+vector<pair<string, string>> globalDataPair;
 
 void emitAssemblyFrom3AC() {
+    funcNameStack.push(GLOBAL);
     initializeRegs();
     for(int quadNo = 0; quadNo < gCode.size(); quadNo++) {
         emitAssemblyForQuad(quadNo);
     }
-    printASM();
+    setUpGlobalData();
+    printAsm();
+}
+
+void setUpGlobalData() {
+    //TODO: setup globalDataPair<dataName, dataVal>
+    return;
+}
+
+void printAsm() {
+    freopen("asmOut.asm", "w", stdout);
+    printASMData();
+    printASMText();
+}
+
+void printASMData() {
+    cout << "\n.data" << endl;
+    // int lineNo = 0;
+    for(pair<string, string> p : globalDataPair) {
+        cout << p.first << ":   " << p.second << "\n";        
+    }
+    cout <<  endl;
 }
 
 
@@ -109,28 +137,173 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpIfNeqGoto(quadNo);
         break;
     case OP_BEGINFUNC: 
+        asmOpBeginFunc(quadNo);
         break;
     case OP_ENDFUNC: 
+        asmOpEndFunc(quadNo);
         break;
-    case OP_RETURN: 
+    case OP_RETURN:
+        asmOpReturn(quadNo); 
         break;
     case OP_PUSHPARAM: 
+        asmOpPushparam(quadNo);
         break;
     case OP_POPPARAM: 
+        asmOpPopparam(quadNo);
         break;
-    case OP_LCALL: 
+    case OP_LCALL:
+        amsOpLCall(quadNo); 
         break;
     case OP_LABEL: 
+        asmOpLabel(quadNo);
         break;
     case OP_ADDR: 
         break;
     case OP_BITWISE_NOT: 
+        break;
+    case OP_MOV:
+        asmOPMoveFuncParam(quadNo);
         break;
     default:
         break;
     }
 }
 
+void asmOpLabel(int quadNo) {
+    emitAsm(gCode[quadNo]->result, {":"});
+    string funcName = gCode[quadNo]->result;
+    funcNameStack.push(funcName);
+
+}
+
+void asmOpReturn(int quadNo){
+    quadruple *quad = gCode[quadNo];
+    symbolTable *st = codeSTVec[quadNo];
+    
+    int eaxInd = EAX_REGISTER_INDEX;
+    string eaxName = regVec[EAX_REGISTER_INDEX]->regName;
+    
+    freeRegAndMoveToStack(eaxInd);
+    regVec[eaxInd]->isFree = false;
+    
+    if(quad->result == EMPTY_STR){
+        emitAsm("mov", {"$0x0", eaxName});
+    }else{
+        if(!isConstant(quad->result)){
+            string argAddr = getVariableAddr(quad->result, st);
+            emitAsm("mov", {argAddr, eaxName});
+        }else{
+            emitAsm("mov", {"$"+hexString(quad->result), eaxName});
+        }
+    }
+}
+
+void asmOpEndFunc(int quadNo){
+    emitAsm("add", {"$"+hexString(to_string(funcSizeStack.top())), "%rsp"});
+    emitAsm("pop", {"%rbp"});
+    emitAsm("retq", {});
+    funcNameStack.pop();
+    funcSizeStack.pop();
+}
+
+void amsOpLCall(int quadNo){
+    quadruple *quad = gCode[quadNo];
+    symbolTable *st = codeSTVec[quadNo];
+    //mov    %eax,-0x4(%rbp)
+    if(isConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    emitAsm("callq", {quad->arg1});
+    if(quad->result != EMPTY_STR){
+        string resultAddr = getVariableAddr(quad->result, st);
+        emitAsm("mov", {"%eax", resultAddr});
+    }
+}
+
+void emitFuncStart() {
+    emitAsm("endbr64", {});
+    emitAsm("push", {"%rbp"});
+    emitAsm("mov", {"%rsp", "%rbp"});
+}
+
+void asmOpBeginFunc(int quadNo) {
+    quadruple *quad = gCode[quadNo];
+    symbolTable *st = codeSTVec[quadNo];
+
+    if(!isConstant(quad->result))
+        errorAsm(quad->result, BEGIN_FUNC_ARG_NOT_CONSTANT_ERROR);
+    if(funcNameStack.empty() || funcNameStack.top() == GLOBAL)
+        errorAsm("",CALL_TO_GLOBAL_ERROR);
+
+    int funcSize = getNumberFromConstAddr(quad->result);
+    funcSizeStack.push(funcSize);
+    //TODO: funcNameStack is the the stack containing active function names, starting with global
+    symbolTableNode* funcNode = lookUp(st, funcNameStack.top());
+    if(!funcNode)
+        error(funcNameStack.top(), SYMBOL_NOT_FOUND);
+    if(funcNode->infoType != INFO_TYPE_FUNC)
+        error(funcNameStack.top(), TYPE_ERROR);
+
+    //emit start
+    emitFuncStart();
+    
+    //sub stack pointer
+    emitAsm("sub", {"$"+hexString(quad->result), "%rsp"});
+
+    //move first 6 arguments from register to stack
+    vector<struct param*> paramList = funcNode->paramList;
+    int numParams = paramList.size();
+    for(int i = 0; i < min(6, numParams); i++) {
+        string argAddr = getVariableAddr(paramList[i]->paramName, st);
+        emitAsm("mov", {gArgRegs[i], argAddr});
+    }
+    return;
+}
+
+void asmOPMoveFuncParam(int quadNo){
+    quadruple *quad = gCode[quadNo];
+    symbolTable *st = codeSTVec[quadNo];
+    
+    string regName = quad->arg1;
+    string valToMove = quad->result;
+    if(find(gArgRegs.begin(), gArgRegs.end(), regName) == gArgRegs.end()){
+        errorAsm("", REGISTER_ASSIGNMENT_ERROR);
+    }
+    
+    if(isConstant(valToMove)) {
+        emitAsm("movl", {"$"+hexString(valToMove), regName});
+    }else {
+        string argAddr = getVariableAddr(valToMove, st);
+        emitAsm("mov", {argAddr, regName});
+    }
+}
+
+
+void asmOpPushparam(int quadNo){
+    quadruple *quad = gCode[quadNo];
+    symbolTable *st = codeSTVec[quadNo];
+
+    string resultAddr = quad->result;
+
+    if(isConstant(resultAddr)){
+        emitAsm("pushq", {"$"+hexString(resultAddr)});
+    }
+    else{
+        string argAddr = getVariableAddr(resultAddr,st);
+        emitAsm("mov", {argAddr, "%eax"});
+        emitAsm("push", {"%rax"});        
+    }
+}
+
+void asmOpPopparam(int quadNo){
+    quadruple *quad = gCode[quadNo];
+    symbolTable *st = codeSTVec[quadNo];
+    string resultAddr = quad->result;
+    
+    if(!isConstant(resultAddr)){
+        errorAsm("", POPPARAM_ARG_NOT_CONSTANT);
+    }
+    emitAsm("add", {"$"+hexString(quad->result), "%rsp"});
+}
 /*  Currently our compiler doesn't support negative numbers,
     it takes negative numbers as UNARY_MINUS abs(number). 
     This is in contrast with what GCC do.
@@ -261,10 +434,20 @@ void errorAsm(string str, int errCode){
             errStr = "Cannot assign value to a constant.";
             break;
         case UNDEFINED_SCOPE_STNODE_ERROR:
-            errStr = "Internal Error.";
+            errStr = "Internal Error. UNDEFINED_SCOPE_STNODE_ERROR";
             break;
         case REGISTER_ASSIGNMENT_ERROR:
-            errStr = "Internal Error.";
+            errStr = "Internal Error. REGISTER_ASSIGNMENT_ERROR";
+            break;
+        case POPPARAM_ARG_NOT_CONSTANT:
+            errStr = "Popparam arg should be constant"; 
+            break;
+        case BEGIN_FUNC_ARG_NOT_CONSTANT_ERROR:
+            errStr = "Beginfunc arg should be constant"; 
+            break;
+        case CALL_TO_GLOBAL_ERROR:
+            errStr = "Internal Error. Calling global";
+            break;
         default:
             break;
     }

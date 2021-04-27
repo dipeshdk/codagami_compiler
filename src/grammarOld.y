@@ -1845,7 +1845,7 @@ jump_statement
 		}
 		
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		emit(OP_RETURN, BLANK_STR, BLANK_STR, BLANK_STR);
+		emit(OP_RETURN, EMPTY_STR, EMPTY_STR, EMPTY_STR);
 	}
 	| RETURN expression ';' { 
 		symbolTableNode* funcNode = lookUp(gSymTable, currFunc);
@@ -1864,7 +1864,7 @@ jump_statement
 		if(err) error("error n typecasting", err);
 		// temp->addr = n1->addr;
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 0, temp, (node*)NULL, (node*)NULL, (node*)NULL);
-		emit(OP_RETURN, BLANK_STR, BLANK_STR, temp->addr);
+		emit(OP_RETURN, EMPTY_STR, EMPTY_STR, temp->addr);
     }
 	;
 
@@ -1877,7 +1877,7 @@ external_declaration
 	: function_definition {
 		$$ = $1; 
 		backpatch($$->nextlist, nextQuad());
-		emit(OP_ENDFUNC, BLANK_STR, BLANK_STR, BLANK_STR);}
+		emit(OP_ENDFUNC, EMPTY_STR, EMPTY_STR, EMPTY_STR);}
 	| declaration {$$ = $1;}
 	;
 
@@ -1931,7 +1931,7 @@ function_definition
 
 	// 	funcNode->paramWidth = tempOffset-rbp_size;
 		
-		string labelName = "_" + string(declarator->lexeme);
+		string labelName = string(declarator->lexeme);
 		emit(OP_LABEL, EMPTY_STR, EMPTY_STR, labelName);
 		if(funcBeginQuad != -1)
 			error("Internal funcBeginQuad not -1", INVALID_ARGS_IN_FUNC_CALL);
@@ -2013,7 +2013,7 @@ func_marker_1
 		// }
     
 
-		string labelName = "_" + string(declarator->lexeme);
+		string labelName = string(declarator->lexeme);
 		emit(OP_LABEL, EMPTY_STR, EMPTY_STR,labelName);
     //	TODO: backpatch offset
 		if(funcBeginQuad != -1)
