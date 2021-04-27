@@ -51,7 +51,7 @@ void emitAssemblyForQuad(int quadNo) {
     quadruple *quad = gCode[quadNo];
     switch(quad->opCode) {
     case OP_GOTO:
-        // asmOpGoto();
+        asmOpGoto();
         break;
     case OP_ADDI: 
         asmOpAddI(quadNo);
@@ -60,7 +60,7 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpMulI(quadNo);
         break;
     case OP_IFGOTO: 
-        // asmOpIfGoto();
+        asmOpIfGoto();
         break;
     case OP_SUBI: 
         asmOpSubI(quadNo);
@@ -782,6 +782,52 @@ void asmOpOrOr(int quadNo){
     emitAsm("mov", {"%eax", resultAddr});
     return;
 }
+
+void asmOpGoto(int quadNo){
+  quadruple* quad = gCode[quadNo];
+  symbolTable *st = codeSTVec[quadNo];
+
+  string resultAddr = quad->result;
+
+  if(!isConstant(resultAddr)){
+    errorAsm(quad->result, ); 
+  }
+
+  emitAsm("jmp", {resultAddr});
+
+}
+
+void asmOpIfGoto(int quadNo){
+  quadruple* quad = gCode[quadNo];
+  symbolTable *st = codeSTVec[quadNo];
+
+  if(isConstant(quad->arg1)) {
+        if(isConstant(quad->arg2)){
+            emitAsm("cmp", {"$"+quad->arg1, "$"+quad->arg2});    
+        }
+        else{
+            string argAddr = getVariableAddr(quad->arg2, st);
+            emitAsm("cmp", {"$"+quad->arg1, argAddr});
+        }
+    }
+    else if(isConstant(quad->arg2)){
+        string argAddr = getVariableAddr(quad->arg1, st);
+        emitAsm("cmp", {"$"+quad->arg2, argAddr});
+    }
+    else {
+        string argAddr1 = getVariableAddr(quad->arg1, st);
+        string argAddr2 = getVariableAddr(quad->arg2, st);
+        int regInd = getReg(quadNo, quad->arg1);
+        string regName = regVec[regInd]->regName;
+        emitAsm("mov", {argAddr1, regName});
+        emitAsm("cmp", {regName, argAddr2});
+        freeReg(regInd);
+    }
+    emitAsm("je", {"GOTO_ADDR"}); // Address to be added
+
+}
+
+
 void asmOpIfNeqGoto(int quadNo){
 //         switch(a){
 //    8:	83 7d f8 01          	cmpl   $0x1,-0x8(%rbp)
