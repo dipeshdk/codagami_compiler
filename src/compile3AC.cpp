@@ -34,7 +34,7 @@ void setUpGlobalData() {
 }
 
 void printAsm() {
-    freopen("asmOut.asm", "w", stdout);
+    freopen("asmOut.s", "w", stdout);
     printASMData();
     printASMText();
 }
@@ -170,7 +170,9 @@ void emitAssemblyForQuad(int quadNo) {
 }
 
 void asmOpLabel(int quadNo) {
-    emitAsm(gCode[quadNo]->result, {":"});
+    string label = "\n";
+    label = label + gCode[quadNo]->result + ":";
+    emitAsm(label, {});
     string funcName = gCode[quadNo]->result;
     funcNameStack.push(funcName);
 
@@ -285,7 +287,7 @@ void asmOpPushparam(int quadNo){
     string resultAddr = quad->result;
 
     if(isConstant(resultAddr)){
-        emitAsm("pushq", {"$"+hexString(resultAddr)});
+        emitAsm("push", {"$"+hexString(resultAddr)});
     }
     else{
         string argAddr = getVariableAddr(resultAddr,st);
