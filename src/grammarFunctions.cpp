@@ -288,7 +288,6 @@ void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable){
 		if(!sym_node){
 	    	error(lex, ALLOCATION_ERROR);
 		}
-		
         sym_node->offset = offset;
         offset += getOffsettedSize(sym_node->size);
 	}
