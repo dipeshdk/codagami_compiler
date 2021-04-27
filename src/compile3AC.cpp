@@ -1,9 +1,9 @@
 #include "headers/allInclude.h"
 #define NOT_CONSTANT_EXCEPTION 601
-#define NUM_REGISTER 8
+#define NUM_REGISTER 10
 #define CONSTANT "__constant__"
-#define EAX_REGISTER_INDEX 0
-#define EDX_REGISTER_INDEX 2
+#define EAX_REGISTER_INDEX 3
+#define EDX_REGISTER_INDEX 4
 #define GLOBAL "global"
 #define GLOBAL_SIZE 0
 
@@ -11,16 +11,24 @@ using namespace std;
 
 vector<reg*> regVec;
 vector< pair<string, vector<string>> > gAsm;
-vector<string> regNames({"%eax" , "%ecx" , "%edx" , "%ebx" , "%esp" , "%ebp" , "%esi" , "%edi"});
+vector<string> gArgRegs({"%edi", "%esi", "%edx", "%ecx", "%r8d", "%r9d"});
+vector<string> regNames({"%r10d", "%r11d", "%ecx", "%eax" , "%edx" , "%ebx" , "%esp" , "%ebp" , "%esi" , "%edi"});
 stack<string> funcNameStack;
 stack<int> funcSizeStack;
 vector<pair<string, string>> globalDataPair;
+int gQuadNo; // holding the current quadNo
+stack<int> ptrAssignedRegs;
 
 void emitAssemblyFrom3AC() {
     funcNameStack.push(GLOBAL);
     initializeRegs();
     for(int quadNo = 0; quadNo < gCode.size(); quadNo++) {
+        gQuadNo=quadNo;
         emitAssemblyForQuad(quadNo);
+        while(!ptrAssignedRegs.empty()) {
+            freeReg(ptrAssignedRegs.top());
+            ptrAssignedRegs.pop();
+        }
     }
     setUpGlobalData();
     printAsm();
@@ -41,35 +49,32 @@ void printASMData() {
     cout << "\n.data" << endl;
     // int lineNo = 0;
     for(pair<string, string> p : globalDataPair) {
-        cout << p.first << ":   " << p.second << "\n";        
+        cout << p.first << ":   " << p.second << "\n";  
     }
     cout <<  endl;
 }
 
-
 void emitAssemblyForQuad(int quadNo) {
     quadruple *quad = gCode[quadNo];
     switch(quad->opCode) {
-    case OP_GOTO:
+    /* case OP_GOTO:
         // asmOpGoto();
-        break;
+        break; */
     case OP_ADDI: 
         asmOpAddI(quadNo);
         break;
     case OP_MULI: 
         asmOpMulI(quadNo);
         break;
-    case OP_IFGOTO: 
+    /* case OP_IFGOTO: 
         // asmOpIfGoto();
-        break;
+        break; */
     case OP_SUBI: 
         asmOpSubI(quadNo);
         break;
     case OP_ASSIGNMENT: 
         asmOpAssignment(quadNo);
         break;
-    
-    // amigo
     case OP_UNARY_MINUS:
         asmOpUnaryMinus(quadNo);  
         break;
@@ -82,8 +87,6 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_RIGHT_SHIFT: 
         asmOpRightShift(quadNo);  
         break;
-    // amigo's Work end here
-
     case OP_OR: 
         asmOpLogicalOr(quadNo);
         break;
@@ -114,14 +117,14 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_MOD: 
         asmOpMod(quadNo);
         break;
-    case OP_ADDF: 
+    /* case OP_ADDF: 
         break;
     case OP_MULF: 
         break;
     case OP_SUBF: 
         break;
     case OP_DIVF: 
-        break;
+        break; */
     case OP_GEQ: 
         asmOpGeq(quadNo);
         break;
@@ -156,15 +159,35 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpLabel(quadNo);
         break;
     case OP_ADDR: 
+        amsOpAddr(quadNo);
         break;
-    case OP_BITWISE_NOT: 
-        break;
+    /* case OP_BITWISE_NOT:
+        break; */
     case OP_MOV:
         asmOPMoveFuncParam(quadNo);
         break;
     default:
         break;
     }
+}
+
+void amsOpAddr(int quadNo){
+    quadruple *quad = gCode[quadNo];
+    symbolTable *st = codeSTVec[quadNo];
+
+    if(isConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+
+    if(isConstant(quad->arg1))
+        errorAsm(quad->arg1, ASSIGNMENT_TO_CONSTANT_ERROR);
+    
+    int regInd = getReg(quadNo, quad->arg1);
+    string regName = regVec[regInd]->regName;
+    string resultAddr = getVariableAddr(quad->result, st);
+    string argAddr = getVariableAddr(quad->arg1, st);
+    emitAsm("lea", {argAddr, regName});
+    emitAsm("mov", {regName, resultAddr});
+    freeReg(regInd);
 }
 
 void asmOpLabel(int quadNo) {
@@ -235,8 +258,9 @@ void asmOpBeginFunc(int quadNo) {
     funcSizeStack.push(funcSize);
     //TODO: funcNameStack is the the stack containing active function names, starting with global
     symbolTableNode* funcNode = lookUp(st, funcNameStack.top());
-    if(!funcNode)
+    if(!funcNode){
         error(funcNameStack.top(), SYMBOL_NOT_FOUND);
+    }
     if(funcNode->infoType != INFO_TYPE_FUNC)
         error(funcNameStack.top(), TYPE_ERROR);
 
@@ -445,6 +469,9 @@ void errorAsm(string str, int errCode){
         case CALL_TO_GLOBAL_ERROR:
             errStr = "Internal Error. Calling global";
             break;
+        case DEREFERENCING_CONSTANT_ERROR:
+            errStr = "Derefrencing a constant not allowed.";
+            break;
         default:
             break;
     }
@@ -456,8 +483,11 @@ void errorAsm(string str, int errCode){
 
 
 int getOffset(string varName, symbolTable* st){
+    if(isPointer(varName)) 
+        varName = stripPointer(varName);
     symbolTableNode* sym_node = lookUp(st, varName);
     if(sym_node == nullptr){
+        cout << "getOffset" << endl;
         error(varName, SYMBOL_NOT_FOUND);
     }
     int offset = sym_node->offset;
@@ -467,8 +497,11 @@ int getOffset(string varName, symbolTable* st){
 
 
 bool isGlobal(string varName, symbolTable* st) {
+    if(isPointer(varName)) 
+        varName = stripPointer(varName);
     symbolTableNode* sym_node = lookUp(st, varName);
     if(sym_node == nullptr){
+        cout << "isGlobal" << endl;
         error(varName, SYMBOL_NOT_FOUND);
     }
     if(sym_node->scope == -1)
@@ -477,17 +510,44 @@ bool isGlobal(string varName, symbolTable* st) {
 }
 
 int getGlobalAddress(string varName, symbolTable* st){
+    if(isPointer(varName)) 
+        varName = stripPointer(varName);
     symbolTableNode* sym_node = lookUp(st, varName);
     if(sym_node == nullptr){
+        cout << "getGlobalAddress" << endl;
         error(varName, SYMBOL_NOT_FOUND);
     }
     // TODO: global offset(starting address of the program) need to be added here to get the absolute address of the variable
     return sym_node->offset;
 }
 
+bool isPointer(string name) {
+    int n = name.size();
+    if(n <= 3) return false;
+    if(name[0]=='*' && name[1] == '(' && name[n-1]==')') return true;
+    
+    return false;
+}
+
+string getOffsetStr(int offset){
+     string offsetStr="";
+    if(offset < 0) 
+        offsetStr = "-";
+    
+    offset = abs(offset);
+    offsetStr = offsetStr + hexString(to_string(offset));
+    return offsetStr + "(%rbp)";
+}
+
+string stripPointer(string name) {
+    int n = name.length();
+    string varName = name.substr(2, n-3);
+    return varName;
+}
 
 string getVariableAddr(string varName, symbolTable* st) {
     int offset;
+    string offsetStr;
     if(isGlobal(varName, st)) {
         //UNSUPPORTED FUNCTION
         error("globals are unsupported", UNSUPPORTED_FUNCTIONALITY);
@@ -495,14 +555,21 @@ string getVariableAddr(string varName, symbolTable* st) {
         offset = getGlobalAddress(varName, st);
         return to_string(offset);
     }
+    if(isPointer(varName)) {
+        string name = stripPointer(varName);
+        if(isConstant(name))
+            errorAsm(name,DEREFERENCING_CONSTANT_ERROR);
+        offset = getOffset(name, st);
+        offsetStr=getOffsetStr(offset);
+        int regInd = getReg(gQuadNo, name); //TODO: Free this reg
+        string regName = regVec[regInd]->regName;
+        emitAsm("mov", {offsetStr, regName});
+        ptrAssignedRegs.push(regInd);
+        return "(" + regName + ")";
+    }   
     offset = getOffset(varName, st);
-    string offsetStr="";
-    if(offset < 0) 
-        offsetStr = "-";
-    
-    offset = abs(offset);
-    offsetStr = offsetStr + hexString(to_string(offset));
-    return offsetStr + "(%rbp)";
+    offsetStr=getOffsetStr(offset);
+    return offsetStr;
 }
 
 void initializeRegs() {

@@ -1,7 +1,5 @@
 int main() {
-    char c = '\n';
-    char y = '\t';
-    char x = '\r';
-    char a = 'a';
+    int arr[10];
+    arr[5]=7;
     return 0;
 }

@@ -152,3 +152,11 @@ void printAsm();
 void printASMData();
 
 void setUpGlobalData();
+
+void amsOpAddr(int quadNo);
+
+string getOffsetStr(int offset);
+
+bool isPointer(string name);
+
+string stripPointer(string name);

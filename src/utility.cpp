@@ -142,9 +142,15 @@ void error(string var, int error_code) {
 		case MISMATCH_DEFINITION_DECLARATION:
 			str = "Function declaration and definition do not match.";
 			break;
-    case ASSIGNMENT_TO_CONSTANT_ERROR:
+    	case ASSIGNMENT_TO_CONSTANT_ERROR:
 			str = "Assignment to a constant not allowed";
 			break;
+		case ARRAY_SIZE_SHOULD_BE_POSITIVE:
+			str = "Array size should be positive integer constant";
+			break;
+		case ARRAY_INDEX_SHOULD_BE_POSITIVE:
+			str = "Array size should be positive integer constant";
+			break;	
 		default:
 			break;
 	}
