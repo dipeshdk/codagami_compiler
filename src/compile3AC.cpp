@@ -210,13 +210,13 @@ void amsOpLCall(int quadNo){
     quadruple *quad = gCode[quadNo];
     symbolTable *st = codeSTVec[quadNo];
     //mov    %eax,-0x4(%rbp)
-    if(!isConstant(quad->result))
+    if(isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    emitAsm("callq", {quad->arg1});
     if(quad->result != EMPTY_STR){
         string resultAddr = getVariableAddr(quad->result, st);
         emitAsm("mov", {"%eax", resultAddr});
     }
-    emitAsm("callq", {quad->arg1});
 }
 
 void emitFuncStart() {

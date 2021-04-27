@@ -433,7 +433,7 @@ void printASMText() {
             if(i < (n-1)) res += ", ";
         }
         // cout << lineNo++ << ".  " << res << "\n";
-        cout <<  ".  " << res << "\n";
+        cout <<  "  " << res << "\n";
     }
     cout <<  endl;
 }
