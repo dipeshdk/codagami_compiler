@@ -395,7 +395,7 @@ unary_expression
 		sym_node->size = 4;
 		sym_node->offset = offset;
 		sym_node->declSp->type.push_back(TYPE_INT);
-		offset += 4;
+		offset += 8;
 		$$->addr = newTmp;
 	}
 	| SIZEOF '(' type_name ')'{
@@ -414,7 +414,7 @@ unary_expression
 		sym_node->size = 4;
 		sym_node->offset = offset;
 		sym_node->declSp->type.push_back(TYPE_INT);
-		offset += 4;
+		offset += 8;
 		$$->addr = newTmp;
 	}
 
@@ -1053,7 +1053,7 @@ declaration
 					sym_node->size = 4;
 					sym_node->offset = offset;
 					sym_node->declSp->type.push_back(TYPE_INT);
-					offset += 4;
+					offset += 8;
 					
 					while(currInit) {
 						string addr = emitArrayIndexGetAddr(temp->addr, to_string(ind), sizeTmp, errCode, errStr);

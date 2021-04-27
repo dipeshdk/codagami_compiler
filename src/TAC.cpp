@@ -171,7 +171,7 @@ void emitRelop(node* n1, node* n2, node* temp, int opCode, int& errCode, string 
 	sym_node->size = 4;
 	sym_node->offset = offset;
 	sym_node->declSp->type.push_back(TYPE_INT);
-	offset += 4;
+	offset += 8;
     return;
 }
 
@@ -250,7 +250,7 @@ string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCo
 	sym_node->size = 4;
 	sym_node->offset = offset;
 	sym_node->declSp->type.push_back(TYPE_INT);
-	offset += 4;
+	offset += 8;
 
     //_t3 = arr + _t2;
     string pointerTmp = generateTemp(errCode);
@@ -264,7 +264,7 @@ string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCo
 	sym_node->offset = offset;
     sym_node->declSp->ptrLevel = 1;
 	sym_node->declSp->type.push_back(TYPE_INT);
-	offset += 4;
+	offset += 8;
 
     if(errCode){
         setErrorParams(errCode, errCode, errStr, "error in temp generation");
@@ -307,7 +307,7 @@ string getArrayIndexWithEmit(node *postfix_expression , node *expression, int &e
 		sym_node->size = 4;
 		sym_node->offset = offset;
 		sym_node->declSp->type.push_back(TYPE_INT);
-		offset += 4;
+		offset += 8;
 
         return emitArrayIndexGetAddr(postfix_expression->addr, expression->addr, sizeTmp, errCode, errStr);
 }

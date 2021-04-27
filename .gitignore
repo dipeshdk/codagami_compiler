@@ -61,3 +61,4 @@ symbolTable.txt
 *.asm
 .vscode/*
 .vscode/settings.json
+asmOut.s

@@ -4,8 +4,6 @@
 #define CONSTANT "__constant__"
 #define EAX_REGISTER_INDEX 0
 #define EDX_REGISTER_INDEX 2
-#define RBP_REGISTER_INDEX 5
-#define RSP_REGISTER_INDEX 4
 #define GLOBAL "global"
 #define GLOBAL_SIZE 0
 
@@ -13,7 +11,7 @@ using namespace std;
 
 vector<reg*> regVec;
 vector< pair<string, vector<string>> > gAsm;
-vector<string> regNames({"%rax" , "%rcx" , "%rdx" , "%rbx" , "%rsp" , "%rbp" , "%rsi" , "%rdi"});
+vector<string> regNames({"%eax" , "%ecx" , "%edx" , "%ebx" , "%esp" , "%ebp" , "%esi" , "%edi"});
 stack<string> funcNameStack;
 stack<int> funcSizeStack;
 vector<pair<string, string>> globalDataPair;

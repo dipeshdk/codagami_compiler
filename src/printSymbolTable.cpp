@@ -272,10 +272,10 @@ int getArraySize(symbolTableNode* sym_node){
 }
 
 int getOffsettedSize(int size){
-    if(size%4 == 0){
+    if(size%8 == 0){
         return size;
     }
-    return ((size/4) +1)*4;
+    return ((size/8) +1)*8;
 }
 
 int getTypeSize(vector<int> &type) {
