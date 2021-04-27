@@ -46,6 +46,7 @@ struct symbolTableNode {
     int lineNo;
     int arraySize;
     int paramSize;
+    int callPopSize;
     bool isDefined; //for functions
     int size;
     int paramWidth;
@@ -61,6 +62,7 @@ struct symbolTableNode {
         isDefined=true;
         declSp = new declSpec();
         scope = -1;
+        callPopSize=0;
     }
 };
 

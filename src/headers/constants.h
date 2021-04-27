@@ -63,6 +63,9 @@
 #define ASSIGNMENT_TO_CONSTANT_ERROR 130
 #define UNDEFINED_SCOPE_STNODE_ERROR 131
 #define REGISTER_ASSIGNMENT_ERROR 132
+#define BEGIN_FUNC_ARG_NOT_CONSTANT_ERROR 133
+#define CALL_TO_GLOBAL_ERROR 134
+#define POPPARAM_ARG_NOT_CONSTANT 135
 
 #define NOT_CONSTANT_EXCEPTION 601
 
@@ -72,7 +75,6 @@
 #define INFO_TYPE_STRUCT 204
 #define INFO_TYPE_UNION 205
 #define INFO_NESTED_STRUCT 206
-
 
 #define NOT_GOTO_IN_BACKPATCH 301
 
@@ -125,17 +127,20 @@
 #define OP_RETURN 733
 #define OP_PUSHPARAM 734
 #define OP_POPPARAM 735
-#define OP_LCALL 736    
+#define OP_LCALL 736
 
-
-#define OP_LABEL 737
-#define OP_ADDR 738
+#define OP_LABEL 737 //main:
+#define OP_ADDR 738 //lea
 #define OP_BITWISE_NOT 739
 
+//for function call
+#define OP_MOV 740
 
 #define BLANK_STR "BLANK"
 #define EMPTY_STR "______"
 
 #define GLOBAL_SCOPE_NUM 0
+
+
 
 #endif

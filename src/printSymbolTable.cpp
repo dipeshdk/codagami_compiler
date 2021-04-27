@@ -363,6 +363,7 @@ string getOpName(int opCode) {
         case OP_BITWISE_NOT: return "BITWISE_NOT";
         case OP_LOGICAL_NOT: return "LOGICAL_NOT";
         case OP_ADDR: return "ADDR";
+        case OP_MOV: return "MOV";
     }
     return "INVALID OPCODE";
 }
@@ -380,14 +381,14 @@ void printQuad(quadruple* quad, int line) {
         case OP_ENDFUNC:
             printf("END_FUNCTION\n\n"); break;
         case OP_RETURN:
-            if(quad->result == BLANK_STR) {
+            if(quad->result == EMPTY_STR) {
                 printf("Return \n");
             }else {
                 printf("Return %s\n", quad->result.c_str());
             }
             break;
         case OP_LCALL:
-            if(quad->result == BLANK_STR) {
+            if(quad->result == EMPTY_STR) {
                 printf("LCALL _%s\n", quad->arg1.c_str());
             }else {
                 printf("%s = LCALL _%s\n", quad->result.c_str(), quad->arg1.c_str());
@@ -403,6 +404,8 @@ void printQuad(quadruple* quad, int line) {
         case OP_LOGICAL_NOT:
         case OP_ADDR:
             printf("%s = %s %s\n", quad->result.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str()); break;
+        case OP_MOV:
+            printf("MOV %s -> %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
         default:
             printf("%s = %s %s %s\n", quad->result.c_str(),  quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());
     }
@@ -418,10 +421,9 @@ void printCode(char* filename) {
     cout << "\n====================================================\n";
 }
 
-void printASM() {
-    freopen("asmOut.asm", "w", stdout);
-    cout << "\n====================================printing assembly===================================\n" << endl;
-    int lineNo = 0;
+void printASMText() {
+    cout << "\n.text\n  .global main\n" << endl;
+    // int lineNo = 0;
     for(pair<string, vector<string>> p : gAsm) {
         string res = p.first;
         res += "    ";
@@ -430,7 +432,8 @@ void printASM() {
             res += p.second[i];
             if(i < (n-1)) res += ", ";
         }
-        cout << lineNo++ << ".  " << res << "\n";
+        // cout << lineNo++ << ".  " << res << "\n";
+        cout <<  ".  " << res << "\n";
     }
-    cout << "\n====================================assembly===================================\n" << endl;
+    cout <<  endl;
 }

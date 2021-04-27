@@ -1845,7 +1845,7 @@ jump_statement
 		}
 		
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		emit(OP_RETURN, BLANK_STR, BLANK_STR, BLANK_STR);
+		emit(OP_RETURN, EMPTY_STR, EMPTY_STR, EMPTY_STR);
 	}
 	| RETURN expression ';' { 
 		symbolTableNode* funcNode = lookUp(gSymTable, currFunc);
@@ -1864,7 +1864,7 @@ jump_statement
 		if(err) error("error n typecasting", err);
 		// temp->addr = n1->addr;
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 0, temp, (node*)NULL, (node*)NULL, (node*)NULL);
-		emit(OP_RETURN, BLANK_STR, BLANK_STR, temp->addr);
+		emit(OP_RETURN, EMPTY_STR, EMPTY_STR, temp->addr);
     }
 	;
 
@@ -1877,7 +1877,7 @@ external_declaration
 	: function_definition {
 		$$ = $1; 
 		backpatch($$->nextlist, nextQuad());
-		emit(OP_ENDFUNC, BLANK_STR, BLANK_STR, BLANK_STR);}
+		emit(OP_ENDFUNC, EMPTY_STR, EMPTY_STR, EMPTY_STR);}
 	| declaration {$$ = $1;}
 	;
 
