@@ -1931,7 +1931,7 @@ function_definition
 
 		funcNode->paramWidth = tempOffset-rbp_size;
 		
-		string labelName = "_" + string(declarator->lexeme);
+		string labelName = string(declarator->lexeme);
 		emit(OP_LABEL, EMPTY_STR, EMPTY_STR, labelName);
 		if(funcBeginQuad != -1)
 			error("Internal funcBeginQuad not -1", INVALID_ARGS_IN_FUNC_CALL);
@@ -2014,7 +2014,7 @@ func_marker_1
 		}
     
 
-		string labelName = "_" + string(declarator->lexeme);
+		string labelName = string(declarator->lexeme);
 		emit(OP_LABEL, EMPTY_STR, EMPTY_STR,labelName);
     //	TODO: backpatch offset
 		if(funcBeginQuad != -1)

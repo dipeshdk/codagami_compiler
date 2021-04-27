@@ -171,7 +171,7 @@ void emitAssemblyForQuad(int quadNo) {
 
 void asmOpLabel(int quadNo) {
     emitAsm(gCode[quadNo]->result, {":"});
-    string funcName = gCode[quadNo]->result.substr(1, gCode[quadNo]->result.size()-1);
+    string funcName = gCode[quadNo]->result;
     funcNameStack.push(funcName);
 
 }
