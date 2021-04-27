@@ -1,5 +1,8 @@
 #include "headers/allInclude.h" 
 
+extern int rbp_size;
+extern int offset;
+
 structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expression, bool isPtrOp, int &errCode, string
  &errString) {
     structTableNode* structure = nullptr;
@@ -221,3 +224,56 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         emit(OP_POPPARAM, BLANK_STR, BLANK_STR, to_string(paramSize));
     return newTemp;
 }
+
+void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode* funcNode){
+    int tempOffset = rbp_size;
+    int param_num = 0;
+	for(auto &p: declarator->paramList){
+        param_num++;
+		int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
+		if(retVal) {
+    		error(p->paramName, retVal);
+		}
+		string lex = p->paramName;
+		
+		struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+		if(!sym_node){
+	    	error(lex, ALLOCATION_ERROR);
+		}
+		if(p->declSp->type[0] == TYPE_STRUCT){
+        	sym_node->infoType = INFO_TYPE_STRUCT;
+		}
+		sym_node->declSp = declSpCopy(p->declSp);
+		sym_node->infoType = p->infoType;
+		sym_node->size = getNodeSize(sym_node, gSymTable);
+		if(param_num > 6){
+            sym_node->offset = (-1*tempOffset);
+            tempOffset += getOffsettedSize(sym_node->size);
+        }
+	}
+
+    funcNode->paramWidth = tempOffset-rbp_size;
+
+    return;
+}
+
+void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable){
+    offset += 8;
+    int param_num = 0;
+    symbolTable* curr = gSymTable->childList[(gSymTable->childList.size())-1];
+    
+	for(auto &p: declarator->paramList){
+        param_num++;
+        if(param_num > 6) break;
+		string lex = p->paramName;
+		struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+		if(!sym_node){
+	    	error(lex, ALLOCATION_ERROR);
+		}
+		
+        sym_node->offset = offset;
+        offset += getOffsettedSize(sym_node->size);
+	}
+    return;
+}
+

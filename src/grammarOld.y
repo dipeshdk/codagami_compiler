@@ -1905,31 +1905,31 @@ function_definition
 		gSymTable = addChildSymbolTable(gSymTable);
 		// Adding params to symtab
 		symbolTable* curr = gSymTable;
-		int tempOffset = rbp_size;
+	// 	int tempOffset = rbp_size;
 
-		for(auto &p: declarator->paramList){
-			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
-			if(retVal) {
-				error(p->paramName, retVal);
-			}
-			string lex = p->paramName;
-			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-			if(!sym_node){
-				error(lex, ALLOCATION_ERROR);
-			}
-      // cout<< sym_node->name << " "<< p->declSp->type[0] <<endl;
-			// emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, lex);
-      if(p->declSp->type[0] == TYPE_STRUCT){
-        sym_node->infoType = INFO_TYPE_STRUCT;
-      }
-      sym_node->infoType = p->infoType;
-			sym_node->declSp = declSpCopy(p->declSp);
-			sym_node->infoType = p->infoType;
-			sym_node->size = getNodeSize(sym_node, gSymTable);
-			tempOffset += getOffsettedSize(sym_node->size);
-		}
+	// 	for(auto &p: declarator->paramList){
+	// 		int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
+	// 		if(retVal) {
+	// 			error(p->paramName, retVal);
+	// 		}
+	// 		string lex = p->paramName;
+	// 		struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+	// 		if(!sym_node){
+	// 			error(lex, ALLOCATION_ERROR);
+	// 		}
+    //   // cout<< sym_node->name << " "<< p->declSp->type[0] <<endl;
+	// 		// emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, lex);
+    //   if(p->declSp->type[0] == TYPE_STRUCT){
+    //     sym_node->infoType = INFO_TYPE_STRUCT;
+    //   }
+    //   sym_node->infoType = p->infoType;
+	// 		sym_node->declSp = declSpCopy(p->declSp);
+	// 		sym_node->infoType = p->infoType;
+	// 		sym_node->size = getNodeSize(sym_node, gSymTable);
+	// 		tempOffset += getOffsettedSize(sym_node->size);
+	// 	}
 
-		funcNode->paramWidth = tempOffset-rbp_size;
+	// 	funcNode->paramWidth = tempOffset-rbp_size;
 		
 		string labelName = "_" + string(declarator->lexeme);
 		emit(OP_LABEL, EMPTY_STR, EMPTY_STR, labelName);
@@ -1938,16 +1938,18 @@ function_definition
 		funcBeginQuad = nextQuad();
     	emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, BLANK_STR); // GCC will set the global variable offset
 		
-		for(auto &p: declarator->paramList){
-			string lex = p->paramName;	
-			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-			sym_node->offset = (-1*tempOffset);
-			tempOffset = tempOffset-getOffsettedSize(sym_node->size);
-		}
+		setOverSixParamOffset(declarator, curr, funcNode);
+		// for(auto &p: declarator->paramList){
+		// 	string lex = p->paramName;	
+		// 	struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+		// 	sym_node->offset = (-1*tempOffset);
+		// 	tempOffset = tempOffset-getOffsettedSize(sym_node->size);
+		// }
 		offset = 0;
 	} compound_statement { 
 		addChild($2, $4);
 		$$ = $2;
+		setFirstSixParamOffset($2, gSymTable);
 		int retval = backpatchBeginFunc(funcBeginQuad, offset);
 		if(retval)
 			error("backpatchBeginFunc", retval);
@@ -1963,11 +1965,9 @@ function_definition
 		error("Use function definitions of type int foo(int a, int b){...}", UNSUPPORTED_FUNCTIONALITY);
 	}
 	| declarator func_marker_1 compound_statement { 
-		//UNSUPPORTED_FUNCTIONALITY
-		error("Use function definitions of type int foo(int a, int b){...}", UNSUPPORTED_FUNCTIONALITY);
-		//TODO: NO EMIT
 		addChild($1, $3);
 		$$ = $1;
+		setFirstSixParamOffset($1, gSymTable);
 		int retval = backpatchBeginFunc(funcBeginQuad, offset);
 		if(retval)
 			error("backpatchBeginFunc", retval);
@@ -1991,27 +1991,26 @@ func_marker_1
 		gSymTable = addChildSymbolTable(gSymTable);
 		// Adding params to symtab
 		symbolTable* curr = gSymTable;
-		int tempOffset = rbp_size;
-		for(auto &p: declarator->paramList){
-			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
-			if(retVal) {
-				error(p->paramName, retVal);
-			}
-			string lex = p->paramName;
+		// int tempOffset = rbp_size;
+		// for(auto &p: declarator->paramList){
+		// 	int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
+		// 	if(retVal) {
+		// 		error(p->paramName, retVal);
+		// 	}
+		// 	string lex = p->paramName;
 			
-			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-			if(!sym_node){
-				error(lex, ALLOCATION_ERROR);
-			}
-			if(p->declSp->type[0] == TYPE_STRUCT){
-        sym_node->infoType = INFO_TYPE_STRUCT;
-      }
-      sym_node->infoType = p->infoType;
-			sym_node->declSp = declSpCopy(p->declSp);
-			sym_node->infoType = p->infoType;
-			sym_node->size = getNodeSize(sym_node, gSymTable);
-			tempOffset += getOffsettedSize(sym_node->size);
-		}
+		// 	struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+		// 	if(!sym_node){
+		// 		error(lex, ALLOCATION_ERROR);
+		// 	}
+		// 	if(p->declSp->type[0] == TYPE_STRUCT){
+        // 		sym_node->infoType = INFO_TYPE_STRUCT;
+		// 	}
+		// 	sym_node->declSp = declSpCopy(p->declSp);
+		// 	sym_node->infoType = p->infoType;
+		// 	sym_node->size = getNodeSize(sym_node, gSymTable);
+		// 	tempOffset += getOffsettedSize(sym_node->size);
+		// }
     
 
 		string labelName = "_" + string(declarator->lexeme);
@@ -2021,13 +2020,15 @@ func_marker_1
 			error("Internal funcBeginQuad not -1", INVALID_ARGS_IN_FUNC_CALL);
 		funcBeginQuad = nextQuad();
 		emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, BLANK_STR); // GCC will set the global variable offset 
-		funcNode->paramWidth = tempOffset-rbp_size;
-		for(auto &p: declarator->paramList){
-			string lex = p->paramName;	
-			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-			sym_node->offset = (-1*tempOffset);
-			tempOffset = tempOffset-getOffsettedSize(sym_node->size);
-		}
+
+		// funcNode->paramWidth = tempOffset-rbp_size;
+		setOverSixParamOffset(declarator, curr, funcNode);
+		// for(auto &p: declarator->paramList){
+		// 	string lex = p->paramName;	
+		// 	struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+		// 	sym_node->offset = (-1*tempOffset);
+		// 	tempOffset = tempOffset-getOffsettedSize(sym_node->size);
+		// }
 		offset = 0;
 
 	}

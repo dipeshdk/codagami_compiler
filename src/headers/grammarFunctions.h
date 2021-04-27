@@ -19,4 +19,8 @@ node* parameter_declaration(node* declaration_specifiers, node* declarator);
 
 string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_expression_list, int &errCode, string &errString);
 
+void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode* funcNode);
+
+void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable);
+
 #endif
