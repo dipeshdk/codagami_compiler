@@ -183,12 +183,9 @@ void asmOpReturn(int quadNo){
     int eaxInd = EAX_REGISTER_INDEX;
     string eaxName = regVec[EAX_REGISTER_INDEX]->regName;
     
-    freeRegAndMoveToStack(eaxInd);
-    regVec[eaxInd]->isFree = false;
-    
-    if(quad->result == EMPTY_STR){
-        emitAsm("mov", {"$0x0", eaxName});
-    }else{
+    if(quad->result != EMPTY_STR){
+        freeRegAndMoveToStack(eaxInd);
+        regVec[eaxInd]->isFree = false;
         if(!isConstant(quad->result)){
             string argAddr = getVariableAddr(quad->result, st);
             emitAsm("mov", {argAddr, eaxName});

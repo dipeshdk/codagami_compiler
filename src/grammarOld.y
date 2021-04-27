@@ -43,7 +43,6 @@
 	int offset = 0;
 	int rbp_size = 4+16;
 	stack<string> ternaryTempStack;
-	// string ternaryTemp = BLANK_STR;
 	int funcBeginQuad = -1;
 
 
@@ -158,12 +157,44 @@ primary_expression
 	}
 	| CHAR_LITERAL {
 		string name = yylval.id;
-		if(name.size() != 3) error( yylval.id, NOT_A_CHAR);
+		char c;
+		if(name.size() == 4 && name[1] == '\\') {
+			switch (name[2])
+            {
+            case '\\':
+				c = '\\';
+				break;
+
+            case 'r':
+				c = '\r';
+				break;
+
+            case 'n':
+				c = '\n';
+				break;
+
+            case 't':
+				c = '\t';
+				break;
+
+            case 'v':
+				c = '\v';
+				break;
+
+            case 'a':
+				c = '\a';
+				break;
+			}
+		}else if(name.size() == 3) {
+			c = name[1];
+		}else {
+			error( yylval.id, NOT_A_CHAR);
+		}
 		node* temp = makeNode(strdup("CHAR_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
 		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_CHAR);
 		temp->valType = TYPE_CHAR;
-		setAddr(temp, string(yylval.id));
+		setAddr(temp, to_string((int)c));
 		$$ = temp;
 	}
 	| '(' expression ')' { $$ = $2; }
