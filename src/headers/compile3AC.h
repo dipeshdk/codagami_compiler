@@ -71,6 +71,10 @@ void asmOpAndAnd(int quadNo);
 
 void asmOpOrOr(int quadNo);
 
+void asmOpGoto(int quadNo);
+
+void asmOpIfGoto(int quadNo);
+
 void asmOpIfNeqGoto(int quadNo);
 
 void asmOpUnaryOperator(string op, int quadNo);
