@@ -281,10 +281,11 @@ int getOffsettedSize(int size){
 int getTypeSize(vector<int> &type) {
     if(type.size() != 1) return -CONFLICTING_TYPES;
     switch(type[0]) {
-        case TYPE_CHAR: return SIZE_CHAR; 
-        case TYPE_VOID: return SIZE_VOID;
-        case TYPE_INT: return SIZE_INT;  
-        case TYPE_FLOAT: return SIZE_FLOAT;  
+        // case TYPE_CHAR: return SIZE_CHAR; 
+        // case TYPE_VOID: return SIZE_VOID;
+        // case TYPE_INT: return SIZE_INT;  
+        // case TYPE_FLOAT: return SIZE_FLOAT;
+        default: return 8;  
     }
     return -CONFLICTING_TYPES;
 }
