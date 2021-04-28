@@ -47,6 +47,7 @@ void printAsm() {
 
 void printASMData() {
     cout << "\n.data" << endl;
+    cout << "   format:  .asciz \"%ld\\n\"" << endl;
     // int lineNo = 0;
     for(pair<string, string> p : globalDataPair) {
         cout << p.first << ":   " << p.second << "\n";  
@@ -232,6 +233,10 @@ void amsOpLCall(int quadNo){
     //mov    %eax,-0x4(%rbp)
     if(isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    if(quad->arg1 == "printf"){
+        emitAsm("lea", {"format(%rip)", "%rdi"});
+        emitAsm("xor", {"%rax", "%rax"});
+    }
     emitAsm("callq", {quad->arg1});
     if(quad->result != EMPTY_STR){
         string resultAddr = getVariableAddr(quad->result, st);

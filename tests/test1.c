@@ -1,8 +1,13 @@
+void printf(char *c, int d);
+
 int main() {
-    int arr[10];
-    int x,y;
-    arr[5] =7;
-    arr[2] = 2;
-    arr[4] = arr[5]-arr[2];
+    char* arr;
+    int x = 6896849;
+    int a[3];
+    a[1]=2;
+    a[0] = 9;
+
+    printf(arr,a[0]);
+    printf(arr, x);
     return 0;
 }

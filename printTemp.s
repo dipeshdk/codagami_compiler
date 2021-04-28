@@ -4,3 +4,11 @@ mov    -0x4(%rbp),%esi
 lea format(%rip), %rdi
 xor  %eax, %eax
 callq printf
+
+
+format:  .asciz "%ld\n"
+
+mov    -0x4(%rbp),%esi
+lea format(%rip), %rdi
+xor  %eax, %eax
+callq printf
