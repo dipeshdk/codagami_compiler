@@ -491,7 +491,7 @@ int getOffset(string varName, symbolTable* st){
         error(varName, SYMBOL_NOT_FOUND);
     }
     int offset = sym_node->offset;
-    offset += sym_node->size;
+    offset += getOffsettedSize(sym_node->size);
     return -1*offset;
 }
 

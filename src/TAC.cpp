@@ -168,7 +168,7 @@ void emitRelop(node* n1, node* n2, node* temp, int opCode, int& errCode, string 
     emit(OP_IFGOTO, temp->addr, EMPTY_STR, BLANK_STR);
     emit(OP_GOTO, EMPTY_STR, EMPTY_STR, BLANK_STR);
     symbolTableNode* sym_node = lookUp(gSymTable, newTmp);
-	sym_node->size = 4;
+	sym_node->size = 8;
 	sym_node->offset = offset;
 	sym_node->declSp->type.push_back(TYPE_INT);
 	offset += 8;
@@ -247,7 +247,7 @@ string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCo
     }
     emit(OP_MULI, sizeTemp, ind, indexTmp);
     symbolTableNode* sym_node = lookUp(gSymTable, indexTmp);
-	sym_node->size = 4;
+	sym_node->size = 8;
 	sym_node->offset = offset;
 	sym_node->declSp->type.push_back(TYPE_INT);
 	offset += 8;
@@ -258,6 +258,7 @@ string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCo
         setErrorParams(errCode, errCode, errStr, "error in temp generation");
         return EMPTY_STR;
     }
+    
     emit(OP_ADDI, arr, indexTmp, pointerTmp);
     sym_node = lookUp(gSymTable, pointerTmp);
 	sym_node->size = 8;
@@ -304,7 +305,7 @@ string getArrayIndexWithEmit(node *postfix_expression , node *expression, int &e
         }
         emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
         symbolTableNode* sym_node = lookUp(gSymTable, sizeTmp);
-		sym_node->size = 4;
+		sym_node->size = 8;
 		sym_node->offset = offset;
 		sym_node->declSp->type.push_back(TYPE_INT);
 		offset += 8;
