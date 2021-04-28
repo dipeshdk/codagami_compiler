@@ -15,21 +15,32 @@ vector<string> regNames({"%eax", "%ecx", "%edx", "%ebx", "%esp", "%ebp", "%esi",
 stack<string> funcNameStack;
 stack<int> funcSizeStack;
 vector<pair<string, string>> globalDataPair;
-vector<int> quad_instr_begin;
-vector<pair<int, int> > asm_backpatch_list;
 
-string currFunc = "#prog";
-int instr_num = 0;
 
 void emitAssemblyFrom3AC() {
   funcNameStack.push(GLOBAL);
   initializeRegs();
+  vector<int> gotoLabels;
   for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
-    quad_instr_begin.push_back(instr_num);
-    emitAssemblyForQuad(quadNo);
+    int op = gCode[quadNo]->opCode;
+    if((op == OP_GOTO) || (op == OP_IFGOTO) || (op == OP_IFNEQGOTO)){
+        string num = gCode[quadNo]->result;
+        if(!isConstant(num)){
+            errorAsm(num, GOTO_ADDR_NOT_CONST);
+        }
+        gotoLabels.push_back(stoi(num));
+    }
   }
-  for(auto p: asm_backpatch_list){
-    // gAsm[p.first] // p.first is the asm instruction number and p.second is the quad number
+  sort(gotoLabels.begin(), gotoLabels.end());
+  int curr = 0;
+  for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
+      if(gotoLabels[curr] == quadNo){
+         asmLabel(quadNo);
+         while(gotoLabels[curr] == quadNo){
+             curr++;
+         }
+      }
+      emitAssemblyForQuad(quadNo);
   }
   setUpGlobalData();
   printAsm();
@@ -184,6 +195,18 @@ void asmOpLabel(int quadNo) {
   currFunc = funcName;
 }
 
+void asmLabel(int labelno){
+    string label = "\nlabel$"+to_string(labelno)+":";
+    emitAsm(label, {});
+}
+
+void asmJump(int quadNo, string op){
+    quadruple *quad = gCode[quadNo];
+    string result = quad->result;
+    string label = "label$"+result;
+    emitAsm(op, {label});
+}
+
 void asmOpReturn(int quadNo) {
   quadruple *quad = gCode[quadNo];
   symbolTable *st = codeSTVec[quadNo];
@@ -228,7 +251,6 @@ void amsOpLCall(int quadNo) {
 }
 
 void emitFuncStart() {
-  instr_num = 0;
   emitAsm("endbr64", {});
   emitAsm("push", {"%rbp"});
   emitAsm("mov", {"%rsp", "%rbp"});
@@ -453,6 +475,8 @@ void errorAsm(string str, int errCode) {
     case CALL_TO_GLOBAL_ERROR:
       errStr = "Internal Error. Calling global";
       break;
+    case GOTO_ADDR_NOT_CONST:
+      errStr = "Internal Error: Goto address should be integer";
     default:
       break;
   }
@@ -678,7 +702,7 @@ void asmOpComp(int quadNo, string asm_comp) {
   int regInd     = getReg(quadNo, quad->arg1);
   string regName = regVec[regInd]->regName;
   emitAsm(asm_comp, {regName});
-  emitAsm("movz", {regName, "%eax"});
+  emitAsm("movzbl", {regName, "%eax"});
   emitAsm("mov", {"%eax", resultAddr});
   freeReg(regInd);
   return;
@@ -731,17 +755,19 @@ void asmOpAndAnd(int quadNo) {
     string argAddr = getVariableAddr(quad->arg1, st);
     emitAsm("cmp", {"$0x0", argAddr});
   }
-  emitAsm("je", {to_string(gAsm.size() + 5)});  // Jump to mov 0x0
+  emitAsm("je", {"1f"});  // Jump to mov 0x0
   if (isConstant(quad->arg2)) {
     emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg2)});
   } else {
     string argAddr = getVariableAddr(quad->arg2, st);
     emitAsm("cmp", {"$0x0", argAddr});
   }
-  emitAsm("je", {to_string(gAsm.size() + 3)});  // Jump to mov 0x0
+  emitAsm("je", {"1f"});  // Jump to mov 0x0
   emitAsm("mov", {"$0x1", "%eax"});
-  emitAsm("jmp", {to_string(gAsm.size() + 2)});
-  emitAsm("mov", {"0x0", "%eax"});
+  emitAsm("jmp", {"2f"});
+  emitAsm("\n1:", {});
+  emitAsm("mov", {"$0x0", "%eax"});
+  emitAsm("\n2:", {});
   emitAsm("mov", {"%eax", resultAddr});
   return;
 }
@@ -767,17 +793,20 @@ void asmOpOrOr(int quadNo) {
     string argAddr = getVariableAddr(quad->arg1, st);
     emitAsm("cmp", {"$0x0", argAddr});
   }
-  emitAsm("jne", {to_string(gAsm.size() + 3)});  // Jump to mov 0x0
+  emitAsm("jne", {"1f"});  // Jump to mov 0x0
   if (isConstant(quad->arg2)) {
     emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg2)});
   } else {
     string argAddr = getVariableAddr(quad->arg2, st);
     emitAsm("cmp", {"$0x0", argAddr});
   }
-  emitAsm("je", {to_string(gAsm.size() + 3)});  // Jump to mov 0x0
+  emitAsm("je", {"2f"});  // Jump to mov 0x0
+  emitAsm("\n1:", {});
   emitAsm("mov", {"$0x1", "%eax"});
-  emitAsm("jmp", {to_string(gAsm.size() + 2)});
-  emitAsm("mov", {"0x0", "%eax"});
+  emitAsm("jmp", {"3f"});
+  emitAsm("\n2:", {});
+  emitAsm("mov", {"$0x0", "%eax"});
+  emitAsm("\n3:", {});
   emitAsm("mov", {"%eax", resultAddr});
   return;
 }
@@ -787,10 +816,9 @@ void asmOpGoto(int quadNo) {
   symbolTable *st = codeSTVec[quadNo];
 
   if (!isConstant(quad->result)) {
-    errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    errorAsm(quad->result, GOTO_ADDR_NOT_CONST);
   }
-  string resultAddr = getVariableAddr(quad->result, st);
-  emitAsm("jmp", {resultAddr});
+  asmJump(quadNo, "jmp");
 }
 
 void asmOpIfGoto(int quadNo) {
@@ -807,8 +835,8 @@ void asmOpIfGoto(int quadNo) {
     emitAsm("cmp", {"$0x0", regName});
     freeReg(regInd);
   }
-  string argAddr = getVariableAddr(quad->result, st);
-  emitAsm("je", {argAddr});  // Address to be added
+  asmJump(quadNo, "jne");
+    // Address to be added
 }
 
 void asmOpIfNeqGoto(int quadNo) {
@@ -853,8 +881,7 @@ void asmOpIfNeqGoto(int quadNo) {
     emitAsm("cmp", {regName, argAddr2});
     freeReg(regInd);
   }
-  string resultAddr = getVariableAddr(quad->result, st);
-  emitAsm("jne", {resultAddr});  // Address to be added
+  asmJump(quadNo, "jne"); // Address to be added
 
   return;
 }
