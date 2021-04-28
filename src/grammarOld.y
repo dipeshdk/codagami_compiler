@@ -1085,7 +1085,7 @@ declaration
 					}
 					emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
 					symbolTableNode* sym_node = lookUp(gSymTable, sizeTmp);
-					sym_node->size = 4;
+					sym_node->size = 8;
 					sym_node->offset = offset;
 					sym_node->declSp->type.push_back(TYPE_INT);
 					offset += 8;
