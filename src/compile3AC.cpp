@@ -17,6 +17,7 @@ vector<reg*> regVec;
 vector< pair<string, vector<string>> > gAsm;
 vector<string> gArgRegs({"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"});
 vector<string> regNames({"%r10", "%r11", "%rcx", "%rax" , "%rdx" , "%rbx" , "%rsp" , "%rbp" , "%rsi" , "%rdi"});
+vector<string> regNamesOneByte({"%r10b", "%r11b", "%cl", "%al" , "%dl" , "%bl" , "%rsp" , "%bpl" , "%sil" , "%dil"});
 stack<string> funcNameStack;
 stack<int> funcSizeStack;
 vector<globalData*> globalDataPair;
@@ -49,6 +50,7 @@ void emitAssemblyFrom3AC(string asmOutputFile) {
     int op = gCode[quadNo]->opCode;
     if((op == OP_GOTO) || (op == OP_IFGOTO) || (op == OP_IFNEQGOTO)){
         string num = gCode[quadNo]->result;
+        if(num == BLANK_STR) continue;
         if(!isConstant(num)){
             errorAsm(num, GOTO_ADDR_NOT_CONST);
         }
@@ -57,12 +59,14 @@ void emitAssemblyFrom3AC(string asmOutputFile) {
   }
   
   sort(gotoLabels.begin(), gotoLabels.end());
+  int labelSize = gotoLabels.size();
   int curr = 0;
   for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
+    //   cout << quadNo << endl; 
       gQuadNo=quadNo;
-      if((curr < gotoLabels.size()) && (gotoLabels[curr] == quadNo)){
+      if(curr < labelSize && gotoLabels[curr] == quadNo){
          asmLabel(quadNo);
-         while(gotoLabels[curr] == quadNo){
+         while(curr < labelSize && gotoLabels[curr] == quadNo){
              curr++;
          }
       }
@@ -775,6 +779,7 @@ void initializeRegs() {
     regVec[i]          = new reg();
     regVec[i]->isFree  = true;
     regVec[i]->regName = regNames[i];
+    regVec[i]->regNameOneByte = regNamesOneByte[i];
   }
 }
 
@@ -948,9 +953,10 @@ void asmOpComp(int quadNo, string asm_comp) {
   }
   int regInd     = getReg(quadNo, quad->arg1);
   string regName = regVec[regInd]->regName;
-  emitAsm(asm_comp, {regName});
-  emitAsm("movzbl", {regName, "%rax"});
-  emitAsm("movq", {"%rax", resultAddr});
+  string regNameOneByte = regVec[regInd]->regNameOneByte;
+  emitAsm(asm_comp, {regNameOneByte});
+  emitAsm("movzbl", {regNameOneByte, regName});
+  emitAsm("movq", {regName, resultAddr});
   freeReg(regInd);
   return;
 }
@@ -1063,6 +1069,11 @@ void asmOpGoto(int quadNo) {
   quadruple *quad = gCode[quadNo];
   symbolTable *st = codeSTVec[quadNo];
 
+  if(quad->result == BLANK_STR){
+    //   cout<< "blank result in goto\n";
+      return;
+  } 
+
   if (!isConstant(quad->result)) {
     errorAsm(quad->result, GOTO_ADDR_NOT_CONST);
   }
@@ -1072,6 +1083,11 @@ void asmOpGoto(int quadNo) {
 void asmOpIfGoto(int quadNo) {
   quadruple *quad = gCode[quadNo];
   symbolTable *st = codeSTVec[quadNo];
+
+  if(quad->result == BLANK_STR){
+    //   cout<< "blank result in goto\n";
+      return;
+  }
 
   if (isConstant(quad->arg1)) {
     emitAsm("cmpl", {"$0x0", "$" + hexString(quad->arg1)});
