@@ -25,7 +25,7 @@
 
 #endif
 
-void emitAssemblyFrom3AC();
+void emitAssemblyFrom3AC(string asmOutputFile);
 
 void emitAssemblyForQuad(int quadNo);
 
@@ -155,7 +155,7 @@ void emitFuncStart();
 
 void asmOpBeginFunc(int quadNo);
 
-void printAsm();
+void printAsm(string asmOutputFile);
 
 void printASMData();
 
@@ -168,3 +168,7 @@ string getOffsetStr(int offset);
 bool isPointer(string name);
 
 string stripPointer(string name);
+
+void stripTypeCastFromQuads();
+
+string stripTypeCastUtil(string name);

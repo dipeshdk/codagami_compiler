@@ -20,9 +20,26 @@ int gQuadNo; // holding the current quadNo
 stack<int> ptrAssignedRegs;
 
 
-void emitAssemblyFrom3AC() {
+string stripTypeCastUtil(string name) {
+  size_t pos = name.find(")");
+  if (pos == string::npos)
+    return name;
+  return name.substr(pos+2);
+}
+
+void stripTypeCastFromQuads() {
+  for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
+    quadruple *quad = gCode[quadNo];
+    stripTypeCastUtil(quad->result);
+    stripTypeCastUtil(quad->arg1);
+    stripTypeCastUtil(quad->arg2);
+  }
+}
+
+void emitAssemblyFrom3AC(string asmOutputFile) {
   funcNameStack.push(GLOBAL);
   initializeRegs();
+  // stripTypeCastFromQuads();
   vector<int> gotoLabels;
   for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
     int op = gCode[quadNo]->opCode;
@@ -52,7 +69,7 @@ void emitAssemblyFrom3AC() {
       }
   }
   setUpGlobalData();
-  printAsm();
+  printAsm(asmOutputFile);
 }
 
 void setUpGlobalData() {
@@ -60,8 +77,8 @@ void setUpGlobalData() {
   return;
 }
 
-void printAsm() {
-  freopen("asmOut.s", "w", stdout);
+void printAsm(string asmOutputFile) {
+  freopen(asmOutputFile.c_str(), "w", stdout);
   printASMData();
   printASMText();
 }
@@ -407,9 +424,26 @@ void asmOpUnaryMinus(int quadNo) {
   asmOpUnaryOperator("neg", quadNo);
 }
 
-void asmOpUnaryLogicalNot(int quadNo) {
-  asmOpUnaryOperator("not", quadNo);
+void asmOpUnaryLogicalNot(int quadNo){
+    quadruple *quad = gCode[quadNo];
+    symbolTable *st = codeSTVec[quadNo];
+    if (isConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    string resultAddr = getVariableAddr(quad->result, st);
+
+    string argString = quad->arg1;
+    if(isConstant(argString)){
+        string result = evaluate("logicalNot", argString, "");  //incomp
+        emitAsm("movq", {resultAddr});
+    }else{
+        string argAddr = getVariableAddr(argString, st);
+        emitAsm("cmpl", {"$0x0", argAddr});
+        emitAsm("sete", {"%al"});
+        emitAsm("movzbl", {"%al", regNames[EAX_REGISTER_INDEX]});
+        emitAsm("movq", {regNames[EAX_REGISTER_INDEX], resultAddr});
+    }
 }
+
 
 void asmOpDivI(int quadNo){   
     /*  Refer http://www.godevtool.com/TestbugHelp/UseofIDIV.htm#:~:text=The%20IDIV%20instruction%20takes%20only,the%20dividend%20and%20the%20divisor. 
