@@ -1,4 +1,5 @@
 void printf(char *c, int d);
+char *p = "%d\n";
 
 int main() {
     char* arr;
@@ -6,12 +7,12 @@ int main() {
     int x = 5;
     int y = 490;
     x = 50 >> a;
-    printf(arr, x);
+    printf(p, x);
     x =  y >> a ;    
-    printf(arr, x);
+    printf(p, x);
     x = 50 << a;
-    printf(arr, x);
+    printf(p, x);
     x = 70 << a;
-    printf(arr, x);
+    printf(p, x);
     return 0;
 }

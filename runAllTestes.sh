@@ -7,5 +7,5 @@ for f in "${fileNames[@]}"
 do
 out="${f%.c}".output
 echo "filename: ${f}"
-    bin/3AC tests/$f outputs/$out
+    bin/3AC tests/$f
 done

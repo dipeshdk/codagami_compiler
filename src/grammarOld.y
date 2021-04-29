@@ -44,7 +44,8 @@
 	int rbp_size = 4+16;
 	stack<string> ternaryTempStack;
 	int funcBeginQuad = -1;
-
+	#include <sys/stat.h>
+	#include <sys/types.h>
 
 extern "C"
 {
@@ -148,11 +149,13 @@ primary_expression
 	}
 	| constant	{$$ = $1;}
 	| STRING_LITERAL {
-		$$ = NULL;
-		// node* temp = makeNode(strdup("STRING_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		// if(!temp->declSp) temp->declSp = new declSpec();
-		// temp->declSp->type.push_back(TYPE_STRING_LITERAL);
-		error(yylval.id, STRING_LITERAL_ERROR);
+		if(gSymTable->scope != GLOBAL_SCOPE_NUM)
+			error(yylval.id, NON_GLOBAL_STRING_LITERAL);
+		node* temp = makeNode(strdup("STRING_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		if(!temp->declSp) temp->declSp = new declSpec();
+		temp->declSp->type.push_back(TYPE_STRING_LITERAL);
+		temp->addr = string(yylval.id);
+		$$ = temp;
 		;
 	}
 	| CHAR_LITERAL {
@@ -183,6 +186,9 @@ primary_expression
 
             case 'a':
 				c = '\a';
+				break;
+			case '0':
+				c = '\0';
 				break;
 			}
 		}else if(name.size() == 3) {
@@ -1020,7 +1026,7 @@ declaration
 	| declaration_specifiers init_declarator_list ';' {
 		node* curr = $2;
 		while(curr){
-			node* temp = curr;
+			node *temp = curr;
 			string s(curr->name);
 			node* initializer=nullptr;
 			if(s == "="){
@@ -1105,17 +1111,33 @@ declaration
 				if(temp->declSp)
 					sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
 				if(initializer) {
-					//variable initialized
-					int retval = canTypecast(sym_node->declSp, initializer->declSp);
-					if(retval)
-						error("variable assignment error", retval);
-					retval = areDifferentTypes(sym_node->declSp, initializer->declSp, errCode, errStr);
-					if(errCode)
-						error(errStr, errCode);
-					if(retval) {
-						typeCastLexemeWithEmit(initializer, sym_node->declSp);
-					}
-					emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);					
+					if(!checkStringLiteralDecl(initializer->declSp)){
+						//global string literal
+						sym_node->declSp = declSpCopy($1->declSp);
+						if(!temp->declSp) 
+							error(temp->addr,INVALID_STRING_LITERAL_ASSIGNMENT);
+						sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
+						if(!checkType(sym_node->declSp, TYPE_CHAR, 1))
+							error(temp->addr, INVALID_STRING_LITERAL_ASSIGNMENT);
+						
+						globalData *gData = new globalData();
+						gData->varName = temp->addr;
+						gData->value = initializer->addr;
+						gData->valueType = TYPE_STRING_LITERAL;
+						globalDataPair.push_back(gData);
+					}else {
+						//variable initialized
+						int retval = canTypecast(sym_node->declSp, initializer->declSp);
+						if(retval)
+							error("variable assignment error", retval);
+						retval = areDifferentTypes(sym_node->declSp, initializer->declSp, errCode, errStr);
+						if(errCode)
+							error(errStr, errCode);
+						if(retval) {
+							typeCastLexemeWithEmit(initializer, sym_node->declSp);
+						}
+						emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);
+					}			
 				}
 			}
 			sym_node->size = getNodeSize(sym_node, gSymTable);
@@ -2145,6 +2167,7 @@ N_marker:
 
 %%
 #include <stdio.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -2154,25 +2177,29 @@ int main(int ac, char **av) {
     FILE    *fd;
     if (ac >= 2)
     {
-		char* codeFilename;
-		if(ac == 2) {
-			codeFilename = strdup("code.txt");
-		}else {
-			codeFilename = av[2];
-		}
-
-        if (!(fd = fopen(av[1], "r")))
+		string inputFileName = string(av[1]); 
+        if (!(fd = fopen(inputFileName.c_str(), "r")))
         {
             perror(" Error: ");
             return (-1);
         }
-
-		
+		string filePrefix = extractFileName(inputFileName);
+		string currDir = get_current_dir_name();
+		string directoryName = "outputs/" + filePrefix; 
+		int dir = mkdir(directoryName.c_str(), 0777);
+		if(dir == -1 && errno != EEXIST) {
+			cerr << "Error :  " << strerror(errno) << endl;
+			directoryName = currDir + "/outputs/";
+		} else {
+			directoryName.push_back('/');
+		}
+		string TACFilename =  directoryName + filePrefix +".tac"; 
         yyset_in(fd);
         
         // Make the first symbol table with global scope
 		gSymTable = new symbolTable();
 		gTempSymbolMap = new symbolTable();
+		globalScopeSymTable = gSymTable;
 		if(!gSymTable) {
 			printf("ERROR: Cannot allocate global symbol table\n");
 			return 1;
@@ -2190,11 +2217,12 @@ int main(int ac, char **av) {
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
 		generateDot(root,fileName);
-		
 		// printSymbolTable(gSymTable);
-		emitAssemblyFrom3AC();
-		printSymbolTableJSON(gSymTable,0,1);
-        printCode(codeFilename);
+		string asmFileName = directoryName + filePrefix +".s";
+		emitAssemblyFrom3AC(asmFileName);
+		string jsonFileNamePrefix = directoryName + filePrefix;
+		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
+        printCode((char*)TACFilename.c_str());
 		
 		fclose(fd);
     }

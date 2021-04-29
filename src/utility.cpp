@@ -151,6 +151,12 @@ void error(string var, int error_code) {
 		case ARRAY_INDEX_SHOULD_BE_POSITIVE:
 			str = "Array size should be positive integer constant";
 			break;	
+		case NON_GLOBAL_STRING_LITERAL:
+			str = "Non global string literal. String literals can be used only in global scope";
+			break;
+		case INVALID_STRING_LITERAL_ASSIGNMENT:
+			str = "Invalid string literal assignment";
+			break;
 		default:
 			break;
 	}
@@ -196,4 +202,23 @@ int getNumberFromConstAddr(string s) {
     ss << s;
     ss >> a;
     return a;
+}
+
+string removeExtension(string str){
+    char c = '.';
+    size_t found = str.find(c);
+    if (found != string::npos)
+    	return str.substr(0,found);
+	return str;
+}
+
+string extractFileName(string str){
+    char ch = '/';
+    size_t found;
+    found = str.find_last_of(ch);
+    if (found == string::npos) {
+        return removeExtension(str);
+    } else {
+        return removeExtension(str.substr(found+1, str.length() - found-1));
+    }
 }

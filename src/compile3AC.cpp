@@ -19,14 +19,31 @@ vector<string> gArgRegs({"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"});
 vector<string> regNames({"%r10", "%r11", "%rcx", "%rax" , "%rdx" , "%rbx" , "%rsp" , "%rbp" , "%rsi" , "%rdi"});
 stack<string> funcNameStack;
 stack<int> funcSizeStack;
-vector<pair<string, string>> globalDataPair;
+vector<globalData*> globalDataPair;
 int gQuadNo; // holding the current quadNo
 stack<int> ptrAssignedRegs;
 
 
-void emitAssemblyFrom3AC() {
+string stripTypeCastUtil(string name) {
+  size_t pos = name.find(")");
+  if (pos == string::npos)
+    return name;
+  return name.substr(pos+2);
+}
+
+void stripTypeCastFromQuads() {
+  for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
+    quadruple *quad = gCode[quadNo];
+    quad->result=stripTypeCastUtil(quad->result);
+    quad->arg1=stripTypeCastUtil(quad->arg1);
+    quad->arg2=stripTypeCastUtil(quad->arg2);
+  }
+}
+
+void emitAssemblyFrom3AC(string asmOutputFile) {
   funcNameStack.push(GLOBAL);
   initializeRegs();
+  stripTypeCastFromQuads();
   vector<int> gotoLabels;
   for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
     int op = gCode[quadNo]->opCode;
@@ -56,7 +73,7 @@ void emitAssemblyFrom3AC() {
       }
   }
   setUpGlobalData();
-  printAsm();
+  printAsm(asmOutputFile);
 }
 
 void setUpGlobalData() {
@@ -64,8 +81,8 @@ void setUpGlobalData() {
   return;
 }
 
-void printAsm() {
-  freopen("asmOut.s", "w", stdout);
+void printAsm(string asmOutputFile) {
+  freopen(asmOutputFile.c_str(), "w", stdout);
   printASMData();
   printASMText();
 }
@@ -74,8 +91,12 @@ void printASMData() {
     cout << "\n.data" << endl;
     cout << "   format:  .asciz \"%ld\\n\"" << endl;
     // int lineNo = 0;
-    for(pair<string, string> p : globalDataPair) {
-        cout << p.first << ":   " << p.second << "\n";  
+    for(globalData *g : globalDataPair) {
+        cout << "   " << g->varName << ": ";
+        if(g->valueType == TYPE_STRING_LITERAL) {
+          cout << ".asciz ";
+        }
+        cout << g->value << "\n";  
     }
     cout <<  endl;
 }
@@ -266,7 +287,7 @@ void amsOpLCall(int quadNo){
     if(isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
     if(quad->arg1 == "printf"){
-        emitAsm("lea", {"format(%rip)", "%rdi"});
+        // emitAsm("lea", {"format(%rip)", "%rdi"});
         emitAsm("xor", {"%rax", "%rax"});
     }
     emitAsm("callq", {quad->arg1});
@@ -413,9 +434,26 @@ void asmOpUnaryMinus(int quadNo) {
   asmOpUnaryOperator("neg", quadNo);
 }
 
-void asmOpUnaryLogicalNot(int quadNo) {
-  asmOpUnaryOperator("not", quadNo);
+void asmOpUnaryLogicalNot(int quadNo){
+    quadruple *quad = gCode[quadNo];
+    symbolTable *st = codeSTVec[quadNo];
+    if (isConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    string resultAddr = getVariableAddr(quad->result, st);
+
+    string argString = quad->arg1;
+    if(isConstant(argString)){
+        string result = evaluate("logicalNot", argString, "");  //incomp
+        emitAsm("movq", {resultAddr});
+    }else{
+        string argAddr = getVariableAddr(argString, st);
+        emitAsm("cmpl", {"$0x0", argAddr});
+        emitAsm("sete", {"%al"});
+        emitAsm("movzbl", {"%al", regNames[EAX_REGISTER_INDEX]});
+        emitAsm("movq", {regNames[EAX_REGISTER_INDEX], resultAddr});
+    }
 }
+
 
 void asmOpDivI(int quadNo){   
     /*  Refer http://www.godevtool.com/TestbugHelp/UseofIDIV.htm#:~:text=The%20IDIV%20instruction%20takes%20only,the%20dividend%20and%20the%20divisor. 
@@ -706,11 +744,13 @@ string getVariableAddr(string varName, symbolTable* st) {
     int offset;
     string offsetStr;
     if(isGlobal(varName, st)) {
-        //UNSUPPORTED FUNCTION
-        error("globals are unsupported", UNSUPPORTED_FUNCTIONALITY);
-        //TODO: return absolute addr
-        offset = getGlobalAddress(varName, st);
-        return to_string(offset);
+        bool isStringLiteral=false;
+        for(globalData *g : globalDataPair) {
+          if(g->varName == varName){
+            return "$" + g->varName;
+          }
+        }
+        error("non-string globals are unsupported", UNSUPPORTED_FUNCTIONALITY);        
     }
     if(isPointer(varName)) {
         string name = stripPointer(varName);
