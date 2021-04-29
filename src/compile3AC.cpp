@@ -28,6 +28,7 @@ void emitAssemblyFrom3AC() {
     int op = gCode[quadNo]->opCode;
     if((op == OP_GOTO) || (op == OP_IFGOTO) || (op == OP_IFNEQGOTO)){
         string num = gCode[quadNo]->result;
+        if(num == BLANK_STR) continue;
         if(!isConstant(num)){
             errorAsm(num, GOTO_ADDR_NOT_CONST);
         }
@@ -35,12 +36,14 @@ void emitAssemblyFrom3AC() {
     }
   }
   sort(gotoLabels.begin(), gotoLabels.end());
+  int labelSize = gotoLabels.size();
   int curr = 0;
   for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
+    //   cout << quadNo << endl; 
       gQuadNo=quadNo;
-      if(gotoLabels[curr] == quadNo){
+      if(curr < labelSize && gotoLabels[curr] == quadNo){
          asmLabel(quadNo);
-         while(gotoLabels[curr] == quadNo){
+         while(curr < labelSize && gotoLabels[curr] == quadNo){
              curr++;
          }
       }
@@ -78,18 +81,18 @@ void printASMData() {
 void emitAssemblyForQuad(int quadNo) {
     quadruple *quad = gCode[quadNo];
     switch(quad->opCode) {
-    /* case OP_GOTO:
-        // asmOpGoto();
-        break; */
+    case OP_GOTO:
+        asmOpGoto(quadNo);
+        break;
     case OP_ADDI: 
         asmOpAddI(quadNo);
         break;
     case OP_MULI: 
         asmOpMulI(quadNo);
         break;
-    /* case OP_IFGOTO: 
-        // asmOpIfGoto();
-        break; */
+    case OP_IFGOTO: 
+        asmOpIfGoto(quadNo);
+        break;
     case OP_SUBI: 
         asmOpSubI(quadNo);
         break;
@@ -780,7 +783,7 @@ void asmOpComp(int quadNo, string asm_comp) {
   int regInd     = getReg(quadNo, quad->arg1);
   string regName = regVec[regInd]->regName;
   emitAsm(asm_comp, {regName});
-  emitAsm("movzbl", {regName, "%rax"});
+  emitAsm("movq", {regName, "%rax"});
   emitAsm("movq", {"%rax", resultAddr});
   freeReg(regInd);
   return;
@@ -894,6 +897,11 @@ void asmOpGoto(int quadNo) {
   quadruple *quad = gCode[quadNo];
   symbolTable *st = codeSTVec[quadNo];
 
+  if(quad->result == BLANK_STR){
+    //   cout<< "blank result in goto\n";
+      return;
+  } 
+
   if (!isConstant(quad->result)) {
     errorAsm(quad->result, GOTO_ADDR_NOT_CONST);
   }
@@ -903,6 +911,11 @@ void asmOpGoto(int quadNo) {
 void asmOpIfGoto(int quadNo) {
   quadruple *quad = gCode[quadNo];
   symbolTable *st = codeSTVec[quadNo];
+
+  if(quad->result == BLANK_STR){
+    //   cout<< "blank result in goto\n";
+      return;
+  }
 
   if (isConstant(quad->arg1)) {
     emitAsm("cmpl", {"$0x0", "$" + hexString(quad->arg1)});
