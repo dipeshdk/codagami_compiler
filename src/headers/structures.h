@@ -6,6 +6,12 @@
 
 using namespace std;
 
+struct globalData{
+    string varName;
+    string value;
+    int valueType;
+};
+
 struct declSpec
 {
     vector<int> type; // check validity of vector short double 

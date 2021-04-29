@@ -1,9 +1,9 @@
-void printf(char *c, int d);
+void printf(char *c, int d, int f);
+char *p = "%s = %d\n";
+char *s = "sdafsdf";
 
 int main() {
-    int* arr;
-    int x=50;
-    char c;
-   /*  c = x;
-    arr = x; */
+    char *c;
+    int x = 6;
+    printf(p,s,x);
 }
