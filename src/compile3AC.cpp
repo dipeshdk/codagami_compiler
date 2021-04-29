@@ -782,8 +782,10 @@ void asmOpComp(int quadNo, string asm_comp) {
   }
   int regInd     = getReg(quadNo, quad->arg1);
   string regName = regVec[regInd]->regName;
-  emitAsm(asm_comp, {regName});
-  emitAsm("movq", {regName, "%rax"});
+//   emitAsm(asm_comp, {regName});
+//   emitAsm("movq", {regName, "%rax"});
+  emitAsm(asm_comp, {"%al"});
+  emitAsm("movzbl", {"%al", "%rax"});
   emitAsm("movq", {"%rax", resultAddr});
   freeReg(regInd);
   return;
