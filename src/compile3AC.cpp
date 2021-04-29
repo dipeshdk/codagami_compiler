@@ -1042,7 +1042,8 @@ void asmOpMulI(int quadNo) {
 }
 
 void asmOpSubI(int quadNo) {
-    emitAsmForBinaryOperator("subq", quadNo);
+  swap(gCode[quadNo]->arg1, gCode[quadNo]->arg2);
+  emitAsmForBinaryOperator("subq", quadNo);
 }
 
 void asmOpCompareEqual(int quadNo) {

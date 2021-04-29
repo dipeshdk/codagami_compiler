@@ -4,7 +4,7 @@ int main() {
     char* arr;
 
     int x = 6896849;
-    int a[3] = {0,3,8};
-    printf(arr,a[1]);
+    x = x -1;
+    printf(arr,x);
     return 0;
 }
