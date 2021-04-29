@@ -39,7 +39,7 @@ void stripTypeCastFromQuads() {
 void emitAssemblyFrom3AC(string asmOutputFile) {
   funcNameStack.push(GLOBAL);
   initializeRegs();
-  // stripTypeCastFromQuads();
+  stripTypeCastFromQuads();
   vector<int> gotoLabels;
   for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
     int op = gCode[quadNo]->opCode;

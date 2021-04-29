@@ -2156,35 +2156,23 @@ int main(int ac, char **av) {
     FILE    *fd;
     if (ac >= 2)
     {
-		// if(ac == 2) {
-		// 	codeFilename = strdup("code.txt");
-		// }else {
-		// 	codeFilename = av[2];
-		// }
-		string inputFileName = "tests/" + string(av[1]); 
+		string inputFileName = string(av[1]); 
         if (!(fd = fopen(inputFileName.c_str(), "r")))
         {
             perror(" Error: ");
             return (-1);
         }
-		inputFileName = string(av[1]);
-		string filePrefix = "";
-		for(char c : inputFileName){
-			if(c=='.') break;
-			filePrefix.push_back(c);
-
-		}
+		string filePrefix = extractFileName(inputFileName);
 		string currDir = get_current_dir_name();
-		string dirName = currDir + "/outputs/" + filePrefix; 
-		int dir = mkdir(dirName.c_str(), 0777);
+		string directoryName = currDir + "/outputs/" + filePrefix; 
+		int dir = mkdir(directoryName.c_str(), 0777);
 		if(dir == -1 && errno != EEXIST) {
 			cerr << "Error :  " << strerror(errno) << endl;
+			directoryName = currDir + "/outputs/";
 		} else {
-			dirName.push_back('/');
+			directoryName.push_back('/');
 		}
-
-		filePrefix = dirName + filePrefix;
-		string codeFilename =  filePrefix + ".tac"; 
+		string TACFilename =  directoryName + filePrefix +".tac"; 
         yyset_in(fd);
         
         // Make the first symbol table with global scope
@@ -2208,10 +2196,11 @@ int main(int ac, char **av) {
 		if(ac == 3) fileName = av[2];
 		generateDot(root,fileName);
 		// printSymbolTable(gSymTable);
-		string asmFileName = filePrefix + ".asm";
+		string asmFileName = directoryName + filePrefix +".asm";
 		emitAssemblyFrom3AC(asmFileName);
-		printSymbolTableJSON(gSymTable,0,1);
-        printCode((char*)codeFilename.c_str());
+		string jsonFileNamePrefix = directoryName + filePrefix;
+		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
+        printCode((char*)TACFilename.c_str());
 		
 		fclose(fd);
     }
