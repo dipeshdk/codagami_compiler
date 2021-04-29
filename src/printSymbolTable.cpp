@@ -189,9 +189,9 @@ void printElem(symbolTableNode* elem, string str, int printTemps) {
     printf("%s", str.c_str());
 }
 
-void printSymbolTableJSON(symbolTable *st, int numTab, int printTemps) {
+void printSymbolTableJSON(string filePrefix, symbolTable *st, int numTab, int printTemps) {
     stringstream ss;  
-    ss << "symbolTableJson/symbolTable" << st->scope << ".json";
+    ss << filePrefix << st->scope << ".json";
     string fileName;
     ss >> fileName;
     FILE *jsonFile = freopen(fileName.c_str(), "w", stdout);
@@ -227,7 +227,7 @@ void printSymbolTableJSON(symbolTable *st, int numTab, int printTemps) {
     printf("}\n");
     fclose (jsonFile);  
     for(symbolTable *child : st->childList) {
-        printSymbolTableJSON(child, numTab, printTemps);
+        printSymbolTableJSON(filePrefix, child, numTab, printTemps);
     }  
 }
 

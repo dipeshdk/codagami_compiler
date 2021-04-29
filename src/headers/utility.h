@@ -23,4 +23,9 @@ bool isConstant(string s);
 string hexString(string decStr);
 
 int getNumberFromConstAddr(string s);
+
+string extractFileName(string str);
+
+string removeExtension(string str);
+
 #endif

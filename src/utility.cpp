@@ -197,3 +197,22 @@ int getNumberFromConstAddr(string s) {
     ss >> a;
     return a;
 }
+
+string removeExtension(string str){
+    char c = '.';
+    size_t found = str.find(c);
+    if (found != string::npos)
+    	return str.substr(0,found);
+	return str;
+}
+
+string extractFileName(string str){
+    char ch = '/';
+    size_t found;
+    found = str.find_last_of(ch);
+    if (found == string::npos) {
+        return removeExtension(str);
+    } else {
+        return removeExtension(str.substr(found+1, str.length() - found-1));
+    }
+}
