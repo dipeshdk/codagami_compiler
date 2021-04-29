@@ -13,6 +13,7 @@ vector<reg*> regVec;
 vector< pair<string, vector<string>> > gAsm;
 vector<string> gArgRegs({"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"});
 vector<string> regNames({"%r10", "%r11", "%rcx", "%rax" , "%rdx" , "%rbx" , "%rsp" , "%rbp" , "%rsi" , "%rdi"});
+vector<string> regNamesOneByte({"%r10b", "%r11b", "%cl", "%al" , "%dl" , "%bl" , "%rsp" , "%bpl" , "%sil" , "%dil"});
 stack<string> funcNameStack;
 stack<int> funcSizeStack;
 vector<pair<string, string>> globalDataPair;
@@ -615,6 +616,7 @@ void initializeRegs() {
     regVec[i]          = new reg();
     regVec[i]->isFree  = true;
     regVec[i]->regName = regNames[i];
+    regVec[i]->regNameOneByte = regNamesOneByte[i];
   }
 }
 
@@ -782,11 +784,10 @@ void asmOpComp(int quadNo, string asm_comp) {
   }
   int regInd     = getReg(quadNo, quad->arg1);
   string regName = regVec[regInd]->regName;
-//   emitAsm(asm_comp, {regName});
-//   emitAsm("movq", {regName, "%rax"});
-  emitAsm(asm_comp, {"%al"});
-  emitAsm("movzbl", {"%al", "%rax"});
-  emitAsm("movq", {"%rax", resultAddr});
+  string regNameOneByte = regVec[regInd]->regNameOneByte;
+  emitAsm(asm_comp, {regNameOneByte});
+  emitAsm("movzbl", {regNameOneByte, regName});
+  emitAsm("movq", {regName, resultAddr});
   freeReg(regInd);
   return;
 }

@@ -134,6 +134,7 @@ struct reg{
     string varValue;
     int quadNo;
     string regName;
+    string regNameOneByte;
     
     reg() {
         isFree = true;
