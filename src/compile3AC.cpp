@@ -51,11 +51,12 @@ void emitAssemblyFrom3AC(string asmOutputFile) {
         gotoLabels.push_back(stoi(num));
     }
   }
+  
   sort(gotoLabels.begin(), gotoLabels.end());
   int curr = 0;
   for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
       gQuadNo=quadNo;
-      if(gotoLabels[curr] == quadNo){
+      if((curr < gotoLabels.size()) && (gotoLabels[curr] == quadNo)){
          asmLabel(quadNo);
          while(gotoLabels[curr] == quadNo){
              curr++;
@@ -95,18 +96,18 @@ void printASMData() {
 void emitAssemblyForQuad(int quadNo) {
     quadruple *quad = gCode[quadNo];
     switch(quad->opCode) {
-    /* case OP_GOTO:
-        // asmOpGoto();
-        break; */
+    case OP_GOTO:
+        asmOpGoto(quadNo);
+        break;
     case OP_ADDI: 
         asmOpAddI(quadNo);
         break;
     case OP_MULI: 
         asmOpMulI(quadNo);
         break;
-    /* case OP_IFGOTO: 
-        // asmOpIfGoto();
-        break; */
+    case OP_IFGOTO: 
+        asmOpIfGoto(quadNo);
+        break;
     case OP_SUBI: 
         asmOpSubI(quadNo);
         break;
@@ -1058,7 +1059,8 @@ void asmOpMulI(int quadNo) {
 }
 
 void asmOpSubI(int quadNo) {
-    emitAsmForBinaryOperator("subq", quadNo);
+  swap(gCode[quadNo]->arg1, gCode[quadNo]->arg2);
+  emitAsmForBinaryOperator("subq", quadNo);
 }
 
 void asmOpCompareEqual(int quadNo) {
