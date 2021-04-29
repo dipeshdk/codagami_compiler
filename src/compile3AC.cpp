@@ -79,18 +79,18 @@ void printASMData() {
 void emitAssemblyForQuad(int quadNo) {
     quadruple *quad = gCode[quadNo];
     switch(quad->opCode) {
-    /* case OP_GOTO:
-        // asmOpGoto();
-        break; */
+    case OP_GOTO:
+        asmOpGoto(quadNo);
+        break;
     case OP_ADDI: 
         asmOpAddI(quadNo);
         break;
     case OP_MULI: 
         asmOpMulI(quadNo);
         break;
-    /* case OP_IFGOTO: 
-        // asmOpIfGoto();
-        break; */
+    case OP_IFGOTO: 
+        asmOpIfGoto(quadNo);
+        break;
     case OP_SUBI: 
         asmOpSubI(quadNo);
         break;
