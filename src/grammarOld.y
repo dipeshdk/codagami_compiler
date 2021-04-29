@@ -149,11 +149,11 @@ primary_expression
 	}
 	| constant	{$$ = $1;}
 	| STRING_LITERAL {
-		$$ = NULL;
-		// node* temp = makeNode(strdup("STRING_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		// if(!temp->declSp) temp->declSp = new declSpec();
-		// temp->declSp->type.push_back(TYPE_STRING_LITERAL);
-		error(yylval.id, STRING_LITERAL_ERROR);
+		node* temp = makeNode(strdup("STRING_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
+		if(!temp->declSp) temp->declSp = new declSpec();
+		temp->declSp->type.push_back(TYPE_STRING_LITERAL);
+		temp->addr = string(yylval.id);
+		$$ = temp;
 		;
 	}
 	| CHAR_LITERAL {
@@ -184,6 +184,9 @@ primary_expression
 
             case 'a':
 				c = '\a';
+				break;
+			case '0':
+				c = '\0';
 				break;
 			}
 		}else if(name.size() == 3) {

@@ -30,16 +30,16 @@ string stripTypeCastUtil(string name) {
 void stripTypeCastFromQuads() {
   for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
     quadruple *quad = gCode[quadNo];
-    stripTypeCastUtil(quad->result);
-    stripTypeCastUtil(quad->arg1);
-    stripTypeCastUtil(quad->arg2);
+    quad->result=stripTypeCastUtil(quad->result);
+    quad->arg1=stripTypeCastUtil(quad->arg1);
+    quad->arg2=stripTypeCastUtil(quad->arg2);
   }
 }
 
 void emitAssemblyFrom3AC(string asmOutputFile) {
   funcNameStack.push(GLOBAL);
   initializeRegs();
-  // stripTypeCastFromQuads();
+  stripTypeCastFromQuads();
   vector<int> gotoLabels;
   for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
     int op = gCode[quadNo]->opCode;

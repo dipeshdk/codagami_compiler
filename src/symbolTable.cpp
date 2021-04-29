@@ -5,7 +5,7 @@ int gScope=0;
 int id = 0;
 symbolTable* gTempSymbolMap;
 symbolTable* gSymTable;
-set<int> validTypes = {TYPE_CHAR, TYPE_INT, TYPE_FLOAT, TYPE_VOID, TYPE_STRUCT};
+set<int> validTypes = {TYPE_CHAR, TYPE_INT, TYPE_FLOAT, TYPE_VOID, TYPE_STRUCT, TYPE_STRING_LITERAL};
 vector<struct quadruple*> gCode;
 vector<symbolTable*> codeSTVec;
 
