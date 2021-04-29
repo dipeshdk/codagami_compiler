@@ -13,13 +13,11 @@ bool checkTypeWrapperWithStruct(declSpec* ds1, declSpec*ds2){
 
 bool checkType(declSpec *ds, int typeName, int ptrLevel) {
     if(checkValidType(ds->type) || ds->type[0] != typeName || ds->ptrLevel != ptrLevel) return false;
-    // cout << "return from check type" << endl;
     return true;
 }
 
 
 int canTypecast(declSpec* to_ds,  declSpec* from_ds){
-
     if(!to_ds || !from_ds)
         return CONFLICTING_TYPES;
 
@@ -61,9 +59,12 @@ int canTypecast(declSpec* to_ds,  declSpec* from_ds){
             return TYPE_ERROR;
         }
     } 
-    // float char* not allowed 
+
+    // float to char* not allowed, string literal can be typcasted only to char * 
     if((checkType(to_ds, TYPE_FLOAT,0) && checkType(from_ds, TYPE_CHAR, 1) )
-     || (checkType(from_ds, TYPE_FLOAT,0) && checkType(to_ds, TYPE_CHAR, 1))) 
+     || (checkType(from_ds, TYPE_FLOAT,0) && checkType(to_ds, TYPE_CHAR, 1))
+     || (checkType(to_ds, TYPE_STRING_LITERAL, 0) && !checkType(from_ds, TYPE_CHAR, 1))
+     || (checkType(from_ds, TYPE_STRING_LITERAL, 0) && !checkType(to_ds, TYPE_CHAR, 1))) 
         return CONFLICTING_TYPES;
     return 0;
 }
@@ -121,6 +122,7 @@ string getTypeName(int type) {
         case TYPE_FLOAT: return "FLOAT";
         case TYPE_VOID: return "VOID";
         case TYPE_STRUCT: return "STRUCT";
+        case TYPE_STRING_LITERAL: return "STRING_LITERAL";
     }
     return "INVALID TYPE";
 }
@@ -158,11 +160,10 @@ int checkStringLiteralDecl(declSpec* root){
     if(!root){
         return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
     }
-    vector<int> v1 = root ->type;
-    if(v1.size()> 0 && v1[0] == TYPE_STRING_LITERAL ){
+    vector<int> v1 = root->type;
+    if(v1.size() == 1 && v1[0] == TYPE_STRING_LITERAL ){
         return 0;
     }
-
     return TYPE_ERROR;
 }
 
@@ -198,6 +199,7 @@ int giveTypeCastRank(node* n1, node* n2){
     */
     int rank1 = getTypeRank(v1); 
     int rank2 = getTypeRank(v2);
+
     if(n1->declSp->ptrLevel > 0) rank1 = RANK_TYPE_POINTER;
     if(n2->declSp->ptrLevel > 0) rank2 = RANK_TYPE_POINTER;
     if(rank1 < 0)

@@ -35,5 +35,6 @@ extern vector<string> gArgRegs;
 
 extern stack<string> funcNameStack;
 extern stack<int> funcSizeStack;
-extern vector<pair<string, string>> globalDataPair;
+extern vector<globalData*> globalDataPair;
+extern symbolTable* globalScopeSymTable;
 #endif
