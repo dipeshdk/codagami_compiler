@@ -43,7 +43,6 @@
 	int offset = 0;
 	int rbp_size = 4+16;
 	stack<string> ternaryTempStack;
-	// string ternaryTemp = BLANK_STR;
 	int funcBeginQuad = -1;
 
 
@@ -158,12 +157,44 @@ primary_expression
 	}
 	| CHAR_LITERAL {
 		string name = yylval.id;
-		if(name.size() != 3) error( yylval.id, NOT_A_CHAR);
+		char c;
+		if(name.size() == 4 && name[1] == '\\') {
+			switch (name[2])
+            {
+            case '\\':
+				c = '\\';
+				break;
+
+            case 'r':
+				c = '\r';
+				break;
+
+            case 'n':
+				c = '\n';
+				break;
+
+            case 't':
+				c = '\t';
+				break;
+
+            case 'v':
+				c = '\v';
+				break;
+
+            case 'a':
+				c = '\a';
+				break;
+			}
+		}else if(name.size() == 3) {
+			c = name[1];
+		}else {
+			error( yylval.id, NOT_A_CHAR);
+		}
 		node* temp = makeNode(strdup("CHAR_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
 		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_CHAR);
 		temp->valType = TYPE_CHAR;
-		setAddr(temp, string(yylval.id));
+		setAddr(temp, to_string((int)c));
 		$$ = temp;
 	}
 	| '(' expression ')' { $$ = $2; }
@@ -195,13 +226,17 @@ postfix_expression
 	| postfix_expression '[' expression ']' {
 		node *postfix_expression = $1;
 		node *expression = $3;
+		int asize = getValueFromConstantExpression($3, errCode);
+		if(asize < 0){
+			error($1->lexeme , ARRAY_INDEX_SHOULD_BE_POSITIVE);
+		}
 		string arrayIndexStr = getArrayIndexWithEmit(postfix_expression, expression, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		addChild(postfix_expression, expression);
 		postfix_expression->infoType = INFO_TYPE_ARRAY;
 		postfix_expression->addr = arrayIndexStr;
-		postfix_expression->declSp->ptrLevel++;
+		postfix_expression->declSp->ptrLevel--;
 		$$ = postfix_expression;
 	}
 	| postfix_expression '(' ')' { // Check with function paramlist111NoParamName111
@@ -1050,7 +1085,7 @@ declaration
 					}
 					emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
 					symbolTableNode* sym_node = lookUp(gSymTable, sizeTmp);
-					sym_node->size = 4;
+					sym_node->size = 8;
 					sym_node->offset = offset;
 					sym_node->declSp->type.push_back(TYPE_INT);
 					offset += 8;
@@ -1361,6 +1396,9 @@ direct_declarator
 	| direct_declarator '[' constant_expression ']' {
 		node* temp = $1;
 		int asize = getValueFromConstantExpression($3, errCode);
+		if(asize < 0){
+			error(temp->lexeme , ARRAY_SIZE_SHOULD_BE_POSITIVE);
+		}
 		if(errCode){
 			error(temp->lexeme, errCode);
 		}
@@ -1370,6 +1408,34 @@ direct_declarator
 			temp->declSp = new declSpec();
 		}
 		temp->declSp->ptrLevel++;
+		string newTmp = generateTemp(errCode);
+		if(errCode)
+			error("", errCode);
+		symbolTableNode *sym_node;
+		sym_node = lookUp(gSymTable, newTmp);
+		sym_node->size = 8;
+		sym_node->offset = offset;
+		sym_node->declSp = new declSpec();
+		sym_node->declSp->type.push_back(TYPE_VOID);
+		sym_node->declSp->ptrLevel++;
+		offset += 8;
+
+		emit(OP_ADDR, $1->addr, EMPTY_STR, newTmp);
+		string newTmp1 = generateTemp(errCode);
+		if(errCode)
+			error("", errCode);
+
+		sym_node = lookUp(gSymTable, newTmp1);
+		sym_node->size = 8;
+		sym_node->offset = offset;
+		sym_node->declSp = new declSpec();
+		sym_node->declSp->type.push_back(TYPE_VOID);
+		sym_node->declSp->ptrLevel++;
+		offset += 8;
+
+		emit(OP_ADDI, newTmp, "8", newTmp1);
+		emit(OP_ASSIGNMENT, newTmp1, EMPTY_STR,$1->addr);
+
 		$$ = temp;
 	}
 	| direct_declarator '[' ']' {

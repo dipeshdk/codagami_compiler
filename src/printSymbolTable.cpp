@@ -281,10 +281,11 @@ int getOffsettedSize(int size){
 int getTypeSize(vector<int> &type) {
     if(type.size() != 1) return -CONFLICTING_TYPES;
     switch(type[0]) {
-        case TYPE_CHAR: return SIZE_CHAR; 
-        case TYPE_VOID: return SIZE_VOID;
-        case TYPE_INT: return SIZE_INT;  
-        case TYPE_FLOAT: return SIZE_FLOAT;  
+        // case TYPE_CHAR: return SIZE_CHAR; 
+        // case TYPE_VOID: return SIZE_VOID;
+        // case TYPE_INT: return SIZE_INT;  
+        // case TYPE_FLOAT: return SIZE_FLOAT;
+        default: return 8;  
     }
     return -CONFLICTING_TYPES;
 }
@@ -389,7 +390,7 @@ void printQuad(quadruple* quad, int line) {
             break;
         case OP_LCALL:
             if(quad->result == EMPTY_STR) {
-                printf("LCALL _%s\n", quad->arg1.c_str());
+                printf("LCALL %s\n", quad->arg1.c_str());
             }else {
                 printf("%s = LCALL _%s\n", quad->result.c_str(), quad->arg1.c_str());
             }

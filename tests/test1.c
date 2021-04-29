@@ -1,14 +1,10 @@
-/* int foo(int a, int b) {
-    int q=1,p=2;
-    a=1;
-    b=2;
-        return q+i;
-} */
+void printf(char *c, int d);
 
 int main() {
-    int hh=5;
-    int f=3;
-    f = hh + 6;
+    char* arr;
 
+    int x = 6896849;
+    int a[3] = {0,3,8};
+    printf(arr,a[1]);
     return 0;
 }
