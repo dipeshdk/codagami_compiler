@@ -2185,7 +2185,7 @@ int main(int ac, char **av) {
         }
 		string filePrefix = extractFileName(inputFileName);
 		string currDir = get_current_dir_name();
-		string directoryName = currDir + "/outputs/" + filePrefix; 
+		string directoryName = "outputs/" + filePrefix; 
 		int dir = mkdir(directoryName.c_str(), 0777);
 		if(dir == -1 && errno != EEXIST) {
 			cerr << "Error :  " << strerror(errno) << endl;
