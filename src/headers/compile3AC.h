@@ -71,6 +71,10 @@ void asmOpAndAnd(int quadNo);
 
 void asmOpOrOr(int quadNo);
 
+void asmOpGoto(int quadNo);
+
+void asmOpIfGoto(int quadNo);
+
 void asmOpIfNeqGoto(int quadNo);
 
 void asmOpUnaryOperator(string op, int quadNo);
@@ -138,6 +142,10 @@ void asmOpPushparam(int quadNo);
 void asmOpPopparam(int quad);
 
 void asmOpLabel(int quadNo);
+
+void asmLabel(int labelno);
+
+void asmJump(int quadNo, string op);
 
 void asmOpReturn(int quadNo);
 
