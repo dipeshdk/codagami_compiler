@@ -44,7 +44,8 @@
 	int rbp_size = 4+16;
 	stack<string> ternaryTempStack;
 	int funcBeginQuad = -1;
-
+	#include <sys/stat.h>
+	#include <sys/types.h>
 
 extern "C"
 {
@@ -2145,6 +2146,7 @@ N_marker:
 
 %%
 #include <stdio.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -2154,20 +2156,36 @@ int main(int ac, char **av) {
     FILE    *fd;
     if (ac >= 2)
     {
-		char* codeFilename;
-		if(ac == 2) {
-			codeFilename = strdup("code.txt");
-		}else {
-			codeFilename = av[2];
-		}
-
-        if (!(fd = fopen(av[1], "r")))
+		// if(ac == 2) {
+		// 	codeFilename = strdup("code.txt");
+		// }else {
+		// 	codeFilename = av[2];
+		// }
+		string inputFileName = "tests/" + string(av[1]); 
+        if (!(fd = fopen(inputFileName.c_str(), "r")))
         {
             perror(" Error: ");
             return (-1);
         }
+		inputFileName = string(av[1]);
+		string filePrefix = "";
+		for(char c : inputFileName){
+			if(c=='.') break;
+			filePrefix.push_back(c);
 
-		
+		}
+		string currDir = get_current_dir_name();
+		string dirName = currDir + "/outputs/" + filePrefix; 
+		cout << dirName << endl;
+		int dir = mkdir(dirName.c_str(), 0777);
+		if(dir == -1 && errno != EEXIST) {
+			cerr << "Error :  " << strerror(errno) << endl;
+		} else {
+			dirName.push_back('/');
+		}
+
+		filePrefix = dirName + filePrefix;
+		string codeFilename =  filePrefix + "Code.txt"; 
         yyset_in(fd);
         
         // Make the first symbol table with global scope
@@ -2190,11 +2208,13 @@ int main(int ac, char **av) {
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
 		generateDot(root,fileName);
-		
 		// printSymbolTable(gSymTable);
-		emitAssemblyFrom3AC();
+		string asmFileName = filePrefix + ".asm";
+		emitAssemblyFrom3AC(asmFileName);
+		cout << 2219 << endl;
 		printSymbolTableJSON(gSymTable,0,1);
-        printCode(codeFilename);
+		cout << 2221 << endl;
+        printCode((char*)codeFilename.c_str());
 		
 		fclose(fd);
     }
