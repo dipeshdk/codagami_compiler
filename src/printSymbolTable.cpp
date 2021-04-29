@@ -370,56 +370,56 @@ string getOpName(int opCode) {
 }
 
 void printQuad(quadruple* quad, int line) {
-    printf("%d.   ", line);
+    // printf("%d.   ", line);
     switch(quad->opCode) {
         case OP_IFGOTO:
-            printf("IF %s THEN GOTO %s\n",quad->arg1.c_str(), quad->result.c_str()); break;
+            printf("    IF %s THEN GOTO %s\n",quad->arg1.c_str(), quad->result.c_str()); break;
         case OP_GOTO:
         case OP_BEGINFUNC:
         case OP_PUSHPARAM:
         case OP_POPPARAM:
-            printf("%s %s\n",getOpName(quad->opCode).c_str(), quad->result.c_str()); break;
+            printf("    %s %s\n",getOpName(quad->opCode).c_str(), quad->result.c_str()); break;
         case OP_ENDFUNC:
-            printf("END_FUNCTION\n\n"); break;
+            printf("    END_FUNCTION\n\n"); break;
         case OP_RETURN:
             if(quad->result == EMPTY_STR) {
-                printf("Return \n");
+                printf("    Return \n");
             }else {
-                printf("Return %s\n", quad->result.c_str());
+                printf("    Return %s\n", quad->result.c_str());
             }
             break;
         case OP_LCALL:
             if(quad->result == EMPTY_STR) {
-                printf("LCALL %s\n", quad->arg1.c_str());
+                printf("    LCALL %s\n", quad->arg1.c_str());
             }else {
-                printf("%s = LCALL _%s\n", quad->result.c_str(), quad->arg1.c_str());
+                printf("    %s = LCALL _%s\n", quad->result.c_str(), quad->arg1.c_str());
             }
             break;
         case OP_LABEL: printf("%s:\n", quad->result.c_str()); break;
         case OP_ASSIGNMENT:
-            printf("%s = %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
+            printf("    %s = %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
         case OP_IFNEQGOTO:
-            printf("IF %s <> %s GOTO %s\n", quad->arg1.c_str(), quad->arg2.c_str(), quad->result.c_str()); break;
+            printf("    IF %s <> %s GOTO %s\n", quad->arg1.c_str(), quad->arg2.c_str(), quad->result.c_str()); break;
         case OP_UNARY_MINUS:
         case OP_BITWISE_NOT:
         case OP_LOGICAL_NOT:
         case OP_ADDR:
-            printf("%s = %s %s\n", quad->result.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str()); break;
+            printf("    %s = %s %s\n", quad->result.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str()); break;
         case OP_MOV:
-            printf("MOV %s -> %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
+            printf("    MOV %s -> %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
         default:
-            printf("%s = %s %s %s\n", quad->result.c_str(),  quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());
+            printf("    %s = %s %s %s\n", quad->result.c_str(),  quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());
     }
 }
 
 void printCode(char* filename) {
     freopen(filename, "w", stdout);
-    cout << "\n==================== Printing 3AC Code ==================\n";
+    // cout << "\n";
     int n = gCode.size();
     for(int i = 0; i < n; i++) {
         printQuad(gCode[i], i);
     }
-    cout << "\n====================================================\n";
+    // cout << "\n";
 }
 
 void printASMText() {

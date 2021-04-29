@@ -424,9 +424,26 @@ void asmOpUnaryMinus(int quadNo) {
   asmOpUnaryOperator("neg", quadNo);
 }
 
-void asmOpUnaryLogicalNot(int quadNo) {
-  asmOpUnaryOperator("not", quadNo);
+void asmOpUnaryLogicalNot(int quadNo){
+    quadruple *quad = gCode[quadNo];
+    symbolTable *st = codeSTVec[quadNo];
+    if (isConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    string resultAddr = getVariableAddr(quad->result, st);
+
+    string argString = quad->arg1;
+    if(isConstant(argString)){
+        string result = evaluate("logicalNot", argString, "");  //incomp
+        emitAsm("movq", {resultAddr});
+    }else{
+        string argAddr = getVariableAddr(argString, st);
+        emitAsm("cmpl", {"$0x0", argAddr});
+        emitAsm("sete", {"%al"});
+        emitAsm("movzbl", {"%al", regNames[EAX_REGISTER_INDEX]});
+        emitAsm("movq", {regNames[EAX_REGISTER_INDEX], resultAddr});
+    }
 }
+
 
 void asmOpDivI(int quadNo){   
     /*  Refer http://www.godevtool.com/TestbugHelp/UseofIDIV.htm#:~:text=The%20IDIV%20instruction%20takes%20only,the%20dividend%20and%20the%20divisor. 

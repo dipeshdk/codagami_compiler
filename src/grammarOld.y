@@ -2176,7 +2176,6 @@ int main(int ac, char **av) {
 		}
 		string currDir = get_current_dir_name();
 		string dirName = currDir + "/outputs/" + filePrefix; 
-		cout << dirName << endl;
 		int dir = mkdir(dirName.c_str(), 0777);
 		if(dir == -1 && errno != EEXIST) {
 			cerr << "Error :  " << strerror(errno) << endl;
@@ -2185,7 +2184,7 @@ int main(int ac, char **av) {
 		}
 
 		filePrefix = dirName + filePrefix;
-		string codeFilename =  filePrefix + "Code.txt"; 
+		string codeFilename =  filePrefix + ".tac"; 
         yyset_in(fd);
         
         // Make the first symbol table with global scope
@@ -2211,9 +2210,7 @@ int main(int ac, char **av) {
 		// printSymbolTable(gSymTable);
 		string asmFileName = filePrefix + ".asm";
 		emitAssemblyFrom3AC(asmFileName);
-		cout << 2219 << endl;
 		printSymbolTableJSON(gSymTable,0,1);
-		cout << 2221 << endl;
         printCode((char*)codeFilename.c_str());
 		
 		fclose(fd);
