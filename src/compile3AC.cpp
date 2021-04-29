@@ -34,11 +34,12 @@ void emitAssemblyFrom3AC() {
         gotoLabels.push_back(stoi(num));
     }
   }
+  
   sort(gotoLabels.begin(), gotoLabels.end());
   int curr = 0;
   for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
       gQuadNo=quadNo;
-      if(gotoLabels[curr] == quadNo){
+      if((curr < gotoLabels.size()) && (gotoLabels[curr] == quadNo)){
          asmLabel(quadNo);
          while(gotoLabels[curr] == quadNo){
              curr++;
