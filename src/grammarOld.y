@@ -44,7 +44,8 @@
 	int rbp_size = 4+16;
 	stack<string> ternaryTempStack;
 	int funcBeginQuad = -1;
-
+	#include <sys/stat.h>
+	#include <sys/types.h>
 
 extern "C"
 {
@@ -2145,6 +2146,7 @@ N_marker:
 
 %%
 #include <stdio.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -2154,20 +2156,23 @@ int main(int ac, char **av) {
     FILE    *fd;
     if (ac >= 2)
     {
-		char* codeFilename;
-		if(ac == 2) {
-			codeFilename = strdup("code.txt");
-		}else {
-			codeFilename = av[2];
-		}
-
-        if (!(fd = fopen(av[1], "r")))
+		string inputFileName = string(av[1]); 
+        if (!(fd = fopen(inputFileName.c_str(), "r")))
         {
             perror(" Error: ");
             return (-1);
         }
-
-		
+		string filePrefix = extractFileName(inputFileName);
+		string currDir = get_current_dir_name();
+		string directoryName = "outputs/" + filePrefix; 
+		int dir = mkdir(directoryName.c_str(), 0777);
+		if(dir == -1 && errno != EEXIST) {
+			cerr << "Error :  " << strerror(errno) << endl;
+			directoryName = currDir + "/outputs/";
+		} else {
+			directoryName.push_back('/');
+		}
+		string TACFilename =  directoryName + filePrefix +".tac"; 
         yyset_in(fd);
         
         // Make the first symbol table with global scope
@@ -2190,11 +2195,12 @@ int main(int ac, char **av) {
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
 		generateDot(root,fileName);
-		
 		// printSymbolTable(gSymTable);
-		emitAssemblyFrom3AC();
-		printSymbolTableJSON(gSymTable,0,1);
-        printCode(codeFilename);
+		string asmFileName = directoryName + filePrefix +".s";
+		emitAssemblyFrom3AC(asmFileName);
+		string jsonFileNamePrefix = directoryName + filePrefix;
+		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
+        printCode((char*)TACFilename.c_str());
 		
 		fclose(fd);
     }
