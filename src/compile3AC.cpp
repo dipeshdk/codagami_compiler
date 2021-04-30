@@ -85,7 +85,7 @@ void printAsm(string asmOutputFile) {
 
 void printASMData() {
     cout << "\n.data" << endl;
-    cout << "   format:  .asciz \"%ld\\n\"" << endl;
+    // cout << "   format:  .asciz \"%ld\\n\"" << endl;
     // int lineNo = 0;
     for(globalData *g : globalDataPair) {
         cout << "   " << g->varName << ": ";
