@@ -2055,7 +2055,7 @@ function_definition
 		addChild($2, $4);
 		$$ = $2;
 		setFirstSixParamOffset($2, gSymTable);
-		int retval = backpatchBeginFunc(funcBeginQuad, offset);
+		int retval = backpatchBeginFunc(funcBeginQuad, offset-8);
 		if(retval)
 			error("backpatchBeginFunc", retval);
 		funcBeginQuad = -1;

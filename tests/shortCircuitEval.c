@@ -12,10 +12,14 @@ int main(){
     if(a == 1){
         d = 5;
     }
-    if(b == foo(2) && c == b){
+    if(b == foo(2) + c && c != b + d){
         d = 6;
     }
-    if(b == c || bar(12) == d){
-        b = 34.90;
+    a = 10;
+    if(b + d <= c - a|| bar(12) >= d /a){
+        b = 34;
     }
+
+    a = b && c;
+    a = b + d + c  || a - b;
 }

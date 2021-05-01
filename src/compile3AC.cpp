@@ -26,9 +26,12 @@ stack<int> ptrAssignedRegs;
 
 
 string stripTypeCastUtil(string name) {
-  size_t pos = name.find(")");
+  size_t pos = name.find(" ) ");
   if (pos == string::npos)
     return name;
+  if((pos+2) >= name.size()) {
+    return name;
+  }
   return name.substr(pos+2);
 }
 
@@ -93,7 +96,6 @@ void printAsm(string asmOutputFile) {
 
 void printASMData() {
     cout << "\n.data" << endl;
-    cout << "   format:  .asciz \"%ld\\n\"" << endl;
     // int lineNo = 0;
     for(globalData *g : globalDataPair) {
         cout << "   " << g->varName << ": ";
@@ -277,7 +279,7 @@ void asmOpReturn(int quadNo){
 }
 
 void asmOpEndFunc(int quadNo){
-    emitAsm("addq", {"$"+hexString(to_string(funcSizeStack.top())), "%rsp"});
+    emitAsm("addq", {"$"+hexString(to_string(funcSizeStack.top())), "%rbp"});
     emitAsm("popq", {"%rbp"});
     emitAsm("retq", {});
     funcNameStack.pop();
@@ -366,7 +368,7 @@ void asmOpBeginFunc(int quadNo) {
   emitFuncStart();
   
   //sub stack pointer
-  emitAsm("subq", {"$"+hexString(quad->result), "%rsp"});
+  emitAsm("subq", {"$"+hexString(quad->result), "%rbp"});
 
   //move first 6 arguments from register to stack
   vector<struct param*> paramList = funcNode->paramList;
@@ -741,8 +743,13 @@ string getOffsetStr(int offset){
 
 string stripPointer(string name) {
     int n = name.length();
-    string varName = name.substr(2, n-3);
-    return varName;
+    if(n > 3) {
+      string varName = name.substr(2, n-3);
+      return varName;
+    }else {
+      error(name, INVALID_POINTER_ADDR);
+    }
+    return name;
 }
 
 string getVariableAddr(string varName, symbolTable* st) {

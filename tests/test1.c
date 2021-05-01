@@ -1,8 +1,6 @@
 
-/* void printf(char *c, int d, int f);
-char *p = "%s = %d\n";
-char *s = "sdafsdf"; */
-
+void printf(char *c, int d);
+char *p = "%d\n";
 struct foo{
     int a;
     int b;
@@ -11,8 +9,9 @@ struct foo{
 
 
 int main() {
-    struct foo *f;
-    int c;
-    c = f->a;
+    struct foo f;
+    int c = 5;
+    f.a = 5;
+    printf(p,c);
     return 0;
 }
