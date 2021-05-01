@@ -276,8 +276,8 @@ string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCo
 }
 
 string getArrayIndexWithEmit(node *postfix_expression , node *expression, int &errCode, string &errStr){
-    if(expression->declSp) 
-		{
+		errCode = 0;
+        if(expression->declSp) {
 			checkTypeArrayWithTypecast(expression, errCode, errStr);
 			if(errCode){
                 setErrorParams(errCode, errCode, errStr, errStr);
