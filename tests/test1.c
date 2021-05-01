@@ -1,9 +1,12 @@
-void printf(char *c, int d);
-char *p = "%d\n";
+void printf(char *c, int b);
+char *c = "%ld\n";
 
-int main() {
-    int *a, b;
-    b = *a;
-    /* printf(p,b); */
+int foo(int arr[5]) {
     return 0;
+}
+
+int main(){
+    int arr[5];
+    int b=3;
+    arr[3]=5;
 }

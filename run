@@ -1,0 +1,1 @@
+make && bin/3AC tests/test1.c && gcc -no-pie outputs/test1/test1.s && ./a.out

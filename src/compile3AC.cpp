@@ -280,7 +280,7 @@ void asmOpReturn(int quadNo){
 }
 
 void asmOpEndFunc(int quadNo){
-    emitAsm("addq", {"$"+hexString(to_string(funcSizeStack.top())), "%rsp"});
+    emitAsm("addq", {"$"+hexString(to_string(funcSizeStack.top())), "%rbp"});
     emitAsm("popq", {"%rbp"});
     emitAsm("retq", {});
     funcNameStack.pop();
@@ -369,7 +369,7 @@ void asmOpBeginFunc(int quadNo) {
   emitFuncStart();
   
   //sub stack pointer
-  emitAsm("subq", {"$"+hexString(quad->result), "%rsp"});
+  emitAsm("subq", {"$"+hexString(quad->result), "%rbp"});
 
   //move first 6 arguments from register to stack
   vector<struct param*> paramList = funcNode->paramList;
