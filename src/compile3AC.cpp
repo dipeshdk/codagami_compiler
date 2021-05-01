@@ -23,6 +23,7 @@ stack<int> funcSizeStack;
 vector<globalData*> globalDataPair;
 int gQuadNo; // holding the current quadNo
 stack<int> ptrAssignedRegs;
+set<string> libraryFunctions {"printf", "scanf", "malloc"};
 
 
 string stripTypeCastUtil(string name) {
@@ -293,8 +294,7 @@ void amsOpLCall(int quadNo){
     //mov    %eax,-0x4(%rbp)
     if(isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-    if(quad->arg1 == "printf" || quad->arg1 == "scanf"){
-        // emitAsm("lea", {"format(%rip)", "%rdi"});
+    if(libraryFunctions.find(quad->arg1) !=  libraryFunctions.end()){
         emitAsm("xor", {"%rax", "%rax"});
     }
     emitAsm("callq", {quad->arg1});
