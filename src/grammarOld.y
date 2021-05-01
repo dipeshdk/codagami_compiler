@@ -283,14 +283,19 @@ postfix_expression
 		string identifierName = yylval.id;
 		structParam* param = structureParamLookup(structure, identifierName, errCode, errStr);
 		if(errCode) error(errStr, errCode);
-		string newAddr = postfix_expression->addr + "." + identifierName;
+        // emitStructDeferenceDot
+        string newAddr = emitStructDeferenceDot($1, structure, identifierName, param, errCode, errStr);
+        if(errCode)
+			error(errStr, errCode);
+		// string newAddr = postfix_expression->addr + "." + identifierName;
 		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, NULL, NULL, NULL, NULL);
 		temp->declSp = declSpCopy(param->declSp);
-		temp->infoType = INFO_NESTED_STRUCT;
-		temp->addr = newAddr;
+		// temp->infoType = INFO_NESTED_STRUCT; // check later
+        temp->infoType = param->infoType;
+		// temp->addr = newAddr;
 		node *newNode = makeNode(strdup("."), strdup("."), 0, $1, temp , NULL, NULL);
-		newNode->declSp = declSpCopy(temp->declSp);
-		newNode->infoType = INFO_NESTED_STRUCT;
+		newNode->declSp = declSpCopy(param->declSp);
+		newNode->infoType = param->infoType; // check later
 		newNode->addr = newAddr;
 		$$ = newNode;
 	}
@@ -943,7 +948,7 @@ assignment_expression
 			}
 			else if(s == "=")
 			{
-				bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
+                bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
 				if(errCode)
 					error(errStr, errCode);
 				if(retval){
@@ -1342,6 +1347,7 @@ struct_declarator
 	: declarator { 
 		node* declarator = $1; 
 		structParam* param = new structParam();
+        param->infoType = declarator->infoType;
 		param->name = declarator->lexeme;
 		param->declSp = declarator->declSp;
 		declarator->structParamList.push_back(param);
@@ -1351,6 +1357,7 @@ struct_declarator
 	| declarator ':' constant_expression {
 		node* declarator = $1; 
 		structParam* param = new structParam();
+        param->infoType = declarator->infoType;
 		param->name = declarator->lexeme;
 		param->declSp = declarator->declSp;
 		int err = 0;
@@ -2217,13 +2224,14 @@ int main(int ac, char **av) {
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
 		generateDot(root,fileName);
+        // cout << "done tac\n";  
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
 		emitAssemblyFrom3AC(asmFileName);
+        // cout << "done asm\n";
 		string jsonFileNamePrefix = directoryName + filePrefix;
-		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-        printCode((char*)TACFilename.c_str());
-		
+		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);    
+		printCode((char*)TACFilename.c_str());
 		fclose(fd);
     }
     else

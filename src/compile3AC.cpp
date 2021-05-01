@@ -702,6 +702,7 @@ bool isGlobal(string varName, symbolTable* st) {
         varName = stripPointer(varName);
     symbolTableNode* sym_node = lookUp(st, varName);
     if(sym_node == nullptr){
+        cout << "here\n";
         error(varName, SYMBOL_NOT_FOUND);
     }
     if(sym_node->scope == -1)

@@ -38,6 +38,7 @@ struct param{
 };
 
 struct structParam{
+    int infoType;
     struct declSpec *declSp;
     string name;
     int bit;

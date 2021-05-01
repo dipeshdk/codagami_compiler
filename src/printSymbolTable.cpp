@@ -413,12 +413,15 @@ void printQuad(quadruple* quad, int line) {
 }
 
 void printCode(char* filename) {
+    cout << filename << endl;
+    cout << "printCode : size = " << gCode.size() << endl;
     freopen(filename, "w", stdout);
     // cout << "\n";
     int n = gCode.size();
     for(int i = 0; i < n; i++) {
         printQuad(gCode[i], i);
     }
+
     // cout << "\n";
 }
 
