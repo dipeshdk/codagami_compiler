@@ -2222,7 +2222,7 @@ int main(int ac, char **av) {
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-        printCode((char*)TACFilename.c_str());
+        	printCode((char*)TACFilename.c_str());
 		
 		fclose(fd);
     }
