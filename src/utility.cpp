@@ -157,6 +157,9 @@ void error(string var, int error_code) {
 		case INVALID_STRING_LITERAL_ASSIGNMENT:
 			str = "Invalid string literal assignment";
 			break;
+		case INVALID_POINTER_ADDR:
+			str = "Internal error: Invalid pointer name in 3AC code";
+			break;
 		default:
 			break;
 	}
