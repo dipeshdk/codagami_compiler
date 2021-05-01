@@ -47,7 +47,7 @@ int backpatchBeginFunc(int funcBeginQuad, int offset) {
 }
 
 void emit(int opCode, string arg1, string arg2, string result){
-
+    cout << result << " " << arg1 << " " << opCode << " " << arg2 << endl;
     quadruple* quad = new quadruple();
     quad->opCode = opCode;
     quad->arg1 = arg1;
@@ -339,7 +339,7 @@ int getParamOffset(structTableNode* node, string paramName, int& err, string& er
 
 string emitStructDeferenceDot(node* node, structTableNode* structure, string paramName, structParam* param, int &errCode, string &errStr){
     int paramOffset = getParamOffset(structure, paramName, errCode, errStr);
-    // cout << "paramOffset " << paramOffset << endl;
+    cout << "paramOffset " << paramOffset << endl;
     if(paramOffset < 0){
         setErrorParams(errCode, errCode, errStr, "struct dereference error");
         return EMPTY_STR;
@@ -365,4 +365,33 @@ string emitStructDeferenceDot(node* node, structTableNode* structure, string par
         return EMPTY_STR;
     }
     return pointerTmp;
+}
+
+node* emitStructDeferencePtrOp(node* stNode, int &errCode, string &errStr){
+    string pointerTmp = generateTemp(errCode);
+    if(errCode) {
+        setErrorParams(errCode, errCode, errStr, "error in temp generation");
+        return NULL;
+    }
+    string pointerAddr = "*(" + stNode->addr + ")";
+    emit(OP_ASSIGNMENT, pointerAddr, EMPTY_STR, pointerTmp);
+    symbolTableNode* sym_node = lookUp(gSymTable, pointerTmp);
+	sym_node->offset = offset;
+	sym_node->declSp = stNode->declSp;
+    sym_node->declSp->ptrLevel = stNode->declSp->ptrLevel-1;
+    sym_node->infoType = stNode->infoType;
+    sym_node->paramList = stNode->paramList;
+    sym_node->paramSize = stNode->paramSize;
+	offset += 8;
+
+    node* ptrNode = makeDeadNode();
+    ptrNode->declSp = stNode->declSp;
+    ptrNode->declSp->ptrLevel = stNode->declSp->ptrLevel -1;
+    ptrNode->infoType = stNode->infoType;
+    ptrNode->paramList = stNode->paramList;
+    ptrNode->paramSize = stNode->paramSize;
+    ptrNode->addr = pointerTmp;
+    ptrNode->lexeme = strcpy(new char[pointerTmp.length() + 1], pointerTmp.c_str());
+
+    return ptrNode;
 }

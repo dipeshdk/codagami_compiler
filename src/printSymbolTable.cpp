@@ -1,4 +1,4 @@
-#include "headers/allInclude.h" 
+#include "headers/allInclude.h"
 
 extern int offset;
 
@@ -80,7 +80,7 @@ void printSymbolTable(symbolTable *st) {
     for(auto &s: st->symbolOrder){
         cout << s << " ";
     }
-    cout << endl;
+    ;
     cout << "\n=================================================\n";
     printStructTable(st->structMap, st->scope);
     for(symbolTable *child : st->childList) {
@@ -370,7 +370,6 @@ string getOpName(int opCode) {
 }
 
 void printQuad(quadruple* quad, int line) {
-    // printf("%d.   ", line);
     switch(quad->opCode) {
         case OP_IFGOTO:
             printf("    IF %s THEN GOTO %s\n",quad->arg1.c_str(), quad->result.c_str()); break;
@@ -395,16 +394,16 @@ void printQuad(quadruple* quad, int line) {
                 printf("    %s = LCALL _%s\n", quad->result.c_str(), quad->arg1.c_str());
             }
             break;
-        case OP_LABEL: printf("%s:\n", quad->result.c_str()); break;
+        case OP_LABEL: printf("%s:\n", quad->result.c_str()); ; break;
         case OP_ASSIGNMENT:
             printf("    %s = %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
         case OP_IFNEQGOTO:
-            printf("    IF %s <> %s GOTO %s\n", quad->arg1.c_str(), quad->arg2.c_str(), quad->result.c_str()); break;
+            printf("    IF %s <> %s GOTO %s\n", quad->arg1.c_str(), quad->arg2.c_str(), quad->result.c_str());  break;
         case OP_UNARY_MINUS:
         case OP_BITWISE_NOT:
         case OP_LOGICAL_NOT:
         case OP_ADDR:
-            printf("    %s = %s %s\n", quad->result.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str()); break;
+            printf("    %s = %s %s\n", quad->result.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str());  break;
         case OP_MOV:
             printf("    MOV %s -> %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
         default:
@@ -414,14 +413,12 @@ void printQuad(quadruple* quad, int line) {
 
 void printCode(char* filename) {
     cout << filename << endl;
-    cout << "printCode : size = " << gCode.size() << endl;
     freopen(filename, "w", stdout);
     // cout << "\n";
     int n = gCode.size();
     for(int i = 0; i < n; i++) {
         printQuad(gCode[i], i);
     }
-
     // cout << "\n";
 }
 

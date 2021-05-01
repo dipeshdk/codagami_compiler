@@ -283,11 +283,10 @@ postfix_expression
 		string identifierName = yylval.id;
 		structParam* param = structureParamLookup(structure, identifierName, errCode, errStr);
 		if(errCode) error(errStr, errCode);
-        // emitStructDeferenceDot
+
         string newAddr = emitStructDeferenceDot($1, structure, identifierName, param, errCode, errStr);
         if(errCode)
 			error(errStr, errCode);
-		// string newAddr = postfix_expression->addr + "." + identifierName;
 		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, NULL, NULL, NULL, NULL);
 		temp->declSp = declSpCopy(param->declSp);
 		// temp->infoType = INFO_NESTED_STRUCT; // check later
@@ -302,12 +301,22 @@ postfix_expression
 	| postfix_expression PTR_OP IDENTIFIER {
 		structTableNode* structure = getRightMostStructFromPostfixExpression($1, true, errCode, errStr);
 		if(errCode) error(errStr, errCode);
-		
+		if($1->declSp->ptrLevel != 1){
+            error("pointer error in struct", INVALID_REFERENCE);
+        }
 		string identifierName = yylval.id;
 		structParam* param = structureParamLookup(structure, identifierName, errCode, errStr);
 		if(errCode) error(errStr, errCode);
-	
-		string newAddr = $1->addr + "->" + identifierName;
+
+        node* ptrNode = emitStructDeferencePtrOp($1, errCode, errStr);
+        if(ptrNode == NULL){
+            error("error in new node generation", DEFAULT_ERROR);
+        }
+        cout << " node generated " << endl;
+		string newAddr = emitStructDeferenceDot(ptrNode, structure, identifierName, param, errCode, errStr);
+
+        cout << " newAddr generated " << endl;
+
 		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, NULL, NULL, NULL, NULL);
 		temp->declSp = declSpCopy(param->declSp);
 		temp->infoType = INFO_NESTED_STRUCT;
@@ -317,6 +326,7 @@ postfix_expression
 		newNode->infoType = INFO_NESTED_STRUCT;
 		newNode->addr = newAddr;
 		$$ = newNode;
+        cout << "all done\n";
 	}
 	| postfix_expression INC_OP {
 		// int retval  = checkIntOrCharOrPointer($1);
@@ -2223,15 +2233,15 @@ int main(int ac, char **av) {
 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
-		generateDot(root,fileName);
-        // cout << "done tac\n";  
+		generateDot(root,fileName); 
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
+        // cout << asmFileName << endl;
 		emitAssemblyFrom3AC(asmFileName);
-        // cout << "done asm\n";
 		string jsonFileNamePrefix = directoryName + filePrefix;
-		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);    
-		printCode((char*)TACFilename.c_str());
+		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);   
+        printCode((char*)TACFilename.c_str());        
+		
 		fclose(fd);
     }
     else
