@@ -2038,7 +2038,7 @@ function_definition
 		addChild($2, $4);
 		$$ = $2;
 		setFirstSixParamOffset($2, gSymTable);
-		int retval = backpatchBeginFunc(funcBeginQuad, offset);
+		int retval = backpatchBeginFunc(funcBeginQuad, offset-8);
 		if(retval)
 			error("backpatchBeginFunc", retval);
 		funcBeginQuad = -1;
@@ -2222,7 +2222,7 @@ int main(int ac, char **av) {
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-        	printCode((char*)TACFilename.c_str());
+		printCode((char*)TACFilename.c_str());
 		
 		fclose(fd);
     }

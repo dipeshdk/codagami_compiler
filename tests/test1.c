@@ -32,3 +32,9 @@ int main(){
     printf(str,arr[9]);
     return 0;
 }
+
+int main(){
+    int arr[5];
+    int b=3;
+    arr[3]=5;
+}
