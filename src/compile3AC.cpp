@@ -293,7 +293,7 @@ void amsOpLCall(int quadNo){
     //mov    %eax,-0x4(%rbp)
     if(isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-    if(quad->arg1 == "printf"){
+    if(quad->arg1 == "printf" || quad->arg1 == "scanf"){
         // emitAsm("lea", {"format(%rip)", "%rdi"});
         emitAsm("xor", {"%rax", "%rax"});
     }
