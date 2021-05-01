@@ -277,7 +277,7 @@ void asmOpReturn(int quadNo){
 }
 
 void asmOpEndFunc(int quadNo){
-    emitAsm("addq", {"$"+hexString(to_string(funcSizeStack.top())), "%rsp"});
+    emitAsm("addq", {"$"+hexString(to_string(funcSizeStack.top())), "%rbp"});
     emitAsm("popq", {"%rbp"});
     emitAsm("retq", {});
     funcNameStack.pop();
@@ -290,7 +290,7 @@ void amsOpLCall(int quadNo){
     //mov    %eax,-0x4(%rbp)
     if(isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-    if(quad->arg1 == "printf"){
+    if(quad->arg1 == "printf" || quad->arg1 == "scanf"){
         // emitAsm("lea", {"format(%rip)", "%rdi"});
         emitAsm("xor", {"%rax", "%rax"});
     }
@@ -366,7 +366,7 @@ void asmOpBeginFunc(int quadNo) {
   emitFuncStart();
   
   //sub stack pointer
-  emitAsm("subq", {"$"+hexString(quad->result), "%rsp"});
+  emitAsm("subq", {"$"+hexString(quad->result), "%rbp"});
 
   //move first 6 arguments from register to stack
   vector<struct param*> paramList = funcNode->paramList;
