@@ -276,39 +276,37 @@ string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCo
 }
 
 string getArrayIndexWithEmit(node *postfix_expression , node *expression, int &errCode, string &errStr){
-    if(expression->declSp) 
-		{
-			checkTypeArrayWithTypecast(expression, errCode, errStr);
-			if(errCode){
-                setErrorParams(errCode, errCode, errStr, errStr);
-                return EMPTY_STR;
-            }
-		}else{ 
-			setErrorParams(errCode, ARRAY_INDEX_SHOULD_BE_INT, errStr, expression->lexeme);
-            return EMPTY_STR;
-		}
-
-        if(!postfix_expression->declSp){
-            setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, "postfix_expression declSp not allocated for array");
-            return EMPTY_STR;
-        }
-        int size = getTypeSize(postfix_expression->declSp->type);
-        if(size < 0){
-            setErrorParams(errCode, -size, errStr, "invalid array type");
-            return EMPTY_STR;
-        }
-        //_t1 = 4;
-        string sizeTmp = generateTemp(errCode);
+    if(expression->declSp){
+        checkTypeArrayWithTypecast(expression, errCode, errStr);
         if(errCode){
-            setErrorParams(errCode, errCode, errStr, "error in temp generation");
+            setErrorParams(errCode, errCode, errStr, errStr);
             return EMPTY_STR;
         }
-        emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
-        symbolTableNode* sym_node = lookUp(gSymTable, sizeTmp);
-		sym_node->size = 8;
-		sym_node->offset = offset;
-		sym_node->declSp->type.push_back(TYPE_INT);
-		offset += 8;
+    }else{ 
+        setErrorParams(errCode, ARRAY_INDEX_SHOULD_BE_INT, errStr, expression->lexeme);
+        return EMPTY_STR;
+    }
 
-        return emitArrayIndexGetAddr(postfix_expression->addr, expression->addr, sizeTmp, errCode, errStr);
+    if(!postfix_expression->declSp){
+        setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, "postfix_expression declSp not allocated for array");
+        return EMPTY_STR;
+    }
+    int size = getTypeSize(postfix_expression->declSp->type);
+    if(size < 0){
+        setErrorParams(errCode, -size, errStr, "invalid array type");
+        return EMPTY_STR;
+    }
+    //_t1 = 4;
+    string sizeTmp = generateTemp(errCode);
+    if(errCode){
+        setErrorParams(errCode, errCode, errStr, "error in temp generation");
+        return EMPTY_STR;
+    }
+    emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
+    symbolTableNode* sym_node = lookUp(gSymTable, sizeTmp);
+    sym_node->size = 8;
+    sym_node->offset = offset;
+    sym_node->declSp->type.push_back(TYPE_INT);
+    offset += 8;
+    return emitArrayIndexGetAddr(postfix_expression->addr, expression->addr, sizeTmp, errCode, errStr);
 }
