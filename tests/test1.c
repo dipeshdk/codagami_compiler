@@ -7,3 +7,9 @@ int main() {
     /* printf(p,b); */
     return 0;
 }
+
+int main(){
+    int arr[5];
+    int b=3;
+    arr[3]=5;
+}
