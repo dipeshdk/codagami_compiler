@@ -26,9 +26,12 @@ stack<int> ptrAssignedRegs;
 
 
 string stripTypeCastUtil(string name) {
-  size_t pos = name.find(")");
+  size_t pos = name.find(" ) ");
   if (pos == string::npos)
     return name;
+  if((pos+2) >= name.size()) {
+    return name;
+  }
   return name.substr(pos+2);
 }
 
@@ -740,8 +743,13 @@ string getOffsetStr(int offset){
 
 string stripPointer(string name) {
     int n = name.length();
-    string varName = name.substr(2, n-3);
-    return varName;
+    if(n > 3) {
+      string varName = name.substr(2, n-3);
+      return varName;
+    }else {
+      error(name, INVALID_POINTER_ADDR);
+    }
+    return name;
 }
 
 string getVariableAddr(string varName, symbolTable* st) {
