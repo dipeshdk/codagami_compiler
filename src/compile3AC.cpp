@@ -5,7 +5,7 @@
 #define NO_VAR_VALUE_ASSIGNED "__not_assigned__"
 #define EAX_REGISTER_INDEX 3
 #define EDX_REGISTER_INDEX 4
-#define ECX_REGISTER_INDEX 4
+#define ECX_REGISTER_INDEX 2
 #define CL_REGISTER "%cl" // ECX 8 bit version
 
 #define GLOBAL "global"
@@ -845,7 +845,6 @@ void asmOpAssignment(int quadNo){
 }
 
 
-
 void asmOpMod(int quadNo){
 //    8:	8b 45 f8             	mov    -0x8(%rbp),%eax (Move arg1)
 //    b:	99                   	cltd   
@@ -858,15 +857,15 @@ void asmOpMod(int quadNo){
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR); //does not print line number
     
     string resultAddr = getVariableAddr(quad->result, st);
+    freeRegAndMoveToStack(EAX_REGISTER_INDEX); 
+    regVec[EAX_REGISTER_INDEX]->isFree = false;
+    string regName = regVec[EAX_REGISTER_INDEX]->regName;
+
     if(isConstant(quad->arg1)) {
-        emitAsm("movq", {"$"+hexString(quad->arg1), "%rax"});
+        emitAsm("movq", {"$"+hexString(quad->arg1), regName});
     }else {
         string argAddr = getVariableAddr(quad->arg1, st);
-        // int regInd = getReg(quadNo, quad->arg1);y = x << 12;
-        // string regName = regVec[regInd]->regName;
-        emitAsm("movq", {argAddr, "%rax"});
-        // emitAsm("mov", {regName, resultAddr});
-        // freeReg(regInd);
+        emitAsm("movq", {argAddr, regName});
     }
     emitAsm("cltd", {});
     string arg2Addr;
@@ -877,13 +876,18 @@ void asmOpMod(int quadNo){
         arg2Addr = "$" + hexString(quad->arg2);
         emitAsm("movq", {arg2Addr, reg2Name});
         emitAsm("idivq", {reg2Name});
+        freeReg(reg2Ind);
     }else{
         arg2Addr = getVariableAddr(quad->arg2, st);
         emitAsm("idivq", {arg2Addr});
     }
 
-    
-    emitAsm("movq", {"%rdx", resultAddr});
+    freeRegAndMoveToStack(EDX_REGISTER_INDEX); 
+    regVec[EDX_REGISTER_INDEX]->isFree = false;
+    string regNamerdx = regVec[EDX_REGISTER_INDEX]->regName;
+    emitAsm("movq", {regNamerdx, resultAddr});
+    freeReg(EAX_REGISTER_INDEX);
+    freeReg(EDX_REGISTER_INDEX);
     return;
 }
 
