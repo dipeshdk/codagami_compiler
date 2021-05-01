@@ -1,18 +1,18 @@
-void printf(char *c, int d);
-char *p = "%d\n";
+
+/* void printf(char *c, int d, int f);
+char *p = "%s = %d\n";
+char *s = "sdafsdf"; */
+
+struct foo{
+    int a;
+    int b;
+    float c;
+};
+
 
 int main() {
-    char* arr;
-    int a = 8;
-    int x = 5;
-    int y = 490;
-    x = 50 >> a;
-    printf(p, x);
-    x =  y >> a ;    
-    printf(p, x);
-    x = 50 << a;
-    printf(p, x);
-    x = 70 << a;
-    printf(p, x);
+    struct foo *f;
+    int c;
+    c = f->a;
     return 0;
 }
