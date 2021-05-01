@@ -299,24 +299,15 @@ postfix_expression
 		$$ = newNode;
 	}
 	| postfix_expression PTR_OP IDENTIFIER {
-		structTableNode* structure = getRightMostStructFromPostfixExpression($1, true, errCode, errStr);
+		
+        structTableNode* structure = getRightMostStructFromPostfixExpression($1, true, errCode, errStr);
 		if(errCode) error(errStr, errCode);
-		if($1->declSp->ptrLevel != 1){
-            error("pointer error in struct", INVALID_REFERENCE);
-        }
+		
 		string identifierName = yylval.id;
 		structParam* param = structureParamLookup(structure, identifierName, errCode, errStr);
 		if(errCode) error(errStr, errCode);
-
-        node* ptrNode = emitStructDeferencePtrOp($1, errCode, errStr);
-        if(ptrNode == NULL){
-            error("error in new node generation", DEFAULT_ERROR);
-        }
-        cout << " node generated " << endl;
-		string newAddr = emitStructDeferenceDot(ptrNode, structure, identifierName, param, errCode, errStr);
-
-        cout << " newAddr generated " << endl;
-
+	
+		string newAddr = $1->addr + "->" + identifierName;
 		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, NULL, NULL, NULL, NULL);
 		temp->declSp = declSpCopy(param->declSp);
 		temp->infoType = INFO_NESTED_STRUCT;
@@ -326,7 +317,6 @@ postfix_expression
 		newNode->infoType = INFO_NESTED_STRUCT;
 		newNode->addr = newAddr;
 		$$ = newNode;
-        cout << "all done\n";
 	}
 	| postfix_expression INC_OP {
 		// int retval  = checkIntOrCharOrPointer($1);
@@ -2239,8 +2229,8 @@ int main(int ac, char **av) {
         // cout << asmFileName << endl;
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
-		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);   
-        printCode((char*)TACFilename.c_str());        
+		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
+		printCode((char*)TACFilename.c_str());
 		
 		fclose(fd);
     }

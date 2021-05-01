@@ -292,7 +292,7 @@ void amsOpLCall(int quadNo){
     //mov    %eax,-0x4(%rbp)
     if(isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-    if(quad->arg1 == "printf"){
+    if(quad->arg1 == "printf" || quad->arg1 == "scanf"){
         // emitAsm("lea", {"format(%rip)", "%rdi"});
         emitAsm("xor", {"%rax", "%rax"});
     }
@@ -686,14 +686,38 @@ void errorAsm(string str, int errCode) {
   exit(errCode);
 }
 
+int getParameterOffset(string structName, string param, symbolTable* st){
+    structTableNode* structure = nullptr;
+    structure = structLookUp(st, structName);
+    if(structure == nullptr){
+        error(structName, STRUCT_NOT_DECLARED);
+    }
+    int paramOffset = getParamOffset(structure, param, errCode, errStr); 
+    if(paramOffset < 0){
+        error("paramOffset Negative", DEFAULT_ERROR);
+    }
+    return paramOffset;
+}
+
 int getOffset(string varName, symbolTable* st){
     if(isPointer(varName)) 
         varName = stripPointer(varName);
-    symbolTableNode* sym_node = lookUp(st, varName);
+    //check for foo->a
+    string identifier = varName, param, name = varName, delim = "->";
+    size_t pos = name.find(delim);
+    if(pos != string::npos){
+        identifier = name.substr(0, pos);
+        name.erase(0, pos + delim.length());
+        param = name;
+    }
+    symbolTableNode* sym_node = lookUp(st, identifier);
     if(sym_node == nullptr){
-        error(varName, SYMBOL_NOT_FOUND);
+        error(identifier, SYMBOL_NOT_FOUND);
     }
     int offset = sym_node->offset;
+    if(sym_node->infoType == INFO_TYPE_STRUCT){
+        offset += getParameterOffset(sym_node->declSp->lexeme, param, st);
+    }
     offset += getOffsettedSize(sym_node->size);
     return -1*offset;
 }
@@ -702,7 +726,12 @@ int getOffset(string varName, symbolTable* st){
 bool isGlobal(string varName, symbolTable* st) {
     if(isPointer(varName)) 
         varName = stripPointer(varName);
-    symbolTableNode* sym_node = lookUp(st, varName);
+    string identifier = varName, param, name = varName, delim = "->";
+    size_t pos = name.find(delim);
+    if(pos != string::npos){
+        identifier = name.substr(0, pos);
+    }
+    symbolTableNode* sym_node = lookUp(st, identifier);
     if(sym_node == nullptr){
         cout << "here\n";
         error(varName, SYMBOL_NOT_FOUND);

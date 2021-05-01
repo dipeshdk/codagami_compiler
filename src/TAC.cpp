@@ -47,7 +47,7 @@ int backpatchBeginFunc(int funcBeginQuad, int offset) {
 }
 
 void emit(int opCode, string arg1, string arg2, string result){
-    cout << result << " " << arg1 << " " << opCode << " " << arg2 << endl;
+
     quadruple* quad = new quadruple();
     quad->opCode = opCode;
     quad->arg1 = arg1;
@@ -339,7 +339,6 @@ int getParamOffset(structTableNode* node, string paramName, int& err, string& er
 
 string emitStructDeferenceDot(node* node, structTableNode* structure, string paramName, structParam* param, int &errCode, string &errStr){
     int paramOffset = getParamOffset(structure, paramName, errCode, errStr);
-    cout << "paramOffset " << paramOffset << endl;
     if(paramOffset < 0){
         setErrorParams(errCode, errCode, errStr, "struct dereference error");
         return EMPTY_STR;
