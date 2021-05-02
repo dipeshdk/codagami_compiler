@@ -131,8 +131,8 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpAssignment(quadNo);
         break;
     case OP_UNARY_MINUS:
-      asmOpUnaryMinus(quadNo);
-      break;
+		asmOpUnaryMinus(quadNo);
+		break;
     case OP_DIVI:
         asmOpDivI(quadNo);  
         break;
@@ -199,14 +199,14 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpEndFunc(quadNo);
         break;
     case OP_RETURN:
-      asmOpReturn(quadNo);
-      break;
+		asmOpReturn(quadNo);
+		break;
     case OP_PUSHPARAM:
-      asmOpPushparam(quadNo);
-      break;
+		asmOpPushparam(quadNo);
+		break;
     case OP_POPPARAM:
-      asmOpPopparam(quadNo);
-      break;
+		asmOpPopparam(quadNo);
+		break;
     case OP_LCALL:
         amsOpLCall(quadNo); 
         break;
@@ -219,10 +219,10 @@ void emitAssemblyForQuad(int quadNo) {
     /* case OP_BITWISE_NOT:
         break; */
     case OP_MOV:
-      asmOPMoveFuncParam(quadNo);
-      break;
+		asmOPMoveFuncParam(quadNo);
+		break;
     default:
-      break;
+      	break;
   }
 }
 
@@ -382,10 +382,10 @@ void asmOpBeginFunc(int quadNo) {
 }
 
 void asmOpPushparam(int quadNo) {
-  quadruple *quad = gCode[quadNo];
-  symbolTable *st = codeSTVec[quadNo];
+  	quadruple *quad = gCode[quadNo];
+  	symbolTable *st = codeSTVec[quadNo];
 
-      string resultAddr = quad->result;
+    string resultAddr = quad->result;
 
     if(isConstant(resultAddr)){
         emitAsm("pushq", {"$"+hexString(resultAddr)});
@@ -394,7 +394,7 @@ void asmOpPushparam(int quadNo) {
         string argAddr = getVariableAddr(resultAddr,st);
         emitAsm("movq", {argAddr, "%rax"});
         emitAsm("pushq", {"%rax"});
-  }
+  	}
 }
 
 /*  Currently our compiler doesn't support negative numbers,

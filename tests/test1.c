@@ -1,12 +1,10 @@
-void scanf(char *c, int* d);
-void printf(char *c, int d);
-int *malloc(int s);
-char *p = "%d\n";
-int main() {
-    int a,sz = 15;
-    int *pf;
-    pf = malloc(sz * 8);
-    pf[5]=6;
-    printf(p,pf[5]);
+int x;
+void printf(char* c, int x);
+char* str = "%d\n";
+int main(){
+    int n = 3;
+    int arr[3];
+    arr[2] = 5;
+    printf(str,arr[n-1]);
     return 0;
 }
