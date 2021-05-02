@@ -204,8 +204,7 @@ string emitTypeCast(node* node, declSpec *toDs, int &errCode, string &errStr) {
 }
 
 void emitOperationAssignment(node* unary_expression, node* assignment_expression, int opCode, string resultAddr, int &errCode, string &errStr) {
-    cout<< unary_expression->lexeme << " " << assignment_expression->lexeme <<endl;
-    
+       
     string newTmp = generateTemp(errCode);
     if(errCode){
         setErrorParams(errCode, errCode, errStr, "Cannot generate Temp");
@@ -334,62 +333,4 @@ int getParamOffset(structTableNode* node, string paramName, int& err, string& er
     }
     setErrorParams(err, INVALID_STRUCT_PARAM, errStr, paramName);
     return -err;
-}
-
-string emitStructDeferenceDot(node* node, structTableNode* structure, string paramName, structParam* param, int &errCode, string &errStr){
-    int paramOffset = getParamOffset(structure, paramName, errCode, errStr);
-    if(paramOffset < 0){
-        setErrorParams(errCode, errCode, errStr, "struct dereference error");
-        return EMPTY_STR;
-    }
-
-    // t2 = foo.a; t2->offset = f->offset + paramOffset
-    string pointerTmp = generateTemp(errCode);
-    if(errCode) {
-        setErrorParams(errCode, errCode, errStr, "error in temp generation");
-        return EMPTY_STR;
-    }
-    string pointerAddr = node->addr + "." + paramName;
-    // emit(OP_ASSIGNMENT, pointerAddr, EMPTY_STR, pointerTmp);
-    symbolTableNode* struct_node = lookUp(gSymTable, node->lexeme);
-    symbolTableNode* sym_node = lookUp(gSymTable, pointerTmp);
-	sym_node->size = getTypeSize(param->declSp->type);
-	sym_node->offset = struct_node->offset + paramOffset;
-	sym_node->declSp = param->declSp;
-	// offset += getOffsettedSize(sym_node->size);
-
-    if(errCode){
-        setErrorParams(errCode, errCode, errStr, "error in temp generation");
-        return EMPTY_STR;
-    }
-    return pointerTmp;
-}
-
-node* emitStructDeferencePtrOp(node* stNode, int &errCode, string &errStr){
-    string pointerTmp = generateTemp(errCode);
-    if(errCode) {
-        setErrorParams(errCode, errCode, errStr, "error in temp generation");
-        return NULL;
-    }
-    string pointerAddr = "*(" + stNode->addr + ")";
-    emit(OP_ASSIGNMENT, pointerAddr, EMPTY_STR, pointerTmp);
-    symbolTableNode* sym_node = lookUp(gSymTable, pointerTmp);
-	sym_node->offset = offset;
-	sym_node->declSp = stNode->declSp;
-    sym_node->declSp->ptrLevel = stNode->declSp->ptrLevel-1;
-    sym_node->infoType = stNode->infoType;
-    sym_node->paramList = stNode->paramList;
-    sym_node->paramSize = stNode->paramSize;
-	offset += 8;
-
-    node* ptrNode = makeDeadNode();
-    ptrNode->declSp = stNode->declSp;
-    ptrNode->declSp->ptrLevel = stNode->declSp->ptrLevel -1;
-    ptrNode->infoType = stNode->infoType;
-    ptrNode->paramList = stNode->paramList;
-    ptrNode->paramSize = stNode->paramSize;
-    ptrNode->addr = pointerTmp;
-    ptrNode->lexeme = strcpy(new char[pointerTmp.length() + 1], pointerTmp.c_str());
-
-    return ptrNode;
 }

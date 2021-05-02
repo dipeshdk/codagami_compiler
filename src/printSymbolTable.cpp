@@ -414,7 +414,6 @@ void printQuad(quadruple* quad, int line) {
 }
 
 void printCode(char* filename) {
-    cout << filename << endl;
     freopen(filename, "w", stdout);
     // cout << "\n";
     int n = gCode.size();

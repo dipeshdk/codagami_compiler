@@ -936,7 +936,6 @@ void asmOpAssignment(int quadNo){
     if(isConstant(quad->arg1)) {
         emitAsm("movq", {"$"+hexString(quad->arg1), resultAddr});
     }else {
-        // cout << "assignment:" << quad->arg1 << endl;
         string argAddr = getVariableAddr(quad->arg1, st);
         int regInd = getReg(quadNo, quad->arg1);
         string regName = regVec[regInd]->regName;
