@@ -1,11 +1,24 @@
-int foo(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j, int k) {
-    int koo[1999];
-    a=b;
-    return c;
-}
 
-int main(){
-    int a=1,b=2;
-    b=foo(1,2,3,4,5,6,a+b,8,9,a,b);
-    b = b + a;
+void scanf(char *c, int* d);
+void printf(char *c, int d);
+char *p = "%d\n";
+
+struct foo{
+    int a;
+    int b;
+    int c;
+};
+
+int main() {
+    struct foo s;
+    struct foo *f;
+    int c;
+    s.a= 5;
+    f = &s;
+    s.b = 6;
+    s.c = 7;
+    c = 2*f->c + f->a + f->b;
+
+    printf(p,c);
+    return 0;
 }

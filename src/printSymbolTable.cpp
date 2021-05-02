@@ -1,4 +1,4 @@
-#include "headers/allInclude.h" 
+#include "headers/allInclude.h"
 
 extern int offset;
 
@@ -80,7 +80,7 @@ void printSymbolTable(symbolTable *st) {
     for(auto &s: st->symbolOrder){
         cout << s << " ";
     }
-    cout << endl;
+    ;
     cout << "\n=================================================\n";
     printStructTable(st->structMap, st->scope);
     for(symbolTable *child : st->childList) {
@@ -233,7 +233,8 @@ void printSymbolTableJSON(string filePrefix, symbolTable *st, int numTab, int pr
 
 int getNodeSize(symbolTableNode* elem, symbolTable* st){
     int size = 0;
-    if(elem->infoType == INFO_TYPE_ARRAY){
+    if(elem->declSp->ptrLevel >=1) size = 8;
+    else if(elem->infoType == INFO_TYPE_ARRAY){
         size += 8;
     }
     else if(elem->infoType == INFO_TYPE_FUNC){
@@ -370,7 +371,7 @@ string getOpName(int opCode) {
 }
 
 void printQuad(quadruple* quad, int line) {
-    printf("%d.   ", line);
+    //printf("%d.   ", line);
     switch(quad->opCode) {
         case OP_IFGOTO:
             printf("    IF %s THEN GOTO %s\n",quad->arg1.c_str(), quad->result.c_str()); break;
@@ -399,12 +400,12 @@ void printQuad(quadruple* quad, int line) {
         case OP_ASSIGNMENT:
             printf("    %s = %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
         case OP_IFNEQGOTO:
-            printf("    IF %s <> %s GOTO %s\n", quad->arg1.c_str(), quad->arg2.c_str(), quad->result.c_str()); break;
+            printf("    IF %s <> %s GOTO %s\n", quad->arg1.c_str(), quad->arg2.c_str(), quad->result.c_str());  break;
         case OP_UNARY_MINUS:
         case OP_BITWISE_NOT:
         case OP_LOGICAL_NOT:
         case OP_ADDR:
-            printf("    %s = %s %s\n", quad->result.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str()); break;
+            printf("    %s = %s %s\n", quad->result.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str());  break;
         case OP_MOV:
             printf("    MOV %s -> %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
         default:

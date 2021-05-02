@@ -31,5 +31,7 @@ string emitTypeCast(node* node, declSpec *toDs, int &errCode, string &errStr);
 string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCode, string &errStr);
 string getArrayIndexWithEmit(node *postfix_expression , node *expression, int &errCode, string &errStr);
 
+int getParamOffset(structTableNode* node, string paramName, int& err, string& errStr);
 int getOpcodeFromAssignStr(string s);
+
 #endif
