@@ -276,7 +276,7 @@ postfix_expression
 
 	}
 	| postfix_expression '.' IDENTIFIER { 
-		node * postfix_expression = $1;
+		/* node * postfix_expression = $1;
 		structTableNode* structure = getRightMostStructFromPostfixExpression($1, false, errCode, errStr);
 		if(errCode) error(errStr, errCode);
 		
@@ -295,6 +295,24 @@ postfix_expression
 		node *newNode = makeNode(strdup("."), strdup("."), 0, $1, temp , NULL, NULL);
 		newNode->declSp = declSpCopy(param->declSp);
 		newNode->infoType = param->infoType; // check later
+		newNode->addr = newAddr;
+		$$ = newNode; */
+
+        node * postfix_expression = $1;
+		structTableNode* structure = getRightMostStructFromPostfixExpression($1, false, errCode, errStr);
+		if(errCode) error(errStr, errCode);
+		
+		string identifierName = yylval.id;
+		structParam* param = structureParamLookup(structure, identifierName, errCode, errStr);
+		if(errCode) error(errStr, errCode);
+		string newAddr = postfix_expression->addr + "." + identifierName;
+		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, NULL, NULL, NULL, NULL);
+		temp->declSp = declSpCopy(param->declSp);
+		temp->infoType = INFO_NESTED_STRUCT;
+		temp->addr = newAddr;
+		node *newNode = makeNode(strdup("."), strdup("."), 0, $1, temp , NULL, NULL);
+		newNode->declSp = declSpCopy(temp->declSp);
+		newNode->infoType = INFO_NESTED_STRUCT;
 		newNode->addr = newAddr;
 		$$ = newNode;
 	}
@@ -413,6 +431,7 @@ unary_expression
 				error("Cannot generate Temp", errCode);
 			emit(opCode, cast_expression->addr, EMPTY_STR, newTmp);
 			unary_operator->addr = newTmp;
+            cout << newTmp << endl;
 			addTempDetails(newTmp, gSymTable, unary_operator);
 		}
 
@@ -2224,13 +2243,14 @@ int main(int ac, char **av) {
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
 		generateDot(root,fileName); 
+        printCode((char*)TACFilename.c_str());
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
         // cout << asmFileName << endl;
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-		printCode((char*)TACFilename.c_str());
+		
 		
 		fclose(fd);
     }

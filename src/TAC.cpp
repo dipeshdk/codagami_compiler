@@ -326,7 +326,6 @@ int getParamOffset(structTableNode* node, string paramName, int& err, string& er
     int paramOffset = 0;
     for(structParam* p : node->paramList) 
         size +=  getTypeSize(p->declSp->type);
-
     for(structParam* p : node->paramList) {
         int size1 = getTypeSize(p->declSp->type);
         paramOffset += getOffsettedSize(size1); // doubt : considering offset inside struct?

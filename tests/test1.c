@@ -6,15 +6,15 @@ char *p = "%d\n";
 struct foo{
     int a;
     int b;
-    float c;
+    int c;
 };
 
 int main() {
-    struct foo *f;
-    int c;
-    f->a = 1; 
-    f->b = 2;
-    c = f->a + f->b;
-    printf(p,c);
+    struct foo s;
+    int c, *x, y;
+    c = 5;
+    x = &c;
+    y = *x;
+    printf(p,y);
     return 0;
 }
