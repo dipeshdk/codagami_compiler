@@ -59,6 +59,7 @@ struct symbolTableNode {
     int paramWidth;
     int offset;
     vector<struct param*> paramList; //for functions, struct and union
+    vector<int> arrayIndices;
     string name;
     struct declSpec *declSp;
     int scope;
@@ -117,6 +118,7 @@ struct node
     int paramSize = 0;
     vector<struct param*> paramList;
     vector<struct structParam*> structParamList;
+    vector<node*> arrayIndices;
 
     string addr; 
     int quad;

@@ -29,7 +29,8 @@ void emitRelop(node* n1, node* n2, node* temp, int opCode, int& errCode, string 
 void emitOperationAssignment(node* unary_expression, node* assignment_expression, int opCode, string resultAddr, int &errCode, string &errStr);
 string emitTypeCast(node* node, declSpec *toDs, int &errCode, string &errStr);
 string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCode, string &errStr);
-string getArrayIndexWithEmit(node *postfix_expression , node *expression, int &errCode, string &errStr);
+string getArrayIndexWithEmit(node *postfix_expression, int &errCode, string &errStr);
+string getIndexStr(node* root, int &errCode, string &errStr);
 
 int getParamOffset(structTableNode* node, string paramName, int& err, string& errStr);
 int getOpcodeFromAssignStr(string s);
