@@ -701,30 +701,6 @@ int getParameterOffset(string structName, string param, symbolTable* st){
     return paramOffset;
 }
 
-int getParameterOffsetPtr(string structName, string param, symbolTable* st){
-    structTableNode* structure = nullptr;
-    structure = structLookUp(st, structName);
-    if(structure == nullptr){
-        error(structName, STRUCT_NOT_DECLARED);
-    }
-    int paramOffset = 0;
-    // int size = 0;
-    // for(structParam* p : structure->paramList) 
-    //     size +=  getTypeSize(p->declSp->type);
-    for(structParam* p : structure->paramList) {
-        if(p->name == param) 
-            return paramOffset;
-        int size1 = getTypeSize(p->declSp->type);
-        paramOffset += getOffsettedSize(size1); // doubt : considering offset inside struct?
-        
-    }
-    if(paramOffset < 0){
-        error("paramOffset Negative", DEFAULT_ERROR);
-    }
-    return paramOffset;
-
-}
-
 int getOffset(string varName, symbolTable* st){
     if(isPointer(varName)) 
         varName = stripPointer(varName);

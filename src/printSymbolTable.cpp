@@ -396,7 +396,7 @@ void printQuad(quadruple* quad, int line) {
                 printf("    %s = LCALL _%s\n", quad->result.c_str(), quad->arg1.c_str());
             }
             break;
-        case OP_LABEL: printf("%s:\n", quad->result.c_str()); ; break;
+        case OP_LABEL: printf("%s:\n", quad->result.c_str()); break;
         case OP_ASSIGNMENT:
             printf("    %s = %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
         case OP_IFNEQGOTO:

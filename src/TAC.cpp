@@ -47,7 +47,6 @@ int backpatchBeginFunc(int funcBeginQuad, int offset) {
 }
 
 void emit(int opCode, string arg1, string arg2, string result){
-
     quadruple* quad = new quadruple();
     quad->opCode = opCode;
     quad->arg1 = arg1;

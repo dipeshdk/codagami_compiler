@@ -2220,13 +2220,12 @@ int main(int ac, char **av) {
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
 		generateDot(root,fileName); 
-        printCode((char*)TACFilename.c_str());
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-		
+		printCode((char*)TACFilename.c_str());
 		
 		fclose(fd);
     }
