@@ -37,4 +37,5 @@ extern stack<string> funcNameStack;
 extern stack<int> funcSizeStack;
 extern vector<globalData*> globalDataPair;
 extern symbolTable* globalScopeSymTable;
+extern set<string> libraryFunctions;
 #endif
