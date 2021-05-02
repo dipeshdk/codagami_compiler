@@ -93,6 +93,7 @@ bool typeCastRequired(declSpec* to_ds,  declSpec* from_ds, int &errCode, string 
 }
 
 void checkTypeArrayWithTypecast(node* idNode, int &errCode, string &errStr){
+    errCode = 0;
     if(!idNode->declSp) {
         setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, "checkTypeArrayWithTypecast");
         return;
