@@ -172,3 +172,5 @@ string stripPointer(string name);
 void stripTypeCastFromQuads();
 
 string stripTypeCastUtil(string name);
+
+int getParameterOffset(string structName, string param, symbolTable* st);

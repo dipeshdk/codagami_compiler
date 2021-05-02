@@ -1,0 +1,571 @@
+
+test2.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_foo>:
+int _foo(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j, int k) {
+   0:	f3 0f 1e fa          	endbr64 
+   4:	55                   	push   %rbp
+   5:	48 89 e5             	mov    %rsp,%rbp
+   8:	48 81 ec 00 10 00 00 	sub    $0x1000,%rsp
+   f:	48 83 0c 24 00       	orq    $0x0,(%rsp)
+  14:	48 81 ec 70 0f 00 00 	sub    $0xf70,%rsp
+  1b:	89 bd ac e0 ff ff    	mov    %edi,-0x1f54(%rbp)
+  21:	89 b5 a8 e0 ff ff    	mov    %esi,-0x1f58(%rbp)
+  27:	89 95 a4 e0 ff ff    	mov    %edx,-0x1f5c(%rbp)
+  2d:	89 8d a0 e0 ff ff    	mov    %ecx,-0x1f60(%rbp)
+  33:	44 89 85 9c e0 ff ff 	mov    %r8d,-0x1f64(%rbp)
+  3a:	44 89 8d 98 e0 ff ff 	mov    %r9d,-0x1f68(%rbp)
+  41:	64 48 8b 04 25 28 00 	mov    %fs:0x28,%rax
+  48:	00 00 
+  4a:	48 89 45 f8          	mov    %rax,-0x8(%rbp)
+  4e:	31 c0                	xor    %eax,%eax
+    int koo[1999];
+    a=b;
+  50:	8b 85 a8 e0 ff ff    	mov    -0x1f58(%rbp),%eax
+  56:	89 85 ac e0 ff ff    	mov    %eax,-0x1f54(%rbp)
+    return c;
+  5c:	8b 85 a4 e0 ff ff    	mov    -0x1f5c(%rbp),%eax
+}
+  62:	48 8b 55 f8          	mov    -0x8(%rbp),%rdx
+  66:	64 48 33 14 25 28 00 	xor    %fs:0x28,%rdx
+  6d:	00 00 
+  6f:	74 05                	je     76 <_foo+0x76>
+  71:	e8 00 00 00 00       	callq  76 <_foo+0x76>
+			72: R_X86_64_PLT32	__stack_chk_fail-0x4
+  76:	c9                   	leaveq 
+  77:	c3                   	retq   
+
+0000000000000078 <main>:
+
+int main(){
+  78:	f3 0f 1e fa          	endbr64 
+  7c:	55                   	push   %rbp
+  7d:	48 89 e5             	mov    %rsp,%rbp
+    int a, b;
+    int k;
+    k = a == b;
+  80:	8b 45 f4             	mov    -0xc(%rbp),%eax
+  83:	3b 45 f8             	cmp    -0x8(%rbp),%eax
+  86:	0f 94 c0             	sete   %al
+  89:	0f b6 c0             	movzbl %al,%eax
+  8c:	89 45 fc             	mov    %eax,-0x4(%rbp)
+    k = a != b;
+  8f:	8b 45 f4             	mov    -0xc(%rbp),%eax
+  92:	3b 45 f8             	cmp    -0x8(%rbp),%eax
+  95:	0f 95 c0             	setne  %al
+  98:	0f b6 c0             	movzbl %al,%eax
+  9b:	89 45 fc             	mov    %eax,-0x4(%rbp)
+    k = a < b;
+  9e:	8b 45 f4             	mov    -0xc(%rbp),%eax
+  a1:	3b 45 f8             	cmp    -0x8(%rbp),%eax
+  a4:	0f 9c c0             	setl   %al
+  a7:	0f b6 c0             	movzbl %al,%eax
+  aa:	89 45 fc             	mov    %eax,-0x4(%rbp)
+    k = a > b;
+  ad:	8b 45 f4             	mov    -0xc(%rbp),%eax
+  b0:	3b 45 f8             	cmp    -0x8(%rbp),%eax
+  b3:	0f 9f c0             	setg   %al
+  b6:	0f b6 c0             	movzbl %al,%eax
+  b9:	89 45 fc             	mov    %eax,-0x4(%rbp)
+    k = a <= b;
+  bc:	8b 45 f4             	mov    -0xc(%rbp),%eax
+  bf:	3b 45 f8             	cmp    -0x8(%rbp),%eax
+  c2:	0f 9e c0             	setle  %al
+  c5:	0f b6 c0             	movzbl %al,%eax
+  c8:	89 45 fc             	mov    %eax,-0x4(%rbp)
+    k = a >= b;
+  cb:	8b 45 f4             	mov    -0xc(%rbp),%eax
+  ce:	3b 45 f8             	cmp    -0x8(%rbp),%eax
+  d1:	0f 9d c0             	setge  %al
+  d4:	0f b6 c0             	movzbl %al,%eax
+  d7:	89 45 fc             	mov    %eax,-0x4(%rbp)
+    k = a/(a+b);
+  da:	8b 55 f4             	mov    -0xc(%rbp),%edx
+  dd:	8b 45 f8             	mov    -0x8(%rbp),%eax
+  e0:	8d 0c 02             	lea    (%rdx,%rax,1),%ecx
+  e3:	8b 45 f4             	mov    -0xc(%rbp),%eax
+  e6:	99                   	cltd   
+  e7:	f7 f9                	idiv   %ecx
+  e9:	89 45 fc             	mov    %eax,-0x4(%rbp)
+  ec:	b8 00 00 00 00       	mov    $0x0,%eax
+
+  f1:	5d                   	pop    %rbp
+  f2:	c3                   	retq   
+
+Disassembly of section .debug_info:
+
+0000000000000000 <.debug_info>:
+int _foo(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j, int k) {
+   0:	5b                   	pop    %rbx
+   1:	01 00                	add    %eax,(%rax)
+   3:	00 04 00             	add    %al,(%rax,%rax,1)
+   6:	00 00                	add    %al,(%rax)
+			6: R_X86_64_32	.debug_abbrev
+   8:	00 00                	add    %al,(%rax)
+   a:	08 01                	or     %al,(%rcx)
+   c:	00 00                	add    %al,(%rax)
+			c: R_X86_64_32	.debug_str+0x20
+   e:	00 00                	add    %al,(%rax)
+  10:	0c 00                	or     $0x0,%al
+			11: R_X86_64_32	.debug_str
+	...
+			15: R_X86_64_32	.debug_str+0xba
+			19: R_X86_64_64	.text
+  1e:	00 00                	add    %al,(%rax)
+  20:	00 f3                	add    %dh,%bl
+	...
+			29: R_X86_64_32	.debug_line
+  2a:	00 00                	add    %al,(%rax)
+  2c:	00 02                	add    %al,(%rdx)
+  2e:	00 00                	add    %al,(%rax)
+			2e: R_X86_64_32	.debug_str+0xb5
+  30:	00 00                	add    %al,(%rax)
+  32:	01 07                	add    %eax,(%rdi)
+  34:	05 77 00 00 00       	add    $0x77,%eax
+	...
+			39: R_X86_64_64	.text+0x78
+  41:	7b 00                	jnp    43 <.debug_info+0x43>
+  43:	00 00                	add    %al,(%rax)
+  45:	00 00                	add    %al,(%rax)
+  47:	00 00                	add    %al,(%rax)
+  49:	01 9c 77 00 00 00 03 	add    %ebx,0x3000000(%rdi,%rsi,2)
+    a=b;
+  50:	61                   	(bad)  
+  51:	00 01                	add    %al,(%rcx)
+  53:	08 09                	or     %cl,(%rcx)
+  55:	77 00                	ja     57 <.debug_info+0x57>
+  57:	00 00                	add    %al,(%rax)
+  59:	02 91 64 03 62 00    	add    0x620364(%rcx),%dl
+    return c;
+  5f:	01 08                	add    %ecx,(%rax)
+  61:	0c 77                	or     $0x77,%al
+}
+  63:	00 00                	add    %al,(%rax)
+  65:	00 02                	add    %al,(%rdx)
+  67:	91                   	xchg   %eax,%ecx
+  68:	68 03 6b 00 01       	pushq  $0x1006b03
+  6d:	09 09                	or     %ecx,(%rcx)
+  6f:	77 00                	ja     71 <.debug_info+0x71>
+  71:	00 00                	add    %al,(%rax)
+  73:	02 91 6c 00 04 04    	add    0x404006c(%rcx),%dl
+int main(){
+  79:	05 69 6e 74 00       	add    $0x746e69,%eax
+  7e:	05 00 00 00 00       	add    $0x0,%eax
+			7f: R_X86_64_32	.debug_str+0xb0
+    k = a == b;
+  83:	01 01                	add    %eax,(%rcx)
+  85:	05 77 00 00 00       	add    $0x77,%eax
+	...
+			8a: R_X86_64_64	.text
+    k = a != b;
+  92:	78 00                	js     94 <.debug_info+0x94>
+  94:	00 00                	add    %al,(%rax)
+  96:	00 00                	add    %al,(%rax)
+  98:	00 00                	add    %al,(%rax)
+  9a:	01 9c 46 01 00 00 06 	add    %ebx,0x6000001(%rsi,%rax,2)
+    k = a < b;
+  a1:	61                   	(bad)  
+  a2:	00 01                	add    %al,(%rcx)
+  a4:	01 0e                	add    %ecx,(%rsi)
+  a6:	77 00                	ja     a8 <.debug_info+0xa8>
+  a8:	00 00                	add    %al,(%rax)
+  aa:	03 91 9c 41 06 62    	add    0x6206419c(%rcx),%edx
+    k = a > b;
+  b0:	00 01                	add    %al,(%rcx)
+  b2:	01 15 77 00 00 00    	add    %edx,0x77(%rip)        # 12f <.debug_info+0x12f>
+  b8:	03 91 98 41 06 63    	add    0x63064198(%rcx),%edx
+    k = a <= b;
+  be:	00 01                	add    %al,(%rcx)
+  c0:	01 1c 77             	add    %ebx,(%rdi,%rsi,2)
+  c3:	00 00                	add    %al,(%rax)
+  c5:	00 03                	add    %al,(%rbx)
+  c7:	91                   	xchg   %eax,%ecx
+  c8:	94                   	xchg   %eax,%esp
+  c9:	41 06                	rex.B (bad) 
+    k = a >= b;
+  cb:	64 00 01             	add    %al,%fs:(%rcx)
+  ce:	01 23                	add    %esp,(%rbx)
+  d0:	77 00                	ja     d2 <.debug_info+0xd2>
+  d2:	00 00                	add    %al,(%rax)
+  d4:	03 91 90 41 06 65    	add    0x65064190(%rcx),%edx
+    k = a/(a+b);
+  da:	00 01                	add    %al,(%rcx)
+  dc:	01 2a                	add    %ebp,(%rdx)
+  de:	77 00                	ja     e0 <.debug_info+0xe0>
+  e0:	00 00                	add    %al,(%rax)
+  e2:	03 91 8c 41 06 66    	add    0x6606418c(%rcx),%edx
+  e8:	00 01                	add    %al,(%rcx)
+  ea:	01 31                	add    %esi,(%rcx)
+  ec:	77 00                	ja     ee <.debug_info+0xee>
+  ee:	00 00                	add    %al,(%rax)
+  f0:	03 91 88 41 06 67    	add    0x67064188(%rcx),%edx
+  f6:	00 01                	add    %al,(%rcx)
+  f8:	01 38                	add    %edi,(%rax)
+  fa:	77 00                	ja     fc <.debug_info+0xfc>
+  fc:	00 00                	add    %al,(%rax)
+  fe:	02 91 00 06 68 00    	add    0x680600(%rcx),%dl
+ 104:	01 01                	add    %eax,(%rcx)
+ 106:	3f                   	(bad)  
+ 107:	77 00                	ja     109 <.debug_info+0x109>
+ 109:	00 00                	add    %al,(%rax)
+ 10b:	02 91 08 06 69 00    	add    0x690608(%rcx),%dl
+ 111:	01 01                	add    %eax,(%rcx)
+ 113:	46 77 00             	rex.RX ja 116 <.debug_info+0x116>
+ 116:	00 00                	add    %al,(%rax)
+ 118:	02 91 10 06 6a 00    	add    0x6a0610(%rcx),%dl
+ 11e:	01 01                	add    %eax,(%rcx)
+ 120:	4d 77 00             	rex.WRB ja 123 <.debug_info+0x123>
+ 123:	00 00                	add    %al,(%rax)
+ 125:	02 91 18 06 6b 00    	add    0x6b0618(%rcx),%dl
+ 12b:	01 01                	add    %eax,(%rcx)
+ 12d:	54                   	push   %rsp
+ 12e:	77 00                	ja     130 <.debug_info+0x130>
+ 130:	00 00                	add    %al,(%rax)
+ 132:	02 91 20 03 6b 6f    	add    0x6f6b0320(%rcx),%dl
+ 138:	6f                   	outsl  %ds:(%rsi),(%dx)
+ 139:	00 01                	add    %al,(%rcx)
+ 13b:	02 09                	add    (%rcx),%cl
+ 13d:	46 01 00             	rex.RX add %r8d,(%rax)
+ 140:	00 03                	add    %al,(%rbx)
+ 142:	91                   	xchg   %eax,%ecx
+ 143:	a0 41 00 07 77 00 00 	movabs 0x5700000077070041,%al
+ 14a:	00 57 
+ 14c:	01 00                	add    %eax,(%rax)
+ 14e:	00 08                	add    %cl,(%rax)
+ 150:	57                   	push   %rdi
+ 151:	01 00                	add    %eax,(%rax)
+ 153:	00 ce                	add    %cl,%dh
+ 155:	07                   	(bad)  
+ 156:	00 09                	add    %cl,(%rcx)
+ 158:	08 07                	or     %al,(%rdi)
+ 15a:	00 00                	add    %al,(%rax)
+			15a: R_X86_64_32	.debug_str+0xe
+ 15c:	00 00                	add    %al,(%rax)
+	...
+
+Disassembly of section .debug_abbrev:
+
+0000000000000000 <.debug_abbrev>:
+int _foo(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j, int k) {
+   0:	01 11                	add    %edx,(%rcx)
+   2:	01 25 0e 13 0b 03    	add    %esp,0x30b130e(%rip)        # 30b1316 <main+0x30b129e>
+   8:	0e                   	(bad)  
+   9:	1b 0e                	sbb    (%rsi),%ecx
+   b:	11 01                	adc    %eax,(%rcx)
+   d:	12 07                	adc    (%rdi),%al
+   f:	10 17                	adc    %dl,(%rdi)
+  11:	00 00                	add    %al,(%rax)
+  13:	02 2e                	add    (%rsi),%ch
+  15:	01 3f                	add    %edi,(%rdi)
+  17:	19 03                	sbb    %eax,(%rbx)
+  19:	0e                   	(bad)  
+  1a:	3a 0b                	cmp    (%rbx),%cl
+  1c:	3b 0b                	cmp    (%rbx),%ecx
+  1e:	39 0b                	cmp    %ecx,(%rbx)
+  20:	49 13 11             	adc    (%r9),%rdx
+  23:	01 12                	add    %edx,(%rdx)
+  25:	07                   	(bad)  
+  26:	40 18 97 42 19 01 13 	sbb    %dl,0x13011942(%rdi)
+  2d:	00 00                	add    %al,(%rax)
+  2f:	03 34 00             	add    (%rax,%rax,1),%esi
+  32:	03 08                	add    (%rax),%ecx
+  34:	3a 0b                	cmp    (%rbx),%cl
+  36:	3b 0b                	cmp    (%rbx),%ecx
+  38:	39 0b                	cmp    %ecx,(%rbx)
+  3a:	49 13 02             	adc    (%r10),%rax
+  3d:	18 00                	sbb    %al,(%rax)
+  3f:	00 04 24             	add    %al,(%rsp)
+  42:	00 0b                	add    %cl,(%rbx)
+  44:	0b 3e                	or     (%rsi),%edi
+  46:	0b 03                	or     (%rbx),%eax
+  48:	08 00                	or     %al,(%rax)
+  4a:	00 05 2e 01 3f 19    	add    %al,0x193f012e(%rip)        # 193f017e <main+0x193f0106>
+    a=b;
+  50:	03 0e                	add    (%rsi),%ecx
+  52:	3a 0b                	cmp    (%rbx),%cl
+  54:	3b 0b                	cmp    (%rbx),%ecx
+  56:	39 0b                	cmp    %ecx,(%rbx)
+  58:	27                   	(bad)  
+  59:	19 49 13             	sbb    %ecx,0x13(%rcx)
+    return c;
+  5c:	11 01                	adc    %eax,(%rcx)
+  5e:	12 07                	adc    (%rdi),%al
+  60:	40 18 96 42 19 01 13 	sbb    %dl,0x13011942(%rsi)
+}
+  67:	00 00                	add    %al,(%rax)
+  69:	06                   	(bad)  
+  6a:	05 00 03 08 3a       	add    $0x3a080300,%eax
+  6f:	0b 3b                	or     (%rbx),%edi
+  71:	0b 39                	or     (%rcx),%edi
+  73:	0b 49 13             	or     0x13(%rcx),%ecx
+  76:	02 18                	add    (%rax),%bl
+int main(){
+  78:	00 00                	add    %al,(%rax)
+  7a:	07                   	(bad)  
+  7b:	01 01                	add    %eax,(%rcx)
+  7d:	49 13 01             	adc    (%r9),%rax
+    k = a == b;
+  80:	13 00                	adc    (%rax),%eax
+  82:	00 08                	add    %cl,(%rax)
+  84:	21 00                	and    %eax,(%rax)
+  86:	49 13 2f             	adc    (%r15),%rbp
+  89:	05 00 00 09 24       	add    $0x24090000,%eax
+  8e:	00 0b                	add    %cl,(%rbx)
+    k = a != b;
+  90:	0b 3e                	or     (%rsi),%edi
+  92:	0b 03                	or     (%rbx),%eax
+  94:	0e                   	(bad)  
+  95:	00 00                	add    %al,(%rax)
+	...
+
+Disassembly of section .debug_aranges:
+
+0000000000000000 <.debug_aranges>:
+int _foo(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j, int k) {
+   0:	2c 00                	sub    $0x0,%al
+   2:	00 00                	add    %al,(%rax)
+   4:	02 00                	add    (%rax),%al
+   6:	00 00                	add    %al,(%rax)
+			6: R_X86_64_32	.debug_info
+   8:	00 00                	add    %al,(%rax)
+   a:	08 00                	or     %al,(%rax)
+	...
+			10: R_X86_64_64	.text
+  18:	f3 00 00             	repz add %al,(%rax)
+	...
+
+Disassembly of section .debug_line:
+
+0000000000000000 <.debug_line>:
+   0:	78 00                	js     2 <.debug_line+0x2>
+   2:	00 00                	add    %al,(%rax)
+   4:	03 00                	add    (%rax),%eax
+   6:	24 00                	and    $0x0,%al
+   8:	00 00                	add    %al,(%rax)
+   a:	01 01                	add    %eax,(%rcx)
+   c:	fb                   	sti    
+   d:	0e                   	(bad)  
+   e:	0d 00 01 01 01       	or     $0x1010100,%eax
+  13:	01 00                	add    %eax,(%rax)
+  15:	00 00                	add    %al,(%rax)
+  17:	01 00                	add    %eax,(%rax)
+  19:	00 01                	add    %al,(%rcx)
+  1b:	74 65                	je     82 <main+0xa>
+  1d:	73 74                	jae    93 <main+0x1b>
+  1f:	73 00                	jae    21 <.debug_line+0x21>
+  21:	00 74 65 73          	add    %dh,0x73(%rbp,%riz,2)
+  25:	74 32                	je     59 <.debug_line+0x59>
+  27:	2e 63 00             	movslq %cs:(%rax),%eax
+  2a:	01 00                	add    %eax,(%rax)
+  2c:	00 00                	add    %al,(%rax)
+  2e:	05 57 00 09 02       	add    $0x2090057,%eax
+	...
+			33: R_X86_64_64	.text
+  3b:	01 02                	add    %eax,(%rdx)
+  3d:	41 12 05 06 e6 05 0c 	adc    0xc05e606(%rip),%al        # c05e64a <main+0xc05e5d2>
+  44:	bb 05 01 67 05       	mov    $0x5670105,%ebx
+  49:	0b 08                	or     (%rax),%ecx
+  4b:	5a                   	pop    %rdx
+  4c:	85 05 07 90 05 0b    	test   %eax,0xb059007(%rip)        # b059059 <main+0xb058fe1>
+    a=b;
+  52:	67 05 07 90 05 0b    	addr32 add $0xb059007,%eax
+  58:	67 05 07 90 05 0b    	addr32 add $0xb059007,%eax
+    return c;
+  5e:	67 05 07 90 05 0b    	addr32 add $0xb059007,%eax
+}
+  64:	67 05 07 90 05 0b    	addr32 add $0xb059007,%eax
+  6a:	67 05 07 90 05 0d    	addr32 add $0xd059007,%eax
+  70:	67 05 07 90 05 01    	addr32 add $0x1059007,%eax
+  76:	d8 02                	fadds  (%rdx)
+int main(){
+  78:	02 00                	add    (%rax),%al
+  7a:	01 01                	add    %eax,(%rcx)
+
+Disassembly of section .debug_str:
+
+0000000000000000 <.debug_str>:
+int _foo(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j, int k) {
+   0:	74 65                	je     67 <.debug_str+0x67>
+   2:	73 74                	jae    78 <.debug_str+0x78>
+   4:	73 2f                	jae    35 <.debug_str+0x35>
+   6:	74 65                	je     6d <.debug_str+0x6d>
+   8:	73 74                	jae    7e <.debug_str+0x7e>
+   a:	32 2e                	xor    (%rsi),%ch
+   c:	63 00                	movslq (%rax),%eax
+   e:	6c                   	insb   (%dx),%es:(%rdi)
+   f:	6f                   	outsl  %ds:(%rsi),(%dx)
+  10:	6e                   	outsb  %ds:(%rsi),(%dx)
+  11:	67 20 75 6e          	and    %dh,0x6e(%ebp)
+  15:	73 69                	jae    80 <.debug_str+0x80>
+  17:	67 6e                	outsb  %ds:(%esi),(%dx)
+  19:	65 64 20 69 6e       	gs and %ch,%fs:0x6e(%rcx)
+  1e:	74 00                	je     20 <.debug_str+0x20>
+  20:	47                   	rex.RXB
+  21:	4e 55                	rex.WRX push %rbp
+  23:	20 43 31             	and    %al,0x31(%rbx)
+  26:	37                   	(bad)  
+  27:	20 39                	and    %bh,(%rcx)
+  29:	2e 33 2e             	xor    %cs:(%rsi),%ebp
+  2c:	30 20                	xor    %ah,(%rax)
+  2e:	2d 6d 74 75 6e       	sub    $0x6e75746d,%eax
+  33:	65 3d 67 65 6e 65    	gs cmp $0x656e6567,%eax
+  39:	72 69                	jb     a4 <.debug_str+0xa4>
+  3b:	63 20                	movslq (%rax),%esp
+  3d:	2d 6d 61 72 63       	sub    $0x6372616d,%eax
+  42:	68 3d 78 38 36       	pushq  $0x3638783d
+  47:	2d 36 34 20 2d       	sub    $0x2d203436,%eax
+  4c:	67 20 2d 66 6e 6f 2d 	and    %ch,0x2d6f6e66(%eip)        # 2d6f6eb9 <main+0x2d6f6e41>
+    a=b;
+  53:	61                   	(bad)  
+  54:	73 79                	jae    cf <.debug_str+0xcf>
+  56:	6e                   	outsb  %ds:(%rsi),(%dx)
+  57:	63 68 72             	movslq 0x72(%rax),%ebp
+  5a:	6f                   	outsl  %ds:(%rsi),(%dx)
+  5b:	6e                   	outsb  %ds:(%rsi),(%dx)
+    return c;
+  5c:	6f                   	outsl  %ds:(%rsi),(%dx)
+  5d:	75 73                	jne    d2 <.debug_str+0xd2>
+  5f:	2d 75 6e 77 69       	sub    $0x69776e75,%eax
+}
+  64:	6e                   	outsb  %ds:(%rsi),(%dx)
+  65:	64 2d 74 61 62 6c    	fs sub $0x6c626174,%eax
+  6b:	65 73 20             	gs jae 8e <.debug_str+0x8e>
+  6e:	2d 66 73 74 61       	sub    $0x61747366,%eax
+  73:	63 6b 2d             	movslq 0x2d(%rbx),%ebp
+  76:	70 72                	jo     ea <main+0x72>
+int main(){
+  78:	6f                   	outsl  %ds:(%rsi),(%dx)
+  79:	74 65                	je     e0 <.debug_str+0xe0>
+  7b:	63 74 6f 72          	movslq 0x72(%rdi,%rbp,2),%esi
+  7f:	2d 73 74 72 6f       	sub    $0x6f727473,%eax
+    k = a == b;
+  84:	6e                   	outsb  %ds:(%rsi),(%dx)
+  85:	67 20 2d 66 73 74 61 	and    %ch,0x61747366(%eip)        # 617473f2 <main+0x6174737a>
+  8c:	63 6b 2d             	movslq 0x2d(%rbx),%ebp
+    k = a != b;
+  8f:	63 6c 61 73          	movslq 0x73(%rcx,%riz,2),%ebp
+  93:	68 2d 70 72 6f       	pushq  $0x6f72702d
+  98:	74 65                	je     ff <main+0x87>
+  9a:	63 74 69 6f          	movslq 0x6f(%rcx,%rbp,2),%esi
+    k = a < b;
+  9e:	6e                   	outsb  %ds:(%rsi),(%dx)
+  9f:	20 2d 66 63 66 2d    	and    %ch,0x2d666366(%rip)        # 2d66640b <main+0x2d666393>
+  a5:	70 72                	jo     119 <main+0xa1>
+  a7:	6f                   	outsl  %ds:(%rsi),(%dx)
+  a8:	74 65                	je     10f <main+0x97>
+  aa:	63 74 69 6f          	movslq 0x6f(%rcx,%rbp,2),%esi
+    k = a > b;
+  ae:	6e                   	outsb  %ds:(%rsi),(%dx)
+  af:	00 5f 66             	add    %bl,0x66(%rdi)
+  b2:	6f                   	outsl  %ds:(%rsi),(%dx)
+  b3:	6f                   	outsl  %ds:(%rsi),(%dx)
+  b4:	00 6d 61             	add    %ch,0x61(%rbp)
+  b7:	69 6e 00 2f 68 6f 6d 	imul   $0x6d6f682f,0x0(%rsi),%ebp
+    k = a <= b;
+  be:	65 2f                	gs (bad) 
+  c0:	73 61                	jae    123 <main+0xab>
+  c2:	6b 73 68 69          	imul   $0x69,0x68(%rbx),%esi
+  c6:	2f                   	(bad)  
+  c7:	70 72                	jo     13b <main+0xc3>
+  c9:	6f                   	outsl  %ds:(%rsi),(%dx)
+  ca:	6a 65                	pushq  $0x65
+    k = a >= b;
+  cc:	63 74 2d 33          	movslq 0x33(%rbp,%rbp,1),%esi
+  d0:	33 35 2f 63 6f 64    	xor    0x646f632f(%rip),%esi        # 646f6405 <main+0x646f638d>
+  d6:	61                   	(bad)  
+  d7:	67 61                	addr32 (bad) 
+  d9:	6d                   	insl   (%dx),%es:(%rdi)
+    k = a/(a+b);
+  da:	69 5f 63 6f 6d 70 69 	imul   $0x69706d6f,0x63(%rdi),%ebx
+  e1:	6c                   	insb   (%dx),%es:(%rdi)
+  e2:	65 72 00             	gs jb  e5 <main+0x6d>
+
+Disassembly of section .comment:
+
+0000000000000000 <.comment>:
+int _foo(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j, int k) {
+   0:	00 47 43             	add    %al,0x43(%rdi)
+   3:	43 3a 20             	rex.XB cmp (%r8),%spl
+   6:	28 55 62             	sub    %dl,0x62(%rbp)
+   9:	75 6e                	jne    79 <main+0x1>
+   b:	74 75                	je     82 <main+0xa>
+   d:	20 39                	and    %bh,(%rcx)
+   f:	2e 33 2e             	xor    %cs:(%rsi),%ebp
+  12:	30 2d 31 37 75 62    	xor    %ch,0x62753731(%rip)        # 62753749 <main+0x627536d1>
+  18:	75 6e                	jne    88 <main+0x10>
+  1a:	74 75                	je     91 <main+0x19>
+  1c:	31 7e 32             	xor    %edi,0x32(%rsi)
+  1f:	30 2e                	xor    %ch,(%rsi)
+  21:	30 34 29             	xor    %dh,(%rcx,%rbp,1)
+  24:	20 39                	and    %bh,(%rcx)
+  26:	2e 33 2e             	xor    %cs:(%rsi),%ebp
+  29:	30 00                	xor    %al,(%rax)
+
+Disassembly of section .note.gnu.property:
+
+0000000000000000 <.note.gnu.property>:
+   0:	04 00                	add    $0x0,%al
+   2:	00 00                	add    %al,(%rax)
+   4:	10 00                	adc    %al,(%rax)
+   6:	00 00                	add    %al,(%rax)
+   8:	05 00 00 00 47       	add    $0x47000000,%eax
+   d:	4e 55                	rex.WRX push %rbp
+   f:	00 02                	add    %al,(%rdx)
+  11:	00 00                	add    %al,(%rax)
+  13:	c0 04 00 00          	rolb   $0x0,(%rax,%rax,1)
+  17:	00 03                	add    %al,(%rbx)
+  19:	00 00                	add    %al,(%rax)
+  1b:	00 00                	add    %al,(%rax)
+  1d:	00 00                	add    %al,(%rax)
+	...
+
+Disassembly of section .debug_frame:
+
+0000000000000000 <.debug_frame>:
+   0:	14 00                	adc    $0x0,%al
+   2:	00 00                	add    %al,(%rax)
+   4:	ff                   	(bad)  
+   5:	ff                   	(bad)  
+   6:	ff                   	(bad)  
+   7:	ff 01                	incl   (%rcx)
+   9:	00 01                	add    %al,(%rcx)
+   b:	78 10                	js     1d <.debug_frame+0x1d>
+   d:	0c 07                	or     $0x7,%al
+   f:	08 90 01 00 00 00    	or     %dl,0x1(%rax)
+  15:	00 00                	add    %al,(%rax)
+  17:	00 24 00             	add    %ah,(%rax,%rax,1)
+	...
+			1c: R_X86_64_32	.debug_frame
+			20: R_X86_64_64	.text
+  26:	00 00                	add    %al,(%rax)
+  28:	78 00                	js     2a <.debug_frame+0x2a>
+  2a:	00 00                	add    %al,(%rax)
+  2c:	00 00                	add    %al,(%rax)
+  2e:	00 00                	add    %al,(%rax)
+  30:	45 0e                	rex.RB (bad) 
+  32:	10 86 02 43 0d 06    	adc    %al,0x60d4302(%rsi)
+  38:	02 6f 0c             	add    0xc(%rdi),%ch
+  3b:	07                   	(bad)  
+  3c:	08 00                	or     %al,(%rax)
+  3e:	00 00                	add    %al,(%rax)
+  40:	24 00                	and    $0x0,%al
+	...
+			44: R_X86_64_32	.debug_frame
+			48: R_X86_64_64	.text+0x78
+  4e:	00 00                	add    %al,(%rax)
+    a=b;
+  50:	7b 00                	jnp    52 <.debug_frame+0x52>
+  52:	00 00                	add    %al,(%rax)
+  54:	00 00                	add    %al,(%rax)
+  56:	00 00                	add    %al,(%rax)
+  58:	45 0e                	rex.RB (bad) 
+  5a:	10 86 02 43 0d 06    	adc    %al,0x60d4302(%rsi)
+    return c;
+  60:	02 72 0c             	add    0xc(%rdx),%dh
+}
+  63:	07                   	(bad)  
+  64:	08 00                	or     %al,(%rax)
+	...

@@ -28,12 +28,14 @@ set<string> libraryFunctions {"printf", "scanf", "malloc"};
 
 string stripTypeCastUtil(string name) {
   size_t pos = name.find(" ) ");
-  if (pos == string::npos)
-    return name;
+  if (pos == string::npos){
+      return name;
+  }
+    
   if((pos+2) >= name.size()) {
     return name;
   }
-  return name.substr(pos+2);
+  return name.substr(pos+3);
 }
 
 void stripTypeCastFromQuads() {
@@ -97,7 +99,6 @@ void printAsm(string asmOutputFile) {
 
 void printASMData() {
     cout << "\n.data" << endl;
-    // cout << "   format:  .asciz \"%ld\\n\"" << endl;
     // int lineNo = 0;
     for(globalData *g : globalDataPair) {
         cout << "   " << g->varName << ": ";
@@ -687,15 +688,41 @@ void errorAsm(string str, int errCode) {
   exit(errCode);
 }
 
+int getParameterOffset(string structName, string param, symbolTable* st){
+    structTableNode* structure = nullptr;
+    structure = structLookUp(st, structName);
+    if(structure == nullptr){
+        error(structName, STRUCT_NOT_DECLARED);
+    }
+    int paramOffset = getParamOffset(structure, param, errCode, errStr); 
+    if(paramOffset < 0){
+        error("paramOffset Negative", DEFAULT_ERROR);
+    }
+    return paramOffset;
+}
+
 int getOffset(string varName, symbolTable* st){
     if(isPointer(varName)) 
         varName = stripPointer(varName);
-    symbolTableNode* sym_node = lookUp(st, varName);
+    //check for foo.a
+    bool dot = false;
+    string identifier = varName, param, name = varName, delim_dot = ".";
+    size_t pos = name.find(delim_dot);
+    if(pos != string::npos){
+        dot = true;
+        identifier = name.substr(0, pos);
+        name.erase(0, pos + delim_dot.length());
+        param = name;
+    }
+    symbolTableNode* sym_node = lookUp(st, identifier);
     if(sym_node == nullptr){
-        error(varName, SYMBOL_NOT_FOUND);
+        error(identifier, SYMBOL_NOT_FOUND);
     }
     int offset = sym_node->offset;
-    offset += getOffsettedSize(sym_node->size);
+    if(dot && sym_node->infoType == INFO_TYPE_STRUCT && sym_node->declSp->ptrLevel == 0){
+        offset += getParameterOffset(sym_node->declSp->lexeme, param, st);
+    }
+    // offset += getOffsettedSize(sym_node->size);
     return -1*offset;
 }
 
@@ -703,7 +730,12 @@ int getOffset(string varName, symbolTable* st){
 bool isGlobal(string varName, symbolTable* st) {
     if(isPointer(varName)) 
         varName = stripPointer(varName);
-    symbolTableNode* sym_node = lookUp(st, varName);
+    string identifier = varName, param, name = varName, delim_dot = ".";
+    size_t pos = name.find(delim_dot);
+    if(pos != string::npos){
+        identifier = name.substr(0, pos);
+    }
+    symbolTableNode* sym_node = lookUp(st, identifier);
     if(sym_node == nullptr){
         error(varName, SYMBOL_NOT_FOUND);
     }
@@ -755,10 +787,47 @@ string stripPointer(string name) {
 string getVariableAddr(string varName, symbolTable* st) {
     int offset;
     string offsetStr;
-    if(isGlobal(varName, st)) {
+    string identifier = varName, param, temp = varName, delim_ptr = "->", delim_dot = ".";
+    // f->a
+    bool ptrOp = false;
+    size_t pos = temp.find(delim_ptr);
+    if(pos != string::npos){
+        identifier = temp.substr(0, pos);
+        temp.erase(0, pos + delim_ptr.length());
+        param = temp;
+        offset = getOffset(identifier, st);
+        offsetStr=getOffsetStr(offset);
+        int regAddInd = getReg(gQuadNo, identifier); //TODO: Free this reg
+        string regAddName = regVec[regAddInd]->regName;
+        emitAsm("movq", {offsetStr, regAddName});
+        int regInd = getReg(gQuadNo, identifier);
+        string regName = regVec[regInd]->regName;
+
+        symbolTableNode* sym_node = lookUp(st, identifier);
+        if(sym_node == nullptr){
+            error(identifier, SYMBOL_NOT_FOUND);
+        }
+        int paramOffset = getParameterOffset(sym_node->declSp->lexeme, param, st);
+        emitAsm("subq", {"$"+hexString(to_string(paramOffset)), regAddName});
+        emitAsm("movq", {regAddName, regName});
+        // free regAddName
+        ptrAssignedRegs.push(regInd);
+        return "(" + regName + ")";
+    }
+
+    // f.a
+    temp = varName;
+    pos = temp.find(delim_dot);
+    if(pos != string::npos){
+        identifier = temp.substr(0, pos);
+        temp.erase(0, pos + delim_dot.length());
+        param = temp;
+    }
+
+    if(isGlobal(identifier, st)) {
         bool isStringLiteral=false;
         for(globalData *g : globalDataPair) {
-          if(g->varName == varName){
+          if(g->varName == identifier){
             return "$" + g->varName;
           }
         }

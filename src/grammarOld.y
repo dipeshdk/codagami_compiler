@@ -295,7 +295,8 @@ postfix_expression
 		$$ = newNode;
 	}
 	| postfix_expression PTR_OP IDENTIFIER {
-		structTableNode* structure = getRightMostStructFromPostfixExpression($1, true, errCode, errStr);
+		
+        structTableNode* structure = getRightMostStructFromPostfixExpression($1, true, errCode, errStr);
 		if(errCode) error(errStr, errCode);
 		
 		string identifierName = yylval.id;
@@ -943,7 +944,7 @@ assignment_expression
 			}
 			else if(s == "=")
 			{
-				bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
+                bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
 				if(errCode)
 					error(errStr, errCode);
 				if(retval){
@@ -1342,6 +1343,7 @@ struct_declarator
 	: declarator { 
 		node* declarator = $1; 
 		structParam* param = new structParam();
+        param->infoType = declarator->infoType;
 		param->name = declarator->lexeme;
 		param->declSp = declarator->declSp;
 		declarator->structParamList.push_back(param);
@@ -1351,6 +1353,7 @@ struct_declarator
 	| declarator ':' constant_expression {
 		node* declarator = $1; 
 		structParam* param = new structParam();
+        param->infoType = declarator->infoType;
 		param->name = declarator->lexeme;
 		param->declSp = declarator->declSp;
 		int err = 0;
@@ -2216,7 +2219,7 @@ int main(int ac, char **av) {
 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
-		generateDot(root,fileName);
+		generateDot(root,fileName); 
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
 		emitAssemblyFrom3AC(asmFileName);
