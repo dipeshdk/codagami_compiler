@@ -46,7 +46,7 @@
 	int funcBeginQuad = -1;
 	#include <sys/stat.h>
 	#include <sys/types.h>
-
+	stack<string> arrayInFuncParam;
 extern "C"
 {
 	int yylex(void);  
@@ -1433,34 +1433,7 @@ direct_declarator
 			temp->declSp = new declSpec();
 		}
 		temp->declSp->ptrLevel++;
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error("", errCode);
-		symbolTableNode *sym_node;
-		sym_node = lookUp(gSymTable, newTmp);
-		sym_node->size = 8;
-		sym_node->offset = offset;
-		sym_node->declSp = new declSpec();
-		sym_node->declSp->type.push_back(TYPE_VOID);
-		sym_node->declSp->ptrLevel++;
-		offset += 8;
-
-		emit(OP_ADDR, $1->addr, EMPTY_STR, newTmp);
-		string newTmp1 = generateTemp(errCode);
-		if(errCode)
-			error("", errCode);
-
-		sym_node = lookUp(gSymTable, newTmp1);
-		sym_node->size = 8;
-		sym_node->offset = offset;
-		sym_node->declSp = new declSpec();
-		sym_node->declSp->type.push_back(TYPE_VOID);
-		sym_node->declSp->ptrLevel++;
-		offset += 8;
-
-		emit(OP_ADDI, newTmp, "8", newTmp1);
-		emit(OP_ASSIGNMENT, newTmp1, EMPTY_STR,$1->addr);
-
+		arrayInFuncParam.push($1->addr);
 		$$ = temp;
 	}
 	| direct_declarator '[' ']' {
@@ -2028,7 +2001,10 @@ function_definition
 			error("Internal funcBeginQuad not -1", INVALID_ARGS_IN_FUNC_CALL);
 		funcBeginQuad = nextQuad();
     	emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, BLANK_STR); // GCC will set the global variable offset
-		
+		while(!arrayInFuncParam.empty()){
+			addArrayParamToStack(offset, arrayInFuncParam.top(), errCode, errStr);
+			arrayInFuncParam.pop();
+		}
 		setOverSixParamOffset(declarator, curr, funcNode);
 		// for(auto &p: declarator->paramList){
 		// 	string lex = p->paramName;	
@@ -2222,7 +2198,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName); 
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
-		emitAssemblyFrom3AC(asmFileName);
+		// emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
 		printCode((char*)TACFilename.c_str());

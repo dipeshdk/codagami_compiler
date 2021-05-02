@@ -294,3 +294,37 @@ void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable){
     return;
 }
 
+int addArrayParamToStack(int &offset, string addr, int &errCode, string &errString){
+    string newTmp = generateTemp(errCode);
+    if(errCode) {
+        setErrorParams(errCode, errCode, errString, "");
+        return -1;
+    }
+    symbolTableNode *sym_node;
+    sym_node = lookUp(gSymTable, newTmp);
+    sym_node->size = 8;
+    sym_node->offset = offset;
+    sym_node->declSp = new declSpec();
+    sym_node->declSp->type.push_back(TYPE_VOID);
+    sym_node->declSp->ptrLevel++;
+    offset += 8;
+
+    emit(OP_ADDR, addr, EMPTY_STR, newTmp);
+    string newTmp1 = generateTemp(errCode);
+    if(errCode) {
+        setErrorParams(errCode, errCode, errString, "");
+        return -1;
+    }
+
+    sym_node = lookUp(gSymTable, newTmp1);
+    sym_node->size = 8;
+    sym_node->offset = offset;
+    sym_node->declSp = new declSpec();
+    sym_node->declSp->type.push_back(TYPE_VOID);
+    sym_node->declSp->ptrLevel++;
+    offset += 8;
+
+    emit(OP_ADDI, newTmp, "8", newTmp1);
+    emit(OP_ASSIGNMENT, newTmp1, EMPTY_STR, addr);
+    return 0;
+}

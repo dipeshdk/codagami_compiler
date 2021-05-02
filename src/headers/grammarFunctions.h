@@ -23,4 +23,5 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
 
 void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable);
 
+int addArrayParamToStack(int &offset, string addr, int &errCode, string &errString);
 #endif
