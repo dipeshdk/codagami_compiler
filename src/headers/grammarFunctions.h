@@ -23,4 +23,6 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
 
 void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable);
 
+bool checkGlobalInitializerDFSUtil(node *a);
+bool checkGlobalInitializer(node *initializer);
 #endif

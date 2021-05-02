@@ -63,3 +63,10 @@ void addChild(node* parent, node* child){
 	}
 }
 
+bool isConstantNode(node *node) {
+	return node->isConstant;
+}
+
+bool isStringLiteral(node *node) {
+	return node->isStringLiteral;
+}

@@ -294,3 +294,23 @@ void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable){
     return;
 }
 
+bool checkGlobalInitializerDFSUtil(node *a){
+    if(!a) return true;
+    if(a->isLeaf) {
+        return a->isConstant;
+    }
+
+    node *temp = a->childList;
+    while(temp) {
+        if(!checkGlobalInitializerDFSUtil(temp)) 
+            return false;
+        temp = temp->next;
+    }
+
+    return true;
+}
+
+bool checkGlobalInitializer(node *initializer){
+    //performs dfs and checks if any leaf node is not constant
+    return checkGlobalInitializerDFSUtil(initializer);
+}

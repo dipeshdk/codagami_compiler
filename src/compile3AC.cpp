@@ -104,6 +104,9 @@ void printASMData() {
         cout << "   " << g->varName << ": ";
         if(g->valueType == TYPE_STRING_LITERAL) {
           cout << ".asciz ";
+        }else {
+          //TODO: ERROR HERE
+          cout << ".long ";
         }
         cout << g->value << "\n";  
     }
@@ -831,7 +834,7 @@ string getVariableAddr(string varName, symbolTable* st) {
             return "$" + g->varName;
           }
         }
-        error("non-string globals are unsupported", UNSUPPORTED_FUNCTIONALITY);        
+        // error("non-string globals are unsupported", UNSUPPORTED_FUNCTIONALITY);        
     }
     if(isPointer(varName)) {
         string name = stripPointer(varName);
