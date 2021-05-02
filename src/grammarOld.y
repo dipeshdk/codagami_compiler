@@ -276,29 +276,7 @@ postfix_expression
 
 	}
 	| postfix_expression '.' IDENTIFIER { 
-		/* node * postfix_expression = $1;
-		structTableNode* structure = getRightMostStructFromPostfixExpression($1, false, errCode, errStr);
-		if(errCode) error(errStr, errCode);
-		
-		string identifierName = yylval.id;
-		structParam* param = structureParamLookup(structure, identifierName, errCode, errStr);
-		if(errCode) error(errStr, errCode);
-
-        string newAddr = emitStructDeferenceDot($1, structure, identifierName, param, errCode, errStr);
-        if(errCode)
-			error(errStr, errCode);
-		node *temp = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, NULL, NULL, NULL, NULL);
-		temp->declSp = declSpCopy(param->declSp);
-		// temp->infoType = INFO_NESTED_STRUCT; // check later
-        temp->infoType = param->infoType;
-		// temp->addr = newAddr;
-		node *newNode = makeNode(strdup("."), strdup("."), 0, $1, temp , NULL, NULL);
-		newNode->declSp = declSpCopy(param->declSp);
-		newNode->infoType = param->infoType; // check later
-		newNode->addr = newAddr;
-		$$ = newNode; */
-
-        node * postfix_expression = $1;
+		node * postfix_expression = $1;
 		structTableNode* structure = getRightMostStructFromPostfixExpression($1, false, errCode, errStr);
 		if(errCode) error(errStr, errCode);
 		
@@ -431,7 +409,6 @@ unary_expression
 				error("Cannot generate Temp", errCode);
 			emit(opCode, cast_expression->addr, EMPTY_STR, newTmp);
 			unary_operator->addr = newTmp;
-            cout << newTmp << endl;
 			addTempDetails(newTmp, gSymTable, unary_operator);
 		}
 
@@ -2082,7 +2059,7 @@ function_definition
 		addChild($1, $3);
 		$$ = $1;
 		setFirstSixParamOffset($1, gSymTable);
-		int retval = backpatchBeginFunc(funcBeginQuad, offset);
+		int retval = backpatchBeginFunc(funcBeginQuad, offset-8);
 		if(retval)
 			error("backpatchBeginFunc", retval);
 		funcBeginQuad = -1;

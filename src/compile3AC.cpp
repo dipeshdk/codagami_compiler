@@ -718,7 +718,6 @@ int getParameterOffsetPtr(string structName, string param, symbolTable* st){
         paramOffset += getOffsettedSize(size1); // doubt : considering offset inside struct?
         
     }
-
     if(paramOffset < 0){
         error("paramOffset Negative", DEFAULT_ERROR);
     }
@@ -747,7 +746,7 @@ int getOffset(string varName, symbolTable* st){
     if(dot && sym_node->infoType == INFO_TYPE_STRUCT && sym_node->declSp->ptrLevel == 0){
         offset += getParameterOffset(sym_node->declSp->lexeme, param, st);
     }
-    offset += getOffsettedSize(sym_node->size);
+    // offset += getOffsettedSize(sym_node->size);
     return -1*offset;
 }
 
@@ -824,21 +823,20 @@ string getVariableAddr(string varName, symbolTable* st) {
         offsetStr=getOffsetStr(offset);
         int regAddInd = getReg(gQuadNo, identifier); //TODO: Free this reg
         string regAddName = regVec[regAddInd]->regName;
-        emitAsm("leaq", {offsetStr, regAddName});
+        emitAsm("movq", {offsetStr, regAddName});
         int regInd = getReg(gQuadNo, identifier);
         string regName = regVec[regInd]->regName;
 
         symbolTableNode* sym_node = lookUp(st, identifier);
         if(sym_node == nullptr){
-            cout << "->\n";
             error(identifier, SYMBOL_NOT_FOUND);
         }
-        int paramOffset = getParameterOffsetPtr(sym_node->declSp->lexeme, param, st);
-        cout << paramOffset << endl;
-        emitAsm("movq", {hexString(to_string(paramOffset))+ "(" + regAddName + ")", regName});
+        int paramOffset = getParameterOffset(sym_node->declSp->lexeme, param, st);
+        emitAsm("subq", {"$"+hexString(to_string(paramOffset)), regAddName});
+        emitAsm("movq", {regAddName, regName});
         // free regAddName
         ptrAssignedRegs.push(regInd);
-        return regName;
+        return "(" + regName + ")";
     }
 
     // f.a
