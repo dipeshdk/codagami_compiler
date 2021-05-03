@@ -160,6 +160,9 @@ void error(string var, int error_code) {
 		case INVALID_POINTER_ADDR:
 			str = "Internal error: Invalid pointer name in 3AC code";
 			break;
+		case INVALID_GLOBAL_INITIALIZER:
+			str = "Invalid global initialization. RHS must be constant.";
+			break;
 		default:
 			break;
 	}
@@ -177,7 +180,11 @@ void copyList(node* n1, node *n2) {
 }
 
 bool isConstant(string s){
-	for (char const &c : s) {
+	int n= s.length();
+	int i = 0;
+	if(n > 0 && s[0]=='-') i++;
+	for (; i < n; i++) {
+		char c = s[i];
         if (!(c >= '0' && c <= '9')) return false;
     }
     return true;
@@ -194,9 +201,11 @@ bool isConstant(string s){
 }
 
 string hexString(string decStr) {
-    stringstream ss;
-    ss << "0x" << hex << getNumberFromConstAddr(decStr);
-    return ss.str();
+	//TODO: For negative numbers testing remaining
+	return decStr;
+    // stringstream ss;
+    // ss << "0x" << hex << getNumberFromConstAddr(decStr);
+    // return ss.str();
 }
 
 int getNumberFromConstAddr(string s) {

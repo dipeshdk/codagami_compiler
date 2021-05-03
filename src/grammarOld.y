@@ -155,6 +155,8 @@ primary_expression
 		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_STRING_LITERAL);
 		temp->addr = string(yylval.id);
+		temp->isConstant = true;
+		temp->isStringLiteral=true;
 		$$ = temp;
 		;
 	}
@@ -201,6 +203,7 @@ primary_expression
 		temp->declSp->type.push_back(TYPE_CHAR);
 		temp->valType = TYPE_CHAR;
 		setAddr(temp, to_string((int)c));
+		temp->isConstant = true;
 		$$ = temp;
 	}
 	| '(' expression ')' { $$ = $2; }
@@ -214,6 +217,7 @@ constant
 		temp->declSp->type.push_back(TYPE_INT);
 		addIVal(temp, yylval.id);
 		setAddr(temp, string(yylval.id));
+		temp->isConstant = true;
 		$$ = temp;
 	}
 	| F_CONSTANT {
@@ -223,6 +227,7 @@ constant
 		temp->declSp->type.push_back(TYPE_FLOAT);
 		addFVal(temp, yylval.id);
 		setAddr(temp, string(yylval.id));
+		temp->isConstant = true;
 		$$ = temp;
 	}
 	;
@@ -377,46 +382,84 @@ unary_expression
 		string name(unary_operator->name);
 		unary_operator->declSp = cast_expression->declSp;
 
-		int opCode = -1;
-		if(name == "*"){
-			if(!(cast_expression->infoType == INFO_TYPE_ARRAY || (cast_expression->declSp && cast_expression->declSp->ptrLevel > 0)))
+		if(isConstantNode(cast_expression)) {
+			if(isStringLiteral(cast_expression)) {
+				error("unary operations of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr(cast_expression->addr);
+			int res;
+			node* constTemp = makeNode(strdup("CONSTANT"), strdup("CONSTANT"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			if(name == "*"){
 				error(cast_expression->name, NON_POINTER_DEFERENCE);
-			unary_operator->addr = "*(" + cast_expression->addr + ")";
-			unary_operator->declSp->ptrLevel--;
-		}
-		else if(name == "&") {
-			opCode = OP_ADDR;
-			unary_operator->declSp->ptrLevel++;
-		}
-		else if(name == "-") opCode = OP_UNARY_MINUS;
-		else if(name == "~") {
-			opCode = OP_BITWISE_NOT;
-			//type should be int or char
-			bitwiseTypecastingSingleNode(cast_expression, errCode, errStr);
-			if(errCode)
-				error(errStr, errCode);
-		}
-		else if(name == "!") {
-			opCode = OP_LOGICAL_NOT;
-			unary_operator->truelist = cast_expression->falselist;
-			unary_operator->falselist = cast_expression->truelist;
-		}
-		// nothing to do for unary plus
+			}
+			else if(name == "&") {
+				error(cast_expression->name, NON_POINTER_DEFERENCE);
+			}
+			else if(name == "-") {
+				res = -n1;
+			}
+			else if(name == "~") {
+				res = ~n1;
+			}
+			else if(name == "!") {
+				res = !n1;
+				constTemp->truelist = cast_expression->falselist;
+				constTemp->falselist = cast_expression->truelist;
+			}
+			string resStr = to_string(res);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->lexeme = (char*)resStr.c_str();
+			constTemp->nextlist = cast_expression->nextlist;
+			constTemp->continuelist = cast_expression->continuelist;
+			constTemp->breaklist = cast_expression->breaklist;
+			$$ = constTemp;
+		}else {
+			int opCode = -1;
+			if(name == "*"){
+				if(!(cast_expression->infoType == INFO_TYPE_ARRAY || (cast_expression->declSp && cast_expression->declSp->ptrLevel > 0)))
+					error(cast_expression->name, NON_POINTER_DEFERENCE);
+				unary_operator->addr = "*(" + cast_expression->addr + ")";
+				unary_operator->declSp->ptrLevel--;
+			}
+			else if(name == "&") {
+				opCode = OP_ADDR;
+				unary_operator->declSp->ptrLevel++;
+			}
+			else if(name == "-") {
+				opCode = OP_UNARY_MINUS;
+			}
+			else if(name == "~") {
+				opCode = OP_BITWISE_NOT;
+				//type should be int or char
+				bitwiseTypecastingSingleNode(cast_expression, errCode, errStr);
+				if(errCode)
+					error(errStr, errCode);
+			}
+			else if(name == "!") {
+				opCode = OP_LOGICAL_NOT;
+				unary_operator->truelist = cast_expression->falselist;
+				unary_operator->falselist = cast_expression->truelist;
+			}
+			// nothing to do for unary plus
 
-		if(opCode != -1) {
-			string newTmp = generateTemp(errCode);
-			if(errCode)
-				error("Cannot generate Temp", errCode);
-			emit(opCode, cast_expression->addr, EMPTY_STR, newTmp);
-			unary_operator->addr = newTmp;
-			addTempDetails(newTmp, gSymTable, unary_operator);
-		}
+			if(opCode != -1) {
+				string newTmp = generateTemp(errCode);
+				if(errCode)
+					error("Cannot generate Temp", errCode);
+				emit(opCode, cast_expression->addr, EMPTY_STR, newTmp);
+				unary_operator->addr = newTmp;
+				addTempDetails(newTmp, gSymTable, unary_operator);
+			}
 
-		addChild(unary_operator, cast_expression);
-		unary_operator->nextlist = cast_expression->nextlist;
-		unary_operator->continuelist = cast_expression->continuelist;
-		unary_operator->breaklist = cast_expression->breaklist;
-		$$ = unary_operator;
+			addChild(unary_operator, cast_expression);
+			unary_operator->nextlist = cast_expression->nextlist;
+			unary_operator->continuelist = cast_expression->continuelist;
+			unary_operator->breaklist = cast_expression->breaklist;
+			$$ = unary_operator;
+		}
 	}
 	| SIZEOF unary_expression {
 		if(strcmp(($2 -> name), "IDENTIFIER")){
@@ -494,101 +537,182 @@ multiplicative_expression
 	: cast_expression {$$ = $1; }
 	| multiplicative_expression '*' cast_expression { 
 		//  no pointer & no string literal constNode->lexeme
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "*", errCode, errStr); 
-		if(errCode)
-			error(errStr, errCode);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
-		int opCode = getOpMulType(temp, errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
-		emit(opCode, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("multiplication of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1*n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "*", errCode, errStr); 
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error(errStr, errCode);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy($1->declSp);
+			int opCode = getOpMulType(temp, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			emit(opCode, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
+		}
 	}
 	| multiplicative_expression '/' cast_expression { 
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "/", errCode, errStr); 
-		if(errCode)
-			error(errStr, errCode);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
-		int opCode = getOpDivType(temp, errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
-		emit(opCode, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("division of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1/n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "/", errCode, errStr); 
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error(errStr, errCode);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy($1->declSp);
+			int opCode = getOpDivType(temp, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			emit(opCode, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
+		}
 	}
 	| multiplicative_expression '%' cast_expression { 
 		int retval = checkType($3->declSp,TYPE_FLOAT,0);
 		if(retval){
 			error($3->lexeme, SHOULD_NOT_BE_FLOAT);
 		}
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "%", errCode, errStr); 
-		if(errCode)
-			error(errStr, errCode);
-			
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
-		emit(OP_MOD, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("mod of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1%n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "%", errCode, errStr); 
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error(errStr, errCode);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy($1->declSp);
+			emit(OP_MOD, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
+		}
 	}
 	;
 
 additive_expression
 	: multiplicative_expression { $$ = $1; }
 	| additive_expression '+' multiplicative_expression { 
-		node* temp = makeNodeForExpressionNotStringForAddition($1, $3, "+", errCode, errStr); 
-		if(errCode)
-			error(errStr, errCode);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy(temp->declSp);
-		int opCode = getOpAddType(temp, errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
-		emit(opCode, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		// temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, temp);
-		$$ = temp;
+		
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("addition of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1+n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			$$ = constTemp;
+		} else {
+			node* temp = makeNodeForExpressionNotStringForAddition($1, $3, "+", errCode, errStr); 
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error(errStr, errCode);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy(temp->declSp);
+			int opCode = getOpAddType(temp, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			emit(opCode, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			// temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, temp);
+			$$ = temp;
 		}
+	}
 	| additive_expression '-' multiplicative_expression { 
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "-", errCode, errStr); 
-		if(errCode)
-			error(errStr, errCode);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
-		int opCode = getOpSubType(temp, errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
-		emit(opCode, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("subtraction of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1-n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "-", errCode, errStr); 
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error(errStr, errCode);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy($1->declSp);
+			int opCode = getOpSubType(temp, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			emit(opCode, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
 		}
+	}
 	;
 
 shift_expression
@@ -599,42 +723,72 @@ shift_expression
 		retval = checkIntOrChar($1);
 		if(retval)	error($1->lexeme, TYPE_ERROR);
 		
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "<<", errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
-			
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
-		emit(OP_LEFT_SHIFT, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp; 
-		}
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("left shift of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1 << n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			$$ = constTemp;
+		} else {	
+			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "<<", errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error(errStr, errCode);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy($1->declSp);
+			emit(OP_LEFT_SHIFT, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
+		} 
+	}
 	| shift_expression RIGHT_OP additive_expression { 
 		int retval = checkIntOrChar($3);
 		if(retval)	error($3->lexeme, TYPE_ERROR);
 		retval = checkIntOrChar($1);
 		if(retval)	error($1->lexeme, TYPE_ERROR);
 		
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, ">>", errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
-			
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
-		emit(OP_RIGHT_SHIFT, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("right shift of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1 >> n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			$$ = constTemp;
+		} else {
+			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, ">>", errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error(errStr, errCode);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy($1->declSp);
+			emit(OP_RIGHT_SHIFT, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
 		}
+	}
 	;
 
 relational_expression
@@ -642,13 +796,13 @@ relational_expression
 	| relational_expression '<' shift_expression { 
 			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
 			if(retval < 0)
-				error(errStr,-retval);
+				error(errStr,-retval);			
 			node* temp = makeNode(strdup("<"), strdup("<"), 0, $1, $3, (node*)NULL, (node*)NULL); 
 			emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
 			$$ = temp;
-			}
+		}
 	| relational_expression '>' shift_expression { 
 			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
 			if(retval < 0)
@@ -740,16 +894,32 @@ and_expression
 		if(retval < 0){
 			error(errStr, errCode);
 		}
-		node* temp = makeNode(strdup("&"), strdup("&"), 0, and_expression, equality_expression, (node*)NULL, (node*)NULL);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		emit(OP_AND, and_expression->addr, equality_expression->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("logical and of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1 & n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			$$ = constTemp;
+		}else{
+			node* temp = makeNode(strdup("&"), strdup("&"), 0, and_expression, equality_expression, (node*)NULL, (node*)NULL);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error(errStr, errCode);
+			emit(OP_AND, and_expression->addr, equality_expression->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
 		}
+	}
 	;
 
 
@@ -762,15 +932,31 @@ exclusive_or_expression
 		if(retval < 0){
 			error(errStr, errCode);
 		}
-		node* temp = makeNode(strdup("^"), strdup("^"), 0, exclusive_or_expression, and_expression, (node*)NULL, (node*)NULL);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		emit(OP_XOR, exclusive_or_expression->addr, and_expression->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("logical xor of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1 ^ n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNode(strdup("^"), strdup("^"), 0, exclusive_or_expression, and_expression, (node*)NULL, (node*)NULL);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error(errStr, errCode);
+			emit(OP_XOR, exclusive_or_expression->addr, and_expression->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
+		}
 	}
 	;
 
@@ -783,15 +969,31 @@ inclusive_or_expression
 		if(retval < 0){
 			error(errStr, errCode);
 		}
-		node* temp = makeNode(strdup("|"), strdup("|"), 0, inclusive_or_expression1, exclusive_or_expression, (node*)NULL, (node*)NULL);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		emit(OP_OR, inclusive_or_expression1->addr, exclusive_or_expression->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("logical or of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1 | n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNode(strdup("|"), strdup("|"), 0, inclusive_or_expression1, exclusive_or_expression, (node*)NULL, (node*)NULL);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error(errStr, errCode);
+			emit(OP_OR, inclusive_or_expression1->addr, exclusive_or_expression->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
+		}
 	}
 	;
 
@@ -801,17 +1003,36 @@ logical_and_expression
 		int retval = backpatch($1->truelist, $3->quad);
 		if(retval)
 			error("backpatch error", retval);
-		node* temp = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $4, (node*)NULL, (node*)NULL); 
-		temp->truelist = $4->truelist;
-		temp->falselist = mergelist($1->falselist, $4->falselist);
-		string newTmp = generateTemp(errCode);
-		if(errCode){
-			error("temp gen internal error",errCode);
+
+		if(isConstantNode($1) && isConstantNode($4)) {
+			if(isStringLiteral($1) || isStringLiteral($4)) {
+				error("&& of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($4->addr);
+			int res = n1 && n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->truelist = $4->truelist;
+			constTemp->falselist = mergelist($1->falselist, $4->falselist);
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $4, (node*)NULL, (node*)NULL); 
+			temp->truelist = $4->truelist;
+			temp->falselist = mergelist($1->falselist, $4->falselist);
+			string newTmp = generateTemp(errCode);
+			if(errCode){
+				error("temp gen internal error",errCode);
+			}
+			emit(OP_ANDAND, $1->addr, $4->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			$$ = temp;
 		}
-		emit(OP_ANDAND, $1->addr, $4->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		$$ = temp;
 	}
 	;
 
@@ -821,18 +1042,36 @@ logical_or_expression
 		int retval = backpatch($1->falselist, $3->quad);
 		if(retval)
 			error("backpatch error", retval);
-		node* temp = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $4, (node*)NULL, (node*)NULL);  
-		temp->truelist = mergelist($1->truelist, $4->truelist);
-		temp->falselist = $4->falselist;
-		string newTmp = generateTemp(errCode);
-		if(errCode){
-			error("temp gen internal error",errCode);
+		if(isConstantNode($1) && isConstantNode($4)) {
+			if(isStringLiteral($1) || isStringLiteral($4)) {
+				error("|| of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($4->addr);
+			int res = n1 && n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->truelist = mergelist($1->truelist, $4->truelist);
+			constTemp->falselist = $4->falselist;
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			$$ = constTemp;
+		}else{
+			node* temp = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $4, (node*)NULL, (node*)NULL);  
+			temp->truelist = mergelist($1->truelist, $4->truelist);
+			temp->falselist = $4->falselist;
+			string newTmp = generateTemp(errCode);
+			if(errCode){
+				error("temp gen internal error",errCode);
+			}
+			emit(OP_OROR, $1->addr, $4->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			$$ = temp;
 		}
-		emit(OP_OROR, $1->addr, $4->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		$$ = temp;
-		}
+	}
 	;
 
 logical_or_expressionJumpStatement
@@ -947,6 +1186,9 @@ assignment_expression
                 bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
 				if(errCode)
 					error(errStr, errCode);
+				if(gSymTable->scope == GLOBAL_SCOPE_NUM && !checkGlobalInitializer(assignment_expression)) {
+					error(unary_expression->addr, INVALID_GLOBAL_INITIALIZER);
+				}
 				if(retval){
 					typeCastLexemeWithEmit(assignment_expression, unary_expression->declSp);
 				}
@@ -987,7 +1229,6 @@ assignment_expression
 		}else {
 			error("Assignment of return value of a void function" ,UNSUPPORTED_FUNCTIONALITY);
 		}
-		
 	}
 	;
 
@@ -1137,8 +1378,37 @@ declaration
 						if(retval) {
 							typeCastLexemeWithEmit(initializer, sym_node->declSp);
 						}
-						emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);
+
+						if(gSymTable->scope == GLOBAL_SCOPE_NUM) {
+							sym_node->declSp = declSpCopy($1->declSp);
+							if(temp->declSp) 
+								sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
+							
+							globalData *gData = new globalData();
+							gData->varName = temp->addr;
+							gData->value =  hexString(initializer->addr);
+							if(initializer->declSp && initializer->declSp->type.size() > 0)
+								gData->valueType = initializer->declSp->type[0];
+							else
+								gData->valueType = TYPE_INT;
+							globalDataPair.push_back(gData);
+						}else {
+							emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);
+						}
 					}			
+				}else {
+					//no initializer
+					if(gSymTable->scope == GLOBAL_SCOPE_NUM) {
+						sym_node->declSp = declSpCopy($1->declSp);
+						if(temp->declSp) 
+							sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
+						
+						globalData *gData = new globalData();
+						gData->varName = temp->addr;
+						gData->value = hexString(to_string(DEFAULT_INITIALIZATION_VALUE));
+						gData->valueType = DEFAULT_INITIALIZATION_VALUE_TYPE;
+						globalDataPair.push_back(gData);
+					}
 				}
 			}
 			sym_node->size = getNodeSize(sym_node, gSymTable);
@@ -1215,6 +1485,11 @@ init_declarator
 			ds->type = initializer->declSp->type;
 			declarator->declSp = ds;
 		}
+
+		if(gSymTable->scope == GLOBAL_SCOPE_NUM && !checkGlobalInitializer($3)) {
+			error($1->addr, INVALID_GLOBAL_INITIALIZER);
+		}
+
 		$$ = makeNode(strdup("="), strdup("="), 0, declarator, initializer, (node*)NULL, (node*)NULL);
 		$$->addr=$1->addr;
 	}
