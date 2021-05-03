@@ -831,7 +831,10 @@ string getVariableAddr(string varName, symbolTable* st) {
         bool isStringLiteral=false;
         for(globalData *g : globalDataPair) {
           if(g->varName == identifier){
-            return "$" + g->varName;
+            if(g->valueType == TYPE_STRING_LITERAL)
+              return "$" + g->varName;
+            else
+              return g->varName + "(%rip)";
           }
         }
         // error("non-string globals are unsupported", UNSUPPORTED_FUNCTIONALITY);        
