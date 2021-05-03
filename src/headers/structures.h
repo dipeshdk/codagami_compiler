@@ -110,7 +110,8 @@ struct node
     struct node *next;
     struct node *childList = nullptr;
     struct declSpec *declSp;
- 
+    bool isConstant;
+    bool isStringLiteral;
     // symtable node
     int infoType = INFO_TYPE_NORMAL;
     int lineNo;
@@ -130,6 +131,8 @@ struct node
         declSp = new declSpec();
         addr = "EMPTY_ADDR";
         valType = NOT_CONSTANT;
+        isConstant = false;
+        isStringLiteral=false;
     }
 }; 
 
