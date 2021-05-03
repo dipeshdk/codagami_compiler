@@ -7,6 +7,7 @@ int main() {
     for(i=5;i < 7;++i) {
         for(j=3;j == 3;--j){
             printf(p,i,j);
+            printf(p,i,j);
         }
     }
 }

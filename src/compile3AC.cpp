@@ -105,7 +105,6 @@ void printASMData() {
         if(g->valueType == TYPE_STRING_LITERAL) {
           cout << ".asciz ";
         }else {
-          //TODO: ERROR HERE
           cout << ".long ";
         }
         cout << g->value << "\n";  
@@ -285,7 +284,7 @@ void asmOpReturn(int quadNo){
 }
 
 void asmOpEndFunc(int quadNo){
-    emitAsm("addq", {"$"+hexString(to_string(funcSizeStack.top())), "%rbp"});
+    emitAsm("addq", {"$"+hexString(to_string(funcSizeStack.top())), "%rsp"});
     emitAsm("popq", {"%rbp"});
     emitAsm("retq", {});
     funcNameStack.pop();
@@ -373,7 +372,7 @@ void asmOpBeginFunc(int quadNo) {
   emitFuncStart();
   
   //sub stack pointer
-  emitAsm("subq", {"$"+hexString(quad->result), "%rbp"});
+  emitAsm("subq", {"$"+hexString(quad->result), "%rsp"});
 
   //move first 6 arguments from register to stack
   vector<struct param*> paramList = funcNode->paramList;

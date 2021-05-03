@@ -201,9 +201,11 @@ bool isConstant(string s){
 }
 
 string hexString(string decStr) {
-    stringstream ss;
-    ss << "0x" << hex << getNumberFromConstAddr(decStr);
-    return ss.str();
+	//TODO: For negative numbers testing remaining
+	return decStr;
+    // stringstream ss;
+    // ss << "0x" << hex << getNumberFromConstAddr(decStr);
+    // return ss.str();
 }
 
 int getNumberFromConstAddr(string s) {
