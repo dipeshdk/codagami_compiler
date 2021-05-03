@@ -25,4 +25,5 @@ void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable);
 
 bool checkGlobalInitializerDFSUtil(node *a);
 bool checkGlobalInitializer(node *initializer);
+int addArrayParamToStack(int &offset, string addr, int &errCode, string &errString);
 #endif
