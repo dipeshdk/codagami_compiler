@@ -488,7 +488,7 @@ unary_expression
 		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$->declSp->type.push_back(TYPE_INT);
 		sym_node = lookUp(gSymTable, newTmp);
-		sym_node->size = 4;
+		sym_node->size = 8;
 		sym_node->offset = offset;
 		sym_node->declSp->type.push_back(TYPE_INT);
 		offset += 8;
@@ -507,7 +507,7 @@ unary_expression
 		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$->declSp->type.push_back(TYPE_INT);
 		sym_node = lookUp(gSymTable, newTmp);
-		sym_node->size = 4;
+		sym_node->size = 8;
 		sym_node->offset = offset;
 		sym_node->declSp->type.push_back(TYPE_INT);
 		offset += 8;
@@ -1340,6 +1340,10 @@ declaration
 					sym_node->arrayIndices = arrayIndicesTmp;
 				}else{
 					error(temp->lexeme,INVALID_SYNTAX);
+				}
+				while(!arrayInFuncParam.empty()){
+					addArrayParamToStack(offset, arrayInFuncParam.top(), errCode, errStr);
+					arrayInFuncParam.pop();
 				}
 				if(initializer) {
 					//array initializtion
@@ -2551,7 +2555,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName); 
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
-		// emitAssemblyFrom3AC(asmFileName);
+		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
 		printCode((char*)TACFilename.c_str());
