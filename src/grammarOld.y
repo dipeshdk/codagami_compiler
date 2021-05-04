@@ -1002,7 +1002,7 @@ logical_and_expression
 	| logical_and_expression AND_OP M_marker inclusive_or_expression { 
 		int retval = backpatch($1->truelist, $3->quad);
 		if(retval)
-			error($1->lexeme + "backpatch error", retval);
+			error(string($1->lexeme) + "backpatch error", retval);
 
 		if(isConstantNode($1) && isConstantNode($4)) {
 			if(isStringLiteral($1) || isStringLiteral($4)) {
@@ -1041,7 +1041,7 @@ logical_or_expression
 	| logical_or_expression OR_OP M_marker logical_and_expression { 
 		int retval = backpatch($1->falselist, $3->quad);
 		if(retval)
-			error($1->lexeme + "backpatch error", retval);
+			error(string($1->lexeme) + "backpatch error", retval);
 		if(isConstantNode($1) && isConstantNode($4)) {
 			if(isStringLiteral($1) || isStringLiteral($4)) {
 				error("|| of string literals.", UNSUPPORTED_FUNCTIONALITY);
@@ -1091,10 +1091,10 @@ conditional_expression
 	| logical_or_expressionJumpStatement '?' M_marker expression conditional_marker N_marker ':' M_marker conditional_expression {
 		int retval = backpatch($1->truelist, $3->quad);
 		if(retval)
-			error($1->lexeme + "backpatch error", retval);
+			error(string($1->lexeme) + "backpatch error", retval);
 		retval = backpatch($1->falselist, $8->quad);
 		if(retval)
-			error($1->lexeme + "backpatch error", retval);
+			error(string($1->lexeme) + "backpatch error", retval);
 		node* temp = makeNode(strdup("?:"), strdup("?:"), 0, $1, $4, $8, (node*)NULL); 
 		vector<int> tempVec = mergelist( $4->nextlist, $6->nextlist);
 		temp->nextlist = mergelist(tempVec, $9->nextlist);
@@ -1102,7 +1102,7 @@ conditional_expression
 		emit(OP_ASSIGNMENT, $9->addr, EMPTY_STR, ternaryTempStack.top());
 		retval  = backpatchAssignment($5->nextlist, $4->addr);
 		if(retval)
-			error($5->lexeme + "backpatch error", retval);
+			error(string($5->lexeme) + "backpatch error", retval);
 		temp->addr = ternaryTempStack.top();
 		$$ = temp;
 		ternaryTempStack.pop();
@@ -1325,7 +1325,7 @@ declaration
 
 					int size = getNodeSize(sym_node, gSymTable);
 					if(size < 0){
-						error(sym_node->lexeme, -size);
+						error(sym_node->name, -size);
 					}
 					// _t1 = 4;
 					string sizeTmp = generateTemp(errCode);
@@ -1372,7 +1372,7 @@ declaration
 						//variable initialized
 						int retval = canTypecast(sym_node->declSp, initializer->declSp);
 						if(retval)
-							error(sym_node->lexeme, retval);
+							error(sym_node->name, retval);
 						retval = areDifferentTypes(sym_node->declSp, initializer->declSp, errCode, errStr);
 						if(errCode)
 							error(errStr, errCode);
@@ -2020,7 +2020,7 @@ statement_list
 		}
 		int retval = backpatch($1->nextlist, $2->quad);
 		if(retval)
-			error($1->lexeme + "backpatch error", retval);
+			error(string($1->lexeme) + "backpatch error", retval);
 		temp->nextlist = $3->nextlist;
 		temp->breaklist = mergelist($1->breaklist, $3->breaklist);
 		temp->continuelist = mergelist($1->continuelist, $3->continuelist);
@@ -2056,7 +2056,7 @@ selection_statement
 	: IF '(' expressionJump  ')' M_marker statement {
 		int retval = backpatch($3->truelist, $5->quad);
 		if(retval)
-			error($3->lexeme + " backpatch error", retval);
+			error(string($3->lexeme) + " backpatch error", retval);
 		node * temp = makeNode(strdup("IF"), strdup("if"),0, $3, $6, (node*)NULL, (node*)NULL);
 		temp->nextlist = mergelist($3->falselist, $6->nextlist);
 		temp->breaklist = $6->breaklist;
@@ -2066,10 +2066,10 @@ selection_statement
 	| IF  '(' expressionJump  ')' M_marker statement ELSE N_marker M_marker statement {
 		int retval = backpatch($3->truelist, $5->quad);
 		if(retval)
-			error($3->lexeme + " backpatch error", retval);
+			error(string($3->lexeme) + " backpatch error", retval);
 		retval = backpatch($3->falselist, $9->quad);
 		if(retval)
-			error($3->lexeme + " backpatch error", retval);
+			error(string($3->lexeme) + " backpatch error", retval);
 		node* temp = makeNode(strdup("IF_ELSE"), strdup("else"),0, $3, $6, $10, (node*)NULL);
 		vector<int> tempVec = mergelist($6->nextlist, $8->nextlist);
 		temp->nextlist = mergelist(tempVec, $10->nextlist);
@@ -2093,13 +2093,13 @@ iteration_statement
 		node *m1 = $3, *m2 = $6, *s1 = $7, *e1 = $4;
 		int retval = backpatch(s1->nextlist, m1->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		retval = backpatch(e1->truelist, m2->quad);
 		if(retval)
-			error(e1->lexeme + " backpatch error", retval);
+			error(string(e1->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m1->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 
 		$$ = makeNode(strdup("WHILE"), strdup("while"), 0, $4, $7, (node*)NULL, (node*)NULL);
 		
@@ -2110,13 +2110,13 @@ iteration_statement
 		node* s1 = $3, *e1 = $7, *m2 = $2, *m1 = $6;
 		int retval = backpatch(s1->nextlist, m1->quad);
 		if(retval)
-			error(s1->lexeme+" backpatch error", retval);
+			error(string(s1->lexeme)+" backpatch error", retval);
 		retval = backpatch(e1->truelist, m2->quad);
 		if(retval)
-			error(e1->lexeme + " backpatch error", retval);
+			error(string(e1->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m1->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		
 		$$ = makeNode(strdup("DO WHILE"), strdup("do while"), 0, $3, $7, (node*)NULL, (node*)NULL);
 		
@@ -2128,13 +2128,13 @@ iteration_statement
 		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m1->quad));
 		int retval = backpatch(e2->truelist, m3->quad);
 		if(retval)
-			error(e2->lexeme + " backpatch error", retval);
+			error(string(e2->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m1->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->nextlist, m1->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		
 		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $8, (node*)NULL);
 		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
@@ -2144,16 +2144,16 @@ iteration_statement
 		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m2->quad));
 		int retval = backpatch(n1->nextlist, m1->quad);
 		if(retval)
-			error(n1->lexeme + " backpatch error", retval);
+			error(string(n1->lexeme) + " backpatch error", retval);
 		retval = backpatch(e2->truelist, m3->quad);
 		if(retval)
-			error(e2->lexeme + " backpatch error", retval);
+			error(string(e2->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m2->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->nextlist, m2->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 
 		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $7, $11);
 		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
