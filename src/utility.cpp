@@ -125,7 +125,7 @@ void error(string var, int error_code) {
 			str = "void data type is not compatible";
 			break;
 		case UNSUPPORTED_FUNCTIONALITY:
-			str = "functionality is not supported by this compiler.";
+			str = "This functionality is not supported by this compiler.";
 			break;
 		case NOT_A_CHAR:
 			str = "should be a char";
