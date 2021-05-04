@@ -1315,3 +1315,33 @@ void asmOpSubI(int quadNo) {
 void asmOpCompareEqual(int quadNo) {
   emitAsmForBinaryOperator("cmp", quadNo);
 }
+
+// void copyStruct(string from, string to, symbolTable *st) {
+//   symbolTableNode* fromNode = lookUp(st, from);
+//   if(!fromNode)
+//       error(from, SYMBOL_NOT_FOUND);
+//   if(fromNode->infoType != INFO_TYPE_STRUCT)
+//       error(from, TYPE_ERROR);
+
+
+//   structTableNode* fromStructNode = nullptr;
+//   fromStructNode = structLookUp(st, fromNode->declSp->lexeme);
+//   if(!fromStructNode)
+//       error(fromNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+  
+
+//   symbolTableNode* toNode = lookUp(st, to);
+//   if(!toNode)
+//       error(to, SYMBOL_NOT_FOUND);
+//   if(toNode->infoType != INFO_TYPE_STRUCT)
+//       error(to, TYPE_ERROR);
+  
+//   structTableNode* toStructNode = nullptr;
+//   toStructNode = structLookUp(st, toNode->declSp->lexeme);
+//   if(!toStructNode)
+//       error(toNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+
+//   for(structParam* p : fromStructNode->paramList) {
+    
+//   }    
+// }

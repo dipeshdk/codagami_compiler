@@ -1,15 +1,11 @@
-void scanf(char c, int d);
+void scanf(char c, int* d);
 void printf(char *c, int d); 
 char *p = "%ld\n\0";
 
-int gVar = 5+40;
-gVar=50;
 int main() {
-    int x = -9+4-4/18*'a';
-    
-    scanf(p,&gVar);
-    printf(p,gVar);
-    printf(p,gVar);
-
+    int arr[6];
+    arr[2]=4;
+    printf(p,arr[2]);
+    printf(p,arr[2]);
     return 0;
 }
