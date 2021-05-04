@@ -104,6 +104,8 @@ void printASMData() {
         cout << "   " << g->varName << ": ";
         if(g->valueType == TYPE_STRING_LITERAL) {
           cout << ".asciz ";
+        }else {
+          cout << ".long ";
         }
         cout << g->value << "\n";  
     }
@@ -282,7 +284,7 @@ void asmOpReturn(int quadNo){
 }
 
 void asmOpEndFunc(int quadNo){
-    emitAsm("addq", {"$"+hexString(to_string(funcSizeStack.top())), "%rbp"});
+    emitAsm("addq", {"$"+hexString(to_string(funcSizeStack.top())), "%rsp"});
     emitAsm("popq", {"%rbp"});
     emitAsm("retq", {});
     funcNameStack.pop();
@@ -370,7 +372,7 @@ void asmOpBeginFunc(int quadNo) {
   emitFuncStart();
   
   //sub stack pointer
-  emitAsm("subq", {"$"+hexString(quad->result), "%rbp"});
+  emitAsm("subq", {"$"+hexString(quad->result), "%rsp"});
 
   //move first 6 arguments from register to stack
   vector<struct param*> paramList = funcNode->paramList;
@@ -830,10 +832,13 @@ string getVariableAddr(string varName, symbolTable* st) {
         bool isStringLiteral=false;
         for(globalData *g : globalDataPair) {
           if(g->varName == identifier){
-            return "$" + g->varName;
+            if(g->valueType == TYPE_STRING_LITERAL)
+              return "$" + g->varName;
+            else
+              return g->varName + "(%rip)";
           }
         }
-        error("non-string globals are unsupported", UNSUPPORTED_FUNCTIONALITY);        
+        // error("non-string globals are unsupported", UNSUPPORTED_FUNCTIONALITY);        
     }
     if(!dot && isPointer(varName)) {
         string name = stripPointer(varName);
@@ -920,7 +925,15 @@ void asmOpAssignment(int quadNo){
     if(isConstant(quad->result)){
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR); //does not print line number
     }
-    
+
+    symbolTableNode* stNode = lookUp(st, quad->result);
+
+
+    if(stNode && stNode->infoType == INFO_TYPE_STRUCT) {
+      copyStruct(quad->arg1, quad->result, quadNo);
+      return;
+    }
+
     //result is not constant
     // -result.offset(%rbp)
     string resultAddr = getVariableAddr(quad->result, st);
@@ -1324,4 +1337,45 @@ void asmOpSubI(int quadNo) {
 
 void asmOpCompareEqual(int quadNo) {
   emitAsmForBinaryOperator("cmp", quadNo);
+}
+
+void copyStruct(string from, string to, int quadNo) {
+  symbolTable *st = codeSTVec[quadNo];
+  symbolTableNode* fromNode = lookUp(st, from);
+  if(!fromNode)
+      error(from, SYMBOL_NOT_FOUND);
+  if(fromNode->infoType != INFO_TYPE_STRUCT)
+      error(from, TYPE_ERROR);
+
+
+  structTableNode* fromStructNode = nullptr;
+  fromStructNode = structLookUp(st, fromNode->declSp->lexeme);
+  if(!fromStructNode)
+      error(fromNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+  
+
+  symbolTableNode* toNode = lookUp(st, to);
+  if(!toNode)
+      error(to, SYMBOL_NOT_FOUND);
+  if(toNode->infoType != INFO_TYPE_STRUCT)
+      error(to, TYPE_ERROR);
+  
+  structTableNode* toStructNode = nullptr;
+  toStructNode = structLookUp(st, toNode->declSp->lexeme);
+  if(!toStructNode)
+      error(toNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+
+  for(structParam* p : fromStructNode->paramList) {
+    string fromParam = from + "." + p->name;
+    string fromParamAddr = getVariableAddr(fromParam, st);
+
+    string toParam = to + "." + p->name;
+    string toParamAddr = getVariableAddr(toParam, st);
+
+    int regInd = getReg(quadNo, fromParam);
+    string regName = regVec[regInd]->regName;
+    emitAsm("movq", {fromParamAddr, regName});
+    emitAsm("movq", {regName, toParamAddr});
+    freeReg(regInd);
+  }    
 }

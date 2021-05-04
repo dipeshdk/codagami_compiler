@@ -261,11 +261,17 @@ string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCo
     }
     
     emit(OP_ADDI, arr, indexTmp, pointerTmp);
+
+    symbolTableNode* arr_node = lookUp(gSymTable, arr);
+    if(arr_node == nullptr) {
+        setErrorParams(errCode, errCode, errStr, arr);
+        return EMPTY_STR;
+    }
     sym_node = lookUp(gSymTable, pointerTmp);
 	sym_node->size = 8;
 	sym_node->offset = offset;
     sym_node->declSp->ptrLevel = 1;
-	sym_node->declSp->type.push_back(TYPE_INT);
+	sym_node->declSp->type = arr_node->declSp->type;
 	offset += 8;
 
     if(errCode){
