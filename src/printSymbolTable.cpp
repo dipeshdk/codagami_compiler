@@ -393,7 +393,7 @@ void printQuad(quadruple* quad, int line) {
             if(quad->result == EMPTY_STR) {
                 printf("    LCALL %s\n", quad->arg1.c_str());
             }else {
-                printf("    %s = LCALL _%s\n", quad->result.c_str(), quad->arg1.c_str());
+                printf("    %s = LCALL %s\n", quad->result.c_str(), quad->arg1.c_str());
             }
             break;
         case OP_LABEL: printf("%s:\n", quad->result.c_str()); break;

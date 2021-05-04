@@ -1,24 +1,37 @@
-/* void scanf(char c, int d);
-void printf(char *c, int d); 
-char *p = "%ld\n\0";
+void printf(char* p, int d);
+char* p = "%ld\n";
 
-int main() {
-    int arr[2] = 90;
-    
-    scanf(p,&gVar);
-    printf(p,gVar);
-    printf(p,gVar);
-    return 0;
-} */
+int ack(int m, int n)
+{
+    if (m == 0){
+        m = n+1;
+    }
+    else if((m > 0) && (n == 0)){
+        return ack(m-1, 1);
+    }
+    else if((m > 0) && (n > 0)){
+        return ack(m-1, ack(m, n-1));
+    }
+}
 
-void scanf(char c, int d);
-void printf(char *c, int d); 
-char *p = "%ld\n\0";
+void fov(int x) {
+    x = 5;
+    return;
+} 
 
-int main() {
-    int arr[6];
-    arr[2]=4;
-    printf(p,arr[2]);
-    printf(p,arr[2]);
+int goo() {
+    int f;
+    return f;
+}
+  
+int main(){
+    int A;
+    A = ack(1, 2);
+    /* printf(p,A); */
+    fov(68);
+    A=goo();
+    fov(A);
+    /* printf(p,A); */
+    goo();
     return 0;
 }
