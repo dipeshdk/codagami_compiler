@@ -1144,7 +1144,7 @@ declaration
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			sym_node->offset = offset;
 			offset += getOffsettedSize(sym_node->size);
-			offset += getArraySize(sym_node);
+			offset += getArraySize(sym_node, gSymTable);
 			curr = curr->next;
 		}
 		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;   
@@ -1419,6 +1419,7 @@ direct_declarator
 	}
 	| '(' declarator ')' { $$ = $2;}
 	| direct_declarator '[' constant_expression ']' {
+
 		node* temp = $1;
 		int asize = getValueFromConstantExpression($3, errCode);
 		if(asize < 0){
@@ -2219,13 +2220,13 @@ int main(int ac, char **av) {
 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
 		char * fileName = strdup("graph.dot");
 		if(ac == 3) fileName = av[2];
-		generateDot(root,fileName); 
+		generateDot(root,fileName);
+        printCode((char*)TACFilename.c_str());
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-		printCode((char*)TACFilename.c_str());
 		
 		fclose(fd);
     }

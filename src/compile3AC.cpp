@@ -816,9 +816,11 @@ string getVariableAddr(string varName, symbolTable* st) {
     }
 
     // f.a
+    bool dot = false;
     temp = varName;
     pos = temp.find(delim_dot);
     if(pos != string::npos){
+        dot = true;
         identifier = temp.substr(0, pos);
         temp.erase(0, pos + delim_dot.length());
         param = temp;
@@ -833,7 +835,7 @@ string getVariableAddr(string varName, symbolTable* st) {
         }
         error("non-string globals are unsupported", UNSUPPORTED_FUNCTIONALITY);        
     }
-    if(isPointer(varName)) {
+    if(!dot && isPointer(varName)) {
         string name = stripPointer(varName);
         if(isConstant(name))
             errorAsm(name,DEREFERENCING_CONSTANT_ERROR);
@@ -843,10 +845,23 @@ string getVariableAddr(string varName, symbolTable* st) {
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
+
         return "(" + regName + ")";
-    }   
-    offset = getOffset(varName, st);
-    offsetStr=getOffsetStr(offset);
+    }
+    else if(dot && isPointer(identifier)) {
+        string name = stripPointer(identifier);
+        if(isConstant(name))
+            errorAsm(name,DEREFERENCING_CONSTANT_ERROR);
+        offset = getOffset(name, st);
+        offsetStr=getOffsetStr(offset);
+        int regInd = getReg(gQuadNo, name); //TODO: Free this reg
+        string regName = regVec[regInd]->regName;
+        emitAsm("movq", {offsetStr, regName});
+        ptrAssignedRegs.push(regInd);
+        return "(" + regName + ")";
+    } 
+    offset = getOffset(identifier, st);
+    offsetStr = getOffsetStr(offset);
     return offsetStr;
 }
 

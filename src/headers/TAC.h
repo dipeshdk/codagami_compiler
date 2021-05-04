@@ -32,6 +32,7 @@ string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCo
 string getArrayIndexWithEmit(node *postfix_expression , node *expression, int &errCode, string &errStr);
 
 int getParamOffset(structTableNode* node, string paramName, int& err, string& errStr);
+int getStructSize(structTableNode* node);
 int getOpcodeFromAssignStr(string s);
 
 #endif
