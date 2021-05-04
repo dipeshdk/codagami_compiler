@@ -229,7 +229,7 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
     if(postfix_expression->declSp->type[0]!= TYPE_VOID){
         newTemp = generateTemp(errCode);
         if(errCode)
-            error("Cannot generate Temp",errCode);
+            error("Internal Error: Cannot generate Temp", DEFAULT_ERROR);
         emit(OP_LCALL, func_name, BLANK_STR ,newTemp);
         addTempDetails(newTemp, gSymTable, postfix_expression);
     }else{

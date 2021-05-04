@@ -101,13 +101,13 @@ int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
     if(retVal == SYMBOL_ALREADY_EXISTS) {
         struct symbolTableNode* funcNode = lookUp(gSymTable, name);
         if(funcNode->infoType != INFO_TYPE_FUNC)
-            error("Symbol "+name+" not a function", retVal);      
+            error("Symbol "+name+" not a function", DEFAULT_ERROR);      
         if(funcNode->isDefined)
-            error("Function "+name+" already definded", retVal);      
+            error("Function "+name+" already definded", DEFAULT_ERROR);      
         //check function type
         if(declaration_specifiers) {
             if(!declaration_specifiers->declSp || !funcNode->declSp || funcNode->declSp->type.size() != 1)
-                error("addFunctionSymbol", INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
+                error(declaration_specifiers->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
             //check return type of function
             // if(
                 // !checkType(declaration_specifiers->declSp, funcNode->declSp->type[0], funcNode->declSp->ptrLevel)
@@ -130,7 +130,7 @@ int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
         return 0;
     }else if(retVal) {
         //error checks
-        error("addFunctionSymbol error", retVal);
+        error(name, retVal);
     }
     symbolTableNode* sym_node = gSymTable->symbolTableMap[name];
     if(!sym_node) return ALLOCATION_ERROR;
