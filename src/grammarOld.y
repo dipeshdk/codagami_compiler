@@ -1042,6 +1042,7 @@ logical_and_expression
 			emit(OP_ANDAND, $1->addr, $4->addr, newTmp);
 			temp->addr = newTmp;
 			temp->declSp = declSpCopy($1->declSp);
+			addIntTemp(newTmp, gSymTable);
 			$$ = temp;
 		}
 	}
@@ -1080,6 +1081,7 @@ logical_or_expression
 			emit(OP_OROR, $1->addr, $4->addr, newTmp);
 			temp->addr = newTmp;
 			temp->declSp = declSpCopy($1->declSp);
+			addIntTemp(newTmp, gSymTable);
 			$$ = temp;
 		}
 	}
