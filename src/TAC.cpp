@@ -276,18 +276,87 @@ string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCo
     return pointerAddr;
 }
 
-string getArrayIndexWithEmit(node *postfix_expression , node *expression, int &errCode, string &errStr){
-    if(expression->declSp){
-        checkTypeArrayWithTypecast(expression, errCode, errStr);
-        if(errCode){
-            setErrorParams(errCode, errCode, errStr, errStr);
-            return EMPTY_STR;
-        }
-    }else{ 
-        setErrorParams(errCode, ARRAY_INDEX_SHOULD_BE_INT, errStr, expression->lexeme);
+string getIndexStr(node* root, int &errCode, string &errStr){
+    if(!root){
+        setErrorParams(errCode,INVALID_ARGS, errStr, "");
         return EMPTY_STR;
     }
+    int countRoot = root->arrayIndices.size();
+    symbolTableNode* symNode = lookUp(gSymTable, root->lexeme);
+    if(!symNode){
+        setErrorParams(errCode,SYMBOL_NOT_FOUND, errStr, root->lexeme);
+        return EMPTY_STR;
+    }
+    int countSymNode = symNode->arrayIndices.size();
+    if(countSymNode != countRoot){
+        cout << "countSymNode : " << countSymNode << " countRoot : " << countRoot << endl;
+        setErrorParams(errCode,INVALID_REFERENCE ,errStr,root->lexeme);
+        return EMPTY_STR;
+    }
+    string prev = generateTemp(errCode);
+    addIntTemp(prev, gSymTable);
+    if(errCode){
+        setErrorParams(errCode, errCode, errStr, "error in temp generation");
+        return EMPTY_STR;
+    }
+    emit(OP_ASSIGNMENT, root->arrayIndices[0]->addr, EMPTY_STR, prev);
+    string newTmp;
+    
+    for(int i = 0 ; i < countRoot-1 ; i++){
+        // 1tn+1 = tn muli sai[i+1]
+        // 2tn+1 = 1tn+1 addi rai[i+1];
+        // var = RAi[i] * SAi[i+1] + RAi[i+1];
+        newTmp = generateTemp(errCode);
+        addIntTemp(newTmp, gSymTable);
+        if(errCode) {
+            setErrorParams(errCode, errCode, errStr, "error in temp generation");
+            return EMPTY_STR;
+        }
+        emit(OP_MULI, prev, to_string(symNode->arrayIndices[i+1]),newTmp);
+        prev = newTmp;
+        newTmp = generateTemp(errCode);
+        addIntTemp(newTmp, gSymTable);
+        if(errCode) {
+            setErrorParams(errCode, errCode, errStr, "error in temp generation");
+            return EMPTY_STR;
+        }
+        emit(OP_ADDI, prev, root->arrayIndices[i+1]->addr,newTmp);
+        prev = newTmp;
+    }
+    return prev;
+}
 
+void addIntTemp(string name, symbolTable *st) {
+    symbolTableNode *sym_node = lookUp(st, name);
+    sym_node->size = 8;
+    sym_node->offset = offset;
+    sym_node->declSp->type.push_back(TYPE_INT);
+    offset += 8;
+}
+
+string getArrayIndexWithEmit(node *postfix_expression, int &errCode, string &errStr){
+    errCode = 0;
+    for(auto &x: postfix_expression->arrayIndices){
+        if(x->declSp){
+            checkTypeArrayWithTypecast(x, errCode, errStr);
+            if(errCode){
+                setErrorParams(errCode, errCode, errStr, errStr);
+                return EMPTY_STR;
+            }
+        }else{ 
+            setErrorParams(errCode, ARRAY_INDEX_SHOULD_BE_INT, errStr, x->lexeme);
+            return EMPTY_STR;
+        }
+    }
+    string expAddr = getIndexStr(postfix_expression, errCode, errStr);
+    if(errCode){
+        setErrorParams(errCode, errCode, errStr, errStr);
+        return EMPTY_STR;
+    }
+    /* 
+    TODO: compare indices with symbol tables indices for out of bound errors
+    Currently not being done, it can only be done at runtime by emitting code for if else condition
+    */
     if(!postfix_expression->declSp){
         setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errStr, "postfix_expression declSp not allocated for array");
         return EMPTY_STR;
@@ -309,7 +378,7 @@ string getArrayIndexWithEmit(node *postfix_expression , node *expression, int &e
     sym_node->offset = offset;
     sym_node->declSp->type.push_back(TYPE_INT);
     offset += 8;
-    return emitArrayIndexGetAddr(postfix_expression->addr, expression->addr, sizeTmp, errCode, errStr);
+    return emitArrayIndexGetAddr(postfix_expression->addr, expAddr, sizeTmp, errCode, errStr);
 }
 
 int getParamOffset(structTableNode* node, string paramName, int& err, string& errStr){
@@ -332,11 +401,3 @@ int getParamOffset(structTableNode* node, string paramName, int& err, string& er
     return -err;
 }
 
-void addIntTemp(string name, symbolTable *st) {
-    symbolTableNode *sym_node = lookUp(st, name);
-    sym_node->size = 8;
-    sym_node->offset = offset;
-    sym_node->declSp->ptrLevel = 1;
-    sym_node->declSp->type.push_back(TYPE_INT);
-    offset += 8;
-}
