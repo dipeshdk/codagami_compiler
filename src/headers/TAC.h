@@ -33,5 +33,6 @@ string getArrayIndexWithEmit(node *postfix_expression , node *expression, int &e
 
 int getParamOffset(structTableNode* node, string paramName, int& err, string& errStr);
 int getOpcodeFromAssignStr(string s);
+void addIntTemp(string name, symbolTable *st);
 
 #endif

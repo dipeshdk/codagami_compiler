@@ -1031,6 +1031,7 @@ logical_and_expression
 			emit(OP_ANDAND, $1->addr, $4->addr, newTmp);
 			temp->addr = newTmp;
 			temp->declSp = declSpCopy($1->declSp);
+			addIntTemp(newTmp, gSymTable);
 			$$ = temp;
 		}
 	}
@@ -1069,6 +1070,7 @@ logical_or_expression
 			emit(OP_OROR, $1->addr, $4->addr, newTmp);
 			temp->addr = newTmp;
 			temp->declSp = declSpCopy($1->declSp);
+			addIntTemp(newTmp, gSymTable);
 			$$ = temp;
 		}
 	}
@@ -2474,7 +2476,7 @@ int main(int ac, char **av) {
 		generateDot(root,fileName); 
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
-		// emitAssemblyFrom3AC(asmFileName);
+		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
 		printCode((char*)TACFilename.c_str());
