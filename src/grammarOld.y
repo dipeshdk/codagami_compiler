@@ -349,10 +349,10 @@ unary_expression
 		if(retval) error($2->lexeme, retval);
 		string newTmp = generateTemp(errCode);
     	if(errCode)
-        	error("Cannot generate Temp",errCode);
+        	error("Cannot generate Temp",DEFAULT_ERROR);
 		int opCode = getOpAddType($2, errCode, errStr);
 		if(errCode)
-			error("Cannot generate Temp",errCode);
+			error($2->lexeme,errCode);
         emit(opCode, $2->addr, "1", newTmp);
     	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $2->addr);
 		addTempDetails(newTmp, gSymTable, $2);
@@ -365,10 +365,10 @@ unary_expression
 		if(retval) error($2->lexeme, retval);
 		string newTmp = generateTemp(errCode);
     	if(errCode)
-        	error("Cannot generate Temp",errCode);
+        	error("Cannot generate Temp",DEFAULT_ERROR);
 		int opCode = getOpSubType($2, errCode, errStr);
 		if(errCode)
-			error("Cannot generate Temp",errCode);
+			error($2->lexeme,errCode);
         emit(opCode, $2->addr, "1", newTmp);
     	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $2->addr);
 		addTempDetails(newTmp, gSymTable, $2);
@@ -448,7 +448,7 @@ unary_expression
 			if(opCode != -1) {
 				string newTmp = generateTemp(errCode);
 				if(errCode)
-					error("Cannot generate Temp", errCode);
+					error("Internal Error : Cannot generate Temp", DEFAULT_ERROR);
 				emit(opCode, cast_expression->addr, EMPTY_STR, newTmp);
 				unary_operator->addr = newTmp;
 				addTempDetails(newTmp, gSymTable, unary_operator);
@@ -471,7 +471,7 @@ unary_expression
 		}
 		string newTmp = generateTemp(errCode);
     	if(errCode)
-        	error("Cannot generate Temp",errCode);
+        	error("Internal Error : Cannot generate Temp",DEFAULT_ERROR);
     	emit(OP_ASSIGNMENT, to_string(getNodeSize(sym_node, gSymTable)), EMPTY_STR, newTmp);
 		
 		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
@@ -487,7 +487,7 @@ unary_expression
 		// TODO: Check validity of type_name 
 		string newTmp = generateTemp(errCode);
     	if(errCode)
-        	error("Cannot generate Temp",errCode);
+        	error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
     	symbolTableNode* sym_node = new symbolTableNode();
 		sym_node->declSp = declSpCopy($3->declSp);
 		sym_node->infoType = $3->infoType;
@@ -526,7 +526,7 @@ cast_expression
 		node* type_name = $2;
 		node* cast_expression = $4;
 		int err = canTypecast(cast_expression->declSp, type_name->declSp);
-		if(err) error("", err);
+		if(err) error("Typecasting error", DEFAULT_ERROR);
 		typeCastLexemeWithEmit(cast_expression, type_name->declSp);
 		makeSibling(cast_expression, type_name);
 		$$ = cast_expression;
@@ -557,7 +557,7 @@ multiplicative_expression
 				error(errStr, errCode);
 			string newTmp = generateTemp(errCode);
 			if(errCode)
-				error(errStr, errCode);
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
 			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
 			tempNode->declSp = declSpCopy($1->declSp);
 			int opCode = getOpMulType(temp, errCode, errStr);
@@ -591,7 +591,7 @@ multiplicative_expression
 				error(errStr, errCode);
 			string newTmp = generateTemp(errCode);
 			if(errCode)
-				error(errStr, errCode);
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
 			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
 			tempNode->declSp = declSpCopy($1->declSp);
 			int opCode = getOpDivType(temp, errCode, errStr);
@@ -630,7 +630,7 @@ multiplicative_expression
 				error(errStr, errCode);
 			string newTmp = generateTemp(errCode);
 			if(errCode)
-				error(errStr, errCode);
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
 			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
 			tempNode->declSp = declSpCopy($1->declSp);
 			emit(OP_MOD, $1->addr, $3->addr, newTmp);
@@ -666,7 +666,7 @@ additive_expression
 				error(errStr, errCode);
 			string newTmp = generateTemp(errCode);
 			if(errCode)
-				error(errStr, errCode);
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
 			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
 			tempNode->declSp = declSpCopy(temp->declSp);
 			int opCode = getOpAddType(temp, errCode, errStr);
@@ -700,7 +700,7 @@ additive_expression
 				error(errStr, errCode);
 			string newTmp = generateTemp(errCode);
 			if(errCode)
-				error(errStr, errCode);
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
 			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
 			tempNode->declSp = declSpCopy($1->declSp);
 			int opCode = getOpSubType(temp, errCode, errStr);
@@ -743,7 +743,7 @@ shift_expression
 				error(errStr, errCode);
 			string newTmp = generateTemp(errCode);
 			if(errCode)
-				error(errStr, errCode);
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
 			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
 			tempNode->declSp = declSpCopy($1->declSp);
 			emit(OP_LEFT_SHIFT, $1->addr, $3->addr, newTmp);
@@ -779,7 +779,7 @@ shift_expression
 				error(errStr, errCode);
 			string newTmp = generateTemp(errCode);
 			if(errCode)
-				error(errStr, errCode);
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
 			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
 			tempNode->declSp = declSpCopy($1->declSp);
 			emit(OP_RIGHT_SHIFT, $1->addr, $3->addr, newTmp);
@@ -844,14 +844,14 @@ equality_expression
 		int retval2 = checkPointer(relational_expression);
 		int x = (retval1 == 0) + (retval2 == 0);
 		if(x == 1)
-			error("equality check between pointer and non pointer", POINTER_ERROR);
+			error($3->lexeme, POINTER_ERROR);
 
 		int rank = giveTypeCastRank(equality_expression, relational_expression);
 		if(rank < 0)
-			error("typecasting error rank", rank);
+			error($3->lexeme, rank);
 		int retval = typeCastByRank(equality_expression, relational_expression, rank);
 		if(retval)
-			error("typecasting error rank", retval);
+			error($3->lexeme, retval);
 		node* temp = makeNodeForExpressionByRank(equality_expression, relational_expression, "EQ_OP", "==", rank, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
@@ -867,14 +867,14 @@ equality_expression
 		int retval2 = checkPointer(relational_expression);
 		int x = (retval1 == 0) + (retval2 == 0);
 		if(x == 1)
-			error("equality check between pointer and non pointer", POINTER_ERROR);
+			error($3->lexeme, POINTER_ERROR);
 
 		int rank = giveTypeCastRank(equality_expression, relational_expression);
 		if(rank < 0)
-			error("typecasting error rank", rank);
+			error($3->lexeme, rank);
 		int retval = typeCastByRank(equality_expression, relational_expression, rank);
 		if(retval)
-			error("typecasting error rank", retval);
+			error($3->lexeme, retval);
 		node* temp = makeNodeForExpressionByRank(equality_expression, relational_expression, "NE_OP", "!=", rank, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
@@ -912,7 +912,7 @@ and_expression
 			node* temp = makeNode(strdup("&"), strdup("&"), 0, and_expression, equality_expression, (node*)NULL, (node*)NULL);
 			string newTmp = generateTemp(errCode);
 			if(errCode)
-				error(errStr, errCode);
+				error("Internal Error: Cannot generate temp", DEFAULT_ERROR);
 			emit(OP_AND, and_expression->addr, equality_expression->addr, newTmp);
 			temp->addr = newTmp;
 			temp->declSp = declSpCopy($1->declSp);
@@ -950,7 +950,7 @@ exclusive_or_expression
 			node* temp = makeNode(strdup("^"), strdup("^"), 0, exclusive_or_expression, and_expression, (node*)NULL, (node*)NULL);
 			string newTmp = generateTemp(errCode);
 			if(errCode)
-				error(errStr, errCode);
+				error("Internal Error: Cannot generate temp", DEFAULT_ERROR);
 			emit(OP_XOR, exclusive_or_expression->addr, and_expression->addr, newTmp);
 			temp->addr = newTmp;
 			temp->declSp = declSpCopy($1->declSp);
@@ -987,7 +987,7 @@ inclusive_or_expression
 			node* temp = makeNode(strdup("|"), strdup("|"), 0, inclusive_or_expression1, exclusive_or_expression, (node*)NULL, (node*)NULL);
 			string newTmp = generateTemp(errCode);
 			if(errCode)
-				error(errStr, errCode);
+				error("Internal Error: Cannot generate temp", DEFAULT_ERROR);
 			emit(OP_OR, inclusive_or_expression1->addr, exclusive_or_expression->addr, newTmp);
 			temp->addr = newTmp;
 			temp->declSp = declSpCopy($1->declSp);
@@ -1002,7 +1002,7 @@ logical_and_expression
 	| logical_and_expression AND_OP M_marker inclusive_or_expression { 
 		int retval = backpatch($1->truelist, $3->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error($1->lexeme + "backpatch error", retval);
 
 		if(isConstantNode($1) && isConstantNode($4)) {
 			if(isStringLiteral($1) || isStringLiteral($4)) {
@@ -1026,7 +1026,7 @@ logical_and_expression
 			temp->falselist = mergelist($1->falselist, $4->falselist);
 			string newTmp = generateTemp(errCode);
 			if(errCode){
-				error("temp gen internal error",errCode);
+				error("Internal Error: Cannot generate temp", DEFAULT_ERROR);
 			}
 			emit(OP_ANDAND, $1->addr, $4->addr, newTmp);
 			temp->addr = newTmp;
@@ -1041,7 +1041,7 @@ logical_or_expression
 	| logical_or_expression OR_OP M_marker logical_and_expression { 
 		int retval = backpatch($1->falselist, $3->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error($1->lexeme + "backpatch error", retval);
 		if(isConstantNode($1) && isConstantNode($4)) {
 			if(isStringLiteral($1) || isStringLiteral($4)) {
 				error("|| of string literals.", UNSUPPORTED_FUNCTIONALITY);
@@ -1064,7 +1064,7 @@ logical_or_expression
 			temp->falselist = $4->falselist;
 			string newTmp = generateTemp(errCode);
 			if(errCode){
-				error("temp gen internal error",errCode);
+				error("Internal Error: Cannot generate temp", DEFAULT_ERROR);
 			}
 			emit(OP_OROR, $1->addr, $4->addr, newTmp);
 			temp->addr = newTmp;
@@ -1091,10 +1091,10 @@ conditional_expression
 	| logical_or_expressionJumpStatement '?' M_marker expression conditional_marker N_marker ':' M_marker conditional_expression {
 		int retval = backpatch($1->truelist, $3->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error($1->lexeme + "backpatch error", retval);
 		retval = backpatch($1->falselist, $8->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error($1->lexeme + "backpatch error", retval);
 		node* temp = makeNode(strdup("?:"), strdup("?:"), 0, $1, $4, $8, (node*)NULL); 
 		vector<int> tempVec = mergelist( $4->nextlist, $6->nextlist);
 		temp->nextlist = mergelist(tempVec, $9->nextlist);
@@ -1102,9 +1102,7 @@ conditional_expression
 		emit(OP_ASSIGNMENT, $9->addr, EMPTY_STR, ternaryTempStack.top());
 		retval  = backpatchAssignment($5->nextlist, $4->addr);
 		if(retval)
-		{
-			error("Invalid Assignment Backpatch", retval);
-		}
+			error($5->lexeme + "backpatch error", retval);
 		temp->addr = ternaryTempStack.top();
 		$$ = temp;
 		ternaryTempStack.pop();
@@ -1120,7 +1118,7 @@ conditional_marker:
 		// }
 		string ternaryTemp= generateTemp(errCode);
 		if(errCode)
-        	error("Cannot generate Temp",errCode);
+        	error("Cannot generate Temp",DEFAULT_ERROR);
 		ternaryTempStack.push(ternaryTemp);
     		
 		node* temp = makeDeadNode();
@@ -1155,13 +1153,16 @@ assignment_expression
 				string s(assignment_operator->name);
 				if(s == "AND_ASSIGN" || s == "OR_ASSIGN" || s == "XOR_ASSIGN" || s == "LEFT_ASSIGN" || s == "RIGHT_ASSIGN") {
 					//should be only int or char
-					if(checkIntOrChar(unary_expression) || checkIntOrChar(assignment_expression))
-						error("expression should only be int or char", TYPE_ERROR);
+					if(checkIntOrChar(unary_expression) !=0){
+						error(unary_expression->lexeme, TYPE_ERROR);
+					} 
+					if(checkIntOrChar(assignment_expression)!=0)
+						error(assignment_expression->lexeme, TYPE_ERROR);
 				}
 				if(s=="MUL_ASSIGN" || s=="DIV_ASSIGN" || s=="ADD_ASSIGN" || s=="SUB_ASSIGN" || s=="=") {
 					int retval = canTypecast(assignment_expression->declSp,unary_expression->declSp);
 					if(retval)
-						error("invalid typecast in assignment expression", retval);
+						error(assignment_expression->lexeme, retval);
 				}
 				if(s == "MOD_ASSIGN") {
 					if(checkType(assignment_expression->declSp, TYPE_FLOAT, 0))
@@ -1198,11 +1199,11 @@ assignment_expression
 			{
 				int rank = giveTypeCastRank(unary_expression, assignment_expression);
 				if(rank < 0)
-					error("giveTypeCastRank error",-rank);
+					error(unary_expression->lexeme,-rank);
 				
 				int retval = typeCastByRank(unary_expression, assignment_expression, rank);
 				if(retval)
-					error("typecast error",retval);
+					error(unary_expression->lexeme,retval);
 				opCode = -1;
 				if(s == "MUL_ASSIGN")
 					opCode = getOpMulType(unary_expression, errCode, errStr);
@@ -1324,12 +1325,12 @@ declaration
 
 					int size = getNodeSize(sym_node, gSymTable);
 					if(size < 0){
-						error("invalid array type", -size);
+						error(sym_node->lexeme, -size);
 					}
 					// _t1 = 4;
 					string sizeTmp = generateTemp(errCode);
 					if(errCode) {
-						error("error in temp generation", errCode);
+						error("Internal Error: Cannot generate Temp", DEFAULT_ERROR);
 					}
 					emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
 					symbolTableNode* sym_node = lookUp(gSymTable, sizeTmp);
@@ -1371,7 +1372,7 @@ declaration
 						//variable initialized
 						int retval = canTypecast(sym_node->declSp, initializer->declSp);
 						if(retval)
-							error("variable assignment error", retval);
+							error(sym_node->lexeme, retval);
 						retval = areDifferentTypes(sym_node->declSp, initializer->declSp, errCode, errStr);
 						if(errCode)
 							error(errStr, errCode);
@@ -1443,7 +1444,7 @@ declaration_specifiers
 		node *temp = $2;
 		vector<int> v = $1->declSp->type;
 		int err = addTypeToDeclSpec(temp, v);
-		if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
+		if(err) error(" Internal Error: addTypeToDeclSpec", DEFAULT_ERROR); //Error handling according to error code passed
 		$$ = temp;
 		currDeclSpec = $$;
 	}
@@ -1591,7 +1592,7 @@ specifier_qualifier_list
 		node *temp = $2;
 		vector<int> v = $1->declSp->type;
 		int err = addTypeToDeclSpec(temp, v);
-		if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
+		if(err) error("Internal Error: addTypeToDeclSpec", DEFAULT_ERROR); //Error handling according to error code passed
 		$$ = temp;
 		}
 	| type_specifier { $$ = $1; }
@@ -1633,7 +1634,7 @@ struct_declarator
 		param->declSp = declarator->declSp;
 		int err = 0;
 		int ret = getValueFromConstantExpression($3, err);
-		if(err) error("getValueFromConstantExpression", err);
+		if(err) error($3->lexeme, err);
 		param->bit = ret;
 		declarator->structParamList.push_back(param);
 		$$ = declarator;
@@ -1822,7 +1823,7 @@ parameter_declaration
 		node* declaration_specifiers = $1;
 		param *parameter = new param();
 		if(!declaration_specifiers->declSp) 
-			error("no decl sp in declaration specifier parameter_declaration", INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
+			error($1->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
 		parameter->declSp = declSpCopy(declaration_specifiers->declSp);
 		parameter->paramName = UNNAMED_PARAM;
 		declaration_specifiers->paramList.push_back(parameter);
@@ -1844,7 +1845,7 @@ type_name
 		node *temp = $1;
 		if($2->declSp) {
 			int err = addTypeToDeclSpec(temp, $2->declSp->type);
-			if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
+			if(err) error("Internal Error: addTypeToDeclSpec", DEFAULT_ERROR); //Error handling according to error code passed
 			// err = addStorageClassToDeclSpec(temp, $2->declSp->storageClassSpecifier);
 			mergeConstVolatile(temp, $2);
 			copyPtrLevel(temp, $2);
@@ -2019,7 +2020,7 @@ statement_list
 		}
 		int retval = backpatch($1->nextlist, $2->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error($1->lexeme + "backpatch error", retval);
 		temp->nextlist = $3->nextlist;
 		temp->breaklist = mergelist($1->breaklist, $3->breaklist);
 		temp->continuelist = mergelist($1->continuelist, $3->continuelist);
@@ -2055,7 +2056,7 @@ selection_statement
 	: IF '(' expressionJump  ')' M_marker statement {
 		int retval = backpatch($3->truelist, $5->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error($3->lexeme + " backpatch error", retval);
 		node * temp = makeNode(strdup("IF"), strdup("if"),0, $3, $6, (node*)NULL, (node*)NULL);
 		temp->nextlist = mergelist($3->falselist, $6->nextlist);
 		temp->breaklist = $6->breaklist;
@@ -2065,10 +2066,10 @@ selection_statement
 	| IF  '(' expressionJump  ')' M_marker statement ELSE N_marker M_marker statement {
 		int retval = backpatch($3->truelist, $5->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error($3->lexeme + " backpatch error", retval);
 		retval = backpatch($3->falselist, $9->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error($3->lexeme + " backpatch error", retval);
 		node* temp = makeNode(strdup("IF_ELSE"), strdup("else"),0, $3, $6, $10, (node*)NULL);
 		vector<int> tempVec = mergelist($6->nextlist, $8->nextlist);
 		temp->nextlist = mergelist(tempVec, $10->nextlist);
@@ -2092,13 +2093,13 @@ iteration_statement
 		node *m1 = $3, *m2 = $6, *s1 = $7, *e1 = $4;
 		int retval = backpatch(s1->nextlist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(s1->lexeme + " backpatch error", retval);
 		retval = backpatch(e1->truelist, m2->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(e1->lexeme + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(s1->lexeme + " backpatch error", retval);
 
 		$$ = makeNode(strdup("WHILE"), strdup("while"), 0, $4, $7, (node*)NULL, (node*)NULL);
 		
@@ -2109,13 +2110,13 @@ iteration_statement
 		node* s1 = $3, *e1 = $7, *m2 = $2, *m1 = $6;
 		int retval = backpatch(s1->nextlist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(s1->lexeme+" backpatch error", retval);
 		retval = backpatch(e1->truelist, m2->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(e1->lexeme + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(s1->lexeme + " backpatch error", retval);
 		
 		$$ = makeNode(strdup("DO WHILE"), strdup("do while"), 0, $3, $7, (node*)NULL, (node*)NULL);
 		
@@ -2127,13 +2128,13 @@ iteration_statement
 		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m1->quad));
 		int retval = backpatch(e2->truelist, m3->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(e2->lexeme + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(s1->lexeme + " backpatch error", retval);
 		retval = backpatch(s1->nextlist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(s1->lexeme + " backpatch error", retval);
 		
 		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $8, (node*)NULL);
 		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
@@ -2143,16 +2144,16 @@ iteration_statement
 		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m2->quad));
 		int retval = backpatch(n1->nextlist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(n1->lexeme + " backpatch error", retval);
 		retval = backpatch(e2->truelist, m3->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(e2->lexeme + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m2->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(s1->lexeme + " backpatch error", retval);
 		retval = backpatch(s1->nextlist, m2->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(s1->lexeme + " backpatch error", retval);
 
 		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $7, $11);
 		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
@@ -2180,7 +2181,7 @@ jump_statement
 
 		int err = checkVoidSymbol(funcNode);
 		if(err){
-			error("Function type not void", err);
+			error("Function type not void", DEFAULT_ERROR);
 		}
 		
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
@@ -2195,12 +2196,12 @@ jump_statement
 		node* temp = $2;
 		// symbolTableNode* n1 = funcNode;
 		int err = canTypecast(funcNode->declSp, temp->declSp);;
-		if(err) error("return type isnt valid", err);
+		if(err) error("return type isnt valid", DEFAULT_ERROR);
 		node* n1 = new node();
 		n1->declSp = declSpCopy(funcNode->declSp);
 		n1->addr = temp->addr;
 		err = giveTypeCastRankUnary(n1, temp);
-		if(err) error("error n typecasting", err);
+		if(err) error("error in typecasting", DEFAULT_ERROR);
 		// temp->addr = n1->addr;
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 0, temp, (node*)NULL, (node*)NULL, (node*)NULL);
 		emit(OP_RETURN, EMPTY_STR, EMPTY_STR, temp->addr);
