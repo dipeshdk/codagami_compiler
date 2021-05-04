@@ -326,8 +326,8 @@ string getIndexStr(node* root, int &errCode, string &errStr){
     return prev;
 }
 
-void addIntTemp(string newTmp, symbolTable* symTab){
-    symbolTableNode* sym_node = lookUp(symTab, newTmp);
+void addIntTemp(string name, symbolTable *st) {
+    symbolTableNode *sym_node = lookUp(st, name);
     sym_node->size = 8;
     sym_node->offset = offset;
     sym_node->declSp->type.push_back(TYPE_INT);
@@ -401,11 +401,3 @@ int getParamOffset(structTableNode* node, string paramName, int& err, string& er
     return -err;
 }
 
-void addIntTemp(string name, symbolTable *st) {
-    symbolTableNode *sym_node = lookUp(st, name);
-    sym_node->size = 8;
-    sym_node->offset = offset;
-    sym_node->declSp->ptrLevel = 1;
-    sym_node->declSp->type.push_back(TYPE_INT);
-    offset += 8;
-}
