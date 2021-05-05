@@ -724,7 +724,9 @@ int getOffset(string varName, symbolTable* st){
     if(dot && sym_node->infoType == INFO_TYPE_STRUCT && sym_node->declSp->ptrLevel == 0){
         offset += getParameterOffset(sym_node->declSp->lexeme, param, st);
     }
-    // offset += getOffsettedSize(sym_node->size);
+    else if(sym_node->infoType != INFO_TYPE_STRUCT){
+      offset += getOffsettedSize(sym_node->size);
+    }
     return -1*offset;
 }
 

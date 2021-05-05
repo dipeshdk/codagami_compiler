@@ -371,7 +371,7 @@ string getOpName(int opCode) {
 }
 
 void printQuad(quadruple* quad, int line) {
-    //printf("%d.   ", line);
+    printf("%d.   ", line);
     switch(quad->opCode) {
         case OP_IFGOTO:
             printf("    IF %s THEN GOTO %s\n",quad->arg1.c_str(), quad->result.c_str()); break;

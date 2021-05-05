@@ -1,6 +1,5 @@
 void printf(char* p, int d);
 char* p = "%ld\n";
-
 int ack(int m, int n)
 {
     if (m == 0){
@@ -27,11 +26,12 @@ int goo() {
 int main(){
     int A;
     A = ack(1, 2);
-    /* printf(p,A); */
+    printf(p,A);
     fov(68);
     A=goo();
+    printf(p,A);
     fov(A);
-    /* printf(p,A); */
+    printf(p,A);
     goo();
     return 0;
 }
