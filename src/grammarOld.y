@@ -241,13 +241,14 @@ postfix_expression
 		if(asize < 0){
 			error($1->lexeme , ARRAY_INDEX_SHOULD_BE_POSITIVE);
 		}
-		string arrayIndexStr = getArrayIndexWithEmit(postfix_expression, expression, errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
+		// string arrayIndexStr = getArrayIndexWithEmit(postfix_expression, expression, errCode, errStr);
+		// if(errCode)
+		// 	error(errStr, errCode);
 		addChild(postfix_expression, expression);
 		postfix_expression->infoType = INFO_TYPE_ARRAY;
-		postfix_expression->addr = arrayIndexStr;
-		postfix_expression->declSp->ptrLevel--;
+		postfix_expression->arrayIndices.push_back($3);
+		// postfix_expression->addr = arrayIndexStr;
+		// postfix_expression->declSp->ptrLevel--;
 		$$ = postfix_expression;
 	}
 	| postfix_expression '(' ')' { // Check with function paramlist111NoParamName111
@@ -281,6 +282,16 @@ postfix_expression
 
 	}
 	| postfix_expression '.' IDENTIFIER { 
+        // array of structs 
+        if($1->infoType == INFO_TYPE_ARRAY){
+			errCode = 0;
+			string arrayIndexStr = getArrayIndexWithEmit($1, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			$1->addr = arrayIndexStr;
+			$1->declSp->ptrLevel--;
+		}
+
 		node * postfix_expression = $1;
 		structTableNode* structure = getRightMostStructFromPostfixExpression($1, false, errCode, errStr);
 		if(errCode) error(errStr, errCode);
@@ -295,7 +306,7 @@ postfix_expression
 		temp->addr = newAddr;
 		node *newNode = makeNode(strdup("."), strdup("."), 0, $1, temp , NULL, NULL);
 		newNode->declSp = declSpCopy(temp->declSp);
-		newNode->infoType = INFO_NESTED_STRUCT;
+		newNode->infoType = INFO_NESTED_STRUCT; //can come here even if it is an array.
 		newNode->addr = newAddr;
 		$$ = newNode;
 	}
@@ -343,7 +354,17 @@ argument_expression_list
 	;
 
 unary_expression
-	: postfix_expression {$$ = $1;}
+	: postfix_expression {
+		if($1->infoType == INFO_TYPE_ARRAY){
+			errCode = 0;
+			string arrayIndexStr = getArrayIndexWithEmit($1, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			$1->addr = arrayIndexStr;
+			$1->declSp->ptrLevel--;
+		}
+		$$ = $1;
+	}
 	| INC_OP unary_expression {
 		int retval  = checkIntOrCharOrPointer($2);
 		if(retval) error($2->lexeme, retval);
@@ -478,7 +499,7 @@ unary_expression
 		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$->declSp->type.push_back(TYPE_INT);
 		sym_node = lookUp(gSymTable, newTmp);
-		sym_node->size = 4;
+		sym_node->size = 8;
 		sym_node->offset = offset;
 		sym_node->declSp->type.push_back(TYPE_INT);
 		offset += 8;
@@ -497,7 +518,7 @@ unary_expression
 		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$->declSp->type.push_back(TYPE_INT);
 		sym_node = lookUp(gSymTable, newTmp);
-		sym_node->size = 4;
+		sym_node->size = 8;
 		sym_node->offset = offset;
 		sym_node->declSp->type.push_back(TYPE_INT);
 		offset += 8;
@@ -1013,7 +1034,7 @@ logical_and_expression
 	| logical_and_expression AND_OP M_marker inclusive_or_expression { 
 		int retval = backpatch($1->truelist, $3->quad);
 		if(retval)
-			error($1->lexeme + "backpatch error", retval);
+			error(string($1->lexeme) + "backpatch error", retval);
 
 		if(isConstantNode($1) && isConstantNode($4)) {
 			if(isStringLiteral($1) || isStringLiteral($4)) {
@@ -1043,6 +1064,7 @@ logical_and_expression
 			emit(OP_ANDAND, $1->addr, $4->addr, newTmp);
 			temp->addr = newTmp;
 			temp->declSp = declSpCopy($1->declSp);
+			addIntTemp(newTmp, gSymTable);
 			$$ = temp;
 		}
 	}
@@ -1053,7 +1075,7 @@ logical_or_expression
 	| logical_or_expression OR_OP M_marker logical_and_expression { 
 		int retval = backpatch($1->falselist, $3->quad);
 		if(retval)
-			error($1->lexeme + "backpatch error", retval);
+			error(string($1->lexeme) + "backpatch error", retval);
 		if(isConstantNode($1) && isConstantNode($4)) {
 			if(isStringLiteral($1) || isStringLiteral($4)) {
 				error("|| of string literals.", UNSUPPORTED_FUNCTIONALITY);
@@ -1082,6 +1104,7 @@ logical_or_expression
 			emit(OP_OROR, $1->addr, $4->addr, newTmp);
 			temp->addr = newTmp;
 			temp->declSp = declSpCopy($1->declSp);
+			addIntTemp(newTmp, gSymTable);
 			$$ = temp;
 		}
 	}
@@ -1104,10 +1127,10 @@ conditional_expression
 	| logical_or_expressionJumpStatement '?' M_marker expression conditional_marker N_marker ':' M_marker conditional_expression {
 		int retval = backpatch($1->truelist, $3->quad);
 		if(retval)
-			error($1->lexeme + "backpatch error", retval);
+			error(string($1->lexeme) + "backpatch error", retval);
 		retval = backpatch($1->falselist, $8->quad);
 		if(retval)
-			error($1->lexeme + "backpatch error", retval);
+			error(string($1->lexeme) + "backpatch error", retval);
 		node* temp = makeNode(strdup("?:"), strdup("?:"), 0, $1, $4, $8, (node*)NULL); 
 		vector<int> tempVec = mergelist( $4->nextlist, $6->nextlist);
 		temp->nextlist = mergelist(tempVec, $9->nextlist);
@@ -1115,7 +1138,7 @@ conditional_expression
 		emit(OP_ASSIGNMENT, $9->addr, EMPTY_STR, ternaryTempStack.top());
 		retval  = backpatchAssignment($5->nextlist, $4->addr);
 		if(retval)
-			error($5->lexeme + "backpatch error", retval);
+			error(string($5->lexeme) + "backpatch error", retval);
 		temp->addr = ternaryTempStack.top();
 		$$ = temp;
 		ternaryTempStack.pop();
@@ -1328,6 +1351,25 @@ declaration
 				if(temp->declSp)
 					sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
 				temp->declSp = sym_node->declSp;
+				if(temp->arrayIndices.size() != 0){
+					int asize = 1;
+					vector<int> arrayIndicesTmp;
+					for(auto &x: temp->arrayIndices){
+						int asizeTmp =  getValueFromConstantExpression(x,errCode);
+						if(asizeTmp < 0 || errCode){
+							error(x->lexeme, ARRAY_SIZE_NOT_CONSTANT);
+						}
+						asize *= asizeTmp;
+						arrayIndicesTmp.push_back(asizeTmp);
+					}
+					sym_node->arrayIndices = arrayIndicesTmp;
+				}else{
+					error(temp->lexeme,INVALID_SYNTAX);
+				}
+				while(!arrayInFuncParam.empty()){
+					addArrayParamToStack(offset, arrayInFuncParam.top(), errCode, errStr);
+					arrayInFuncParam.pop();
+				}
 				if(initializer) {
 					//array initializtion
 					node *currInit = initializer;
@@ -1337,7 +1379,7 @@ declaration
 
 					int size = getNodeSize(sym_node, gSymTable);
 					if(size < 0){
-						error(sym_node->lexeme, -size);
+						error(sym_node->name, -size);
 					}
 					// _t1 = 4;
 					string sizeTmp = generateTemp(errCode);
@@ -1384,7 +1426,7 @@ declaration
 						//variable initialized
 						int retval = canTypecast(sym_node->declSp, initializer->declSp);
 						if(retval)
-							error(sym_node->lexeme, retval);
+							error(sym_node->name, retval);
 						retval = areDifferentTypes(sym_node->declSp, initializer->declSp, errCode, errStr);
 						if(errCode)
 							error(errStr, errCode);
@@ -1694,7 +1736,58 @@ declarator
 		$$ = temp;
 		currDecl = $$;
 	}
-	| direct_declarator { $$ = $1; currDecl = $$; }
+	| direct_declarator { 
+		node* temp = $1;
+		if(temp->infoType == INFO_TYPE_ARRAY){
+			temp->declSp->ptrLevel++;
+			int asize = 1;
+			vector<int> arrayIndicesTmp;
+			for(auto &x: temp->arrayIndices){
+				int asizeTmp =  getValueFromConstantExpression(x,errCode);
+				if(asizeTmp < 0 || errCode){
+					error(x->lexeme, ARRAY_SIZE_NOT_CONSTANT);
+				}
+				asize *= asizeTmp;
+				arrayIndicesTmp.push_back(asizeTmp);
+			}
+			temp->arraySize = asize;
+
+			// string newTmp = generateTemp(errCode);
+			// if(errCode)
+			// 	error("", errCode);
+			// symbolTableNode *sym_node;
+			// sym_node = lookUp(gSymTable, newTmp);
+			// sym_node->size = 8;
+			// sym_node->offset = offset;
+			// sym_node->declSp = new declSpec();
+			// sym_node->declSp->type.push_back(TYPE_VOID);
+			// sym_node->declSp->ptrLevel++;
+			// // sym_node->arrayIndices = arrayIndicesTmp;
+			// offset += 8;
+
+			// emit(OP_ADDR, $1->addr, EMPTY_STR, newTmp);
+			// string newTmp1 = generateTemp(errCode);
+			// if(errCode)
+			// 	error("", errCode);
+
+			// sym_node = lookUp(gSymTable, newTmp1);
+			// sym_node->size = 8;
+			// sym_node->offset = offset;
+			// sym_node->declSp = new declSpec();
+			// sym_node->declSp->type.push_back(TYPE_VOID);
+			// sym_node->declSp->ptrLevel++;
+			// // sym_node->arrayIndices = arrayIndicesTmp;
+			// offset += 8;
+
+			// emit(OP_ADDI, newTmp, "8", newTmp1);
+			// emit(OP_ASSIGNMENT, newTmp1, EMPTY_STR,$1->addr);
+
+			arrayInFuncParam.push($1->addr);
+		}
+
+		currDecl = $$;
+		$$ = $1;
+	}
 	;
 
 direct_declarator
@@ -1717,13 +1810,13 @@ direct_declarator
 			error(temp->lexeme, errCode);
 		}
 		temp->infoType = INFO_TYPE_ARRAY;
-		temp->arraySize = asize;
+		// temp->arraySize = asize;
 		if(!temp->declSp){
 			temp->declSp = new declSpec();
 		}
-		temp->declSp->ptrLevel++;
-
-		arrayInFuncParam.push($1->addr);
+		temp->arrayIndices.push_back($3);
+		// temp->declSp->ptrLevel++;
+		// arrayInFuncParam.push({$1->addr,arrayIndicesTmp});
 		$$ = temp;
 	}
 	| direct_declarator '[' ']' {
@@ -2034,7 +2127,7 @@ statement_list
 		}
 		int retval = backpatch($1->nextlist, $2->quad);
 		if(retval)
-			error($1->lexeme + "backpatch error", retval);
+			error(string($1->lexeme) + " backpatch error", retval);
 		temp->nextlist = $3->nextlist;
 		temp->breaklist = mergelist($1->breaklist, $3->breaklist);
 		temp->continuelist = mergelist($1->continuelist, $3->continuelist);
@@ -2070,7 +2163,7 @@ selection_statement
 	: IF '(' expressionJump  ')' M_marker statement {
 		int retval = backpatch($3->truelist, $5->quad);
 		if(retval)
-			error($3->lexeme + " backpatch error", retval);
+			error(string($3->lexeme) + " backpatch error", retval);
 		node * temp = makeNode(strdup("IF"), strdup("if"),0, $3, $6, (node*)NULL, (node*)NULL);
 		temp->nextlist = mergelist($3->falselist, $6->nextlist);
 		temp->breaklist = $6->breaklist;
@@ -2080,10 +2173,10 @@ selection_statement
 	| IF  '(' expressionJump  ')' M_marker statement ELSE N_marker M_marker statement {
 		int retval = backpatch($3->truelist, $5->quad);
 		if(retval)
-			error($3->lexeme + " backpatch error", retval);
+			error(string($3->lexeme) + " backpatch error", retval);
 		retval = backpatch($3->falselist, $9->quad);
 		if(retval)
-			error($3->lexeme + " backpatch error", retval);
+			error(string($3->lexeme) + " backpatch error", retval);
 		node* temp = makeNode(strdup("IF_ELSE"), strdup("else"),0, $3, $6, $10, (node*)NULL);
 		vector<int> tempVec = mergelist($6->nextlist, $8->nextlist);
 		temp->nextlist = mergelist(tempVec, $10->nextlist);
@@ -2107,13 +2200,13 @@ iteration_statement
 		node *m1 = $3, *m2 = $6, *s1 = $7, *e1 = $4;
 		int retval = backpatch(s1->nextlist, m1->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		retval = backpatch(e1->truelist, m2->quad);
 		if(retval)
-			error(e1->lexeme + " backpatch error", retval);
+			error(string(e1->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m1->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 
 		$$ = makeNode(strdup("WHILE"), strdup("while"), 0, $4, $7, (node*)NULL, (node*)NULL);
 		
@@ -2124,13 +2217,13 @@ iteration_statement
 		node* s1 = $3, *e1 = $7, *m2 = $2, *m1 = $6;
 		int retval = backpatch(s1->nextlist, m1->quad);
 		if(retval)
-			error(s1->lexeme+" backpatch error", retval);
+			error(string(s1->lexeme)+" backpatch error", retval);
 		retval = backpatch(e1->truelist, m2->quad);
 		if(retval)
-			error(e1->lexeme + " backpatch error", retval);
+			error(string(e1->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m1->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		
 		$$ = makeNode(strdup("DO WHILE"), strdup("do while"), 0, $3, $7, (node*)NULL, (node*)NULL);
 		
@@ -2142,13 +2235,13 @@ iteration_statement
 		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m1->quad));
 		int retval = backpatch(e2->truelist, m3->quad);
 		if(retval)
-			error(e2->lexeme + " backpatch error", retval);
+			error(string(e2->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m1->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->nextlist, m1->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		
 		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $8, (node*)NULL);
 		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
@@ -2158,16 +2251,16 @@ iteration_statement
 		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m2->quad));
 		int retval = backpatch(n1->nextlist, m1->quad);
 		if(retval)
-			error(n1->lexeme + " backpatch error", retval);
+			error(string(n1->lexeme) + " backpatch error", retval);
 		retval = backpatch(e2->truelist, m3->quad);
 		if(retval)
-			error(e2->lexeme + " backpatch error", retval);
+			error(string(e2->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m2->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->nextlist, m2->quad);
 		if(retval)
-			error(s1->lexeme + " backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 
 		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $7, $11);
 		$$->nextlist = mergelist(s1->breaklist, e2->falselist);

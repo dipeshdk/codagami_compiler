@@ -1,1 +1,13 @@
-make && bin/3AC tests/test1.c && gcc -no-pie outputs/test1/test1.s && ./a.out
+testPath=$1
+fileName=$(basename ${testPath%.c})
+
+
+make 
+bin/3AC ${testPath}
+gcc -no-pie outputs/${fileName}/${fileName}.s
+./a.out > myOutput
+
+gcc -ansi -pedantic ${testPath}
+./a.out > gccOutput
+
+diff -c gccOutput myOutput

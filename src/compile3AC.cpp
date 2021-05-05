@@ -738,7 +738,7 @@ bool isGlobal(string varName, symbolTable* st) {
         identifier = name.substr(0, pos);
     }
     symbolTableNode* sym_node = lookUp(st, identifier);
-    if(sym_node == nullptr){
+    if(sym_node == nullptr){ 
         error(varName, SYMBOL_NOT_FOUND);
     }
     if(sym_node->scope == -1)
@@ -850,20 +850,33 @@ string getVariableAddr(string varName, symbolTable* st) {
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
-
         return "(" + regName + ")";
     }
-    else if(dot && isPointer(identifier)) {
+    else if(dot && isPointer(identifier)) { //should be a struct array
         string name = stripPointer(identifier);
         if(isConstant(name))
             errorAsm(name,DEREFERENCING_CONSTANT_ERROR);
+        
+        cout << "name " << name <<endl; 
+        symbolTableNode* sym_node = lookUp(st, name);
+        if(sym_node == nullptr){
+            error(name, SYMBOL_NOT_FOUND);
+        }
+        else if(sym_node->declSp->type[0] != TYPE_STRUCT){
+            error("not a pointer to a valid struct", DEFAULT_ERROR);
+        }
+        cout << sym_node->name << " struct: " << sym_node->declSp->lexeme << endl; 
+        int paramOffset = getParameterOffset(sym_node->declSp->lexeme, param, st);
+        cout << "paramaOffset : " << paramOffset << endl;
+
+        // #########
         offset = getOffset(name, st);
         offsetStr=getOffsetStr(offset);
         int regInd = getReg(gQuadNo, name); //TODO: Free this reg
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
-        return "(" + regName + ")";
+        return "-" + to_string(paramOffset) + "(" + regName + ")";
     } 
     offset = getOffset(identifier, st);
     offsetStr = getOffsetStr(offset);
