@@ -1,4 +1,4 @@
-#include "headers/allInclude.h" 
+#include "headers/allInclude.h"
 
 extern int rbp_size;
 extern int offset;
@@ -20,12 +20,12 @@ structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expressio
         setErrorParams(errCode, VARIABLE_NOT_A_STRUCT, errString, "");
         return nullptr;
     }
-    
-    string rightMostStructName;	
+
+    string rightMostStructName;
     if(curr->infoType == INFO_NESTED_STRUCT){
         // declSp allocated so look in structure table
         if(curr->declSp) {
-            if(isPtrOp && curr->declSp->ptrLevel != 1){	
+            if(isPtrOp && curr->declSp->ptrLevel != 1){
                 setErrorParams(errCode, INVALID_REFERENCE, errString, curr->lexeme);
                 return nullptr;
             }
@@ -45,7 +45,7 @@ structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expressio
                 }
             }
             if(isStruct) {
-                if(isPtrOp && n->declSp->ptrLevel != 1){	
+                if(isPtrOp && n->declSp->ptrLevel != 1){
                     setErrorParams(errCode, INVALID_REFERENCE, errString, n->name);
                     return nullptr;
                 }
@@ -65,7 +65,7 @@ node* primary_expression_identifier(char* lexeme, int &errCode, string& errStr) 
         errStr = lexeme;
         return nullptr;
     }
-    node *temp = makeNode(strdup("IDENTIFIER"), strdup(lexeme), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+    node *temp = makeNode(strdup("IDENTIFIER"), strdup(lexeme), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
     temp->declSp = new declSpec();
     for(auto i : stNode->declSp->type){
         temp->declSp->type.push_back(i);
@@ -98,14 +98,14 @@ node* struct_declaration(node* specifier_qualifier_list, node* struct_declarator
     string s(curr->name);
     if(s == "="){
       temp = curr->childList;
-    }	
+    }
     if(!temp) continue;
     for(auto &u : temp->structParamList) {
       int ptrLevel = 0;
       if(u->declSp)
         ptrLevel = u->declSp->ptrLevel;
       u->declSp = specifier_qualifier_list->declSp;
-      u->declSp->ptrLevel = ptrLevel;				
+      u->declSp->ptrLevel = ptrLevel;
       specifier_qualifier_list->structParamList.push_back(u);
     }
     curr = curr -> next;
@@ -117,7 +117,7 @@ node* declaration_list(node* declaration_list, node* declaration){
   node* temp = NULL;
   string s(declaration_list->name);
   bool c1  = (s == "DECL_LIST");
-  if( c1 ){ 
+  if( c1 ){
     temp = makeNode(strdup("DECL_LIST"), strdup("declaration list"), 0, declaration_list->childList, declaration, (node*)NULL, (node*)NULL);
   } else {
     temp = makeNode(strdup("DECL_LIST"), strdup("declaration list"), 0, declaration_list, declaration, (node*)NULL, (node*)NULL);
@@ -152,19 +152,11 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
     string func_name = postfix_expression->lexeme;
     string name = postfix_expression->lexeme;
     symbolTableNode* stNode = lookUp(gSymTable, name);
-    
     if(!stNode || stNode->infoType != INFO_TYPE_FUNC || !stNode->declSp) {
         setErrorParams(errCode, SYMBOL_NOT_FOUND, errString, name);
         return EMPTY_STR;
     }
-
-    // if(!stNode->isDefined) {
-    //     setErrorParams(errCode, UNDEFINED_FUNCTION, errString, name);
-    //     return;
-    // }
-    
-
-    vector<struct param*> paramList = stNode->paramList; 
+    vector<struct param*> paramList = stNode->paramList;
     int maxSize = paramList.size();
     int idx = 0;
     node* curr = argument_expression_list;
@@ -182,7 +174,7 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         }
         if(!temp->declSp || !paramList[idx]->declSp){
             setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errString, temp->lexeme);
-            return EMPTY_STR; 
+            return EMPTY_STR;
         }
         int retval = canTypecast(temp->declSp, paramList[idx]->declSp);
         if(retval){
@@ -200,8 +192,6 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         }
         temp->infoType = paramList[idx]->infoType;
         arguments.push_back(temp);
-        // emit(OP_PUSHPARAM, BLANK_STR, BLANK_STR, temp->addr);
-        // paramSize+= getTypeSize(temp->declSp->type);
         idx++;
         curr = curr -> next;
     }
@@ -213,17 +203,25 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         error(postfix_expression->lexeme,INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
     }
 
-    // Doing this in LCall
-    // Assuming no required value in regs 
     for(int i = 0; i < min(6, maxSize); i++) {
         //mov to reg
-        emit(OP_MOV, gArgRegs[i], EMPTY_STR , arguments[i]->addr);
+        if(!nodeIsStruct(arguments[i])) {
+            emit(OP_MOV, gArgRegs[i], EMPTY_STR , arguments[i]->addr);
+        }else {
+            emitPushStruct(arguments[i]);
+            paramSize += getStructSizeFromAstNode(arguments[i]);
+        }
     }
 
     for(int i = maxSize-1; i >= 6; i--) {
         //push param
-        emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, arguments[i]->addr);
-        paramSize+= getTypeSize(arguments[i]->declSp->type);
+        if(!nodeIsStruct(arguments[i])) {
+            emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, arguments[i]->addr);
+            paramSize += getTypeSize(arguments[i]->declSp->type);
+        }else {
+            emitPushStruct(arguments[i]);
+            paramSize += getStructSizeFromAstNode(arguments[i]);
+        }
     }
 
     if(postfix_expression->declSp->type[0]!= TYPE_VOID){
@@ -243,6 +241,39 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
     return newTemp;
 }
 
+bool nodeIsStruct(node *astNode) {
+    string varName = astNode->addr;
+    if(isConstantNode(astNode)) return false;
+    symbolTableNode* stNode = lookUp(gSymTable, varName);
+    if(!stNode)
+        error(varName, SYMBOL_NOT_FOUND);
+    if(stNode->infoType == INFO_TYPE_STRUCT)
+        return true;
+    return false;
+}
+
+void emitPushStruct(node *astNode) {
+    string varName = astNode->addr;
+    symbolTableNode* stNode = lookUp(gSymTable, varName);
+    if(!stNode)
+        error(varName, SYMBOL_NOT_FOUND);
+    if(stNode->infoType != INFO_TYPE_STRUCT)
+        error(varName, TYPE_ERROR);
+
+    structTableNode* structNode = nullptr;
+    structNode = structLookUp(gSymTable, stNode->declSp->lexeme);
+    if(!structNode)
+        error(stNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+
+    vector<structParam*> structParamList = structNode->paramList;
+    int structParamListSize =  structParamList.size();
+
+    for(int i = structParamListSize-1; i >= 0; i--) {
+        string paramAddr = varName + "." + structParamList[i]->name;
+        emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, paramAddr);
+    }
+}
+
 void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode* funcNode){
     int tempOffset = rbp_size;
     int param_num = 0;
@@ -253,7 +284,7 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
     		error(p->paramName, retVal);
 		}
 		string lex = p->paramName;
-		
+
 		struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
 		if(!sym_node){
 	    	error(lex, ALLOCATION_ERROR);
@@ -264,7 +295,7 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
 		sym_node->declSp = declSpCopy(p->declSp);
 		sym_node->infoType = p->infoType;
 		sym_node->size = getNodeSize(sym_node, gSymTable);
-		if(param_num > 6){
+		if((p->declSp->type.size() > 0 && p->declSp->type[0]==TYPE_STRUCT) || param_num > 6){
             sym_node->offset = (-1*tempOffset);
             tempOffset += getOffsettedSize(sym_node->size);
         }
@@ -279,8 +310,9 @@ void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable){
     offset += 8;
     int param_num = 0;
     symbolTable* curr = gSymTable->childList[(gSymTable->childList.size())-1];
-    
+
 	for(auto &p: declarator->paramList){
+        if(p->declSp->type.size() > 0 && p->declSp->type[0]==TYPE_STRUCT) continue;
         param_num++;
         if(param_num > 6) break;
 		string lex = p->paramName;
@@ -302,7 +334,7 @@ bool checkGlobalInitializerDFSUtil(node *a){
 
     node *temp = a->childList;
     while(temp) {
-        if(!checkGlobalInitializerDFSUtil(temp)) 
+        if(!checkGlobalInitializerDFSUtil(temp))
             return false;
         temp = temp->next;
     }

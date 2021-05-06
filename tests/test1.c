@@ -1,38 +1,32 @@
 void printf(char* p, int d);
 char* p = "%ld\n";
-int ack(int m, int n)
-{
-    if (m == 0){
-        m = n + 1;
-        return m;
-    }
-    else if((m > 0) && (n == 0)){
-        return ack(m-1, 1);
-    }
-    else if((m > 0) && (n > 0)){
-        return ack(m-1, ack(m, n-1));
-    }
-}
-void fov(int x) {
-    x = 5;
-    return;
-} 
 
-int goo() {
-    int f = 34545;
-    return f;
+/* struct foo{
+    int x,y,z;
+};
+ */
+/* void func(struct foo f1) {
+    return;
 }
-  
+
+void kite(int a1, int a2, int a3,
+    int a4, int a5, int a6, int a7,
+    int a8, int a9) {
+        return;
+} */
 
 int main(){
-    int A;
-    A = ack(3, 4);
-    printf(p,A);
-    fov(68);
-    A=goo();
-    printf(p,A);
-    fov(A);
-    printf(p,A);
-    goo();
+    /* struct foo f2; */
+    /* f2.x=5; */
+    /* func(f2); */
+    /* printf(p,y); */
+   /*  int a,b,c,d;
+    kite(1,2,3,4,5,a,b,c,d); */
+
+   /*  int arr[1];
+    arr[0]=5; */
+
+    
+
     return 0;
 }

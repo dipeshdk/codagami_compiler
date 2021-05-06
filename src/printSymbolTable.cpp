@@ -119,7 +119,9 @@ void printElem(symbolTableNode* elem, string str, int printTemps) {
         printf("%s", str.c_str());
         printf("{\n");
         printf("%s", str.c_str());
-        printf("\"name\" : \"%s\"", t->paramName.c_str());
+        printf("\"name\" : \"%s\",\n", t->paramName.c_str());
+        printf("%s", str.c_str());
+        printf("\"infoType\" : \"%d\"", t->infoType);
         ds = t->declSp;
         if(ds) {
             // printf("%s", str.c_str());

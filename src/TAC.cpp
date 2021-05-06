@@ -458,3 +458,29 @@ int getParamOffset(structTableNode *node, string paramName, int &err, string &er
     setErrorParams(err, INVALID_STRUCT_PARAM, errStr, paramName);
     return -err;
 }
+
+int getStructSizeFromAstNode(node *astNode) {
+    string varName = astNode->addr;
+    symbolTableNode* stNode = lookUp(gSymTable, varName);
+    if(!stNode)
+        error(varName, SYMBOL_NOT_FOUND);
+    if(stNode->infoType != INFO_TYPE_STRUCT)
+        error(varName, TYPE_ERROR);
+
+    structTableNode* structNode = nullptr;
+    structNode = structLookUp(gSymTable, stNode->declSp->lexeme);
+    if(!structNode)
+        error(stNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+    return getStructSize(structNode);
+}
+
+int getStructSize(structTableNode* node){
+    if(!node) {
+        return -INVALID_ARGS;
+    }
+    int size = 0;
+    for(structParam* p : node->paramList) 
+        size +=  getTypeSize(p->declSp->type);
+
+    return size;
+}

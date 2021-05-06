@@ -409,6 +409,7 @@ void asmOpBeginFunc(int quadNo)
 	int numParams = paramList.size();
 	for (int i = 0; i < min(6, numParams); i++)
 	{
+		if((paramList[i]->declSp->type.size() > 0 && paramList[i]->declSp->type[0]==TYPE_STRUCT)) continue;
 		string argAddr = getVariableAddr(paramList[i]->paramName, st);
 		emitAsm("movq", {gArgRegs[i], argAddr});
 	}
