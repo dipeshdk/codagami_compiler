@@ -300,7 +300,7 @@ string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCo
         return EMPTY_STR;
     }
 
-    emit(OP_ADDI, arr, indexTmp, pointerTmp);
+    emit(OP_SUBI, arr, indexTmp, pointerTmp);
     sym_node = lookUp(gSymTable, pointerTmp);
     sym_node->size = 8;
     sym_node->offset = offset;

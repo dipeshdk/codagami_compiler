@@ -346,7 +346,7 @@ int addArrayParamToStack(int &offset, string addr, int &errCode, string &errStri
     sym_node->declSp->ptrLevel++;
     offset += 8;
 
-    emit(OP_ADDI, newTmp, "8", newTmp1);
+    emit(OP_SUBI, newTmp, "8", newTmp1);
     emit(OP_ASSIGNMENT, newTmp1, EMPTY_STR, addr);
     return 0;
 }
