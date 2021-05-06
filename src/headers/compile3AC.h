@@ -4,27 +4,6 @@
 #include "constants.h"  
 #include "structures.h" 
 
-
-#define rax "rax"
-#define rbx "rbx"
-#define rcx "rcx"  
-#define rdx "rdx" 
-#define rsi "rsi" 
-#define rdi "rdi" 
-#define rbp "rbp" 
-#define rsp "rsp" 
-#define r8 "r8" 
-#define r9 "r9" 
-#define r10 "r10" 
-#define r11 "r11" 
-#define r12 "r12" 
-#define r13 "r13" 
-#define r14 "r14" 
-#define r15 "r15" 
-
-
-#endif
-
 void emitAssemblyFrom3AC(string asmOutputFile);
 
 void emitAssemblyForQuad(int quadNo);
@@ -159,8 +138,6 @@ void printAsm(string asmOutputFile);
 
 void printASMData();
 
-void setUpGlobalData();
-
 void amsOpAddr(int quadNo);
 
 string getOffsetStr(int offset);
@@ -176,3 +153,6 @@ string stripTypeCastUtil(string name);
 int getParameterOffset(string structName, string param, symbolTable* st);
 
 void copyStruct(string from, string to, int quadNo);
+void asmOpBitwiseNot(int quadNo);
+
+#endif

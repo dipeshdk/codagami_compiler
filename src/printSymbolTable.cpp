@@ -24,34 +24,6 @@ void printDeclSp(declSpec* ds) {
     cout << "\n";
 }
 
-void printToCsvFile(symbolTable *st){
-    string fileName = "symbolTableOfScope";
-    fileName = fileName.append(to_string(st->scope));
-    fileName = fileName.append(".csv");
-    fstream file;
-    file.open(fileName, ios::app);
-    file << "Name, infoType, arraySize, paramSize, isDefined";
-    int maxParamListSize = 0;
-    for(auto elem: st->symbolTableMap){
-        maxParamListSize = elem.second->paramList.size() > maxParamListSize ? elem.second->paramList.size() : maxParamListSize;
-    }
-    for(int i = 0; i < maxParamListSize;i++){
-        file << ", Parameter" << i + 1;
-    }
-    file << "\n";
-    for(auto elem : st->symbolTableMap){
-        file << elem.second->name << ", "
-            << elem.second->infoType << ", "
-            << elem.second->arraySize << ", "
-            << elem.second->paramSize << ", "
-            << elem.second->isDefined;
-        for(param* t : elem.second->paramList) {
-            file << ", " << t->paramName;
-        }
-        file << "\n";
-    }
-}
-
 void printSymbolTable(symbolTable *st) {
     cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
     cout << "\n\n=============Printing symbol table (scope: " << st->scope << ")====================\n\n";
@@ -421,6 +393,8 @@ void printQuad(quadruple* quad, int line) {
             printf("    %s = %s %s\n", quad->result.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str());  break;
         case OP_MOV:
             printf("    MOV %s -> %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
+        case OP_SUBI:
+            printf("    %s = %s %s %s\n", quad->result.c_str(),  quad->arg2.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str()); break;
         default:
             printf("    %s = %s %s %s\n", quad->result.c_str(),  quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());
     }
@@ -428,12 +402,10 @@ void printQuad(quadruple* quad, int line) {
 
 void printCode(char* filename) {
     freopen(filename, "w", stdout);
-    // cout << "\n";
     int n = gCode.size();
     for(int i = 0; i < n; i++) {
         printQuad(gCode[i], i);
     }
-    // cout << "\n";
 }
 
 void printASMText() {
@@ -447,7 +419,6 @@ void printASMText() {
             res += p.second[i];
             if(i < (n-1)) res += ", ";
         }
-        // cout << lineNo++ << ".  " << res << "\n";
         cout <<  "  " << res << "\n";
     }
     cout <<  endl;

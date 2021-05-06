@@ -73,25 +73,6 @@ int addTypeToDeclSpec(node *temp, vector<int>&v){
     return checkValidType(temp->declSp->type);
 }
 
-// int checkValidStorageClass(node *temp) {
-//     if(temp->declSp->storageClassSpecifier.size() > 1
-//         || (temp->infoType == INFO_TYPE_FUNC && temp->declSp->storageClassSpecifier.size() > 0 
-//         && temp->declSp->storageClassSpecifier[0] != TYPE_EXTERN))
-//         return INVALID_STORAGE_CLASS;
-//     return 0;
-// }
-
-// int addStorageClassToDeclSpec(node *temp, vector<int>&v){
-//     if(!temp || !temp->declSp) {
-//         return INVALID_ARGS;
-//     }
-//     for(int i = v.size()-1; i >=0; i--) {
-//         temp->declSp->storageClassSpecifier.push_back(v[i]);
-//     }
-//     return checkValidStorageClass(temp);
-// }
-
-
 
 int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
     string name = declarator->lexeme;
