@@ -152,4 +152,6 @@ string stripTypeCastUtil(string name);
 
 int getParameterOffset(string structName, string param, symbolTable* st);
 
+void asmOpBitwiseNot(int quadNo);
+
 #endif
