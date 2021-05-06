@@ -63,3 +63,6 @@ symbolTable.txt
 .vscode/settings.json
 asmOut.s
 outputs/*
+gccOutput
+myOutput
+temp*

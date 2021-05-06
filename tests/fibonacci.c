@@ -20,4 +20,5 @@ int fibonacci(int n){
 int main(){
     int n = 4;
     int fib = fibonacci(n);
+    return 0;
 }

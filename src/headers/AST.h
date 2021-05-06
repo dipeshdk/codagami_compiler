@@ -11,8 +11,6 @@ node* makeTypeNode(int type);
 void makeSibling(node* root, node* childList);
 void addChild(node* parent, node* child);
 
-//deprecated
-node* makeStorageClassNode(int storageClass, char* name, char* lexeme, int isLeaf, node*c1, node*c2, node*c3, node* c4);
 bool isConstantNode(node *node);
 bool isStringLiteral(node *node);
 #endif

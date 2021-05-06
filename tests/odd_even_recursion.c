@@ -1,17 +1,29 @@
+void printf(char* str, int x);
+char* str = "%d\n";
+
 int odd(int x);
 int even(int y);
+int c = 0;
+
 
 int odd(int x){
-    x = x+even(x);
+    ++c;
+    printf(str, x);
+    x = x + even(x+1);
     return x;
 }
 
 int even(int y){
-    if(y < 10000) y = y+2*odd(y);
+    ++c;
+    printf(str, y);
+    if(y < 10){
+        y = y+2*odd(y);
+    }
     return y;
 }
 
 int main(){
-    even(1);
+    int x = even(1);
+    printf(str,x);
     return 0;
 }
