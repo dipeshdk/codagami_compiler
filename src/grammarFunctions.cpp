@@ -318,7 +318,6 @@ bool checkGlobalInitializer(node *initializer){
 
 int addArrayParamToStack(int &offset, string addr, int &errCode, string &errString){
 
-    cout << addr << endl;
     string newTmp = generateTemp(errCode);
     if(errCode) {
         setErrorParams(errCode, errCode, errString, "");

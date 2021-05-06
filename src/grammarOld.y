@@ -1132,8 +1132,12 @@ conditional_expression
 		if(retval)
 			error(string($1->lexeme) + "backpatch error", retval);
 		node* temp = makeNode(strdup("?:"), strdup("?:"), 0, $1, $4, $8, (node*)NULL); 
-		vector<int> tempVec = mergelist( $4->nextlist, $6->nextlist);
-		temp->nextlist = mergelist(tempVec, $9->nextlist);
+		// vector<int> tempVec = mergelist( $4->nextlist, $6->nextlist);
+		// temp->nextlist = mergelist(tempVec, $9->nextlist);
+		retval = backpatch($6->nextlist,nextQuad()+1);
+		if(retval)
+			error(string($6->lexeme) + "backpatch error", retval);
+		temp->nextlist = mergelist($4->nextlist, $9->nextlist);
 		temp->declSp = declSpCopy($1->declSp);
 		emit(OP_ASSIGNMENT, $9->addr, EMPTY_STR, ternaryTempStack.top());
 		retval  = backpatchAssignment($5->nextlist, $4->addr);

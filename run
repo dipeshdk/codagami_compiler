@@ -1,13 +1,19 @@
 testPath=$1
 fileName=$(basename ${testPath%.c})
 
-
+echo "------------make--------------------"
 make 
+echo "----------------------building assembly bin/3AC --------------------------"
 bin/3AC ${testPath}
+echo "----------------------assembler gcc -no-pie ------------------------------"
 gcc -no-pie outputs/${fileName}/${fileName}.s
+echo "----------------------running my a.out ---------------------------------"
 ./a.out > myOutput
 
+echo "----------------------building using gcc...-------------------------------"
 gcc -ansi -pedantic ${testPath}
+echo "----------------------running gcc a.out...--------------------------------"
 ./a.out > gccOutput
 
+echo "----------------------printing diff---------------------------------------"
 diff -c gccOutput myOutput
