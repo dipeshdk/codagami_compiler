@@ -86,62 +86,44 @@
 
 #define NOT_GOTO_IN_BACKPATCH 301
 
-// sarthak
 #define OP_GOTO 701 //{OP_GOTO, "", "", gotoAddr}
 #define OP_ADDI 702
 #define OP_MULI 703 
 #define OP_IFGOTO 704 //{OP_IFGOTO, relop->addr, "", gotoAddr}
 #define OP_SUBI 705
-
-//done
 #define OP_ASSIGNMENT 706
-
-// dipesh
 #define OP_UNARY_MINUS 707
 #define OP_DIVI 708
 #define OP_CALL 709
 #define OP_LEFT_SHIFT 710
 #define OP_RIGHT_SHIFT 711
-
-//rythm
-#define OP_OR 713 //
+#define OP_OR 713
 #define OP_AND 714
 #define OP_LOGICAL_NOT 715
 #define OP_XOR 716
-
-//sakshi
 #define OP_EQ 717
 #define OP_NEQ 718
 #define OP_LEQ 719
 #define OP_GREATER 720
 #define OP_LESS 721
-
-//floating point
 #define OP_ADDF 723
 #define OP_MULF 724
 #define OP_SUBF 725
 #define OP_DIVF 726
-
-//chinmaya
 #define OP_MOD 722
 #define OP_GEQ 727
-#define OP_ANDAND 728   // &&
-#define OP_OROR 729     // ||
+#define OP_ANDAND 728   
+#define OP_OROR 729     
 #define OP_IFNEQGOTO 730 // {OP_IFNEQGOTO, operand1, operand2, gotoAddr if not equal}
-
-//not now
 #define OP_BEGINFUNC 731
 #define OP_ENDFUNC 732
 #define OP_RETURN 733
 #define OP_PUSHPARAM 734
 #define OP_POPPARAM 735
 #define OP_LCALL 736
-
-#define OP_LABEL 737 //main:
-#define OP_ADDR 738 //lea
+#define OP_LABEL 737 
+#define OP_ADDR 738 
 #define OP_BITWISE_NOT 739
-
-//for function call
 #define OP_MOV 740
 
 #define BLANK_STR "BLANK"
@@ -152,4 +134,31 @@
 #define DEFAULT_INITIALIZATION_VALUE 0
 #define DEFAULT_INITIALIZATION_VALUE_TYPE TYPE_INT
 
+#define CALLQ_PADDING 16
+
+#define NOT_CONSTANT_EXCEPTION 601
+#define NUM_REGISTER 10
+#define CONSTANT "__constant__"
+#define NO_VAR_VALUE_ASSIGNED "__not_assigned__"
+#define EAX_REGISTER_INDEX 3
+#define EDX_REGISTER_INDEX 4
+#define ECX_REGISTER_INDEX 4
+#define CL_REGISTER "%cl" // ECX 8 bit version
+
+#define REGISTER_RDI "%rdi"
+#define REGISTER_R10 "%r10"
+#define REGISTER_R11 "%r11"
+#define REGISTER_RCX "%rcx"
+#define REGISTER_RAX "%rax"
+#define REGISTER_RDX "%rdx"
+#define REGISTER_RBX "%rbx"
+#define REGISTER_RSP "%rsp"
+#define REGISTER_RBP "%rbp"
+#define REGISTER_RSI "%rsi"
+#define REGISTER_RDI "%rdi"
+#define REGISTER_R8 "%r8"
+#define REGISTER_R9 "%r9"
+
+#define GLOBAL "global"
+#define GLOBAL_SIZE 0
 #endif

@@ -188,24 +188,10 @@ bool isConstant(string s){
         if (!(c >= '0' && c <= '9')) return false;
     }
     return true;
-    // try{
-    //     int x = stoi(s);
-    //     throw NOT_CONSTANT_EXCEPTION;
-    // }
-    // catch(int exp){
-    //     if(exp == NOT_CONSTANT_EXCEPTION)
-    //        return false;
-    //     else    
-    //         return true; 
-    // }
 }
 
 string hexString(string decStr) {
-	//TODO: For negative numbers testing remaining
 	return decStr;
-    // stringstream ss;
-    // ss << "0x" << hex << getNumberFromConstAddr(decStr);
-    // return ss.str();
 }
 
 int getNumberFromConstAddr(string s) {

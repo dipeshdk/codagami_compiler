@@ -11,7 +11,6 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st);
 int getOffsettedSize(int size);
 void addTempDetails(string name, symbolTable* symtab, node* node);
 
-void printToCsvFile(symbolTable *st);
 void printSymbolTableJSON(string filePrefix, symbolTable *st, int numTab, int printTemps);
 void printStructTable(map<string, struct structTableNode*> &structMap, int scope);
 void printSymbolTable(symbolTable *st);
