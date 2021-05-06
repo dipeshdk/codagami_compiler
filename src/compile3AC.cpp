@@ -225,8 +225,9 @@ void emitAssemblyForQuad(int quadNo)
 	case OP_ADDR:
 		amsOpAddr(quadNo);
 		break;
-	/* case OP_BITWISE_NOT:
-        break; */
+	case OP_BITWISE_NOT:
+		asmOpBitwiseNot(quadNo);
+        break;
 	case OP_MOV:
 		asmOPMoveFuncParam(quadNo);
 		break;
@@ -235,6 +236,9 @@ void emitAssemblyForQuad(int quadNo)
 	}
 }
 
+void asmOpBitwiseNot(int quadNo){
+	asmOpUnaryOperator("not", quadNo);
+}
 
 void amsOpAddr(int quadNo)
 {
