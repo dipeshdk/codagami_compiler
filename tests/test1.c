@@ -5,17 +5,14 @@ struct foo{
     int x,y,z;
 };
 
-void func(struct foo f) {
-    printf(str,f.x);
+void func(int a,int b,int c,int d, int e, int f, int g) {
+    printf(str,g);
     return;
 }
 
 int main(void)
 {
     struct foo f;
-    f.x=1;
-    f.y=2;
-    f.z=3;
-    func(f);
+    func(1,2,3,4,5,6,7);
     return 0;
 }
