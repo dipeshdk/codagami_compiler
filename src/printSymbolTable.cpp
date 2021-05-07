@@ -381,7 +381,7 @@ void printQuad(quadruple* quad, int line) {
         case OP_MOV:
             printf("    MOV %s -> %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
         case OP_SUBI:
-            printf("    %s = %s %s %s\n", quad->result.c_str(),  quad->arg2.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str());
+            printf("    %s = %s %s %s\n", quad->result.c_str(),  quad->arg2.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str()); break;
         default:
             printf("    %s = %s %s %s\n", quad->result.c_str(),  quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());
     }
