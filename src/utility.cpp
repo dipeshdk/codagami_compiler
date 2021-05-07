@@ -181,6 +181,9 @@ void copyList(node* n1, node* n2) {
 }
 
 bool isConstant(string s) {
+    if(s == CONSTANT){
+        return true;
+    }
     int n = s.length();
     int i = 0;
     if (n > 0 && s[0] == '-')

@@ -450,7 +450,6 @@ void asmOpDivI(int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     bool isConst1 = isConstant(quad->arg1), isConst2 = isConstant(quad->arg2);
 
@@ -503,7 +502,6 @@ void asmOpLeftShift(int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     bool isConst1 = isConstant(quad->arg1), isConst2 = isConstant(quad->arg2);
 
@@ -560,7 +558,6 @@ void asmOpRightShift(int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     bool isConst1 = isConstant(quad->arg1), isConst2 = isConstant(quad->arg2);
 
@@ -879,9 +876,10 @@ void useReg(int regInd, int quadNo, string varValue) {
 
 void freeRegAndMoveToStack(int regInd) {
     //TODO: free a reg by moving its data to a location and then
-    if (isConstant(regVec[regInd]->varValue))
-        return;
-    string resultAddr = getVariableAddr(regVec[regInd]->varValue, codeSTVec[regVec[regInd]->quadNo]);
+    // if (isConstant(regVec[regInd]->varValue) && regVec[regInd]->varValue == CONSTANT)
+    //     return;
+    // cout << 907 << regVec[regInd]->varValue << endl;
+    // string resultAddr = getVariableAddr(regVec[regInd]->varValue, codeSTVec[regVec[regInd]->quadNo]);
     // TODO: this line below has to be there after checking all registers are free
     // FLush register if contains useful variable
 
@@ -893,8 +891,9 @@ void asmOpAssignment(int quadNo) {
     symbolTable* st = codeSTVec[quadNo];
 
     //TODO: Verify
-    // if (isConstant(quad->result)) {
-    //     errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    if (isConstant(quad->result)) {
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    }
 
     string noPtrName = quad->result;
     bool isPtr = isPointer(noPtrName);
@@ -909,7 +908,6 @@ void asmOpAssignment(int quadNo) {
         copyStruct(quad->arg1, quad->result, quadNo);
         return;
     }
-
     string resultAddr = getVariableAddr(quad->result, st);
     if (isConstant(quad->arg1)) {
         emitAsm("movq", {"$" + hexString(quad->arg1), resultAddr});
@@ -929,7 +927,6 @@ void asmOpMod(int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     if (isConstant(quad->arg1)) {
         emitAsm("movq", {"$" + hexString(quad->arg1), REGISTER_RAX});
@@ -997,7 +994,6 @@ void asmOpComp(int quadNo, string asm_comp) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     if (isConstant(quad->arg1)) {
         emitAsm("movq", {"$" + hexString(quad->arg1), REGISTER_RAX});
@@ -1051,7 +1047,6 @@ void asmOpAndAnd(int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     if (isConstant(quad->arg1)) {
         emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg1)});
@@ -1082,7 +1077,6 @@ void asmOpOrOr(int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     if (isConstant(quad->arg1)) {
         emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg1)});
@@ -1177,7 +1171,6 @@ void emitAsmForBinaryOperator(string op, int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     bool isConst1 = isConstant(quad->arg1), isConst2 = isConstant(quad->arg2);
 
