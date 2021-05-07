@@ -144,6 +144,16 @@ node* parameter_declaration(node* declaration_specifiers, node* declarator) {
     if (declarator->declSp) {
         parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
     }
+    vector<int> arrayIndicesTmp;
+    for (auto& x : declarator->arrayIndices) {
+        int asizeTmp = getValueFromConstantExpression(x, errCode);
+        if (asizeTmp < 0 || errCode) {
+            error(x->lexeme, ARRAY_SIZE_NOT_CONSTANT);
+        }
+        arrayIndicesTmp.push_back(asizeTmp);
+    }
+    parameter->arraySize = declarator->arraySize;
+    parameter->arrayIndices = arrayIndicesTmp;
     parameter->infoType = declarator->infoType;
     parameter->paramName = declarator->lexeme;
     declarator->paramList.push_back(parameter);
@@ -385,7 +395,19 @@ int addArrayParamToStack(int& offset, string addr, int& errCode, string& errStri
     sym_node->declSp->ptrLevel++;
     offset += 8;
 
-    emit(OP_SUBI, newTmp, "8", newTmp1);
+    sym_node = lookUp(gSymTable, addr);
+    int size = 8;
+    if (sym_node->declSp->type[0] == TYPE_STRUCT) {
+        string structName = sym_node->declSp->lexeme;
+        structTableNode* structNode = structLookUp(gSymTable, structName);
+        if (structNode == nullptr) {
+            error(structName, STRUCT_NOT_DECLARED);
+            return -STRUCT_NOT_DECLARED;
+        }
+        size = getStructSize(structNode);
+    }
+
+    emit(OP_SUBI, newTmp, to_string(size), newTmp1);
     emit(OP_ASSIGNMENT, newTmp1, EMPTY_STR, addr);
     return 0;
 }

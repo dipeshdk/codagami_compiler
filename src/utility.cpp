@@ -36,9 +36,12 @@ int getValueFromConstantExpression(node* constant_expression, int& err) {
     }
     switch (constant_expression->valType) {
     case TYPE_INT:
-        val = constant_expression->ival;
+        // val = constant_expression->ival;
+        val = stoi(constant_expression->addr);
         break;
-    case TYPE_FLOAT:
+    case TYPE_CHAR:
+        val = stoi(constant_expression->addr);
+        break;
     default:
         err = TYPE_ERROR;
         return val;

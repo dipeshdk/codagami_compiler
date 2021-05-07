@@ -28,11 +28,14 @@ struct declSpec {
 
 struct param {
     int infoType;
+    vector<int> arrayIndices;
+    int arraySize;
     struct declSpec* declSp;
     string paramName;
     param() {
         declSp = new declSpec();
         paramName = "empty";
+        arraySize = 0;
         infoType = INFO_TYPE_NORMAL;
     }
 };
