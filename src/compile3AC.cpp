@@ -28,7 +28,6 @@ string stripTypeCastUtil(string name)
 	return name.substr(pos + 3);
 }
 
-
 void stripTypeCastFromQuads()
 {
 	for (int quadNo = 0; quadNo < gCode.size(); quadNo++)
@@ -39,7 +38,6 @@ void stripTypeCastFromQuads()
 		quad->arg2 = stripTypeCastUtil(quad->arg2);
 	}
 }
-
 
 void emitAssemblyFrom3AC(string asmOutputFile)
 {
@@ -87,14 +85,12 @@ void emitAssemblyFrom3AC(string asmOutputFile)
 	printAsm(asmOutputFile);
 }
 
-
 void printAsm(string asmOutputFile)
 {
 	freopen(asmOutputFile.c_str(), "w", stdout);
 	printASMData();
 	printASMText();
 }
-
 
 void printASMData()
 {
@@ -114,7 +110,6 @@ void printASMData()
 	}
 	cout << endl;
 }
-
 
 void emitAssemblyForQuad(int quadNo)
 {
@@ -227,7 +222,7 @@ void emitAssemblyForQuad(int quadNo)
 		break;
 	case OP_BITWISE_NOT:
 		asmOpBitwiseNot(quadNo);
-        break;
+		break;
 	case OP_MOV:
 		asmOPMoveFuncParam(quadNo);
 		break;
@@ -236,7 +231,8 @@ void emitAssemblyForQuad(int quadNo)
 	}
 }
 
-void asmOpBitwiseNot(int quadNo){
+void asmOpBitwiseNot(int quadNo)
+{
 	asmOpUnaryOperator("not", quadNo);
 }
 
