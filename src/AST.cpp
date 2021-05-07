@@ -28,13 +28,15 @@ node* makeDeadNode() {
 
 node* makeTypeNode(int tp) {
     node* newNode = makeDeadNode();
-    newNode->declSp->type.push_back(tp);  //TODO: check validity of type
+    newNode->declSp->type.push_back(tp); //TODO: check validity of type
     return newNode;
 }
 
 void makeSibling(node* root, node* childList) {
-    if (!root) return;
-    if (!childList) return;
+    if (!root)
+        return;
+    if (!childList)
+        return;
     node* curr = childList;
     node* prev = (node*)NULL;
     while (curr) {

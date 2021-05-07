@@ -109,14 +109,15 @@ int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
         error(name, retVal);
     }
     symbolTableNode* sym_node = gSymTable->symbolTableMap[name];
-    if (!sym_node) return ALLOCATION_ERROR;
+    if (!sym_node)
+        return ALLOCATION_ERROR;
     sym_node->infoType = INFO_TYPE_FUNC;
 
     if (declaration_specifiers) {
         sym_node->declSp = declSpCopy(declaration_specifiers->declSp);
     } else {
         declSpec* ds = new declSpec();
-        ds->type.push_back(TYPE_INT);  //default function types if no type specified
+        ds->type.push_back(TYPE_INT); //default function types if no type specified
         sym_node->declSp = ds;
     }
     sym_node->paramList = declarator->paramList;
@@ -153,7 +154,8 @@ int removeSymbol(symbolTable* st, string name) {
 int checkVoidSymbol(symbolTableNode* root) {
     if (!root->declSp)
         return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
-    if (checkType(root->declSp, TYPE_VOID, 0)) return 0;
+    if (checkType(root->declSp, TYPE_VOID, 0))
+        return 0;
     return TYPE_ERROR;
 }
 

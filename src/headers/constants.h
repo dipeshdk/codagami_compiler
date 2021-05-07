@@ -86,10 +86,10 @@
 
 #define NOT_GOTO_IN_BACKPATCH 301
 
-#define OP_GOTO 701  //{OP_GOTO, "", "", gotoAddr}
+#define OP_GOTO 701 //{OP_GOTO, "", "", gotoAddr}
 #define OP_ADDI 702
 #define OP_MULI 703
-#define OP_IFGOTO 704  //{OP_IFGOTO, relop->addr, "", gotoAddr}
+#define OP_IFGOTO 704 //{OP_IFGOTO, relop->addr, "", gotoAddr}
 #define OP_SUBI 705
 #define OP_ASSIGNMENT 706
 #define OP_UNARY_MINUS 707
@@ -114,7 +114,7 @@
 #define OP_GEQ 727
 #define OP_ANDAND 728
 #define OP_OROR 729
-#define OP_IFNEQGOTO 730  // {OP_IFNEQGOTO, operand1, operand2, gotoAddr if not equal}
+#define OP_IFNEQGOTO 730 // {OP_IFNEQGOTO, operand1, operand2, gotoAddr if not equal}
 #define OP_BEGINFUNC 731
 #define OP_ENDFUNC 732
 #define OP_RETURN 733
@@ -143,7 +143,7 @@
 #define EAX_REGISTER_INDEX 3
 #define EDX_REGISTER_INDEX 4
 #define ECX_REGISTER_INDEX 4
-#define CL_REGISTER "%cl"  // ECX 8 bit version
+#define CL_REGISTER "%cl" // ECX 8 bit version
 
 #define REGISTER_RDI "%rdi"
 #define REGISTER_R10 "%r10"

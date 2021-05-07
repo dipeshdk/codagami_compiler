@@ -14,12 +14,12 @@ struct globalData {
 };
 
 struct declSpec {
-    vector<int> type;                   // check validity of vector short double
-    int ptrLevel;                       // **a =2
-    string lexeme;                      // union or struct or enum
-    vector<int> storageClassSpecifier;  // int or vector<int> ? check later
-    bool isConst;                       //bool
-    bool isVolatile;                    //bool
+    vector<int> type;                  // check validity of vector short double
+    int ptrLevel;                      // **a =2
+    string lexeme;                     // union or struct or enum
+    vector<int> storageClassSpecifier; // int or vector<int> ? check later
+    bool isConst;                      //bool
+    bool isVolatile;                   //bool
 
     declSpec() : ptrLevel(0), isConst(0), isVolatile(0) {
         lexeme = "empty";
@@ -28,7 +28,7 @@ struct declSpec {
 
 struct param {
     int infoType;
-    struct declSpec *declSp;
+    struct declSpec* declSp;
     string paramName;
     param() {
         declSp = new declSpec();
@@ -39,7 +39,7 @@ struct param {
 
 struct structParam {
     int infoType;
-    struct declSpec *declSp;
+    struct declSpec* declSp;
     string name;
     int bit;
     structParam() : bit(NO_BIT_ASSIGNED) {
@@ -49,19 +49,19 @@ struct structParam {
 };
 
 struct symbolTableNode {
-    int infoType;  // normal, func, array, struct/union
+    int infoType; // normal, func, array, struct/union
     int lineNo;
     int arraySize;
     int paramSize;
     int callPopSize;
-    bool isDefined;  //for functions
+    bool isDefined; //for functions
     int size;
     int paramWidth;
     int offset;
-    vector<struct param *> paramList;  //for functions, struct and union
+    vector<struct param*> paramList; //for functions, struct and union
     vector<int> arrayIndices;
     string name;
-    struct declSpec *declSp;
+    struct declSpec* declSp;
     int scope;
     symbolTableNode() {
         infoType = INFO_TYPE_NORMAL;
@@ -76,11 +76,11 @@ struct symbolTableNode {
 
 struct symbolTable {
     vector<string> symbolOrder;
-    map<string, struct symbolTableNode *> symbolTableMap;  // <lexeme, struct>
-    struct symbolTable *parent;
-    int scope;  //name for scope : global, main, function name
-    vector<struct symbolTable *> childList;
-    map<string, struct structTableNode *> structMap;
+    map<string, struct symbolTableNode*> symbolTableMap; // <lexeme, struct>
+    struct symbolTable* parent;
+    int scope; //name for scope : global, main, function name
+    vector<struct symbolTable*> childList;
+    map<string, struct structTableNode*> structMap;
 
     symbolTable() {
         parent = nullptr;
@@ -88,10 +88,10 @@ struct symbolTable {
 };
 
 struct structTableNode {
-    int infoType;  //struct or union
+    int infoType; //struct or union
     string name;
     int lineNo;
-    vector<structParam *> paramList;
+    vector<structParam*> paramList;
     structTableNode() {
         name = "empty";
     }
@@ -99,15 +99,15 @@ struct structTableNode {
 
 struct node {
     int id;
-    char *name = NULL;
-    char *lexeme = NULL;
-    int valType;  //in which variable is constant stored
+    char* name = NULL;
+    char* lexeme = NULL;
+    int valType; //in which variable is constant stored
     int ival;
     float fval;
-    int isLeaf;  // DEAD_NODE if declaration node so not ot be printed in AST
-    struct node *next;
-    struct node *childList = nullptr;
-    struct declSpec *declSp;
+    int isLeaf; // DEAD_NODE if declaration node so not ot be printed in AST
+    struct node* next;
+    struct node* childList = nullptr;
+    struct declSpec* declSp;
     bool isConstant;
     bool isStringLiteral;
     // symtable node
@@ -115,9 +115,9 @@ struct node {
     int lineNo;
     int arraySize = 0;
     int paramSize = 0;
-    vector<struct param *> paramList;
-    vector<struct structParam *> structParamList;
-    vector<node *> arrayIndices;
+    vector<struct param*> paramList;
+    vector<struct structParam*> structParamList;
+    vector<node*> arrayIndices;
 
     string addr;
     int quad;

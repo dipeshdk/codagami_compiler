@@ -12,7 +12,8 @@ structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expressio
             break;
         else {
             curr = curr->childList;
-            if (curr) curr = curr->next;
+            if (curr)
+                curr = curr->next;
         }
     }
 
@@ -53,7 +54,8 @@ structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expressio
             }
         }
     }
-    if (!structure) setErrorParams(errCode, VARIABLE_NOT_A_STRUCT, errString, rightMostStructName);
+    if (!structure)
+        setErrorParams(errCode, VARIABLE_NOT_A_STRUCT, errString, rightMostStructName);
     return structure;
 }
 
@@ -98,7 +100,8 @@ node* struct_declaration(node* specifier_qualifier_list, node* struct_declarator
         if (s == "=") {
             temp = curr->childList;
         }
-        if (!temp) continue;
+        if (!temp)
+            continue;
         for (auto& u : temp->structParamList) {
             int ptrLevel = 0;
             if (u->declSp)
@@ -165,8 +168,10 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
     while (curr) {
         node* temp = curr;
         string s = curr->name;
-        if (s == "=") temp = curr->childList;
-        if (!temp) continue;
+        if (s == "=")
+            temp = curr->childList;
+        if (!temp)
+            continue;
         if (idx >= maxSize) {
             setErrorParams(errCode, INVALID_ARGS_IN_FUNC_CALL, errString, temp->lexeme);
             return EMPTY_STR;
@@ -242,7 +247,8 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
 
 bool nodeIsStruct(node* astNode) {
     string varName = astNode->addr;
-    if (isConstantNode(astNode)) return false;
+    if (isConstantNode(astNode))
+        return false;
     symbolTableNode* stNode = lookUp(gSymTable, varName);
     if (!stNode)
         error(varName, SYMBOL_NOT_FOUND);
@@ -311,9 +317,11 @@ void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable) {
     symbolTable* curr = gSymTable->childList[(gSymTable->childList.size()) - 1];
 
     for (auto& p : declarator->paramList) {
-        if (p->declSp->type.size() > 0 && p->declSp->type[0] == TYPE_STRUCT) continue;
+        if (p->declSp->type.size() > 0 && p->declSp->type[0] == TYPE_STRUCT)
+            continue;
         param_num++;
-        if (param_num > 6) break;
+        if (param_num > 6)
+            break;
         string lex = p->paramName;
         struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
         if (!sym_node) {
@@ -326,7 +334,8 @@ void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable) {
 }
 
 bool checkGlobalInitializerDFSUtil(node* a) {
-    if (!a) return true;
+    if (!a)
+        return true;
     if (a->isLeaf) {
         return a->isConstant;
     }
