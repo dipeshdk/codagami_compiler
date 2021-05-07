@@ -705,7 +705,7 @@ int getOffset(string varName, symbolTable* st) {
     }
     int offset = sym_node->offset;
     offset += getOffsettedSize(sym_node->size);
-    if (dot && sym_node->infoType == INFO_TYPE_STRUCT && sym_node->declSp->ptrLevel == 0) {
+    if (dot && (sym_node->infoType == INFO_TYPE_STRUCT || (sym_node->declSp && sym_node->declSp->type.size() > 0 && sym_node->declSp->type[0] == TYPE_STRUCT)) && sym_node->declSp->ptrLevel == 0) {
         offset -= getParameterOffset(sym_node->declSp->lexeme, param, st);
     }
     return -1 * offset;
@@ -1309,8 +1309,9 @@ void copyStruct(string from, string to, int quadNo) {
 
     structTableNode* fromStructNode = nullptr;
     fromStructNode = structLookUp(st, fromNode->declSp->lexeme);
-    if (!fromStructNode)
+    if (!fromStructNode) {
         error(fromNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+    }
 
     symbolTableNode* toNode = lookUp(st, toNoPtr);
     if (!toNode)
@@ -1320,8 +1321,9 @@ void copyStruct(string from, string to, int quadNo) {
 
     structTableNode* toStructNode = nullptr;
     toStructNode = structLookUp(st, toNode->declSp->lexeme);
-    if (!toStructNode)
+    if (!toStructNode) {
         error(toNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+    }
 
     for (structParam* p : fromStructNode->paramList) {
         string fromParam = from + "." + p->name;
