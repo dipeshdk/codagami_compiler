@@ -1273,8 +1273,9 @@ void copyStruct(string from, string to, int quadNo) {
 
     structTableNode* fromStructNode = nullptr;
     fromStructNode = structLookUp(st, fromNode->declSp->lexeme);
-    if (!fromStructNode)
+    if (!fromStructNode) {
         error(fromNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+    }
 
     symbolTableNode* toNode = lookUp(st, toNoPtr);
     if (!toNode)
@@ -1284,8 +1285,9 @@ void copyStruct(string from, string to, int quadNo) {
 
     structTableNode* toStructNode = nullptr;
     toStructNode = structLookUp(st, toNode->declSp->lexeme);
-    if (!toStructNode)
+    if (!toStructNode) {
         error(toNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+    }
 
     for (structParam* p : fromStructNode->paramList) {
         string fromParam = from + "." + p->name;
