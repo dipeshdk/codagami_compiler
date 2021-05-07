@@ -200,6 +200,16 @@ postfix_expression
 
 	}
 	| postfix_expression '.' IDENTIFIER { 
+        // array of structs 
+        if($1->infoType == INFO_TYPE_ARRAY){
+			errCode = 0;
+			string arrayIndexStr = getArrayIndexWithEmit($1, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			$1->addr = arrayIndexStr;
+			$1->declSp->ptrLevel--;
+		}
+
 		node * postfix_expression = $1;
 		structTableNode* structure = getRightMostStructFromPostfixExpression($1, false, errCode, errStr);
 		if(errCode) error(errStr, errCode);
@@ -214,7 +224,7 @@ postfix_expression
 		temp->addr = newAddr;
 		node *newNode = makeNode(strdup("."), strdup("."), 0, $1, temp , NULL, NULL);
 		newNode->declSp = declSpCopy(temp->declSp);
-		newNode->infoType = INFO_NESTED_STRUCT;
+		newNode->infoType = INFO_NESTED_STRUCT; //can come here even if it is an array.
 		newNode->addr = newAddr;
 		$$ = newNode;
 	}
@@ -338,6 +348,7 @@ unary_expression
 			constTemp->nextlist = cast_expression->nextlist;
 			constTemp->continuelist = cast_expression->continuelist;
 			constTemp->breaklist = cast_expression->breaklist;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			int opCode = -1;
@@ -468,6 +479,7 @@ multiplicative_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "*", errCode, errStr); 
@@ -502,6 +514,7 @@ multiplicative_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "/", errCode, errStr); 
@@ -541,6 +554,7 @@ multiplicative_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "%", errCode, errStr); 
@@ -577,6 +591,7 @@ additive_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		} else {
 			node* temp = makeNodeForExpressionNotStringForAddition($1, $3, "+", errCode, errStr); 
@@ -611,6 +626,7 @@ additive_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "-", errCode, errStr); 
@@ -654,6 +670,7 @@ shift_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		} else {	
 			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "<<", errCode, errStr);
@@ -690,6 +707,7 @@ shift_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		} else {
 			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, ">>", errCode, errStr);
@@ -825,6 +843,7 @@ and_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else{
 			node* temp = makeNode(strdup("&"), strdup("&"), 0, and_expression, equality_expression, (node*)NULL, (node*)NULL);
@@ -863,6 +882,7 @@ exclusive_or_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNode(strdup("^"), strdup("^"), 0, exclusive_or_expression, and_expression, (node*)NULL, (node*)NULL);
@@ -900,6 +920,7 @@ inclusive_or_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNode(strdup("|"), strdup("|"), 0, inclusive_or_expression1, exclusive_or_expression, (node*)NULL, (node*)NULL);
@@ -937,6 +958,7 @@ logical_and_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $4, (node*)NULL, (node*)NULL); 
@@ -976,6 +998,7 @@ logical_or_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else{
 			node* temp = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $4, (node*)NULL, (node*)NULL);  
@@ -1043,7 +1066,6 @@ conditional_marker:
 		temp->nextlist = makelist(nextQuad());
 		emit(OP_ASSIGNMENT, BLANK_STR, EMPTY_STR, ternaryTemp); 
 		$$ = temp;
-		
 	}
 	;
 
@@ -1344,7 +1366,7 @@ declaration
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			sym_node->offset = offset;
 			offset += getOffsettedSize(sym_node->size);
-			offset += getArraySize(sym_node);
+			offset += getArraySize(sym_node, gSymTable);
 			curr = curr->next;
 		}
 		makeSibling($2,$1);
@@ -1383,7 +1405,7 @@ declaration_specifiers
 	;
 
 init_declarator_list
-	: init_declarator {  $$ = $1;  }
+	: init_declarator { $$ = $1; }
 	| init_declarator_list ',' init_declarator { 
 		if($3->infoType == INFO_TYPE_FUNC || $1->infoType == INFO_TYPE_FUNC)
 			error("Cannot declare multiple functions in one line", UNSUPPORTED_FUNCTIONALITY);
@@ -1636,6 +1658,7 @@ direct_declarator
 	}
 	| '(' declarator ')' { $$ = $2;}
 	| direct_declarator '[' constant_expression ']' {
+
 		node* temp = $1;
 		int asize = getValueFromConstantExpression($3, errCode);
 		if(asize < 0){
@@ -2287,13 +2310,13 @@ int main(int ac, char **av) {
 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
 		// char * fileName = strdup("graph.dot");
 		// if(ac == 3) fileName = av[2];
-		// generateDot(root,fileName); 
+		// generateDot(root,fileName);
+        printCode((char*)TACFilename.c_str());
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-		printCode((char*)TACFilename.c_str());
 		
 		fclose(fd);
     }
