@@ -1,19 +1,4 @@
 #include "headers/allInclude.h"
-<<<<<<< HEAD
-#define NOT_CONSTANT_EXCEPTION 601
-#define NUM_REGISTER 10
-#define CONSTANT "__constant__"
-#define NO_VAR_VALUE_ASSIGNED "__not_assigned__"
-#define EAX_REGISTER_INDEX 3
-#define EDX_REGISTER_INDEX 4
-#define ECX_REGISTER_INDEX 2
-#define CL_REGISTER "%cl" // ECX 8 bit version
-
-#define GLOBAL "global"
-#define GLOBAL_SIZE 0
-
-=======
->>>>>>> a62d60c421c12e7fa94be7702d685d12a97a6753
 using namespace std;
 
 vector<reg *> regVec;
@@ -337,6 +322,7 @@ void amsOpLCall(int quadNo)
 	if (quad->result != EMPTY_STR)
 	{
 		string resultAddr = getVariableAddr(quad->result, st);
+		//---location: return value movement here
 		emitAsm("movq", {REGISTER_RAX, resultAddr});
 	}
 }
