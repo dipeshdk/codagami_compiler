@@ -256,6 +256,16 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
 void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode* funcNode){
     int tempOffset = rbp_size;
     int param_num = 0;
+    int extra = 0;
+    if(funcNode->declSp && (funcNode->declSp->type[0] == TYPE_STRUCT)){
+        string structName = funcNode->declSp->lexeme;
+        // structTableNode* struc = structLookUp(gSymTable, structName);
+        symbolTableNode* tempNode = new symbolTableNode();
+        tempNode->declSp->type.push_back(TYPE_STRUCT);
+        tempNode->declSp->lexeme = structName;
+        extra = getNodeSize(tempNode, gSymTable)+8;
+        tempOffset += extra;
+    }
 	for(auto &p: declarator->paramList){
         param_num++;
 		int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
@@ -282,7 +292,7 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
         }
 	}
 
-    funcNode->paramWidth = tempOffset-rbp_size;
+    funcNode->paramWidth = tempOffset-rbp_size-extra;
 
     return;
 }

@@ -286,6 +286,7 @@ void asmOpReturn(int quadNo)
 
 		if (!isConstant(quad->result))
 		{
+			// location--copy the return struct to appropriate location here.
 			regVec[eaxInd]->varValue = quad->result;
 			string argAddr = getVariableAddr(quad->result, st);
 			emitAsm("movq", {argAddr, eaxName});
@@ -1428,4 +1429,53 @@ void asmOpSubI(int quadNo)
 void asmOpCompareEqual(int quadNo)
 {
 	emitAsmForBinaryOperator("cmp", quadNo);
+}
+
+void copyStruct(string from, string to, int quadNo) {
+  symbolTable *st = codeSTVec[quadNo];
+  //pointers only for arrays
+  bool isFromPtr = isPointer(from);
+  bool isToPtr = isPointer(to);
+  string fromNoPtr = from;
+  string toNoPtr = to;
+  if(isPointer(from)) fromNoPtr = stripPointer(from);
+  if(isPointer(to)) toNoPtr = stripPointer(to);
+ 
+  symbolTableNode* fromNode = lookUp(st, fromNoPtr);
+  if(!fromNode)
+      error(from, SYMBOL_NOT_FOUND);
+  if(fromNode->infoType != INFO_TYPE_STRUCT && (isFromPtr && fromNode->declSp->type[0] != TYPE_STRUCT))
+      error(from, TYPE_ERROR);
+ 
+ 
+  structTableNode* fromStructNode = nullptr;
+  fromStructNode = structLookUp(st, fromNode->declSp->lexeme);
+  if(!fromStructNode)
+      error(fromNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+  
+ 
+  symbolTableNode* toNode = lookUp(st, toNoPtr);
+  if(!toNode)
+      error(to, SYMBOL_NOT_FOUND);
+  if(toNode->infoType != INFO_TYPE_STRUCT && (isToPtr && toNode->declSp->type[0] != TYPE_STRUCT))
+      error(to, TYPE_ERROR);
+  
+  structTableNode* toStructNode = nullptr;
+  toStructNode = structLookUp(st, toNode->declSp->lexeme);
+  if(!toStructNode)
+      error(toNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+ 
+  for(structParam* p : fromStructNode->paramList) {
+    string fromParam = from + "." + p->name;
+    string fromParamAddr = getVariableAddr(fromParam, st);
+ 
+    string toParam = to + "." + p->name;
+    string toParamAddr = getVariableAddr(toParam, st);
+ 
+    int regInd = getReg(quadNo, fromParam);
+    string regName = regVec[regInd]->regName;
+    emitAsm("movq", {fromParamAddr, regName});
+    emitAsm("movq", {regName, toParamAddr});
+    freeReg(regInd);
+  }    
 }
