@@ -28,4 +28,6 @@ string extractFileName(string str);
 
 string removeExtension(string str);
 
+void typeCastWarning(string from, string to);
+
 #endif

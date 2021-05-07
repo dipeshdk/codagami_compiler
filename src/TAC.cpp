@@ -194,6 +194,7 @@ string emitTypeCast(node* node, declSpec* toDs, int& errCode, string& errStr) {
         to_type += "*";
     string typeCastAddr = "( " + from_type + "_TO_" + to_type + " ) " + node->addr;
     emit(OP_ASSIGNMENT, typeCastAddr, EMPTY_STR, newTmp);
+    typeCastWarning(from_type, to_type);
     tempNode->size = getNodeSize(tempNode, gSymTable);
     tempNode->offset = offset;
     offset += tempNode->size;
