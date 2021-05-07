@@ -290,8 +290,8 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
         sym_node->infoType = p->infoType;
         sym_node->size = getNodeSize(sym_node, gSymTable);
         if (param_num > 6) {
-            sym_node->offset = (-1 * tempOffset);
             tempOffset += getOffsettedSize(sym_node->size);
+            sym_node->offset = (-1 * tempOffset);
         }
     }
 
