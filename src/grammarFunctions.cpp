@@ -3,9 +3,9 @@
 extern int rbp_size;
 extern int offset;
 
-structTableNode *getRightMostStructFromPostfixExpression(node *postfix_expression, bool isPtrOp, int &errCode, string &errString) {
-    structTableNode *structure = nullptr;
-    node *curr = postfix_expression;
+structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expression, bool isPtrOp, int& errCode, string& errString) {
+    structTableNode* structure = nullptr;
+    node* curr = postfix_expression;
     while (curr != NULL) {
         string s = curr->name;
         if (s == "IDENTIFIER")
@@ -35,7 +35,7 @@ structTableNode *getRightMostStructFromPostfixExpression(node *postfix_expressio
         }
     } else {
         // look in symbol table
-        symbolTableNode *n = lookUp(gSymTable, curr->lexeme);
+        symbolTableNode* n = lookUp(gSymTable, curr->lexeme);
         int isStruct = 0;
         if (n->declSp) {
             for (int t : n->declSp->type) {
@@ -59,14 +59,14 @@ structTableNode *getRightMostStructFromPostfixExpression(node *postfix_expressio
     return structure;
 }
 
-node *primary_expression_identifier(char *lexeme, int &errCode, string &errStr) {
-    symbolTableNode *stNode = lookUp(gSymTable, lexeme);
+node* primary_expression_identifier(char* lexeme, int& errCode, string& errStr) {
+    symbolTableNode* stNode = lookUp(gSymTable, lexeme);
     if (!stNode) {
         errCode = UNDECLARED_SYMBOL;
         errStr = lexeme;
         return nullptr;
     }
-    node *temp = makeNode(strdup("IDENTIFIER"), strdup(lexeme), 1, (node *)NULL, (node *)NULL, (node *)NULL, (node *)NULL);
+    node* temp = makeNode(strdup("IDENTIFIER"), strdup(lexeme), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
     temp->declSp = new declSpec();
     for (auto i : stNode->declSp->type) {
         temp->declSp->type.push_back(i);
@@ -81,9 +81,9 @@ node *primary_expression_identifier(char *lexeme, int &errCode, string &errStr) 
     return temp;
 }
 
-node *struct_or_union_specifier(node *struct_or_union, string name) {
+node* struct_or_union_specifier(node* struct_or_union, string name) {
     int type = TYPE_STRUCT;
-    node *temp = makeTypeNode(type);
+    node* temp = makeTypeNode(type);
     if (!temp->declSp)
         temp->declSp = new declSpec();
     temp->declSp->lexeme = name;
@@ -92,17 +92,17 @@ node *struct_or_union_specifier(node *struct_or_union, string name) {
     return temp;
 }
 
-node *struct_declaration(node *specifier_qualifier_list, node *struct_declarator_list) {
-    node *curr = struct_declarator_list;
+node* struct_declaration(node* specifier_qualifier_list, node* struct_declarator_list) {
+    node* curr = struct_declarator_list;
     while (curr) {
-        node *temp = curr;
+        node* temp = curr;
         string s(curr->name);
         if (s == "=") {
             temp = curr->childList;
         }
         if (!temp)
             continue;
-        for (auto &u : temp->structParamList) {
+        for (auto& u : temp->structParamList) {
             int ptrLevel = 0;
             if (u->declSp)
                 ptrLevel = u->declSp->ptrLevel;
@@ -115,26 +115,26 @@ node *struct_declaration(node *specifier_qualifier_list, node *struct_declarator
     return specifier_qualifier_list;
 }
 
-node *declaration_list(node *declaration_list, node *declaration) {
-    node *temp = NULL;
+node* declaration_list(node* declaration_list, node* declaration) {
+    node* temp = NULL;
     string s(declaration_list->name);
     bool c1 = (s == "DECL_LIST");
     if (c1) {
-        temp = makeNode(strdup("DECL_LIST"), strdup("declaration list"), 0, declaration_list->childList, declaration, (node *)NULL, (node *)NULL);
+        temp = makeNode(strdup("DECL_LIST"), strdup("declaration list"), 0, declaration_list->childList, declaration, (node*)NULL, (node*)NULL);
     } else {
-        temp = makeNode(strdup("DECL_LIST"), strdup("declaration list"), 0, declaration_list, declaration, (node *)NULL, (node *)NULL);
+        temp = makeNode(strdup("DECL_LIST"), strdup("declaration list"), 0, declaration_list, declaration, (node*)NULL, (node*)NULL);
     }
-    for (auto &u : declaration->paramList) {
+    for (auto& u : declaration->paramList) {
         temp->paramList.push_back(u);
     }
-    for (auto &u : declaration_list->paramList) {
+    for (auto& u : declaration_list->paramList) {
         temp->paramList.push_back(u);
     }
     return temp;
 }
 
-node *parameter_declaration(node *declaration_specifiers, node *declarator) {
-    param *parameter = new param();
+node* parameter_declaration(node* declaration_specifiers, node* declarator) {
+    param* parameter = new param();
     if (!parameter->declSp) {
         parameter->declSp = new declSpec();
     }
@@ -145,7 +145,7 @@ node *parameter_declaration(node *declaration_specifiers, node *declarator) {
         parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
     }
     vector<int> arrayIndicesTmp;
-    for (auto &x : declarator->arrayIndices) {
+    for (auto& x : declarator->arrayIndices) {
         int asizeTmp = getValueFromConstantExpression(x, errCode);
         if (asizeTmp < 0 || errCode) {
             error(x->lexeme, ARRAY_SIZE_NOT_CONSTANT);
@@ -160,10 +160,10 @@ node *parameter_declaration(node *declaration_specifiers, node *declarator) {
     return declarator;
 }
 
-string checkFuncArgValidityWithParamEmit(node *postfix_expression, node *argument_expression_list, int &errCode, string &errString) {
+string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_expression_list, int& errCode, string& errString) {
     string func_name = postfix_expression->lexeme;
     string name = postfix_expression->lexeme;
-    symbolTableNode *stNode = lookUp(gSymTable, name);
+    symbolTableNode* stNode = lookUp(gSymTable, name);
 
     if (!stNode || stNode->infoType != INFO_TYPE_FUNC || !stNode->declSp) {
         setErrorParams(errCode, SYMBOL_NOT_FOUND, errString, name);
@@ -175,15 +175,15 @@ string checkFuncArgValidityWithParamEmit(node *postfix_expression, node *argumen
     //     return;
     // }
 
-    vector<struct param *> paramList = stNode->paramList;
+    vector<struct param*> paramList = stNode->paramList;
     int maxSize = paramList.size();
     int idx = 0;
-    node *curr = argument_expression_list;
+    node* curr = argument_expression_list;
     int paramSize = 0;
     string newTemp = EMPTY_STR;
-    vector<node *> arguments;
+    vector<node*> arguments;
     while (curr) {
-        node *temp = curr;
+        node* temp = curr;
         string s = curr->name;
         if (s == "=")
             temp = curr->childList;
@@ -256,10 +256,10 @@ string checkFuncArgValidityWithParamEmit(node *postfix_expression, node *argumen
     return newTemp;
 }
 
-void setOverSixParamOffset(node *declarator, symbolTable *curr, symbolTableNode *funcNode) {
+void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode* funcNode) {
     int tempOffset = rbp_size;
     int param_num = 0;
-    for (auto &p : declarator->paramList) {
+    for (auto& p : declarator->paramList) {
         param_num++;
         int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
         if (retVal) {
@@ -267,7 +267,7 @@ void setOverSixParamOffset(node *declarator, symbolTable *curr, symbolTableNode 
         }
         string lex = p->paramName;
 
-        struct symbolTableNode *sym_node = curr->symbolTableMap[lex];
+        struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
         if (!sym_node) {
             error(lex, ALLOCATION_ERROR);
         }
@@ -289,17 +289,17 @@ void setOverSixParamOffset(node *declarator, symbolTable *curr, symbolTableNode 
     return;
 }
 
-void setFirstSixParamOffset(node *declarator, symbolTable *gSymTable) {
+void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable) {
     offset += 8;
     int param_num = 0;
-    symbolTable *curr = gSymTable->childList[(gSymTable->childList.size()) - 1];
+    symbolTable* curr = gSymTable->childList[(gSymTable->childList.size()) - 1];
 
-    for (auto &p : declarator->paramList) {
+    for (auto& p : declarator->paramList) {
         param_num++;
         if (param_num > 6)
             break;
         string lex = p->paramName;
-        struct symbolTableNode *sym_node = curr->symbolTableMap[lex];
+        struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
         if (!sym_node) {
             error(lex, ALLOCATION_ERROR);
         }
@@ -309,14 +309,14 @@ void setFirstSixParamOffset(node *declarator, symbolTable *gSymTable) {
     return;
 }
 
-bool checkGlobalInitializerDFSUtil(node *a) {
+bool checkGlobalInitializerDFSUtil(node* a) {
     if (!a)
         return true;
     if (a->isLeaf) {
         return a->isConstant;
     }
 
-    node *temp = a->childList;
+    node* temp = a->childList;
     while (temp) {
         if (!checkGlobalInitializerDFSUtil(temp))
             return false;
@@ -326,18 +326,18 @@ bool checkGlobalInitializerDFSUtil(node *a) {
     return true;
 }
 
-bool checkGlobalInitializer(node *initializer) {
+bool checkGlobalInitializer(node* initializer) {
     //performs dfs and checks if any leaf node is not constant
     return checkGlobalInitializerDFSUtil(initializer);
 }
 
-int addArrayParamToStack(int &offset, string addr, int &errCode, string &errString) {
+int addArrayParamToStack(int& offset, string addr, int& errCode, string& errString) {
     string newTmp = generateTemp(errCode);
     if (errCode) {
         setErrorParams(errCode, errCode, errString, "");
         return -1;
     }
-    symbolTableNode *sym_node;
+    symbolTableNode* sym_node;
     sym_node = lookUp(gSymTable, newTmp);
     sym_node->size = 8;
     sym_node->offset = offset;
@@ -365,7 +365,7 @@ int addArrayParamToStack(int &offset, string addr, int &errCode, string &errStri
     int size = 8;
     if (sym_node->declSp->type[0] == TYPE_STRUCT) {
         string structName = sym_node->declSp->lexeme;
-        structTableNode *structNode = structLookUp(gSymTable, structName);
+        structTableNode* structNode = structLookUp(gSymTable, structName);
         if (structNode == nullptr) {
             error(structName, STRUCT_NOT_DECLARED);
             return -STRUCT_NOT_DECLARED;

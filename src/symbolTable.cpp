@@ -3,18 +3,18 @@
 int temp_num = 0;
 int gScope = 0;
 int id = 0;
-symbolTable *gTempSymbolMap;
-symbolTable *gSymTable;
+symbolTable* gTempSymbolMap;
+symbolTable* gSymTable;
 set<int> validTypes = {TYPE_CHAR, TYPE_INT, TYPE_FLOAT, TYPE_VOID, TYPE_STRUCT, TYPE_STRING_LITERAL};
-vector<struct quadruple *> gCode;
-vector<symbolTable *> codeSTVec;
-symbolTable *globalScopeSymTable;
+vector<struct quadruple*> gCode;
+vector<symbolTable*> codeSTVec;
+symbolTable* globalScopeSymTable;
 
 // grammar.y check if nullptr then it is error.
-struct symbolTableNode *lookUp(symbolTable *st, string name) {
+struct symbolTableNode* lookUp(symbolTable* st, string name) {
     // goes to parent if does not find in st
     //returns node otherwise null
-    symbolTable *node = st;
+    symbolTable* node = st;
     while (node != nullptr) {
         if (node->symbolTableMap.find(name) != node->symbolTableMap.end()) {
             return node->symbolTableMap[name];
@@ -24,11 +24,11 @@ struct symbolTableNode *lookUp(symbolTable *st, string name) {
     return nullptr;
 }
 
-int insertSymbol(symbolTable *st, int lineNo, string name) {
+int insertSymbol(symbolTable* st, int lineNo, string name) {
     if (st->symbolTableMap.find(name) != st->symbolTableMap.end()) {
         return SYMBOL_ALREADY_EXISTS;
     }
-    symbolTableNode *node = new symbolTableNode();
+    symbolTableNode* node = new symbolTableNode();
     if (!node) {
         return ALLOCATION_ERROR;
     }
@@ -40,20 +40,20 @@ int insertSymbol(symbolTable *st, int lineNo, string name) {
     return 0;
 }
 
-void addIVal(node *temp, string s) {
+void addIVal(node* temp, string s) {
     size_t p;
     temp->valType = TYPE_INT;
     temp->ival = (int)stod(s, &p);
 }
 
-void addFVal(node *temp, string s) {
+void addFVal(node* temp, string s) {
     size_t p;
     temp->valType = TYPE_FLOAT;
     temp->fval = (float)stod(s, &p);
 }
 
-struct symbolTable *addChildSymbolTable(struct symbolTable *parent) {
-    symbolTable *node = new symbolTable();
+struct symbolTable* addChildSymbolTable(struct symbolTable* parent) {
+    symbolTable* node = new symbolTable();
     if (!node)
         return nullptr;
     node->scope = gScope++;
@@ -62,7 +62,7 @@ struct symbolTable *addChildSymbolTable(struct symbolTable *parent) {
     return node;
 }
 
-int addTypeToDeclSpec(node *temp, vector<int> &v) {
+int addTypeToDeclSpec(node* temp, vector<int>& v) {
     if (!temp || !temp->declSp) {
         return INVALID_ARGS;
     }
@@ -72,13 +72,13 @@ int addTypeToDeclSpec(node *temp, vector<int> &v) {
     return checkValidType(temp->declSp->type);
 }
 
-int addFunctionSymbol(node *declaration_specifiers, node *declarator) {
+int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
     string name = declarator->lexeme;
 
     currFunc = name;
     int retVal = insertSymbol(gSymTable, declarator->lineNo, name);
     if (retVal == SYMBOL_ALREADY_EXISTS) {
-        struct symbolTableNode *funcNode = lookUp(gSymTable, name);
+        struct symbolTableNode* funcNode = lookUp(gSymTable, name);
         if (funcNode->infoType != INFO_TYPE_FUNC)
             error("Symbol " + name + " not a function", DEFAULT_ERROR);
         if (funcNode->isDefined)
@@ -108,7 +108,7 @@ int addFunctionSymbol(node *declaration_specifiers, node *declarator) {
         //error checks
         error(name, retVal);
     }
-    symbolTableNode *sym_node = gSymTable->symbolTableMap[name];
+    symbolTableNode* sym_node = gSymTable->symbolTableMap[name];
     if (!sym_node)
         return ALLOCATION_ERROR;
     sym_node->infoType = INFO_TYPE_FUNC;
@@ -116,8 +116,8 @@ int addFunctionSymbol(node *declaration_specifiers, node *declarator) {
     if (declaration_specifiers) {
         sym_node->declSp = declSpCopy(declaration_specifiers->declSp);
     } else {
-        declSpec *ds = new declSpec();
-        ds->type.push_back(TYPE_INT);  //default function types if no type specified
+        declSpec* ds = new declSpec();
+        ds->type.push_back(TYPE_INT); //default function types if no type specified
         sym_node->declSp = ds;
     }
     sym_node->paramList = declarator->paramList;
@@ -127,13 +127,13 @@ int addFunctionSymbol(node *declaration_specifiers, node *declarator) {
     return 0;
 }
 
-declSpec *declSpCopy(declSpec *ds) {
-    declSpec *newds = new declSpec();
-    for (auto &a : ds->type)
+declSpec* declSpCopy(declSpec* ds) {
+    declSpec* newds = new declSpec();
+    for (auto& a : ds->type)
         newds->type.push_back(a);
     newds->ptrLevel = ds->ptrLevel;
     newds->lexeme = ds->lexeme;
-    for (auto &a : ds->storageClassSpecifier) {
+    for (auto& a : ds->storageClassSpecifier) {
         newds->storageClassSpecifier.push_back(a);
     }
     newds->isConst = ds->isConst;
@@ -141,7 +141,7 @@ declSpec *declSpCopy(declSpec *ds) {
     return newds;
 }
 
-int removeSymbol(symbolTable *st, string name) {
+int removeSymbol(symbolTable* st, string name) {
     if (!st)
         return INVALID_ARGS;
     auto it = st->symbolTableMap.find(name);
@@ -151,7 +151,7 @@ int removeSymbol(symbolTable *st, string name) {
     return 0;
 }
 
-int checkVoidSymbol(symbolTableNode *root) {
+int checkVoidSymbol(symbolTableNode* root) {
     if (!root->declSp)
         return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
     if (checkType(root->declSp, TYPE_VOID, 0))
@@ -159,8 +159,8 @@ int checkVoidSymbol(symbolTableNode *root) {
     return TYPE_ERROR;
 }
 
-structTableNode *structLookUp(symbolTable *st, string name) {
-    symbolTable *curr = st;
+structTableNode* structLookUp(symbolTable* st, string name) {
+    symbolTable* curr = st;
     while (curr) {
         if (curr->structMap.find(name) != curr->structMap.end()) {
             return curr->structMap[name];
@@ -170,7 +170,7 @@ structTableNode *structLookUp(symbolTable *st, string name) {
     return nullptr;
 }
 
-structParam *structureParamLookup(structTableNode *node, string paramName, int &err, string &errStr) {
+structParam* structureParamLookup(structTableNode* node, string paramName, int& err, string& errStr) {
     //returns 0 if struct node has a param named paramName
     setErrorParams(err, 0, errStr, "structHasParam");
     if (!node || !paramName.size()) {
@@ -178,7 +178,7 @@ structParam *structureParamLookup(structTableNode *node, string paramName, int &
         return nullptr;
     }
 
-    for (structParam *p : node->paramList) {
+    for (structParam* p : node->paramList) {
         if (p->name == paramName)
             return p;
     }
