@@ -1,4 +1,7 @@
-void bubble_sort(int *arr, int n){
+void printf(char* str, int x);
+char* str = "%d\n";
+
+void bubble_sort(int arr[6], int n){
     int i, j;
     for(i = 0; i < n-2; ++i){
         for(j = 0; j < n-i-1; ++j){
@@ -9,12 +12,22 @@ void bubble_sort(int *arr, int n){
             }
         }
     }
+    /* printf(str, arr[0]);
+    printf(str, arr[1]); 
+    printf(str, arr[2]); */
     return;
 }
 
 int main(){
-    int n = 10;
-    int arr[10] = {5, 4, 7, 2, 9, 10, 1, 3, 6, 8};
+    int n = 6;
+    int arr[6] = {90, 56, 78, 90, 67, 345};
+    /* arr[0] = 90;
+    arr[1] = 23;
+    arr[2] = 45;
+ */
     bubble_sort(arr, n);
+    for(n = 0; n < 6; ++n){
+        printf(str,arr[n]);
+    }
     return 0;
 }

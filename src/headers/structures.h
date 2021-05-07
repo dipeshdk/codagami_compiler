@@ -1,32 +1,32 @@
 #ifndef structuresHeader
 #define structuresHeader
 
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
+
 #include "constants.h"
 
 using namespace std;
 
-struct globalData{
+struct globalData {
     string varName;
     string value;
     int valueType;
 };
 
-struct declSpec
-{
-    vector<int> type; // check validity of vector short double 
-    int ptrLevel; // **a =2
-    string lexeme; // union or struct or enum
-    vector<int> storageClassSpecifier; // int or vector<int> ? check later
-    bool isConst; //bool
-    bool isVolatile; //bool
+struct declSpec {
+    vector<int> type;                   // check validity of vector short double
+    int ptrLevel;                       // **a =2
+    string lexeme;                      // union or struct or enum
+    vector<int> storageClassSpecifier;  // int or vector<int> ? check later
+    bool isConst;                       //bool
+    bool isVolatile;                    //bool
 
-    declSpec() : ptrLevel(0), isConst(0), isVolatile(0)  {
-        lexeme="empty";
-     }
+    declSpec() : ptrLevel(0), isConst(0), isVolatile(0) {
+        lexeme = "empty";
+    }
 };
 
-struct param{
+struct param {
     int infoType;
     vector<int> arrayIndices;
     int arraySize;
@@ -34,82 +34,80 @@ struct param{
     string paramName;
     param() {
         declSp = new declSpec();
-        paramName="empty";
+        paramName = "empty";
         arraySize = 0;
         infoType = INFO_TYPE_NORMAL;
     }
 };
 
-struct structParam{
+struct structParam {
     int infoType;
     struct declSpec *declSp;
     string name;
     int bit;
-    structParam():bit(NO_BIT_ASSIGNED) {
+    structParam() : bit(NO_BIT_ASSIGNED) {
         declSp = new declSpec();
-        name="empty";
+        name = "empty";
     }
 };
 
 struct symbolTableNode {
-    int infoType; // normal, func, array, struct/union
+    int infoType;  // normal, func, array, struct/union
     int lineNo;
     int arraySize;
     int paramSize;
     int callPopSize;
-    bool isDefined; //for functions
+    bool isDefined;  //for functions
     int size;
     int paramWidth;
     int offset;
-    vector<struct param*> paramList; //for functions, struct and union
+    vector<struct param *> paramList;  //for functions, struct and union
     vector<int> arrayIndices;
     string name;
     struct declSpec *declSp;
     int scope;
     symbolTableNode() {
         infoType = INFO_TYPE_NORMAL;
-        arraySize=0;
-        paramSize=0;
-        isDefined=true;
+        arraySize = 0;
+        paramSize = 0;
+        isDefined = true;
         declSp = new declSpec();
         scope = -1;
-        callPopSize=0;
+        callPopSize = 0;
     }
 };
 
-struct symbolTable{
+struct symbolTable {
     vector<string> symbolOrder;
-    map<string, struct symbolTableNode*> symbolTableMap; // <lexeme, struct>
-    struct symbolTable* parent;
-    int scope; //name for scope : global, main, function name
+    map<string, struct symbolTableNode *> symbolTableMap;  // <lexeme, struct>
+    struct symbolTable *parent;
+    int scope;  //name for scope : global, main, function name
     vector<struct symbolTable *> childList;
-    map<string, struct structTableNode*> structMap;
+    map<string, struct structTableNode *> structMap;
 
     symbolTable() {
         parent = nullptr;
     }
 };
 
-
 struct structTableNode {
-    int infoType; //struct or union
+    int infoType;  //struct or union
     string name;
     int lineNo;
-    vector<structParam*> paramList;
+    vector<structParam *> paramList;
     structTableNode() {
-        name="empty";
+        name = "empty";
     }
 };
 
-struct node
-{
+struct node {
     int id;
     char *name = NULL;
     char *lexeme = NULL;
-    int valType; //in which variable is constant stored
+    int valType;  //in which variable is constant stored
     int ival;
     float fval;
-    int isLeaf; // DEAD_NODE if declaration node so not ot be printed in AST
+    int isLeaf;  // DEAD_NODE if declaration node so not ot be printed in AST
     struct node *next;
     struct node *childList = nullptr;
     struct declSpec *declSp;
@@ -120,11 +118,11 @@ struct node
     int lineNo;
     int arraySize = 0;
     int paramSize = 0;
-    vector<struct param*> paramList;
-    vector<struct structParam*> structParamList;
-    vector<node*> arrayIndices;
+    vector<struct param *> paramList;
+    vector<struct structParam *> structParamList;
+    vector<node *> arrayIndices;
 
-    string addr; 
+    string addr;
     int quad;
     vector<int> truelist, falselist, nextlist, continuelist, breaklist;
     node() {
@@ -135,22 +133,22 @@ struct node
         addr = "EMPTY_ADDR";
         valType = NOT_CONSTANT;
         isConstant = false;
-        isStringLiteral=false;
+        isStringLiteral = false;
     }
-}; 
+};
 
 struct quadruple {
     int opCode;
     string arg1, arg2, result;
 };
 
-struct reg{
+struct reg {
     bool isFree;
     string varValue;
     int quadNo;
     string regName;
     string regNameOneByte;
-    
+
     reg() {
         isFree = true;
     }
