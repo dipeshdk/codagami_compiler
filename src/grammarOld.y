@@ -2160,7 +2160,8 @@ function_definition
 		funcBeginQuad = nextQuad();
     	emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, BLANK_STR);
 		while(!arrayInFuncParam.empty()){
-			addArrayParamToStack(offset, arrayInFuncParam.top(), errCode, errStr);
+			// Not required because we don't need to set arr address as it is passed as pointer
+			// addArrayParamToStack(offset, arrayInFuncParam.top(), errCode, errStr);
 			arrayInFuncParam.pop();
 		}
 		setOverSixParamOffset(declarator, curr, funcNode);

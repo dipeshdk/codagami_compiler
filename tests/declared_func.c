@@ -3,18 +3,21 @@ char* str = "%d\n";
 /* int foo(int*, float); */
 
 int foo(int a[10], int b) {
-    int x;
-    int cc[10];
-    x = a[0] + b;
+    int x = 9;
     printf(str,a[0]);
-    printf(str,x);
+    printf(str,a[1]);
+    printf(str,a[2]);
+    x = x + a[0] - a[1];
     return x;
 }
 
 int main() {
+    int x = 90;
     int a[10];
-    int x;
     a[0]= 90;
-    x = foo(a,5);
+    a[1] = 89;
+    a[2] = 94;
+    x = foo(a, x);
+    printf(str,x);
     return 0;
 }
