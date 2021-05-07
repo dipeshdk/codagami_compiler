@@ -256,12 +256,13 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
 }
 
 bool nodeIsStruct(node* astNode) {
+    //TODO: Check for pointer structs
     string varName = astNode->addr;
     if (isConstantNode(astNode))
         return false;
     symbolTableNode* stNode = lookUp(gSymTable, varName);
     if (!stNode)
-        error(varName, SYMBOL_NOT_FOUND);
+        return false;
     if (stNode->infoType == INFO_TYPE_STRUCT)
         return true;
     return false;
@@ -307,15 +308,16 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
         if (p->declSp->type[0] == TYPE_STRUCT) {
             sym_node->infoType = INFO_TYPE_STRUCT;
         }
+        sym_node->arraySize = p->arraySize;
+        sym_node->arrayIndices = p->arrayIndices;
         sym_node->declSp = declSpCopy(p->declSp);
         sym_node->infoType = p->infoType;
         sym_node->size = getNodeSize(sym_node, gSymTable);
-        if ((p->declSp->type.size() > 0 && p->declSp->type[0] == TYPE_STRUCT) || param_num > 6) {
+        if (param_num > 6) {
             sym_node->offset = (-1 * tempOffset);
             tempOffset += getOffsettedSize(sym_node->size);
         }
     }
-
     funcNode->paramWidth = tempOffset - rbp_size;
 
     return;
