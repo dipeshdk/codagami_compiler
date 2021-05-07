@@ -1,14 +1,14 @@
 #include "headers/allInclude.h"
 using namespace std;
 
-vector<reg *> regVec;
+vector<reg*> regVec;
 vector<pair<string, vector<string>>> gAsm;
 vector<string> gArgRegs({REGISTER_RDI, REGISTER_RSI, REGISTER_RDX, REGISTER_RCX, REGISTER_R8, REGISTER_R9});
 vector<string> regNames({REGISTER_R10, REGISTER_R11, REGISTER_RCX, REGISTER_RAX, REGISTER_RDX, REGISTER_RBX, REGISTER_RSP, REGISTER_RBP, REGISTER_RSI, REGISTER_RDI});
 vector<string> regNamesOneByte({"%r10b", "%r11b", "%cl", "%al", "%dl", "%bl", REGISTER_RSP, "%bpl", "%sil", "%dil"});
 stack<string> funcNameStack;
 stack<int> funcSizeStack;
-vector<globalData *> globalDataPair;
+vector<globalData*> globalDataPair;
 int gQuadNo;
 stack<int> ptrAssignedRegs;
 set<string> libraryFunctions{"printf", "scanf", "malloc"};
@@ -27,7 +27,7 @@ string stripTypeCastUtil(string name) {
 
 void stripTypeCastFromQuads() {
     for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
-        quadruple *quad = gCode[quadNo];
+        quadruple* quad = gCode[quadNo];
         quad->result = stripTypeCastUtil(quad->result);
         quad->arg1 = stripTypeCastUtil(quad->arg1);
         quad->arg2 = stripTypeCastUtil(quad->arg2);
@@ -80,7 +80,7 @@ void printAsm(string asmOutputFile) {
 
 void printASMData() {
     cout << "\n.data" << endl;
-    for (globalData *g : globalDataPair) {
+    for (globalData* g : globalDataPair) {
         cout << "   " << g->varName << ": ";
         if (g->valueType == TYPE_STRING_LITERAL) {
             cout << ".asciz ";
@@ -93,69 +93,69 @@ void printASMData() {
 }
 
 void emitAssemblyForQuad(int quadNo) {
-    quadruple *quad = gCode[quadNo];
+    quadruple* quad = gCode[quadNo];
     switch (quad->opCode) {
-        case OP_GOTO:
-            asmOpGoto(quadNo);
-            break;
-        case OP_ADDI:
-            asmOpAddI(quadNo);
-            break;
-        case OP_MULI:
-            asmOpMulI(quadNo);
-            break;
-        case OP_IFGOTO:
-            asmOpIfGoto(quadNo);
-            break;
-        case OP_SUBI:
-            asmOpSubI(quadNo);
-            break;
-        case OP_ASSIGNMENT:
-            asmOpAssignment(quadNo);
-            break;
-        case OP_UNARY_MINUS:
-            asmOpUnaryMinus(quadNo);
-            break;
-        case OP_DIVI:
-            asmOpDivI(quadNo);
-            break;
-        case OP_LEFT_SHIFT:
-            asmOpLeftShift(quadNo);
-            break;
-        case OP_RIGHT_SHIFT:
-            asmOpRightShift(quadNo);
-            break;
-        case OP_OR:
-            asmOpLogicalOr(quadNo);
-            break;
-        case OP_AND:
-            asmOpLogicalAnd(quadNo);
-            break;
-        case OP_LOGICAL_NOT:
-            asmOpUnaryLogicalNot(quadNo);
-            break;
-        case OP_XOR:
-            asmOpLogicalXor(quadNo);
-            break;
-        case OP_EQ:
-            asmOpEq(quadNo);
-            break;
-        case OP_NEQ:
-            asmOpNeq(quadNo);
-            break;
-        case OP_LEQ:
-            asmOpLeq(quadNo);
-            break;
-        case OP_GREATER:
-            asmOpGreater(quadNo);
-            break;
-        case OP_LESS:
-            asmOpLess(quadNo);
-            break;
-        case OP_MOD:
-            asmOpMod(quadNo);
-            break;
-        /* case OP_ADDF: 
+    case OP_GOTO:
+        asmOpGoto(quadNo);
+        break;
+    case OP_ADDI:
+        asmOpAddI(quadNo);
+        break;
+    case OP_MULI:
+        asmOpMulI(quadNo);
+        break;
+    case OP_IFGOTO:
+        asmOpIfGoto(quadNo);
+        break;
+    case OP_SUBI:
+        asmOpSubI(quadNo);
+        break;
+    case OP_ASSIGNMENT:
+        asmOpAssignment(quadNo);
+        break;
+    case OP_UNARY_MINUS:
+        asmOpUnaryMinus(quadNo);
+        break;
+    case OP_DIVI:
+        asmOpDivI(quadNo);
+        break;
+    case OP_LEFT_SHIFT:
+        asmOpLeftShift(quadNo);
+        break;
+    case OP_RIGHT_SHIFT:
+        asmOpRightShift(quadNo);
+        break;
+    case OP_OR:
+        asmOpLogicalOr(quadNo);
+        break;
+    case OP_AND:
+        asmOpLogicalAnd(quadNo);
+        break;
+    case OP_LOGICAL_NOT:
+        asmOpUnaryLogicalNot(quadNo);
+        break;
+    case OP_XOR:
+        asmOpLogicalXor(quadNo);
+        break;
+    case OP_EQ:
+        asmOpEq(quadNo);
+        break;
+    case OP_NEQ:
+        asmOpNeq(quadNo);
+        break;
+    case OP_LEQ:
+        asmOpLeq(quadNo);
+        break;
+    case OP_GREATER:
+        asmOpGreater(quadNo);
+        break;
+    case OP_LESS:
+        asmOpLess(quadNo);
+        break;
+    case OP_MOD:
+        asmOpMod(quadNo);
+        break;
+    /* case OP_ADDF: 
         break;
     case OP_MULF: 
         break;
@@ -163,50 +163,50 @@ void emitAssemblyForQuad(int quadNo) {
         break;
     case OP_DIVF: 
         break; */
-        case OP_GEQ:
-            asmOpGeq(quadNo);
-            break;
-        case OP_ANDAND:
-            asmOpAndAnd(quadNo);
-            break;
-        case OP_OROR:
-            asmOpOrOr(quadNo);
-            break;
-        case OP_IFNEQGOTO:
-            asmOpIfNeqGoto(quadNo);
-            break;
-        case OP_BEGINFUNC:
-            asmOpBeginFunc(quadNo);
-            break;
-        case OP_ENDFUNC:
-            asmOpEndFunc(quadNo);
-            break;
-        case OP_RETURN:
-            asmOpReturn(quadNo);
-            break;
-        case OP_PUSHPARAM:
-            asmOpPushparam(quadNo);
-            break;
-        case OP_POPPARAM:
-            asmOpPopparam(quadNo);
-            break;
-        case OP_LCALL:
-            amsOpLCall(quadNo);
-            break;
-        case OP_LABEL:
-            asmOpLabel(quadNo);
-            break;
-        case OP_ADDR:
-            amsOpAddr(quadNo);
-            break;
-        case OP_BITWISE_NOT:
-            asmOpBitwiseNot(quadNo);
-            break;
-        case OP_MOV:
-            asmOPMoveFuncParam(quadNo);
-            break;
-        default:
-            break;
+    case OP_GEQ:
+        asmOpGeq(quadNo);
+        break;
+    case OP_ANDAND:
+        asmOpAndAnd(quadNo);
+        break;
+    case OP_OROR:
+        asmOpOrOr(quadNo);
+        break;
+    case OP_IFNEQGOTO:
+        asmOpIfNeqGoto(quadNo);
+        break;
+    case OP_BEGINFUNC:
+        asmOpBeginFunc(quadNo);
+        break;
+    case OP_ENDFUNC:
+        asmOpEndFunc(quadNo);
+        break;
+    case OP_RETURN:
+        asmOpReturn(quadNo);
+        break;
+    case OP_PUSHPARAM:
+        asmOpPushparam(quadNo);
+        break;
+    case OP_POPPARAM:
+        asmOpPopparam(quadNo);
+        break;
+    case OP_LCALL:
+        amsOpLCall(quadNo);
+        break;
+    case OP_LABEL:
+        asmOpLabel(quadNo);
+        break;
+    case OP_ADDR:
+        amsOpAddr(quadNo);
+        break;
+    case OP_BITWISE_NOT:
+        asmOpBitwiseNot(quadNo);
+        break;
+    case OP_MOV:
+        asmOPMoveFuncParam(quadNo);
+        break;
+    default:
+        break;
     }
 }
 
@@ -215,8 +215,8 @@ void asmOpBitwiseNot(int quadNo) {
 }
 
 void amsOpAddr(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
@@ -247,8 +247,8 @@ void asmLabel(int labelno) {
 }
 
 void asmOpReturn(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     int eaxInd = EAX_REGISTER_INDEX;
     string eaxName = regVec[EAX_REGISTER_INDEX]->regName;
@@ -277,8 +277,8 @@ void asmOpEndFunc(int quadNo) {
 }
 
 void amsOpLCall(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
     //mov    %eax,-0x4(%rbp)
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
@@ -299,8 +299,8 @@ void emitFuncStart() {
 }
 
 void asmOPMoveFuncParam(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     string regName = quad->arg1;
     string valToMove = quad->result;
@@ -317,15 +317,15 @@ void asmOPMoveFuncParam(int quadNo) {
 }
 
 void asmJump(int quadNo, string op) {
-    quadruple *quad = gCode[quadNo];
+    quadruple* quad = gCode[quadNo];
     string result = quad->result;
     string label = "label$" + result;
     emitAsm(op, {label});
 }
 
 void asmOpPopparam(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
     string resultAddr = quad->result;
 
     if (!isConstant(resultAddr)) {
@@ -335,8 +335,8 @@ void asmOpPopparam(int quadNo) {
 }
 
 void asmOpBeginFunc(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (!isConstant(quad->result))
         errorAsm(quad->result, BEGIN_FUNC_ARG_NOT_CONSTANT_ERROR);
@@ -346,7 +346,7 @@ void asmOpBeginFunc(int quadNo) {
     int funcSize = getNumberFromConstAddr(quad->result);
     funcSizeStack.push(funcSize);
     //TODO: funcNameStack is the the stack containing active function names, starting with global
-    symbolTableNode *funcNode = lookUp(st, funcNameStack.top());
+    symbolTableNode* funcNode = lookUp(st, funcNameStack.top());
     if (!funcNode) {
         error(funcNameStack.top(), SYMBOL_NOT_FOUND);
     }
@@ -360,9 +360,11 @@ void asmOpBeginFunc(int quadNo) {
     emitAsm("subq", {"$" + hexString(quad->result), REGISTER_RSP});
 
     //move first 6 arguments from register to stack
-    vector<struct param *> paramList = funcNode->paramList;
+    vector<struct param*> paramList = funcNode->paramList;
     int numParams = paramList.size();
     for (int i = 0; i < min(6, numParams); i++) {
+        if ((paramList[i]->declSp->type.size() > 0 && paramList[i]->declSp->type[0] == TYPE_STRUCT))
+            continue;
         string argAddr = getVariableAddr(paramList[i]->paramName, st);
         emitAsm("movq", {gArgRegs[i], argAddr});
     }
@@ -370,8 +372,8 @@ void asmOpBeginFunc(int quadNo) {
 }
 
 void asmOpPushparam(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     string resultAddr = quad->result;
 
@@ -385,8 +387,8 @@ void asmOpPushparam(int quadNo) {
 }
 
 void asmOpUnaryOperator(string op, int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
@@ -420,15 +422,15 @@ void asmOpUnaryMinus(int quadNo) {
 }
 
 void asmOpUnaryLogicalNot(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
     string resultAddr = getVariableAddr(quad->result, st);
 
     string argString = quad->arg1;
     if (isConstant(argString)) {
-        string result = evaluate("logicalNot", argString, "");  //incomp
+        string result = evaluate("logicalNot", argString, ""); //incomp
         emitAsm("movq", {resultAddr});
     } else {
         string argAddr = getVariableAddr(argString, st);
@@ -443,8 +445,8 @@ void asmOpDivI(int quadNo) {
     /*  Refer http://www.godevtool.com/TestbugHelp/UseofIDIV.htm#:~:text=The%20IDIV%20instruction%20takes%20only,the%20dividend%20and%20the%20divisor. 
         The above website tell us all the different version of this command of which I(amigo) have used only 1 standard form. */
 
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
@@ -496,8 +498,8 @@ void asmOpDivI(int quadNo) {
 }
 
 void asmOpLeftShift(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
@@ -553,8 +555,8 @@ void asmOpLeftShift(int quadNo) {
 }
 
 void asmOpRightShift(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
@@ -616,32 +618,32 @@ void emitAsm(string optr, vector<string> operands) {
 void errorAsm(string str, int errCode) {
     string errStr;
     switch (errCode) {
-        case ASSIGNMENT_TO_CONSTANT_ERROR:
-            errStr = "Cannot assign value to a constant.";
-            break;
-        case UNDEFINED_SCOPE_STNODE_ERROR:
-            errStr = "Internal Error. UNDEFINED_SCOPE_STNODE_ERROR";
-            break;
-        case REGISTER_ASSIGNMENT_ERROR:
-            errStr = "Internal Error. REGISTER_ASSIGNMENT_ERROR";
-            break;
-        case POPPARAM_ARG_NOT_CONSTANT:
-            errStr = "Popparam arg should be constant";
-            break;
-        case BEGIN_FUNC_ARG_NOT_CONSTANT_ERROR:
-            errStr = "Beginfunc arg should be constant";
-            break;
-        case CALL_TO_GLOBAL_ERROR:
-            errStr = "Internal Error. Calling global";
-            break;
-        case GOTO_ADDR_NOT_CONST:
-            errStr = "Internal Error: Goto address should be integer";
-            break;
-        case DEREFERENCING_CONSTANT_ERROR:
-            errStr = "Derefrencing a constant not allowed.";
-            break;
-        default:
-            break;
+    case ASSIGNMENT_TO_CONSTANT_ERROR:
+        errStr = "Cannot assign value to a constant.";
+        break;
+    case UNDEFINED_SCOPE_STNODE_ERROR:
+        errStr = "Internal Error. UNDEFINED_SCOPE_STNODE_ERROR";
+        break;
+    case REGISTER_ASSIGNMENT_ERROR:
+        errStr = "Internal Error. REGISTER_ASSIGNMENT_ERROR";
+        break;
+    case POPPARAM_ARG_NOT_CONSTANT:
+        errStr = "Popparam arg should be constant";
+        break;
+    case BEGIN_FUNC_ARG_NOT_CONSTANT_ERROR:
+        errStr = "Beginfunc arg should be constant";
+        break;
+    case CALL_TO_GLOBAL_ERROR:
+        errStr = "Internal Error. Calling global";
+        break;
+    case GOTO_ADDR_NOT_CONST:
+        errStr = "Internal Error: Goto address should be integer";
+        break;
+    case DEREFERENCING_CONSTANT_ERROR:
+        errStr = "Derefrencing a constant not allowed.";
+        break;
+    default:
+        break;
     }
     errStr += " ";
     errStr += str;
@@ -649,8 +651,8 @@ void errorAsm(string str, int errCode) {
     exit(errCode);
 }
 
-int getParameterOffset(string structName, string param, symbolTable *st) {
-    structTableNode *structure = nullptr;
+int getParameterOffset(string structName, string param, symbolTable* st) {
+    structTableNode* structure = nullptr;
     structure = structLookUp(st, structName);
     if (structure == nullptr) {
         error(structName, STRUCT_NOT_DECLARED);
@@ -662,7 +664,7 @@ int getParameterOffset(string structName, string param, symbolTable *st) {
     return paramOffset;
 }
 
-int getOffset(string varName, symbolTable *st) {
+int getOffset(string varName, symbolTable* st) {
     if (isPointer(varName))
         varName = stripPointer(varName);
     //check for foo.a
@@ -675,7 +677,7 @@ int getOffset(string varName, symbolTable *st) {
         name.erase(0, pos + delim_dot.length());
         param = name;
     }
-    symbolTableNode *sym_node = lookUp(st, identifier);
+    symbolTableNode* sym_node = lookUp(st, identifier);
     if (sym_node == nullptr) {
         error(identifier, SYMBOL_NOT_FOUND);
     }
@@ -687,7 +689,7 @@ int getOffset(string varName, symbolTable *st) {
     return -1 * offset;
 }
 
-bool isGlobal(string varName, symbolTable *st) {
+bool isGlobal(string varName, symbolTable* st) {
     if (isPointer(varName))
         varName = stripPointer(varName);
     string identifier = varName, param, name = varName, delim_dot = ".";
@@ -695,7 +697,7 @@ bool isGlobal(string varName, symbolTable *st) {
     if (pos != string::npos) {
         identifier = name.substr(0, pos);
     }
-    symbolTableNode *sym_node = lookUp(st, identifier);
+    symbolTableNode* sym_node = lookUp(st, identifier);
     if (sym_node == nullptr) {
         error(varName, SYMBOL_NOT_FOUND);
     }
@@ -704,10 +706,10 @@ bool isGlobal(string varName, symbolTable *st) {
     return sym_node->scope == GLOBAL_SCOPE_NUM;
 }
 
-int getGlobalAddress(string varName, symbolTable *st) {
+int getGlobalAddress(string varName, symbolTable* st) {
     if (isPointer(varName))
         varName = stripPointer(varName);
-    symbolTableNode *sym_node = lookUp(st, varName);
+    symbolTableNode* sym_node = lookUp(st, varName);
     if (sym_node == nullptr) {
         error(varName, SYMBOL_NOT_FOUND);
     }
@@ -746,7 +748,7 @@ string stripPointer(string name) {
     return name;
 }
 
-string getVariableAddr(string varName, symbolTable *st) {
+string getVariableAddr(string varName, symbolTable* st) {
     int offset;
     string offsetStr;
     string identifier = varName, param, temp = varName, delim_ptr = "->", delim_dot = ".";
@@ -759,13 +761,13 @@ string getVariableAddr(string varName, symbolTable *st) {
         param = temp;
         offset = getOffset(identifier, st);
         offsetStr = getOffsetStr(offset);
-        int regAddInd = getReg(gQuadNo, identifier);  //TODO: Free this reg
+        int regAddInd = getReg(gQuadNo, identifier); //TODO: Free this reg
         string regAddName = regVec[regAddInd]->regName;
         emitAsm("movq", {offsetStr, regAddName});
         int regInd = getReg(gQuadNo, identifier);
         string regName = regVec[regInd]->regName;
 
-        symbolTableNode *sym_node = lookUp(st, identifier);
+        symbolTableNode* sym_node = lookUp(st, identifier);
         if (sym_node == nullptr) {
             error(identifier, SYMBOL_NOT_FOUND);
         }
@@ -790,7 +792,7 @@ string getVariableAddr(string varName, symbolTable *st) {
 
     if (isGlobal(identifier, st)) {
         bool isStringLiteral = false;
-        for (globalData *g : globalDataPair) {
+        for (globalData* g : globalDataPair) {
             if (g->varName == identifier) {
                 if (g->valueType == TYPE_STRING_LITERAL)
                     return "$" + g->varName;
@@ -806,17 +808,17 @@ string getVariableAddr(string varName, symbolTable *st) {
             errorAsm(name, DEREFERENCING_CONSTANT_ERROR);
         offset = getOffset(name, st);
         offsetStr = getOffsetStr(offset);
-        int regInd = getReg(gQuadNo, name);  //TODO: Free this reg
+        int regInd = getReg(gQuadNo, name); //TODO: Free this reg
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
         return "(" + regName + ")";
-    } else if (dot && isPointer(identifier)) {  //should be a struct array
+    } else if (dot && isPointer(identifier)) { //should be a struct array
         string name = stripPointer(identifier);
         if (isConstant(name))
             errorAsm(name, DEREFERENCING_CONSTANT_ERROR);
 
-        symbolTableNode *sym_node = lookUp(st, name);
+        symbolTableNode* sym_node = lookUp(st, name);
         if (sym_node == nullptr) {
             error(name, SYMBOL_NOT_FOUND);
         } else if (sym_node->declSp->type[0] != TYPE_STRUCT) {
@@ -826,7 +828,7 @@ string getVariableAddr(string varName, symbolTable *st) {
         int paramOffset = getParameterOffset(sym_node->declSp->lexeme, param, st);
         offset = getOffset(name, st);
         offsetStr = getOffsetStr(offset);
-        int regInd = getReg(gQuadNo, name);  //TODO: Free this reg
+        int regInd = getReg(gQuadNo, name); //TODO: Free this reg
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
@@ -838,7 +840,7 @@ string getVariableAddr(string varName, symbolTable *st) {
 }
 
 void initializeRegs() {
-    regVec = vector<reg *>(NUM_REGISTER);
+    regVec = vector<reg*>(NUM_REGISTER);
     for (int i = 0; i < NUM_REGISTER; i++) {
         regVec[i] = new reg();
         regVec[i]->isFree = true;
@@ -887,8 +889,12 @@ void freeRegAndMoveToStack(int regInd) {
 }
 
 void asmOpAssignment(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
+
+    //TODO: Verify
+    // if (isConstant(quad->result)) {
+    //     errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
 
     string noPtrName = quad->result;
     bool isPtr = isPointer(noPtrName);
@@ -897,7 +903,7 @@ void asmOpAssignment(int quadNo) {
         noPtrName = stripPointer(quad->result);
     }
 
-    symbolTableNode *stNode = lookUp(st, noPtrName);  //for struct and struct array ptrs
+    symbolTableNode* stNode = lookUp(st, noPtrName); //for struct and struct array ptrs
 
     if (stNode && (stNode->infoType == INFO_TYPE_STRUCT || (isPtr && stNode->declSp->type[0] == TYPE_STRUCT))) {
         copyStruct(quad->arg1, quad->result, quadNo);
@@ -918,8 +924,8 @@ void asmOpAssignment(int quadNo) {
 }
 
 void asmOpMod(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
@@ -986,8 +992,8 @@ string evaluate(string op, string arg1, string arg2) {
 }
 
 void asmOpComp(int quadNo, string asm_comp) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
@@ -1040,8 +1046,8 @@ void asmOpNeq(int quad) {
 }
 
 void asmOpAndAnd(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
@@ -1053,14 +1059,14 @@ void asmOpAndAnd(int quadNo) {
         string argAddr = getVariableAddr(quad->arg1, st);
         emitAsm("cmp", {"$0x0", argAddr});
     }
-    emitAsm("je", {"1f"});  // Jump to mov 0x0
+    emitAsm("je", {"1f"}); // Jump to mov 0x0
     if (isConstant(quad->arg2)) {
         emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg2)});
     } else {
         string argAddr = getVariableAddr(quad->arg2, st);
         emitAsm("cmp", {"$0x0", argAddr});
     }
-    emitAsm("je", {"1f"});  // Jump to mov 0x0
+    emitAsm("je", {"1f"}); // Jump to mov 0x0
     emitAsm("movq", {"$0x1", REGISTER_RAX});
     emitAsm("jmp", {"2f"});
     emitAsm("\n1:", {});
@@ -1071,8 +1077,8 @@ void asmOpAndAnd(int quadNo) {
 }
 
 void asmOpOrOr(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
@@ -1084,14 +1090,14 @@ void asmOpOrOr(int quadNo) {
         string argAddr = getVariableAddr(quad->arg1, st);
         emitAsm("cmp", {"$0x0", argAddr});
     }
-    emitAsm("jne", {"1f"});  // Jump to mov 0x0
+    emitAsm("jne", {"1f"}); // Jump to mov 0x0
     if (isConstant(quad->arg2)) {
         emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg2)});
     } else {
         string argAddr = getVariableAddr(quad->arg2, st);
         emitAsm("cmp", {"$0x0", argAddr});
     }
-    emitAsm("je", {"2f"});  // Jump to mov 0x0
+    emitAsm("je", {"2f"}); // Jump to mov 0x0
     emitAsm("\n1:", {});
     emitAsm("movq", {"$0x1", REGISTER_RAX});
     emitAsm("jmp", {"3f"});
@@ -1103,8 +1109,8 @@ void asmOpOrOr(int quadNo) {
 }
 
 void asmOpGoto(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (quad->result == BLANK_STR) {
         return;
@@ -1117,8 +1123,8 @@ void asmOpGoto(int quadNo) {
 }
 
 void asmOpIfGoto(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (quad->result == BLANK_STR) {
         return;
@@ -1138,8 +1144,8 @@ void asmOpIfGoto(int quadNo) {
 }
 
 void asmOpIfNeqGoto(int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (isConstant(quad->arg1)) {
         if (isConstant(quad->arg2)) {
@@ -1166,8 +1172,8 @@ void asmOpIfNeqGoto(int quadNo) {
 }
 
 void emitAsmForBinaryOperator(string op, int quadNo) {
-    quadruple *quad = gCode[quadNo];
-    symbolTable *st = codeSTVec[quadNo];
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
@@ -1248,7 +1254,7 @@ void asmOpCompareEqual(int quadNo) {
 }
 
 void copyStruct(string from, string to, int quadNo) {
-    symbolTable *st = codeSTVec[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
     //pointers only for arrays
     bool isFromPtr = isPointer(from);
     bool isToPtr = isPointer(to);
@@ -1259,29 +1265,29 @@ void copyStruct(string from, string to, int quadNo) {
     if (isPointer(to))
         toNoPtr = stripPointer(to);
 
-    symbolTableNode *fromNode = lookUp(st, fromNoPtr);
+    symbolTableNode* fromNode = lookUp(st, fromNoPtr);
     if (!fromNode)
         error(from, SYMBOL_NOT_FOUND);
     if (fromNode->infoType != INFO_TYPE_STRUCT && (isFromPtr && fromNode->declSp->type[0] != TYPE_STRUCT))
         error(from, TYPE_ERROR);
 
-    structTableNode *fromStructNode = nullptr;
+    structTableNode* fromStructNode = nullptr;
     fromStructNode = structLookUp(st, fromNode->declSp->lexeme);
     if (!fromStructNode)
         error(fromNode->declSp->lexeme, STRUCT_NOT_DECLARED);
 
-    symbolTableNode *toNode = lookUp(st, toNoPtr);
+    symbolTableNode* toNode = lookUp(st, toNoPtr);
     if (!toNode)
         error(to, SYMBOL_NOT_FOUND);
     if (toNode->infoType != INFO_TYPE_STRUCT && (isToPtr && toNode->declSp->type[0] != TYPE_STRUCT))
         error(to, TYPE_ERROR);
 
-    structTableNode *toStructNode = nullptr;
+    structTableNode* toStructNode = nullptr;
     toStructNode = structLookUp(st, toNode->declSp->lexeme);
     if (!toStructNode)
         error(toNode->declSp->lexeme, STRUCT_NOT_DECLARED);
 
-    for (structParam *p : fromStructNode->paramList) {
+    for (structParam* p : fromStructNode->paramList) {
         string fromParam = from + "." + p->name;
         string fromParamAddr = getVariableAddr(fromParam, st);
 

@@ -10,11 +10,11 @@ void emitAssemblyForQuad(int quadNo);
 
 void errorAsm(string str, int errCode);
 
-int getOffset(string varName, symbolTable *st);
+int getOffset(string varName, symbolTable* st);
 
-bool isGlobal(string varName, symbolTable *st);
+bool isGlobal(string varName, symbolTable* st);
 
-string getVariableAddr(string varName, symbolTable *st);
+string getVariableAddr(string varName, symbolTable* st);
 
 void initializeRegs();
 
@@ -102,13 +102,13 @@ void emitAsm(string optr, vector<string> operands);
 
 void errorAsm(string str, int errCode);
 
-int getOffset(string varName, symbolTable *st);
+int getOffset(string varName, symbolTable* st);
 
-bool isGlobal(string varName, symbolTable *st);
+bool isGlobal(string varName, symbolTable* st);
 
-int getGlobalAddress(string varName, symbolTable *st);
+int getGlobalAddress(string varName, symbolTable* st);
 
-string getVariableAddr(string varName, symbolTable *st);
+string getVariableAddr(string varName, symbolTable* st);
 
 void initializeRegs();
 
@@ -150,7 +150,7 @@ void stripTypeCastFromQuads();
 
 string stripTypeCastUtil(string name);
 
-int getParameterOffset(string structName, string param, symbolTable *st);
+int getParameterOffset(string structName, string param, symbolTable* st);
 
 void copyStruct(string from, string to, int quadNo);
 void asmOpBitwiseNot(int quadNo);
