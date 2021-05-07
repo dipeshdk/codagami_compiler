@@ -234,7 +234,6 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
 
     for (int i =  min(5, maxSize-1); i >= 0; i--) {
         if(!nodeIsStruct(arguments[i])) continue;
-        cout << "pushing param struct " << arguments[i]->addr << " i = " << i << endl;
         emitPushStruct(arguments[i]);
         paramSize += getStructSizeFromAstNode(arguments[i]);
         
