@@ -214,7 +214,7 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st){
     else if(elem->infoType == INFO_TYPE_FUNC){
         size += 8;
     }
-    else if(elem->infoType == INFO_TYPE_STRUCT){
+    else if(elem->infoType == INFO_TYPE_STRUCT || (elem->declSp && elem->declSp->type.size() > 0 && elem->declSp->type[0]==TYPE_STRUCT)){
         if(elem->declSp){
             structTableNode* n = structLookUp(st, elem->declSp->lexeme);
             for(auto i: n->paramList){
