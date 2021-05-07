@@ -234,12 +234,25 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st){
     return size;
 }
 
-int getArraySize(symbolTableNode* sym_node){
+int getArraySize(symbolTableNode* sym_node, symbolTable* st){
     if(sym_node->infoType == INFO_TYPE_ARRAY){
         if(sym_node->declSp->ptrLevel > 1){
             return 8*(sym_node->arraySize);
         }
-        else return getTypeSize(sym_node->declSp->type)*(sym_node->arraySize);
+        else if(sym_node->declSp->type[0] == TYPE_STRUCT){
+            string structName = sym_node->declSp->lexeme;
+            structTableNode* structNode = structLookUp(st, structName);
+            if(structNode == nullptr){
+                error(structName, STRUCT_NOT_DECLARED);
+                return -STRUCT_NOT_DECLARED;
+            }
+            int size = getStructSize(structNode);
+            if(size < 0){
+                error(structName + " size error", DEFAULT_ERROR);
+            }
+            return size*(sym_node->arraySize);
+        }
+        else getTypeSize(sym_node->declSp->type)*(sym_node->arraySize);
     }
     return 0;
 }
@@ -381,7 +394,7 @@ void printQuad(quadruple* quad, int line) {
         case OP_MOV:
             printf("    MOV %s -> %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
         case OP_SUBI:
-            printf("    %s = %s %s %s\n", quad->result.c_str(),  quad->arg2.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str());
+            printf("    %s = %s %s %s\n", quad->result.c_str(),  quad->arg2.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str()); break;
         default:
             printf("    %s = %s %s %s\n", quad->result.c_str(),  quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());
     }

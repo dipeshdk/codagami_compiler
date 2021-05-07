@@ -300,13 +300,20 @@ string emitArrayIndexGetAddr(string arr, string ind, string sizeTemp, int &errCo
         return EMPTY_STR;
     }
 
+    symbolTableNode *arr_node = lookUp(gSymTable, arr);
+    if(arr_node == nullptr){
+        setErrorParams(errCode, SYMBOL_NOT_FOUND, errStr, arr);
+        return EMPTY_STR;
+    }
+
     emit(OP_SUBI, arr, indexTmp, pointerTmp);
     sym_node = lookUp(gSymTable, pointerTmp);
     sym_node->size = 8;
     sym_node->offset = offset;
     sym_node->declSp->ptrLevel = 1;
-    sym_node->declSp->type.push_back(TYPE_INT);
-    offset += 8;
+	sym_node->declSp->type = arr_node->declSp->type;
+    sym_node->declSp->lexeme = arr_node->declSp->lexeme;
+	offset += 8;
 
     if (errCode)
     {
@@ -416,19 +423,35 @@ string getArrayIndexWithEmit(node *postfix_expression, int &errCode, string &err
         return EMPTY_STR;
     }
     int size = getTypeSize(postfix_expression->declSp->type);
-    if (size < 0)
-    {
-        setErrorParams(errCode, -size, errStr, "invalid array type");
+
+    symbolTableNode* sym_node = lookUp(gSymTable, postfix_expression->lexeme);
+    if(sym_node == nullptr){
+        setErrorParams(errCode, SYMBOL_NOT_FOUND, errStr, "symbol for array");
         return EMPTY_STR;
     }
+    if(sym_node->declSp->type[0] == TYPE_STRUCT){
+        string structName = sym_node->declSp->lexeme;
+        structTableNode* structNode = structLookUp(gSymTable, structName);
+        if(structNode == nullptr){
+            setErrorParams(errCode, STRUCT_NOT_DECLARED, errStr, "symbol for struct array");
+            return EMPTY_STR;
+        }
+        size = getStructSize(structNode);
+    }
+    if(size < 0){
+        setErrorParams(errCode, TYPE_ERROR, errStr, "invalid array type");
+        return EMPTY_STR;
+    }
+    //_t1 = 4;
+    // cout << postfix_expression->lexeme <<" offset " << offset << endl;
     string sizeTmp = generateTemp(errCode);
     if (errCode)
     {
         setErrorParams(errCode, errCode, errStr, "error in temp generation");
         return EMPTY_STR;
     }
-    emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR, sizeTmp);
-    symbolTableNode *sym_node = lookUp(gSymTable, sizeTmp);
+    emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
+    sym_node = lookUp(gSymTable, sizeTmp);
     sym_node->size = 8;
     sym_node->offset = offset;
     sym_node->declSp->type.push_back(TYPE_INT);
@@ -444,17 +467,31 @@ int getParamOffset(structTableNode *node, string paramName, int &err, string &er
         err = INVALID_ARGS;
         return -err;
     }
-    int size = 0;
+    int size = getStructSize(node);
+    if(size < 0){
+        setErrorParams(err, INVALID_STRUCT_PARAM, errStr, paramName);
+        return -err;
+    }
+
     int paramOffset = 0;
-    for (structParam *p : node->paramList)
-        size += getTypeSize(p->declSp->type);
-    for (structParam *p : node->paramList)
-    {
+    for(structParam* p : node->paramList) {
+         // doubt : considering offset inside struct?
+        if(p->name == paramName) 
+            return paramOffset;
         int size1 = getTypeSize(p->declSp->type);
-        paramOffset += getOffsettedSize(size1); // doubt : considering offset inside struct?
-        if (p->name == paramName)
-            return size - paramOffset;
+        paramOffset += getOffsettedSize(size1);
     }
     setErrorParams(err, INVALID_STRUCT_PARAM, errStr, paramName);
     return -err;
+}
+
+int getStructSize(structTableNode* node){
+    if(!node) {
+        return -INVALID_ARGS;
+    }
+    int size = 0;
+    for(structParam* p : node->paramList) 
+        size +=  getTypeSize(p->declSp->type);
+
+    return size;
 }

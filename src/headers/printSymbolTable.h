@@ -14,7 +14,7 @@ void addTempDetails(string name, symbolTable* symtab, node* node);
 void printSymbolTableJSON(string filePrefix, symbolTable *st, int numTab, int printTemps);
 void printStructTable(map<string, struct structTableNode*> &structMap, int scope);
 void printSymbolTable(symbolTable *st);
-int getArraySize(symbolTableNode* sym_node);
+int getArraySize(symbolTableNode* sym_node, symbolTable *st);
 
 string getOpName(int opCode);
 void printCode(char* filename);
