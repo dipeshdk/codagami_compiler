@@ -142,6 +142,16 @@ node* parameter_declaration(node* declaration_specifiers, node* declarator){
     if(declarator->declSp) {
         parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
     }
+    vector<int> arrayIndicesTmp;
+    for(auto &x: declarator->arrayIndices){
+        int asizeTmp =  getValueFromConstantExpression(x,errCode);
+        if(asizeTmp < 0 || errCode){
+            error(x->lexeme, ARRAY_SIZE_NOT_CONSTANT);
+        }
+        arrayIndicesTmp.push_back(asizeTmp);
+    }
+    parameter->arraySize = declarator->arraySize;
+    parameter->arrayIndices = arrayIndicesTmp;
     parameter->infoType = declarator->infoType;
     parameter->paramName = declarator->lexeme;
     declarator->paramList.push_back(parameter);
@@ -229,7 +239,7 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
     if(postfix_expression->declSp->type[0]!= TYPE_VOID){
         newTemp = generateTemp(errCode);
         if(errCode)
-            error("Cannot generate Temp",errCode);
+            error("Internal Error: Cannot generate Temp", DEFAULT_ERROR);
         emit(OP_LCALL, func_name, BLANK_STR ,newTemp);
         addTempDetails(newTemp, gSymTable, postfix_expression);
     }else{
@@ -261,6 +271,8 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
 		if(p->declSp->type[0] == TYPE_STRUCT){
         	sym_node->infoType = INFO_TYPE_STRUCT;
 		}
+        sym_node->arraySize = p->arraySize;
+        sym_node->arrayIndices = p->arrayIndices;
 		sym_node->declSp = declSpCopy(p->declSp);
 		sym_node->infoType = p->infoType;
 		sym_node->size = getNodeSize(sym_node, gSymTable);
@@ -294,3 +306,59 @@ void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable){
     return;
 }
 
+bool checkGlobalInitializerDFSUtil(node *a){
+    if(!a) return true;
+    if(a->isLeaf) {
+        return a->isConstant;
+    }
+
+    node *temp = a->childList;
+    while(temp) {
+        if(!checkGlobalInitializerDFSUtil(temp)) 
+            return false;
+        temp = temp->next;
+    }
+
+    return true;
+}
+
+bool checkGlobalInitializer(node *initializer){
+    //performs dfs and checks if any leaf node is not constant
+    return checkGlobalInitializerDFSUtil(initializer);
+}
+
+
+int addArrayParamToStack(int &offset, string addr, int &errCode, string &errString){
+    string newTmp = generateTemp(errCode);
+    if(errCode) {
+        setErrorParams(errCode, errCode, errString, "");
+        return -1;
+    }
+    symbolTableNode *sym_node;
+    sym_node = lookUp(gSymTable, newTmp);
+    sym_node->size = 8;
+    sym_node->offset = offset;
+    sym_node->declSp = new declSpec();
+    sym_node->declSp->type.push_back(TYPE_VOID);
+    sym_node->declSp->ptrLevel++;
+    offset += 8;
+
+    emit(OP_ADDR, addr, EMPTY_STR, newTmp);
+    string newTmp1 = generateTemp(errCode);
+    if(errCode) {
+        setErrorParams(errCode, errCode, errString, "");
+        return -1;
+    }
+
+    sym_node = lookUp(gSymTable, newTmp1);
+    sym_node->size = 8;
+    sym_node->offset = offset;
+    sym_node->declSp = new declSpec();
+    sym_node->declSp->type.push_back(TYPE_VOID);
+    sym_node->declSp->ptrLevel++;
+    offset += 8;
+
+    emit(OP_SUBI, newTmp, "8", newTmp1);
+    emit(OP_ASSIGNMENT, newTmp1, EMPTY_STR, addr);
+    return 0;
+}

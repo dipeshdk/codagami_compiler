@@ -23,7 +23,7 @@
 			direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list statement_list
 			expression_statement selection_statement iteration_statement jump_statement translation_unit external_declaration function_definition
 			constant inden_marker func_marker_1 M_marker N_marker expressionJump expressionJumpStatement conditional_marker logical_or_expressionJumpStatement
-// Prototypes
+
 %{
 	#include <stdio.h>
 	#include <string.h>
@@ -46,7 +46,7 @@
 	int funcBeginQuad = -1;
 	#include <sys/stat.h>
 	#include <sys/types.h>
-
+	stack<string> arrayInFuncParam;
 extern "C"
 {
 	int yylex(void);  
@@ -63,82 +63,8 @@ node* root;
 %}
 
 %%
-/*
-	struct quadruple {
-		int operator, op1, op2, eq;
-	}
 
-	vector<quadruple> code;
-
-	a = b + c;
-	(+,b,c,a)
-	a = -b
-	(un- , b, NULL, a)
-
-	if a < b then S1 else S2
-
-	t = a < b
-
-	t = x relop y	
-	if x relop y then goto Z
- 
-	(condJump, true, false, exp)
-	(condJump, s1, s2, t)  
-	
-	while M1 A do M2 B done
-
-	E.true =
-	E.truelist = [all statement numbers which goto ___]
-
-
-	//AST node additions: place, truelist, falselist, nextlist, begin, next, ?end?//(breaklist) left as of now//, quad, ??code??
-	// truelist, falselist: list stl datatype
-	// new functions:
-	• makelist(i): create a newlist containing only i, return a pointer to the list. 
-	• merge(p1, p2): merge lists pointed to by p1 and p2 and return a pointer to the concatenated list 
-	• backpatch(p, i):
-	. emit()
-	. string newTemp()
-	//findOperatorType(operator, op1, op2);
-
-	//#define all operators
-
-
-	gramar change
-	//normal statements (slide 43)
-	//flow control statements
-	//procedure calls :  activation record 
-	//boolean expressions, short circuiting
-
-
-	//global vars:
-	vector<quadruple> gCode, 
-	int nextStat; (gCode.size())
-	//store temp variables in a new symbol table
-	gNewTemp = 0;
-	//symbol table of temp variables
-
-
-	//string newTemp(){
-		return '@t'+gNewTemp++; //@ so that names do not conflict with program variable names
-	}
-
-
-	a = b * c + d;
-	t1 = b * c;
-	a = t1 + d;
-
-
-	id=>
-	E -> id
-	E.place = lexeme;
-	E -> A + B
-	E.place = newtmp();
-	emit(E.place = A.place type_+ B.place);
-*/
-// [,,,]
 primary_expression
-	// assuming identifier is not included in declaration. It must be declared before
 	: IDENTIFIER { 
 		symbolTableNode* stNode = lookUp(gSymTable, yylval.id);
 		if(!stNode) error(yylval.id, UNDECLARED_SYMBOL);
@@ -155,6 +81,8 @@ primary_expression
 		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_STRING_LITERAL);
 		temp->addr = string(yylval.id);
+		temp->isConstant = true;
+		temp->isStringLiteral=true;
 		$$ = temp;
 		;
 	}
@@ -201,6 +129,7 @@ primary_expression
 		temp->declSp->type.push_back(TYPE_CHAR);
 		temp->valType = TYPE_CHAR;
 		setAddr(temp, to_string((int)c));
+		temp->isConstant = true;
 		$$ = temp;
 	}
 	| '(' expression ')' { $$ = $2; }
@@ -214,6 +143,7 @@ constant
 		temp->declSp->type.push_back(TYPE_INT);
 		addIVal(temp, yylval.id);
 		setAddr(temp, string(yylval.id));
+		temp->isConstant = true;
 		$$ = temp;
 	}
 	| F_CONSTANT {
@@ -223,6 +153,7 @@ constant
 		temp->declSp->type.push_back(TYPE_FLOAT);
 		addFVal(temp, yylval.id);
 		setAddr(temp, string(yylval.id));
+		temp->isConstant = true;
 		$$ = temp;
 	}
 	;
@@ -236,16 +167,12 @@ postfix_expression
 		if(asize < 0){
 			error($1->lexeme , ARRAY_INDEX_SHOULD_BE_POSITIVE);
 		}
-		string arrayIndexStr = getArrayIndexWithEmit(postfix_expression, expression, errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
 		addChild(postfix_expression, expression);
 		postfix_expression->infoType = INFO_TYPE_ARRAY;
-		postfix_expression->addr = arrayIndexStr;
-		postfix_expression->declSp->ptrLevel--;
+		postfix_expression->arrayIndices.push_back($3);
 		$$ = postfix_expression;
 	}
-	| postfix_expression '(' ')' { // Check with function paramlist111NoParamName111
+	| postfix_expression '(' ')' {
 		string func_name($1->lexeme);
 		if(!($1->paramList.size() == 0 
 			|| ($1->paramList.size()==1 && $1->paramList[0]->declSp 
@@ -257,9 +184,6 @@ postfix_expression
 		if(!stNode || stNode->infoType != INFO_TYPE_FUNC || !stNode->declSp) {
 			error(name, SYMBOL_NOT_FOUND);
 		}
-		// if(!stNode->isDefined) {
-			// error(name, UNDEFINED_FUNCTION);
-		// }
 		string retTemp = checkFuncArgValidityWithParamEmit($1, nullptr, errCode, errStr);
 		if(errCode) error(errStr, errCode);
 		$1->infoType = INFO_TYPE_FUNC;
@@ -295,7 +219,8 @@ postfix_expression
 		$$ = newNode;
 	}
 	| postfix_expression PTR_OP IDENTIFIER {
-		structTableNode* structure = getRightMostStructFromPostfixExpression($1, true, errCode, errStr);
+		
+        structTableNode* structure = getRightMostStructFromPostfixExpression($1, true, errCode, errStr);
 		if(errCode) error(errStr, errCode);
 		
 		string identifierName = yylval.id;
@@ -314,17 +239,11 @@ postfix_expression
 		$$ = newNode;
 	}
 	| postfix_expression INC_OP {
-		// int retval  = checkIntOrCharOrPointer($1);
-		// if(retval) error($1->lexeme, retval);
-		// addChild($1, makeNode(strdup("INC_OP"), strdup("++"), 1, NULL, NULL, NULL, NULL));
 		errStr = "use ++" + string($1->lexeme)+ " instead of " + string($1->lexeme) + "++";
 		error(errStr.c_str(), UNSUPPORTED_FUNCTIONALITY);
 		$$ = $1;
 	}
 	| postfix_expression DEC_OP {
-		// int retval  = checkIntOrCharOrPointer($1);
-		// if(retval) error($1->lexeme, retval);
-		// addChild($1, makeNode(strdup("DEC_OP"), strdup("--"), 1, NULL, NULL, NULL, NULL));
 		errStr = "use --" + string($1->lexeme)+ " instead of " + string($1->lexeme) + "--";
 		error(errStr.c_str(), UNSUPPORTED_FUNCTIONALITY);
 		$$ = $1;
@@ -337,16 +256,26 @@ argument_expression_list
 	;
 
 unary_expression
-	: postfix_expression {$$ = $1;}
+	: postfix_expression {
+		if($1->infoType == INFO_TYPE_ARRAY){
+			errCode = 0;
+			string arrayIndexStr = getArrayIndexWithEmit($1, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			$1->addr = arrayIndexStr;
+			$1->declSp->ptrLevel--;
+		}
+		$$ = $1;
+	}
 	| INC_OP unary_expression {
 		int retval  = checkIntOrCharOrPointer($2);
 		if(retval) error($2->lexeme, retval);
 		string newTmp = generateTemp(errCode);
     	if(errCode)
-        	error("Cannot generate Temp",errCode);
+        	error("Cannot generate Temp",DEFAULT_ERROR);
 		int opCode = getOpAddType($2, errCode, errStr);
 		if(errCode)
-			error("Cannot generate Temp",errCode);
+			error($2->lexeme,errCode);
         emit(opCode, $2->addr, "1", newTmp);
     	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $2->addr);
 		addTempDetails(newTmp, gSymTable, $2);
@@ -359,10 +288,10 @@ unary_expression
 		if(retval) error($2->lexeme, retval);
 		string newTmp = generateTemp(errCode);
     	if(errCode)
-        	error("Cannot generate Temp",errCode);
+        	error("Cannot generate Temp",DEFAULT_ERROR);
 		int opCode = getOpSubType($2, errCode, errStr);
 		if(errCode)
-			error("Cannot generate Temp",errCode);
+			error($2->lexeme,errCode);
         emit(opCode, $2->addr, "1", newTmp);
     	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $2->addr);
 		addTempDetails(newTmp, gSymTable, $2);
@@ -376,46 +305,85 @@ unary_expression
 		string name(unary_operator->name);
 		unary_operator->declSp = cast_expression->declSp;
 
-		int opCode = -1;
-		if(name == "*"){
-			if(!(cast_expression->infoType == INFO_TYPE_ARRAY || (cast_expression->declSp && cast_expression->declSp->ptrLevel > 0)))
+		if(isConstantNode(cast_expression)) {
+			if(isStringLiteral(cast_expression)) {
+				error("unary operations of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr(cast_expression->addr);
+			int res;
+			node* constTemp = makeNode(strdup("CONSTANT"), strdup("CONSTANT"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			if(name == "*"){
 				error(cast_expression->name, NON_POINTER_DEFERENCE);
-			unary_operator->addr = "*(" + cast_expression->addr + ")";
-			unary_operator->declSp->ptrLevel--;
-		}
-		else if(name == "&") {
-			opCode = OP_ADDR;
-			unary_operator->declSp->ptrLevel++;
-		}
-		else if(name == "-") opCode = OP_UNARY_MINUS;
-		else if(name == "~") {
-			opCode = OP_BITWISE_NOT;
-			//type should be int or char
-			bitwiseTypecastingSingleNode(cast_expression, errCode, errStr);
-			if(errCode)
-				error(errStr, errCode);
-		}
-		else if(name == "!") {
-			opCode = OP_LOGICAL_NOT;
-			unary_operator->truelist = cast_expression->falselist;
-			unary_operator->falselist = cast_expression->truelist;
-		}
-		// nothing to do for unary plus
+			}
+			else if(name == "&") {
+				error(cast_expression->name, NON_POINTER_DEFERENCE);
+			}
+			else if(name == "-") {
+				res = -n1;
+			}
+			else if(name == "~") {
+				res = ~n1;
+			}
+			else if(name == "!") {
+				res = !n1;
+				constTemp->truelist = cast_expression->falselist;
+				constTemp->falselist = cast_expression->truelist;
+			}
+			string resStr = to_string(res);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->lexeme = (char*)resStr.c_str();
+			constTemp->nextlist = cast_expression->nextlist;
+			constTemp->continuelist = cast_expression->continuelist;
+			constTemp->breaklist = cast_expression->breaklist;
+			constTemp->valType = TYPE_INT;
+			$$ = constTemp;
+		}else {
+			int opCode = -1;
+			if(name == "*"){
+				if(!(cast_expression->infoType == INFO_TYPE_ARRAY || (cast_expression->declSp && cast_expression->declSp->ptrLevel > 0)))
+					error(cast_expression->name, NON_POINTER_DEFERENCE);
+				unary_operator->addr = "*(" + cast_expression->addr + ")";
+				unary_operator->declSp->ptrLevel--;
+			}
+			else if(name == "&") {
+				opCode = OP_ADDR;
+				unary_operator->declSp->ptrLevel++;
+			}
+			else if(name == "-") {
+				opCode = OP_UNARY_MINUS;
+			}
+			else if(name == "~") {
+				opCode = OP_BITWISE_NOT;
+				//type should be int or char
+				bitwiseTypecastingSingleNode(cast_expression, errCode, errStr);
+				if(errCode)
+					error(errStr, errCode);
+			}
+			else if(name == "!") {
+				opCode = OP_LOGICAL_NOT;
+				unary_operator->truelist = cast_expression->falselist;
+				unary_operator->falselist = cast_expression->truelist;
+			}
+			// nothing to do for unary plus
 
-		if(opCode != -1) {
-			string newTmp = generateTemp(errCode);
-			if(errCode)
-				error("Cannot generate Temp", errCode);
-			emit(opCode, cast_expression->addr, EMPTY_STR, newTmp);
-			unary_operator->addr = newTmp;
-			addTempDetails(newTmp, gSymTable, unary_operator);
-		}
+			if(opCode != -1) {
+				string newTmp = generateTemp(errCode);
+				if(errCode)
+					error("Internal Error : Cannot generate Temp", DEFAULT_ERROR);
+				emit(opCode, cast_expression->addr, EMPTY_STR, newTmp);
+				unary_operator->addr = newTmp;
+				addTempDetails(newTmp, gSymTable, unary_operator);
+			}
 
-		addChild(unary_operator, cast_expression);
-		unary_operator->nextlist = cast_expression->nextlist;
-		unary_operator->continuelist = cast_expression->continuelist;
-		unary_operator->breaklist = cast_expression->breaklist;
-		$$ = unary_operator;
+			addChild(unary_operator, cast_expression);
+			unary_operator->nextlist = cast_expression->nextlist;
+			unary_operator->continuelist = cast_expression->continuelist;
+			unary_operator->breaklist = cast_expression->breaklist;
+			$$ = unary_operator;
+		}
 	}
 	| SIZEOF unary_expression {
 		if(strcmp(($2 -> name), "IDENTIFIER")){
@@ -427,23 +395,22 @@ unary_expression
 		}
 		string newTmp = generateTemp(errCode);
     	if(errCode)
-        	error("Cannot generate Temp",errCode);
+        	error("Internal Error : Cannot generate Temp",DEFAULT_ERROR);
     	emit(OP_ASSIGNMENT, to_string(getNodeSize(sym_node, gSymTable)), EMPTY_STR, newTmp);
 		
 		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$->declSp->type.push_back(TYPE_INT);
 		sym_node = lookUp(gSymTable, newTmp);
-		sym_node->size = 4;
+		sym_node->size = 8;
 		sym_node->offset = offset;
 		sym_node->declSp->type.push_back(TYPE_INT);
 		offset += 8;
 		$$->addr = newTmp;
 	}
 	| SIZEOF '(' type_name ')'{
-		// TODO: Check validity of type_name 
 		string newTmp = generateTemp(errCode);
     	if(errCode)
-        	error("Cannot generate Temp",errCode);
+        	error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
     	symbolTableNode* sym_node = new symbolTableNode();
 		sym_node->declSp = declSpCopy($3->declSp);
 		sym_node->infoType = $3->infoType;
@@ -452,7 +419,7 @@ unary_expression
 		$$ = makeNode(strdup("SIZEOF"), strdup("sizeof"), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);
 		$$->declSp->type.push_back(TYPE_INT);
 		sym_node = lookUp(gSymTable, newTmp);
-		sym_node->size = 4;
+		sym_node->size = 8;
 		sym_node->offset = offset;
 		sym_node->declSp->type.push_back(TYPE_INT);
 		offset += 8;
@@ -465,11 +432,8 @@ unary_expression
 
 unary_operator
 	: '&' {$$ = makeNode(strdup("&"), strdup("&"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| '*' {
-		$$ = makeNode(strdup("*"), strdup("*"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
-	| '+' {
-		// TODO: String Literal check
-		$$ = makeNode(strdup("+"), strdup("+"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| '*' {$$ = makeNode(strdup("*"), strdup("*"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
+	| '+' {$$ = makeNode(strdup("+"), strdup("+"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '-' {$$ = makeNode(strdup("-"), strdup("-"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '~' {$$ = makeNode(strdup("~"), strdup("~"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| '!' {$$ = makeNode(strdup("!"), strdup("!"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
@@ -482,7 +446,7 @@ cast_expression
 		node* type_name = $2;
 		node* cast_expression = $4;
 		int err = canTypecast(cast_expression->declSp, type_name->declSp);
-		if(err) error("", err);
+		if(err) error("Typecasting error", DEFAULT_ERROR);
 		typeCastLexemeWithEmit(cast_expression, type_name->declSp);
 		makeSibling(cast_expression, type_name);
 		$$ = cast_expression;
@@ -492,102 +456,187 @@ cast_expression
 multiplicative_expression
 	: cast_expression {$$ = $1; }
 	| multiplicative_expression '*' cast_expression { 
-		//  no pointer & no string literal constNode->lexeme
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "*", errCode, errStr); 
-		if(errCode)
-			error(errStr, errCode);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
-		int opCode = getOpMulType(temp, errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
-		emit(opCode, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("multiplication of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1*n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "*", errCode, errStr); 
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy($1->declSp);
+			int opCode = getOpMulType(temp, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			emit(opCode, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
+		}
 	}
 	| multiplicative_expression '/' cast_expression { 
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "/", errCode, errStr); 
-		if(errCode)
-			error(errStr, errCode);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
-		int opCode = getOpDivType(temp, errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
-		emit(opCode, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("division of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1/n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "/", errCode, errStr); 
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy($1->declSp);
+			int opCode = getOpDivType(temp, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			emit(opCode, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
+		}
 	}
 	| multiplicative_expression '%' cast_expression { 
 		int retval = checkType($3->declSp,TYPE_FLOAT,0);
 		if(retval){
 			error($3->lexeme, SHOULD_NOT_BE_FLOAT);
 		}
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "%", errCode, errStr); 
-		if(errCode)
-			error(errStr, errCode);
-			
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
-		emit(OP_MOD, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("mod of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1%n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "%", errCode, errStr); 
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy($1->declSp);
+			emit(OP_MOD, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
+		}
 	}
 	;
 
 additive_expression
 	: multiplicative_expression { $$ = $1; }
 	| additive_expression '+' multiplicative_expression { 
-		node* temp = makeNodeForExpressionNotStringForAddition($1, $3, "+", errCode, errStr); 
-		if(errCode)
-			error(errStr, errCode);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy(temp->declSp);
-		int opCode = getOpAddType(temp, errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
-		emit(opCode, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		// temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, temp);
-		$$ = temp;
+		
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("addition of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1+n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
+			$$ = constTemp;
+		} else {
+			node* temp = makeNodeForExpressionNotStringForAddition($1, $3, "+", errCode, errStr); 
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy(temp->declSp);
+			int opCode = getOpAddType(temp, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			emit(opCode, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			// temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, temp);
+			$$ = temp;
 		}
+	}
 	| additive_expression '-' multiplicative_expression { 
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "-", errCode, errStr); 
-		if(errCode)
-			error(errStr, errCode);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
-		int opCode = getOpSubType(temp, errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
-		emit(opCode, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("subtraction of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1-n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "-", errCode, errStr); 
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy($1->declSp);
+			int opCode = getOpSubType(temp, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			emit(opCode, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
 		}
+	}
 	;
 
 shift_expression
@@ -598,42 +647,74 @@ shift_expression
 		retval = checkIntOrChar($1);
 		if(retval)	error($1->lexeme, TYPE_ERROR);
 		
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "<<", errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
-			
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
-		emit(OP_LEFT_SHIFT, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp; 
-		}
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("left shift of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1 << n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
+			$$ = constTemp;
+		} else {	
+			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "<<", errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy($1->declSp);
+			emit(OP_LEFT_SHIFT, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
+		} 
+	}
 	| shift_expression RIGHT_OP additive_expression { 
 		int retval = checkIntOrChar($3);
 		if(retval)	error($3->lexeme, TYPE_ERROR);
 		retval = checkIntOrChar($1);
 		if(retval)	error($1->lexeme, TYPE_ERROR);
 		
-		node* temp = makeNodeForExpressionNotPointerNotString($1, $3, ">>", errCode, errStr);
-		if(errCode)
-			error(errStr, errCode);
-			
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
-		tempNode->declSp = declSpCopy($1->declSp);
-		emit(OP_RIGHT_SHIFT, $1->addr, $3->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("right shift of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1 >> n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
+			$$ = constTemp;
+		} else {
+			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, ">>", errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error("Internal Error: Cannot generate Temp",DEFAULT_ERROR);
+			symbolTableNode* tempNode= lookUp(gSymTable, newTmp);
+			tempNode->declSp = declSpCopy($1->declSp);
+			emit(OP_RIGHT_SHIFT, $1->addr, $3->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
 		}
+	}
 	;
 
 relational_expression
@@ -641,13 +722,13 @@ relational_expression
 	| relational_expression '<' shift_expression { 
 			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
 			if(retval < 0)
-				error(errStr,-retval);
+				error(errStr,-retval);			
 			node* temp = makeNode(strdup("<"), strdup("<"), 0, $1, $3, (node*)NULL, (node*)NULL); 
 			emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
 			$$ = temp;
-			}
+		}
 	| relational_expression '>' shift_expression { 
 			int retval = implicitTypecastingNotStringLiteral($1, $3, errStr);
 			if(retval < 0)
@@ -689,14 +770,14 @@ equality_expression
 		int retval2 = checkPointer(relational_expression);
 		int x = (retval1 == 0) + (retval2 == 0);
 		if(x == 1)
-			error("equality check between pointer and non pointer", POINTER_ERROR);
+			error($3->lexeme, POINTER_ERROR);
 
 		int rank = giveTypeCastRank(equality_expression, relational_expression);
 		if(rank < 0)
-			error("typecasting error rank", rank);
+			error($3->lexeme, rank);
 		int retval = typeCastByRank(equality_expression, relational_expression, rank);
 		if(retval)
-			error("typecasting error rank", retval);
+			error($3->lexeme, retval);
 		node* temp = makeNodeForExpressionByRank(equality_expression, relational_expression, "EQ_OP", "==", rank, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
@@ -712,14 +793,14 @@ equality_expression
 		int retval2 = checkPointer(relational_expression);
 		int x = (retval1 == 0) + (retval2 == 0);
 		if(x == 1)
-			error("equality check between pointer and non pointer", POINTER_ERROR);
+			error($3->lexeme, POINTER_ERROR);
 
 		int rank = giveTypeCastRank(equality_expression, relational_expression);
 		if(rank < 0)
-			error("typecasting error rank", rank);
+			error($3->lexeme, rank);
 		int retval = typeCastByRank(equality_expression, relational_expression, rank);
 		if(retval)
-			error("typecasting error rank", retval);
+			error($3->lexeme, retval);
 		node* temp = makeNodeForExpressionByRank(equality_expression, relational_expression, "NE_OP", "!=", rank, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
@@ -739,16 +820,33 @@ and_expression
 		if(retval < 0){
 			error(errStr, errCode);
 		}
-		node* temp = makeNode(strdup("&"), strdup("&"), 0, and_expression, equality_expression, (node*)NULL, (node*)NULL);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		emit(OP_AND, and_expression->addr, equality_expression->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("logical and of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1 & n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
+			$$ = constTemp;
+		}else{
+			node* temp = makeNode(strdup("&"), strdup("&"), 0, and_expression, equality_expression, (node*)NULL, (node*)NULL);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error("Internal Error: Cannot generate temp", DEFAULT_ERROR);
+			emit(OP_AND, and_expression->addr, equality_expression->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
 		}
+	}
 	;
 
 
@@ -761,15 +859,32 @@ exclusive_or_expression
 		if(retval < 0){
 			error(errStr, errCode);
 		}
-		node* temp = makeNode(strdup("^"), strdup("^"), 0, exclusive_or_expression, and_expression, (node*)NULL, (node*)NULL);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		emit(OP_XOR, exclusive_or_expression->addr, and_expression->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("logical xor of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1 ^ n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNode(strdup("^"), strdup("^"), 0, exclusive_or_expression, and_expression, (node*)NULL, (node*)NULL);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error("Internal Error: Cannot generate temp", DEFAULT_ERROR);
+			emit(OP_XOR, exclusive_or_expression->addr, and_expression->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
+		}
 	}
 	;
 
@@ -782,15 +897,32 @@ inclusive_or_expression
 		if(retval < 0){
 			error(errStr, errCode);
 		}
-		node* temp = makeNode(strdup("|"), strdup("|"), 0, inclusive_or_expression1, exclusive_or_expression, (node*)NULL, (node*)NULL);
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error(errStr, errCode);
-		emit(OP_OR, inclusive_or_expression1->addr, exclusive_or_expression->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		addTempDetails(newTmp, gSymTable, $1);
-		$$ = temp;
+		if(isConstantNode($1) && isConstantNode($3)) {
+			if(isStringLiteral($1) || isStringLiteral($3)) {
+				error("logical or of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($3->addr);
+			int res = n1 | n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNode(strdup("|"), strdup("|"), 0, inclusive_or_expression1, exclusive_or_expression, (node*)NULL, (node*)NULL);
+			string newTmp = generateTemp(errCode);
+			if(errCode)
+				error("Internal Error: Cannot generate temp", DEFAULT_ERROR);
+			emit(OP_OR, inclusive_or_expression1->addr, exclusive_or_expression->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addTempDetails(newTmp, gSymTable, $1);
+			$$ = temp;
+		}
 	}
 	;
 
@@ -799,18 +931,39 @@ logical_and_expression
 	| logical_and_expression AND_OP M_marker inclusive_or_expression { 
 		int retval = backpatch($1->truelist, $3->quad);
 		if(retval)
-			error("backpatch error", retval);
-		node* temp = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $4, (node*)NULL, (node*)NULL); 
-		temp->truelist = $4->truelist;
-		temp->falselist = mergelist($1->falselist, $4->falselist);
-		string newTmp = generateTemp(errCode);
-		if(errCode){
-			error("temp gen internal error",errCode);
+			error(string($1->lexeme) + "backpatch error", retval);
+
+		if(isConstantNode($1) && isConstantNode($4)) {
+			if(isStringLiteral($1) || isStringLiteral($4)) {
+				error("&& of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($4->addr);
+			int res = n1 && n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->truelist = $4->truelist;
+			constTemp->falselist = mergelist($1->falselist, $4->falselist);
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
+			$$ = constTemp;
+		}else {
+			node* temp = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $4, (node*)NULL, (node*)NULL); 
+			temp->truelist = $4->truelist;
+			temp->falselist = mergelist($1->falselist, $4->falselist);
+			string newTmp = generateTemp(errCode);
+			if(errCode){
+				error("Internal Error: Cannot generate temp", DEFAULT_ERROR);
+			}
+			emit(OP_ANDAND, $1->addr, $4->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addIntTemp(newTmp, gSymTable);
+			$$ = temp;
 		}
-		emit(OP_ANDAND, $1->addr, $4->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		$$ = temp;
 	}
 	;
 
@@ -819,19 +972,39 @@ logical_or_expression
 	| logical_or_expression OR_OP M_marker logical_and_expression { 
 		int retval = backpatch($1->falselist, $3->quad);
 		if(retval)
-			error("backpatch error", retval);
-		node* temp = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $4, (node*)NULL, (node*)NULL);  
-		temp->truelist = mergelist($1->truelist, $4->truelist);
-		temp->falselist = $4->falselist;
-		string newTmp = generateTemp(errCode);
-		if(errCode){
-			error("temp gen internal error",errCode);
+			error(string($1->lexeme) + "backpatch error", retval);
+		if(isConstantNode($1) && isConstantNode($4)) {
+			if(isStringLiteral($1) || isStringLiteral($4)) {
+				error("|| of string literals.", UNSUPPORTED_FUNCTIONALITY);
+			}
+			int n1 = getNumberFromConstAddr($1->addr);
+			int n2 = getNumberFromConstAddr($4->addr);
+			int res = n1 && n2;
+			string resStr = to_string(res);
+			node* constTemp = makeNode(strdup("CONSTANT"), (char*)resStr.c_str(), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+			constTemp->truelist = mergelist($1->truelist, $4->truelist);
+			constTemp->falselist = $4->falselist;
+			constTemp->declSp = new declSpec();
+			constTemp->declSp->type.push_back(TYPE_INT);
+			constTemp->addr = resStr;
+			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
+			$$ = constTemp;
+		}else{
+			node* temp = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $4, (node*)NULL, (node*)NULL);  
+			temp->truelist = mergelist($1->truelist, $4->truelist);
+			temp->falselist = $4->falselist;
+			string newTmp = generateTemp(errCode);
+			if(errCode){
+				error("Internal Error: Cannot generate temp", DEFAULT_ERROR);
+			}
+			emit(OP_OROR, $1->addr, $4->addr, newTmp);
+			temp->addr = newTmp;
+			temp->declSp = declSpCopy($1->declSp);
+			addIntTemp(newTmp, gSymTable);
+			$$ = temp;
 		}
-		emit(OP_OROR, $1->addr, $4->addr, newTmp);
-		temp->addr = newTmp;
-		temp->declSp = declSpCopy($1->declSp);
-		$$ = temp;
-		}
+	}
 	;
 
 logical_or_expressionJumpStatement
@@ -851,36 +1024,32 @@ conditional_expression
 	| logical_or_expressionJumpStatement '?' M_marker expression conditional_marker N_marker ':' M_marker conditional_expression {
 		int retval = backpatch($1->truelist, $3->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string($1->lexeme) + "backpatch error", retval);
 		retval = backpatch($1->falselist, $8->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string($1->lexeme) + "backpatch error", retval);
 		node* temp = makeNode(strdup("?:"), strdup("?:"), 0, $1, $4, $8, (node*)NULL); 
-		vector<int> tempVec = mergelist( $4->nextlist, $6->nextlist);
-		temp->nextlist = mergelist(tempVec, $9->nextlist);
+		retval = backpatch($6->nextlist,nextQuad()+1);
+		if(retval)
+			error(string($6->lexeme) + "backpatch error", retval);
+		temp->nextlist = mergelist($4->nextlist, $9->nextlist);
 		temp->declSp = declSpCopy($1->declSp);
 		emit(OP_ASSIGNMENT, $9->addr, EMPTY_STR, ternaryTempStack.top());
 		retval  = backpatchAssignment($5->nextlist, $4->addr);
 		if(retval)
-		{
-			error("Invalid Assignment Backpatch", retval);
-		}
+			error(string($5->lexeme) + "backpatch error", retval);
 		temp->addr = ternaryTempStack.top();
 		$$ = temp;
 		ternaryTempStack.pop();
 		addTempDetails($$->addr, gSymTable, $4);
-		// ternaryTemp = BLANK_STR;
 		}
 	;
 
 conditional_marker:
 	{
-		// if(ternaryTemp != BLANK_STR){
-		// 	error("Nested ternary operation not supported", UNSUPPORTED_FUNCTIONALITY);
-		// }
 		string ternaryTemp= generateTemp(errCode);
 		if(errCode)
-        	error("Cannot generate Temp",errCode);
+        	error("Cannot generate Temp",DEFAULT_ERROR);
 		ternaryTempStack.push(ternaryTemp);
     		
 		node* temp = makeDeadNode();
@@ -914,22 +1083,20 @@ assignment_expression
 			{
 				string s(assignment_operator->name);
 				if(s == "AND_ASSIGN" || s == "OR_ASSIGN" || s == "XOR_ASSIGN" || s == "LEFT_ASSIGN" || s == "RIGHT_ASSIGN") {
-					//should be only int or char
-					if(checkIntOrChar(unary_expression) || checkIntOrChar(assignment_expression))
-						error("expression should only be int or char", TYPE_ERROR);
+					if(checkIntOrChar(unary_expression) !=0){
+						error(unary_expression->lexeme, TYPE_ERROR);
+					} 
+					if(checkIntOrChar(assignment_expression)!=0)
+						error(assignment_expression->lexeme, TYPE_ERROR);
 				}
 				if(s=="MUL_ASSIGN" || s=="DIV_ASSIGN" || s=="ADD_ASSIGN" || s=="SUB_ASSIGN" || s=="=") {
 					int retval = canTypecast(assignment_expression->declSp,unary_expression->declSp);
 					if(retval)
-						error("invalid typecast in assignment expression", retval);
+						error(assignment_expression->lexeme, retval);
 				}
 				if(s == "MOD_ASSIGN") {
 					if(checkType(assignment_expression->declSp, TYPE_FLOAT, 0))
 						error(assignment_expression->lexeme, SHOULD_NOT_BE_FLOAT);
-					//typecast by rank
-					// int retval = implicitTypecastingNotPointerNotStringLiteral(unary_expression, assignment_expression, errStr);
-					// if(retval)
-						// error(errStr,retval);
 				}
 			}
 			string resultAddr = unary_expression->addr;
@@ -943,9 +1110,12 @@ assignment_expression
 			}
 			else if(s == "=")
 			{
-				bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
+                bool retval = typeCastRequired(assignment_expression->declSp, unary_expression->declSp, errCode, errStr);
 				if(errCode)
 					error(errStr, errCode);
+				if(gSymTable->scope == GLOBAL_SCOPE_NUM && !checkGlobalInitializer(assignment_expression)) {
+					error(unary_expression->addr, INVALID_GLOBAL_INITIALIZER);
+				}
 				if(retval){
 					typeCastLexemeWithEmit(assignment_expression, unary_expression->declSp);
 				}
@@ -955,11 +1125,11 @@ assignment_expression
 			{
 				int rank = giveTypeCastRank(unary_expression, assignment_expression);
 				if(rank < 0)
-					error("giveTypeCastRank error",-rank);
+					error(unary_expression->lexeme,-rank);
 				
 				int retval = typeCastByRank(unary_expression, assignment_expression, rank);
 				if(retval)
-					error("typecast error",retval);
+					error(unary_expression->lexeme,retval);
 				opCode = -1;
 				if(s == "MUL_ASSIGN")
 					opCode = getOpMulType(unary_expression, errCode, errStr);
@@ -986,7 +1156,6 @@ assignment_expression
 		}else {
 			error("Assignment of return value of a void function" ,UNSUPPORTED_FUNCTIONALITY);
 		}
-		
 	}
 	;
 
@@ -1020,7 +1189,6 @@ constant_expression
 	: conditional_expression { $$ = $1; }
 	;
 
-// TODO: check typecasting here in testing, if not done then do it, Wirtten in notes by Sakshi that this might be missing
 declaration
 	: declaration_specifiers ';' { $$ = $1; }
 	| declaration_specifiers init_declarator_list ';' {
@@ -1046,9 +1214,7 @@ declaration
 				error(lex, ALLOCATION_ERROR);
 			}
 
-			//TODO: Why??
 			if(funcDecl){
-				// param* paramcheckValidTypeter = new param();
 				param* paramter = new param();
 				paramter->infoType = $2->infoType;
 				paramter->declSp = declSpCopy($1->declSp);
@@ -1073,6 +1239,25 @@ declaration
 				if(temp->declSp)
 					sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
 				temp->declSp = sym_node->declSp;
+				if(temp->arrayIndices.size() != 0){
+					int asize = 1;
+					vector<int> arrayIndicesTmp;
+					for(auto &x: temp->arrayIndices){
+						int asizeTmp =  getValueFromConstantExpression(x,errCode);
+						if(asizeTmp < 0 || errCode){
+							error(x->lexeme, ARRAY_SIZE_NOT_CONSTANT);
+						}
+						asize *= asizeTmp;
+						arrayIndicesTmp.push_back(asizeTmp);
+					}
+					sym_node->arrayIndices = arrayIndicesTmp;
+				}else{
+					error(temp->lexeme,INVALID_SYNTAX);
+				}
+				while(!arrayInFuncParam.empty()){
+					addArrayParamToStack(offset, arrayInFuncParam.top(), errCode, errStr);
+					arrayInFuncParam.pop();
+				}
 				if(initializer) {
 					//array initializtion
 					node *currInit = initializer;
@@ -1082,12 +1267,12 @@ declaration
 
 					int size = getNodeSize(sym_node, gSymTable);
 					if(size < 0){
-						error("invalid array type", -size);
+						error(sym_node->name, -size);
 					}
-					// _t1 = 4;
+					// _t1 = 8;
 					string sizeTmp = generateTemp(errCode);
 					if(errCode) {
-						error("error in temp generation", errCode);
+						error("Internal Error: Cannot generate Temp", DEFAULT_ERROR);
 					}
 					emit(OP_ASSIGNMENT, to_string(size), EMPTY_STR ,sizeTmp);
 					symbolTableNode* sym_node = lookUp(gSymTable, sizeTmp);
@@ -1129,15 +1314,44 @@ declaration
 						//variable initialized
 						int retval = canTypecast(sym_node->declSp, initializer->declSp);
 						if(retval)
-							error("variable assignment error", retval);
+							error(sym_node->name, retval);
 						retval = areDifferentTypes(sym_node->declSp, initializer->declSp, errCode, errStr);
 						if(errCode)
 							error(errStr, errCode);
 						if(retval) {
 							typeCastLexemeWithEmit(initializer, sym_node->declSp);
 						}
-						emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);
+
+						if(gSymTable->scope == GLOBAL_SCOPE_NUM) {
+							sym_node->declSp = declSpCopy($1->declSp);
+							if(temp->declSp) 
+								sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
+							
+							globalData *gData = new globalData();
+							gData->varName = temp->addr;
+							gData->value =  hexString(initializer->addr);
+							if(initializer->declSp && initializer->declSp->type.size() > 0)
+								gData->valueType = initializer->declSp->type[0];
+							else
+								gData->valueType = TYPE_INT;
+							globalDataPair.push_back(gData);
+						}else {
+							emit(OP_ASSIGNMENT, initializer->addr, EMPTY_STR, temp->addr);
+						}
 					}			
+				}else {
+					//no initializer
+					if(gSymTable->scope == GLOBAL_SCOPE_NUM) {
+						sym_node->declSp = declSpCopy($1->declSp);
+						if(temp->declSp) 
+							sym_node->declSp->ptrLevel = temp->declSp->ptrLevel;
+						
+						globalData *gData = new globalData();
+						gData->varName = temp->addr;
+						gData->value = hexString(to_string(DEFAULT_INITIALIZATION_VALUE));
+						gData->valueType = DEFAULT_INITIALIZATION_VALUE_TYPE;
+						globalDataPair.push_back(gData);
+					}
 				}
 			}
 			sym_node->size = getNodeSize(sym_node, gSymTable);
@@ -1146,7 +1360,6 @@ declaration
 			offset += getArraySize(sym_node);
 			curr = curr->next;
 		}
-		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;   
 		makeSibling($2,$1);
 		$$ = $1; 
 	}
@@ -1157,22 +1370,18 @@ declaration_specifiers
 	| storage_class_specifier declaration_specifiers {
 		if($1){makeSibling($2,$1);} 
 		node *temp = $2;
-		// vector<int> v = $1->declSp->storageClassSpecifier;
-		// int err = addStorageClassToDeclSpec(temp, v);
-		// if(err) error("addStorageClassToDeclSpec", err); //Error handling according to error code passed
 		$$ = temp;
-		// currDeclSpec = $$;
 	}
 	| type_specifier {
-    $$ = $1;
-    currDeclSpec = $$;
-  } 
+		$$ = $1;
+		currDeclSpec = $$;
+	} 
 	| type_specifier declaration_specifiers {
 		if($1){makeSibling($2,$1);} 
 		node *temp = $2;
 		vector<int> v = $1->declSp->type;
 		int err = addTypeToDeclSpec(temp, v);
-		if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
+		if(err) error(" Internal Error: addTypeToDeclSpec", DEFAULT_ERROR); //Error handling according to error code passed
 		$$ = temp;
 		currDeclSpec = $$;
 	}
@@ -1214,6 +1423,11 @@ init_declarator
 			ds->type = initializer->declSp->type;
 			declarator->declSp = ds;
 		}
+
+		if(gSymTable->scope == GLOBAL_SCOPE_NUM && !checkGlobalInitializer($3)) {
+			error($1->addr, INVALID_GLOBAL_INITIALIZER);
+		}
+
 		$$ = makeNode(strdup("="), strdup("="), 0, declarator, initializer, (node*)NULL, (node*)NULL);
 		$$->addr=$1->addr;
 	}
@@ -1265,11 +1479,11 @@ struct_or_union_specifier
 
 		$$ = struct_or_union_specifier($1,name);	
 	} 
-	| struct_or_union '{' struct_declaration_list '}' {$$ = NULL;} // segfault will come whenever this will be running
+	| struct_or_union '{' struct_declaration_list '}' {$$ = NULL;}
 	| struct_or_union  IDENTIFIER {
-		string name(previ); //TODO: wrong name, uses previ
+		string name(previ); // TODO: wrong name, uses previ
 		
-		if(!structLookUp(gSymTable, name)) { // Recursive lookup
+		if(!structLookUp(gSymTable, name)) {
 			if(!structLookUp(gSymTable, string(yylval.id))){
 				error(name, STRUCT_NOT_DECLARED);
 			}
@@ -1302,9 +1516,6 @@ struct_declaration_list
 
 struct_declaration
 	: specifier_qualifier_list struct_declarator_list ';' {
-		// node* specifier_qualifier_list = $1;
-		// node* struct_declarator_list = $2;
-		// $$ = specifier_qualifier_list;
 		$$ = struct_declaration($1, $2);
 	}
 	;
@@ -1315,7 +1526,7 @@ specifier_qualifier_list
 		node *temp = $2;
 		vector<int> v = $1->declSp->type;
 		int err = addTypeToDeclSpec(temp, v);
-		if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
+		if(err) error("Internal Error: addTypeToDeclSpec", DEFAULT_ERROR); //Error handling according to error code passed
 		$$ = temp;
 		}
 	| type_specifier { $$ = $1; }
@@ -1342,6 +1553,7 @@ struct_declarator
 	: declarator { 
 		node* declarator = $1; 
 		structParam* param = new structParam();
+        param->infoType = declarator->infoType;
 		param->name = declarator->lexeme;
 		param->declSp = declarator->declSp;
 		declarator->structParamList.push_back(param);
@@ -1351,11 +1563,12 @@ struct_declarator
 	| declarator ':' constant_expression {
 		node* declarator = $1; 
 		structParam* param = new structParam();
+        param->infoType = declarator->infoType;
 		param->name = declarator->lexeme;
 		param->declSp = declarator->declSp;
 		int err = 0;
 		int ret = getValueFromConstantExpression($3, err);
-		if(err) error("getValueFromConstantExpression", err);
+		if(err) error($3->lexeme, err);
 		param->bit = ret;
 		declarator->structParamList.push_back(param);
 		$$ = declarator;
@@ -1403,7 +1616,27 @@ declarator
 		$$ = temp;
 		currDecl = $$;
 	}
-	| direct_declarator { $$ = $1; currDecl = $$; }
+	| direct_declarator { 
+		node* temp = $1;
+		if(temp->infoType == INFO_TYPE_ARRAY){
+			temp->declSp->ptrLevel++;
+			int asize = 1;
+			vector<int> arrayIndicesTmp;
+			for(auto &x: temp->arrayIndices){
+				int asizeTmp =  getValueFromConstantExpression(x,errCode);
+				if(asizeTmp < 0 || errCode){
+					error(x->lexeme, ARRAY_SIZE_NOT_CONSTANT);
+				}
+				asize *= asizeTmp;
+				arrayIndicesTmp.push_back(asizeTmp);
+			}
+			temp->arraySize = asize;
+			arrayInFuncParam.push($1->addr);
+		}
+
+		currDecl = $$;
+		$$ = $1;
+	}
 	;
 
 direct_declarator
@@ -1425,39 +1658,10 @@ direct_declarator
 			error(temp->lexeme, errCode);
 		}
 		temp->infoType = INFO_TYPE_ARRAY;
-		temp->arraySize = asize;
 		if(!temp->declSp){
 			temp->declSp = new declSpec();
 		}
-		temp->declSp->ptrLevel++;
-		string newTmp = generateTemp(errCode);
-		if(errCode)
-			error("", errCode);
-		symbolTableNode *sym_node;
-		sym_node = lookUp(gSymTable, newTmp);
-		sym_node->size = 8;
-		sym_node->offset = offset;
-		sym_node->declSp = new declSpec();
-		sym_node->declSp->type.push_back(TYPE_VOID);
-		sym_node->declSp->ptrLevel++;
-		offset += 8;
-
-		emit(OP_ADDR, $1->addr, EMPTY_STR, newTmp);
-		string newTmp1 = generateTemp(errCode);
-		if(errCode)
-			error("", errCode);
-
-		sym_node = lookUp(gSymTable, newTmp1);
-		sym_node->size = 8;
-		sym_node->offset = offset;
-		sym_node->declSp = new declSpec();
-		sym_node->declSp->type.push_back(TYPE_VOID);
-		sym_node->declSp->ptrLevel++;
-		offset += 8;
-
-		emit(OP_ADDI, newTmp, "8", newTmp1);
-		emit(OP_ASSIGNMENT, newTmp1, EMPTY_STR,$1->addr);
-
+		temp->arrayIndices.push_back($3);
 		$$ = temp;
 	}
 	| direct_declarator '[' ']' {
@@ -1518,7 +1722,6 @@ pointer
 type_qualifier_list
 	: type_qualifier { $$ = $1; }
 	| type_qualifier_list type_qualifier { 
-		// if($1){ makeSibling($2,$1);$$ = $1;} else $$ = $2;
 		node* temp = $1;
 		mergeConstVolatile(temp, $2);
 		$$ = temp;
@@ -1557,21 +1760,16 @@ parameter_list
 
 parameter_declaration
 	: declaration_specifiers declarator { 
-		//TODO: UNHANDLED
-		// error("FUNCTION DECLARATION WITH IDENTIFIER NAME. Use only type names in declaration.", UNSUPPORTED_FUNCTIONALITY);
 		$$ = parameter_declaration($1, $2);
 	}
 	| declaration_specifiers abstract_declarator { 
-		//TODO: difference in abstract_declarator and declarator
-		//TODO: UNHANDLED
-		// error("FUNCTION DECLARATION WITH ABSTRACT DECLATOR. Use only type names in declaration.", UNSUPPORTED_FUNCTIONALITY);
 		$$ = parameter_declaration($1, $2);
-	 }
+	}
 	| declaration_specifiers { 
 		node* declaration_specifiers = $1;
 		param *parameter = new param();
 		if(!declaration_specifiers->declSp) 
-			error("no decl sp in declaration specifier parameter_declaration", INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
+			error($1->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
 		parameter->declSp = declSpCopy(declaration_specifiers->declSp);
 		parameter->paramName = UNNAMED_PARAM;
 		declaration_specifiers->paramList.push_back(parameter);
@@ -1593,8 +1791,7 @@ type_name
 		node *temp = $1;
 		if($2->declSp) {
 			int err = addTypeToDeclSpec(temp, $2->declSp->type);
-			if(err) error("addTypeToDeclSpec", err); //Error handling according to error code passed
-			// err = addStorageClassToDeclSpec(temp, $2->declSp->storageClassSpecifier);
+			if(err) error("Internal Error: addTypeToDeclSpec", DEFAULT_ERROR); //Error handling according to error code passed
 			mergeConstVolatile(temp, $2);
 			copyPtrLevel(temp, $2);
 		}
@@ -1611,11 +1808,9 @@ abstract_declarator
 		mergeConstVolatile(temp, $1);
 		copyPtrLevel(temp, $1);
 		$$ = temp;
-		// if($1){makeSibling($2,$1);$$ = $1;} else $$ = $2;
 	}
 	;
 
-// not to be handled anything below it, everything is checked by DIPESH and SAKSHI
 direct_abstract_declarator
 	: '(' abstract_declarator ')' {$$ = $2;}
 	| '[' ']' {$$ = (node*)NULL;}
@@ -1738,21 +1933,6 @@ scope_marker
 declaration_list
 	: declaration { $$ = $1;}
 	| declaration_list declaration {
-		// node* temp = NULL;
-		// string s($1->name);
-		// bool c1  = (s == "DECL_LIST");
-		// if( c1 ){ 
-		// 	temp = makeNode(strdup("DECL_LIST"), strdup("declaration list"), 0, $1->childList, $2, (node*)NULL, (node*)NULL);
-		// } else {
-		// 	temp = makeNode(strdup("DECL_LIST"), strdup("declaration list"), 0, $1, $2, (node*)NULL, (node*)NULL);
-		// }
-		// for(auto &u : $2->paramList){
-		// 	temp->paramList.push_back(u);
-		// }
-		// for(auto &u : $1->paramList){
-		// 	temp->paramList.push_back(u);
-		// }
-		// $$ = temp;
 		$$ = declaration_list($1, $2);
 	}
 	;
@@ -1768,7 +1948,7 @@ statement_list
 		}
 		int retval = backpatch($1->nextlist, $2->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string($1->lexeme) + " backpatch error", retval);
 		temp->nextlist = $3->nextlist;
 		temp->breaklist = mergelist($1->breaklist, $3->breaklist);
 		temp->continuelist = mergelist($1->continuelist, $3->continuelist);
@@ -1804,7 +1984,7 @@ selection_statement
 	: IF '(' expressionJump  ')' M_marker statement {
 		int retval = backpatch($3->truelist, $5->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string($3->lexeme) + " backpatch error", retval);
 		node * temp = makeNode(strdup("IF"), strdup("if"),0, $3, $6, (node*)NULL, (node*)NULL);
 		temp->nextlist = mergelist($3->falselist, $6->nextlist);
 		temp->breaklist = $6->breaklist;
@@ -1814,10 +1994,10 @@ selection_statement
 	| IF  '(' expressionJump  ')' M_marker statement ELSE N_marker M_marker statement {
 		int retval = backpatch($3->truelist, $5->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string($3->lexeme) + " backpatch error", retval);
 		retval = backpatch($3->falselist, $9->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string($3->lexeme) + " backpatch error", retval);
 		node* temp = makeNode(strdup("IF_ELSE"), strdup("else"),0, $3, $6, $10, (node*)NULL);
 		vector<int> tempVec = mergelist($6->nextlist, $8->nextlist);
 		temp->nextlist = mergelist(tempVec, $10->nextlist);
@@ -1841,13 +2021,13 @@ iteration_statement
 		node *m1 = $3, *m2 = $6, *s1 = $7, *e1 = $4;
 		int retval = backpatch(s1->nextlist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		retval = backpatch(e1->truelist, m2->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string(e1->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 
 		$$ = makeNode(strdup("WHILE"), strdup("while"), 0, $4, $7, (node*)NULL, (node*)NULL);
 		
@@ -1858,13 +2038,13 @@ iteration_statement
 		node* s1 = $3, *e1 = $7, *m2 = $2, *m1 = $6;
 		int retval = backpatch(s1->nextlist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string(s1->lexeme)+" backpatch error", retval);
 		retval = backpatch(e1->truelist, m2->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string(e1->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		
 		$$ = makeNode(strdup("DO WHILE"), strdup("do while"), 0, $3, $7, (node*)NULL, (node*)NULL);
 		
@@ -1876,13 +2056,13 @@ iteration_statement
 		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m1->quad));
 		int retval = backpatch(e2->truelist, m3->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string(e2->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->nextlist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		
 		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $8, (node*)NULL);
 		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
@@ -1892,16 +2072,16 @@ iteration_statement
 		emit(OP_GOTO, EMPTY_STR, EMPTY_STR, to_string(m2->quad));
 		int retval = backpatch(n1->nextlist, m1->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string(n1->lexeme) + " backpatch error", retval);
 		retval = backpatch(e2->truelist, m3->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string(e2->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->continuelist, m2->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 		retval = backpatch(s1->nextlist, m2->quad);
 		if(retval)
-			error("backpatch error", retval);
+			error(string(s1->lexeme) + " backpatch error", retval);
 
 		$$ = makeNode(strdup("FOR"), strdup("for"),0, $3, $5, $7, $11);
 		$$->nextlist = mergelist(s1->breaklist, e2->falselist);
@@ -1923,13 +2103,13 @@ jump_statement
 	}
 	| RETURN ';' { 
 		symbolTableNode* funcNode = lookUp(gSymTable, currFunc);
-		if(funcNode == nullptr){ // Not in func
+		if(funcNode == nullptr){
 			error("Return statement not in function", DEFAULT_ERROR);
 		}
 
 		int err = checkVoidSymbol(funcNode);
 		if(err){
-			error("Function type not void", err);
+			error("Function type not void", DEFAULT_ERROR);
 		}
 		
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
@@ -1937,20 +2117,18 @@ jump_statement
 	}
 	| RETURN expression ';' { 
 		symbolTableNode* funcNode = lookUp(gSymTable, currFunc);
-		if(funcNode == nullptr){ // Not in func
+		if(funcNode == nullptr){
 			error("Return statement not in function", DEFAULT_ERROR);
 		}
 		
 		node* temp = $2;
-		// symbolTableNode* n1 = funcNode;
 		int err = canTypecast(funcNode->declSp, temp->declSp);;
-		if(err) error("return type isnt valid", err);
+		if(err) error("return type isnt valid", DEFAULT_ERROR);
 		node* n1 = new node();
 		n1->declSp = declSpCopy(funcNode->declSp);
 		n1->addr = temp->addr;
 		err = giveTypeCastRankUnary(n1, temp);
-		if(err) error("error n typecasting", err);
-		// temp->addr = n1->addr;
+		if(err) error("error in typecasting", DEFAULT_ERROR);
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 0, temp, (node*)NULL, (node*)NULL, (node*)NULL);
 		emit(OP_RETURN, EMPTY_STR, EMPTY_STR, temp->addr);
     }
@@ -1970,16 +2148,11 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers  declarator {
-		// TODO: Send type from declaration specifier to function name
-		// UNSUPPORTED_FUNCTIONALITY
-		error("Use function definitions of type int foo(int a, int b){...}", UNSUPPORTED_FUNCTIONALITY);
-	} declaration_list compound_statement { 
-		// UNSUPPORTED_FUNCTIONALITY
+	: declaration_specifiers  declarator declaration_list compound_statement { 
+		// Unsupported Functionality
 		error("Use function definitions of type int foo(int a, int b){...}", UNSUPPORTED_FUNCTIONALITY);
 	}
 	| declaration_specifiers  declarator {
-		// TODO: Send type from declaration specifier to function name
 		struct node* declarator = $2; 
 		struct node* declaration_specifiers = $1;
 		addFunctionSymbol(declaration_specifiers, declarator);
@@ -1991,54 +2164,26 @@ function_definition
 
 		funcDecl = 1;
 		gSymTable = addChildSymbolTable(gSymTable);
-		// Adding params to symtab
 		symbolTable* curr = gSymTable;
-	// 	int tempOffset = rbp_size;
-
-	// 	for(auto &p: declarator->paramList){
-	// 		int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
-	// 		if(retVal) {
-	// 			error(p->paramName, retVal);
-	// 		}
-	// 		string lex = p->paramName;
-	// 		struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-	// 		if(!sym_node){
-	// 			error(lex, ALLOCATION_ERROR);
-	// 		}
-    //   // cout<< sym_node->name << " "<< p->declSp->type[0] <<endl;
-	// 		// emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, lex);
-    //   if(p->declSp->type[0] == TYPE_STRUCT){
-    //     sym_node->infoType = INFO_TYPE_STRUCT;
-    //   }
-    //   sym_node->infoType = p->infoType;
-	// 		sym_node->declSp = declSpCopy(p->declSp);
-	// 		sym_node->infoType = p->infoType;
-	// 		sym_node->size = getNodeSize(sym_node, gSymTable);
-	// 		tempOffset += getOffsettedSize(sym_node->size);
-	// 	}
-
-	// 	funcNode->paramWidth = tempOffset-rbp_size;
 		
 		string labelName = string(declarator->lexeme);
 		emit(OP_LABEL, EMPTY_STR, EMPTY_STR, labelName);
 		if(funcBeginQuad != -1)
 			error("Internal funcBeginQuad not -1", INVALID_ARGS_IN_FUNC_CALL);
 		funcBeginQuad = nextQuad();
-    	emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, BLANK_STR); // GCC will set the global variable offset
-		
+    	emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, BLANK_STR);
+		while(!arrayInFuncParam.empty()){
+			// Not required because we don't need to set arr address as it is passed as pointer
+			// addArrayParamToStack(offset, arrayInFuncParam.top(), errCode, errStr);
+			arrayInFuncParam.pop();
+		}
 		setOverSixParamOffset(declarator, curr, funcNode);
-		// for(auto &p: declarator->paramList){
-		// 	string lex = p->paramName;	
-		// 	struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-		// 	sym_node->offset = (-1*tempOffset);
-		// 	tempOffset = tempOffset-getOffsettedSize(sym_node->size);
-		// }
 		offset = 0;
 	} compound_statement { 
 		addChild($2, $4);
 		$$ = $2;
 		setFirstSixParamOffset($2, gSymTable);
-		int retval = backpatchBeginFunc(funcBeginQuad, offset);
+		int retval = backpatchBeginFunc(funcBeginQuad, offset-8 + CALLQ_PADDING);
 		if(retval)
 			error("backpatchBeginFunc", retval);
 		funcBeginQuad = -1;
@@ -2049,14 +2194,14 @@ function_definition
 		$$->nextlist = v3;
 	}
 	| declarator func_marker_1 declaration_list compound_statement { 
-		//UNSUPPORTED_FUNCTIONALITY
+		// UNSUPPORTED_FUNCTIONALITY
 		error("Use function definitions of type int foo(int a, int b){...}", UNSUPPORTED_FUNCTIONALITY);
 	}
 	| declarator func_marker_1 compound_statement { 
 		addChild($1, $3);
 		$$ = $1;
 		setFirstSixParamOffset($1, gSymTable);
-		int retval = backpatchBeginFunc(funcBeginQuad, offset);
+		int retval = backpatchBeginFunc(funcBeginQuad, offset-8 + CALLQ_PADDING);
 		if(retval)
 			error("backpatchBeginFunc", retval);
 		funcBeginQuad = -1;
@@ -2067,7 +2212,6 @@ function_definition
 
 func_marker_1
 	: {
-		// Send type from declaration specifier to function name
 		struct node* declarator = currDecl;
 		addFunctionSymbol(NULL, declarator);
 		string funcName =  declarator->addr;
@@ -2077,46 +2221,14 @@ func_marker_1
 		}
 		funcDecl = 1;
 		gSymTable = addChildSymbolTable(gSymTable);
-		// Adding params to symtab
 		symbolTable* curr = gSymTable;
-		// int tempOffset = rbp_size;
-		// for(auto &p: declarator->paramList){
-		// 	int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
-		// 	if(retVal) {
-		// 		error(p->paramName, retVal);
-		// 	}
-		// 	string lex = p->paramName;
-			
-		// 	struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-		// 	if(!sym_node){
-		// 		error(lex, ALLOCATION_ERROR);
-		// 	}
-		// 	if(p->declSp->type[0] == TYPE_STRUCT){
-        // 		sym_node->infoType = INFO_TYPE_STRUCT;
-		// 	}
-		// 	sym_node->declSp = declSpCopy(p->declSp);
-		// 	sym_node->infoType = p->infoType;
-		// 	sym_node->size = getNodeSize(sym_node, gSymTable);
-		// 	tempOffset += getOffsettedSize(sym_node->size);
-		// }
-    
-
 		string labelName = string(declarator->lexeme);
 		emit(OP_LABEL, EMPTY_STR, EMPTY_STR,labelName);
-    //	TODO: backpatch offset
 		if(funcBeginQuad != -1)
 			error("Internal funcBeginQuad not -1", INVALID_ARGS_IN_FUNC_CALL);
 		funcBeginQuad = nextQuad();
-		emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, BLANK_STR); // GCC will set the global variable offset 
-
-		// funcNode->paramWidth = tempOffset-rbp_size;
+		emit(OP_BEGINFUNC, EMPTY_STR, EMPTY_STR, BLANK_STR);
 		setOverSixParamOffset(declarator, curr, funcNode);
-		// for(auto &p: declarator->paramList){
-		// 	string lex = p->paramName;	
-		// 	struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-		// 	sym_node->offset = (-1*tempOffset);
-		// 	tempOffset = tempOffset-getOffsettedSize(sym_node->size);
-		// }
 		offset = 0;
 
 	}
@@ -2137,33 +2249,6 @@ N_marker:
 		$$ = temp;
 	}
 	;
-// func_marker_2
-// 	: {
-// 		// TODO: Send type from declaration specifier to function name
-// 		struct node* declarator = currDecl; 
-// 		struct node* declaration_specifiers = currDeclSpec;
-// 		addFunctionSymbol(declaration_specifiers, declarator);
-
-// 		funcDecl = 1;
-// 		gSymTable = addChildSymbolTable(gSymTable);
-// 		// Adding params to symtab
-// 		symbolTable* curr = gSymTable;
-
-// 		for(auto &p: declarator->paramList){
-// 			int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
-// 			if(retVal) {
-// 				error(p->paramName, retVal);
-// 			}
-// 			string lex = p->paramName;
-			
-// 			struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-// 			if(!sym_node){
-// 				error(lex, ALLOCATION_ERROR);
-// 			}
-			
-// 			sym_node->declSp = declSpCopy(p->declSp);
-// 		}
-// 	}
 
 %%
 #include <stdio.h>
@@ -2172,7 +2257,6 @@ N_marker:
 using namespace std;
 
 int main(int ac, char **av) {
-	// insert_into_sets();
 	int val;
     FILE    *fd;
     if (ac >= 2)
@@ -2214,15 +2298,15 @@ int main(int ac, char **av) {
 		gTempSymbolMap->parent = nullptr;
         yyparse();
 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
-		char * fileName = strdup("graph.dot");
-		if(ac == 3) fileName = av[2];
-		generateDot(root,fileName);
+		// char * fileName = strdup("graph.dot");
+		// if(ac == 3) fileName = av[2];
+		// generateDot(root,fileName); 
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-        printCode((char*)TACFilename.c_str());
+		printCode((char*)TACFilename.c_str());
 		
 		fclose(fd);
     }

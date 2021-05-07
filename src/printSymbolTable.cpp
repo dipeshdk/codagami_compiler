@@ -1,4 +1,4 @@
-#include "headers/allInclude.h" 
+#include "headers/allInclude.h"
 
 extern int offset;
 
@@ -22,34 +22,6 @@ void printDeclSp(declSpec* ds) {
     for(int t : ds->storageClassSpecifier) 
        cout << getTypeName(t) << " ";
     cout << "\n";
-}
-
-void printToCsvFile(symbolTable *st){
-    string fileName = "symbolTableOfScope";
-    fileName = fileName.append(to_string(st->scope));
-    fileName = fileName.append(".csv");
-    fstream file;
-    file.open(fileName, ios::app);
-    file << "Name, infoType, arraySize, paramSize, isDefined";
-    int maxParamListSize = 0;
-    for(auto elem: st->symbolTableMap){
-        maxParamListSize = elem.second->paramList.size() > maxParamListSize ? elem.second->paramList.size() : maxParamListSize;
-    }
-    for(int i = 0; i < maxParamListSize;i++){
-        file << ", Parameter" << i + 1;
-    }
-    file << "\n";
-    for(auto elem : st->symbolTableMap){
-        file << elem.second->name << ", "
-            << elem.second->infoType << ", "
-            << elem.second->arraySize << ", "
-            << elem.second->paramSize << ", "
-            << elem.second->isDefined;
-        for(param* t : elem.second->paramList) {
-            file << ", " << t->paramName;
-        }
-        file << "\n";
-    }
 }
 
 void printSymbolTable(symbolTable *st) {
@@ -80,7 +52,7 @@ void printSymbolTable(symbolTable *st) {
     for(auto &s: st->symbolOrder){
         cout << s << " ";
     }
-    cout << endl;
+    ;
     cout << "\n=================================================\n";
     printStructTable(st->structMap, st->scope);
     for(symbolTable *child : st->childList) {
@@ -233,7 +205,8 @@ void printSymbolTableJSON(string filePrefix, symbolTable *st, int numTab, int pr
 
 int getNodeSize(symbolTableNode* elem, symbolTable* st){
     int size = 0;
-    if(elem->infoType == INFO_TYPE_ARRAY){
+    if(elem->declSp->ptrLevel >=1) size = 8;
+    else if(elem->infoType == INFO_TYPE_ARRAY){
         size += 8;
     }
     else if(elem->infoType == INFO_TYPE_FUNC){
@@ -392,21 +365,23 @@ void printQuad(quadruple* quad, int line) {
             if(quad->result == EMPTY_STR) {
                 printf("    LCALL %s\n", quad->arg1.c_str());
             }else {
-                printf("    %s = LCALL _%s\n", quad->result.c_str(), quad->arg1.c_str());
+                printf("    %s = LCALL %s\n", quad->result.c_str(), quad->arg1.c_str());
             }
             break;
         case OP_LABEL: printf("%s:\n", quad->result.c_str()); break;
         case OP_ASSIGNMENT:
             printf("    %s = %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
         case OP_IFNEQGOTO:
-            printf("    IF %s <> %s GOTO %s\n", quad->arg1.c_str(), quad->arg2.c_str(), quad->result.c_str()); break;
+            printf("    IF %s <> %s GOTO %s\n", quad->arg1.c_str(), quad->arg2.c_str(), quad->result.c_str());  break;
         case OP_UNARY_MINUS:
         case OP_BITWISE_NOT:
         case OP_LOGICAL_NOT:
         case OP_ADDR:
-            printf("    %s = %s %s\n", quad->result.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str()); break;
+            printf("    %s = %s %s\n", quad->result.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str());  break;
         case OP_MOV:
             printf("    MOV %s -> %s\n", quad->result.c_str(), quad->arg1.c_str()); break;
+        case OP_SUBI:
+            printf("    %s = %s %s %s\n", quad->result.c_str(),  quad->arg2.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str()); break;
         default:
             printf("    %s = %s %s %s\n", quad->result.c_str(),  quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());
     }
@@ -414,12 +389,10 @@ void printQuad(quadruple* quad, int line) {
 
 void printCode(char* filename) {
     freopen(filename, "w", stdout);
-    // cout << "\n";
     int n = gCode.size();
     for(int i = 0; i < n; i++) {
         printQuad(gCode[i], i);
     }
-    // cout << "\n";
 }
 
 void printASMText() {
@@ -433,7 +406,6 @@ void printASMText() {
             res += p.second[i];
             if(i < (n-1)) res += ", ";
         }
-        // cout << lineNo++ << ".  " << res << "\n";
         cout <<  "  " << res << "\n";
     }
     cout <<  endl;

@@ -32,16 +32,6 @@ node* makeTypeNode(int tp){
 	return newNode;
 }
 
-node* makeStorageClassNode(int storageClass, char* name, char* lexeme, int isLeaf, 
-			node*c1, node*c2, node*c3, node* c4){
-	node* newNode = makeNode(name, lexeme, isLeaf, 
-			c1,c2, c3, c4);
-	newNode->declSp = new declSpec();
-	newNode->declSp->storageClassSpecifier.push_back(storageClass); //TODO: check validity of storage class
-	newNode->name = strdup("Storage Node");
-	return newNode;
-}
-
 void makeSibling(node* root, node* childList){
 	if(!root) return;
 	if(!childList) return;
@@ -63,3 +53,10 @@ void addChild(node* parent, node* child){
 	}
 }
 
+bool isConstantNode(node *node) {
+	return node->isConstant;
+}
+
+bool isStringLiteral(node *node) {
+	return node->isStringLiteral;
+}

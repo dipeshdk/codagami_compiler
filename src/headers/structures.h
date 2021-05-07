@@ -28,16 +28,20 @@ struct declSpec
 
 struct param{
     int infoType;
+    vector<int> arrayIndices;
+    int arraySize;
     struct declSpec *declSp;
     string paramName;
     param() {
         declSp = new declSpec();
         paramName="empty";
+        arraySize = 0;
         infoType = INFO_TYPE_NORMAL;
     }
 };
 
 struct structParam{
+    int infoType;
     struct declSpec *declSp;
     string name;
     int bit;
@@ -58,6 +62,7 @@ struct symbolTableNode {
     int paramWidth;
     int offset;
     vector<struct param*> paramList; //for functions, struct and union
+    vector<int> arrayIndices;
     string name;
     struct declSpec *declSp;
     int scope;
@@ -108,7 +113,8 @@ struct node
     struct node *next;
     struct node *childList = nullptr;
     struct declSpec *declSp;
- 
+    bool isConstant;
+    bool isStringLiteral;
     // symtable node
     int infoType = INFO_TYPE_NORMAL;
     int lineNo;
@@ -116,6 +122,7 @@ struct node
     int paramSize = 0;
     vector<struct param*> paramList;
     vector<struct structParam*> structParamList;
+    vector<node*> arrayIndices;
 
     string addr; 
     int quad;
@@ -127,6 +134,8 @@ struct node
         declSp = new declSpec();
         addr = "EMPTY_ADDR";
         valType = NOT_CONSTANT;
+        isConstant = false;
+        isStringLiteral=false;
     }
 }; 
 

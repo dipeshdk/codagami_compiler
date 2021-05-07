@@ -37,9 +37,12 @@ int getValueFromConstantExpression(node* constant_expression, int &err) {
     }
 	switch(constant_expression->valType){
         case TYPE_INT: 
-            val = constant_expression->ival;
+            // val = constant_expression->ival;
+			val = stoi(constant_expression->addr);
             break;
-        case TYPE_FLOAT:
+        case TYPE_CHAR:
+			val = stoi(constant_expression->addr);
+			break;
         default:
 		    err = TYPE_ERROR;
 			return val;
@@ -125,7 +128,7 @@ void error(string var, int error_code) {
 			str = "void data type is not compatible";
 			break;
 		case UNSUPPORTED_FUNCTIONALITY:
-			str = "functionality is not supported by this compiler.";
+			str = "This functionality is not supported by this compiler.";
 			break;
 		case NOT_A_CHAR:
 			str = "should be a char";
@@ -157,6 +160,12 @@ void error(string var, int error_code) {
 		case INVALID_STRING_LITERAL_ASSIGNMENT:
 			str = "Invalid string literal assignment";
 			break;
+		case INVALID_POINTER_ADDR:
+			str = "Internal error: Invalid pointer name in 3AC code";
+			break;
+		case INVALID_GLOBAL_INITIALIZER:
+			str = "Invalid global initialization. RHS must be constant.";
+			break;
 		default:
 			break;
 	}
@@ -174,26 +183,18 @@ void copyList(node* n1, node *n2) {
 }
 
 bool isConstant(string s){
-	for (char const &c : s) {
+	int n= s.length();
+	int i = 0;
+	if(n > 0 && s[0]=='-') i++;
+	for (; i < n; i++) {
+		char c = s[i];
         if (!(c >= '0' && c <= '9')) return false;
     }
     return true;
-    // try{
-    //     int x = stoi(s);
-    //     throw NOT_CONSTANT_EXCEPTION;
-    // }
-    // catch(int exp){
-    //     if(exp == NOT_CONSTANT_EXCEPTION)
-    //        return false;
-    //     else    
-    //         return true; 
-    // }
 }
 
 string hexString(string decStr) {
-    stringstream ss;
-    ss << "0x" << hex << getNumberFromConstAddr(decStr);
-    return ss.str();
+	return decStr;
 }
 
 int getNumberFromConstAddr(string s) {

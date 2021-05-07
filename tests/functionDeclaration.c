@@ -1,13 +1,24 @@
-int foo(int *x, float f);
+void printf(char* c, int x);
+int* malloc(int x);
 
-int foo(int *a, float f) {
-    int x;
-    x= *a + f;
-    return x;
+char* str = "%d\n";
+int foo(int *x);
+
+int foo(int *a) {
+    int *x = malloc(8);
+    *x= *a + 3;
+    printf(str, *x);
+    return *x;
+}
+
+int bar(int x){
+    int y = 10;
+    return y*x;
 }
 
 int main() {
-    float f;
-    int a;
-    a = foo(5, f);
+    int a = 10;
+    a = foo(&a) * bar(23);
+    printf(str, a);
+    printf(str, foo(&a) * bar(23));
 }
