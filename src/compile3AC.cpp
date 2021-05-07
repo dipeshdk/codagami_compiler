@@ -1365,7 +1365,11 @@ void copyReturningStruct(string from, int quadNo) {
 
     int regIndPtr = getReg(quadNo, CONSTANT);
     string regPtrName = regVec[regIndPtr]->regName;
+
     emitAsm("movq", {hexString(to_string(16)) + "(" + REGISTER_RBP + ")", regPtrName});
+    // emitAsm("movq", {REGISTER_RBP, regPtrName});
+    // emitAsm("addq", {"$" + hexString(to_string(24)), regPtrName});
+
     for (structParam* p : fromStructNode->paramList) {
         string fromParam = from + "." + p->name;
         string fromParamAddr = getVariableAddr(fromParam, st);
@@ -1376,6 +1380,10 @@ void copyReturningStruct(string from, int quadNo) {
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {fromParamAddr, regName});
         emitAsm("movq", {regName, hexString(to_string(toOff)) + "(" + regPtrName + ")"});
+        // emitAsm("movq", {regName, hexString(to_string(24+toOff)) + "(" + REGISTER_RBP + ")"});
         freeReg(regInd);
     }
+
+    emitAsm("movq", {regPtrName, REGISTER_RAX}); // Value to be returned, need to free RAX?
+    freeReg(regIndPtr);
 }
