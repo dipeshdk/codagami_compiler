@@ -683,7 +683,7 @@ int getOffset(string varName, symbolTable* st) {
     }
     int offset = sym_node->offset;
     offset += getOffsettedSize(sym_node->size);
-    if (dot && sym_node->infoType == INFO_TYPE_STRUCT && sym_node->declSp->ptrLevel == 0) {
+    if (dot && (sym_node->infoType == INFO_TYPE_STRUCT || (sym_node->declSp && sym_node->declSp->type.size() > 0 && sym_node->declSp->type[0] == TYPE_STRUCT)) && sym_node->declSp->ptrLevel == 0) {
         offset -= getParameterOffset(sym_node->declSp->lexeme, param, st);
     }
     return -1 * offset;

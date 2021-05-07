@@ -314,8 +314,9 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
         sym_node->infoType = p->infoType;
         sym_node->size = getNodeSize(sym_node, gSymTable);
         if ((p->declSp->type.size() > 0 && p->declSp->type[0] == TYPE_STRUCT) || param_num > 6) {
-            sym_node->offset = (-1 * tempOffset);
+            sym_node->infoType = INFO_TYPE_STRUCT;
             tempOffset += getOffsettedSize(sym_node->size);
+            sym_node->offset = (-1 * tempOffset);
         }
     }
     funcNode->paramWidth = tempOffset - rbp_size;
