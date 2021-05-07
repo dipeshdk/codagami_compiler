@@ -41,7 +41,7 @@
 	string currFunc = "#prog";
 	vector<node*> case_consts;
 	int offset = 0;
-	int rbp_size = 4+16+4;
+	int rbp_size = 24;
 	stack<string> ternaryTempStack;
 	int funcBeginQuad = -1;
 	#include <sys/stat.h>
