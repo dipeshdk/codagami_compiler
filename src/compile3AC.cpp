@@ -363,6 +363,8 @@ void asmOpBeginFunc(int quadNo) {
     vector<struct param*> paramList = funcNode->paramList;
     int numParams = paramList.size();
     for (int i = 0; i < min(6, numParams); i++) {
+        if ((paramList[i]->declSp->type.size() > 0 && paramList[i]->declSp->type[0] == TYPE_STRUCT))
+            continue;
         string argAddr = getVariableAddr(paramList[i]->paramName, st);
         emitAsm("movq", {gArgRegs[i], argAddr});
     }
@@ -889,6 +891,10 @@ void freeRegAndMoveToStack(int regInd) {
 void asmOpAssignment(int quadNo) {
     quadruple* quad = gCode[quadNo];
     symbolTable* st = codeSTVec[quadNo];
+
+    //TODO: Verify
+    // if (isConstant(quad->result)) {
+    //     errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
 
     string noPtrName = quad->result;
     bool isPtr = isPointer(noPtrName);

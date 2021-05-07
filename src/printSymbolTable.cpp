@@ -115,7 +115,9 @@ void printElem(symbolTableNode* elem, string str, int printTemps) {
         printf("%s", str.c_str());
         printf("{\n");
         printf("%s", str.c_str());
-        printf("\"name\" : \"%s\"", t->paramName.c_str());
+        printf("\"name\" : \"%s\",\n", t->paramName.c_str());
+        printf("%s", str.c_str());
+        printf("\"infoType\" : \"%d\"", t->infoType);
         ds = t->declSp;
         if (ds) {
             // printf("%s", str.c_str());
@@ -207,7 +209,7 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st) {
         size += 8;
     } else if (elem->infoType == INFO_TYPE_FUNC) {
         size += 8;
-    } else if (elem->infoType == INFO_TYPE_STRUCT) {
+    } else if (elem->infoType == INFO_TYPE_STRUCT || (elem->declSp && elem->declSp->type.size() > 0 && elem->declSp->type[0] == TYPE_STRUCT)) {
         if (elem->declSp) {
             structTableNode* n = structLookUp(st, elem->declSp->lexeme);
             for (auto i : n->paramList) {
