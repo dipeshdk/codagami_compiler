@@ -130,21 +130,31 @@ node* declaration_list(node* declaration_list, node* declaration) {
   return temp;
 }
 
-node* parameter_declaration(node* declaration_specifiers, node* declarator) {
-  param* parameter = new param();
-  if (!parameter->declSp) {
-    parameter->declSp = new declSpec();
-  }
-  if (declaration_specifiers->declSp) {
-    parameter->declSp = declSpCopy(declaration_specifiers->declSp);
-  }
-  if (declarator->declSp) {
-    parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
-  }
-  parameter->infoType  = declarator->infoType;
-  parameter->paramName = declarator->lexeme;
-  declarator->paramList.push_back(parameter);
-  return declarator;
+node* parameter_declaration(node* declaration_specifiers, node* declarator){
+    param *parameter = new param();
+    if(!parameter->declSp) {
+        parameter->declSp = new declSpec();
+    }
+    if(declaration_specifiers->declSp) {
+        parameter->declSp = declSpCopy(declaration_specifiers->declSp);
+    }
+    if(declarator->declSp) {
+        parameter->declSp->ptrLevel = declarator->declSp->ptrLevel;
+    }
+    vector<int> arrayIndicesTmp;
+    for(auto &x: declarator->arrayIndices){
+        int asizeTmp =  getValueFromConstantExpression(x,errCode);
+        if(asizeTmp < 0 || errCode){
+            error(x->lexeme, ARRAY_SIZE_NOT_CONSTANT);
+        }
+        arrayIndicesTmp.push_back(asizeTmp);
+    }
+    parameter->arraySize = declarator->arraySize;
+    parameter->arrayIndices = arrayIndicesTmp;
+    parameter->infoType = declarator->infoType;
+    parameter->paramName = declarator->lexeme;
+    declarator->paramList.push_back(parameter);
+    return declarator;
 }
 
 string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argument_expression_list, int& errCode, string& errString) {
@@ -241,33 +251,34 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
   return newTemp;
 }
 
-void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode* funcNode) {
-  int tempOffset = rbp_size;
-  int param_num  = 0;
-  for (auto& p : declarator->paramList) {
-    param_num++;
-    int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
-    if (retVal) {
-      error(p->paramName, retVal);
-    }
-    string lex = p->paramName;
-
-    struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
-    if (!sym_node) {
-      error(lex, ALLOCATION_ERROR);
-    }
-    if (p->declSp->type[0] == TYPE_STRUCT) {
-      sym_node->infoType = INFO_TYPE_STRUCT;
-    }
-    sym_node->declSp   = declSpCopy(p->declSp);
-    sym_node->infoType = p->infoType;
-    sym_node->size     = getNodeSize(sym_node, gSymTable);
-    if (param_num > 6) {
-      sym_node->offset = (-1 * tempOffset);
-      tempOffset += getOffsettedSize(sym_node->size);
-    }
-  }
-
+void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode* funcNode){
+    int tempOffset = rbp_size;
+    int param_num = 0;
+	for(auto &p: declarator->paramList){
+        param_num++;
+		int retVal = insertSymbol(curr, declarator->lineNo, p->paramName);
+		if(retVal) {
+    		error(p->paramName, retVal);
+		}
+		string lex = p->paramName;
+		
+		struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
+		if(!sym_node){
+	    	error(lex, ALLOCATION_ERROR);
+		}
+		if(p->declSp->type[0] == TYPE_STRUCT){
+        	sym_node->infoType = INFO_TYPE_STRUCT;
+		}
+        sym_node->arraySize = p->arraySize;
+        sym_node->arrayIndices = p->arrayIndices;
+		sym_node->declSp = declSpCopy(p->declSp);
+		sym_node->infoType = p->infoType;
+		sym_node->size = getNodeSize(sym_node, gSymTable);
+		if(param_num > 6){
+            sym_node->offset = (-1*tempOffset);
+            tempOffset += getOffsettedSize(sym_node->size);
+        }
+	}
   funcNode->paramWidth = tempOffset - rbp_size;
 
   return;
