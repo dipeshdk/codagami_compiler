@@ -35,7 +35,7 @@ string getIndexStr(node *root, int &errCode, string &errStr);
 int getParamOffset(structTableNode *node, string paramName, int &err, string &errStr);
 int getOpcodeFromAssignStr(string s);
 void addIntTemp(string name, symbolTable *st);
-int getStructSize(structTableNode* node);
+int getStructSize(structTableNode *node);
 int getStructSizeFromAstNode(node *astNode);
- 
+
 #endif

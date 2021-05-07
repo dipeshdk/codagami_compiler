@@ -1,7 +1,8 @@
 #ifndef globalsHeader
 #define globalsHeader
 
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
+
 #include "constants.h"
 #include "structures.h"
 
@@ -29,7 +30,7 @@ extern node* root;
 extern vector<symbolTable*> codeSTVec;
 
 extern vector<reg*> regVec;
-extern vector< pair<string, vector<string>> > gAsm;
+extern vector<pair<string, vector<string>>> gAsm;
 extern vector<string> regNames;
 extern vector<string> gArgRegs;
 
