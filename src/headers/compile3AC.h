@@ -154,4 +154,8 @@ int getParameterOffset(string structName, string param, symbolTable* st);
 
 void asmOpBitwiseNot(int quadNo);
 
+void copyReturnStruct(string to, int quadNo);
+
+void copyReturningStruct(string from, int quadNo);
+
 #endif
