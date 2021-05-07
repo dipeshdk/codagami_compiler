@@ -315,10 +315,31 @@ void amsOpLCall(int quadNo)
 	//mov    %eax,-0x4(%rbp)
 	if (isConstant(quad->result))
 		errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+	
+	int isStruct = 0;
 	if (libraryFunctions.find(quad->arg1) != libraryFunctions.end())
 	{
 		emitAsm("xor", {REGISTER_RAX, REGISTER_RAX});
 	}
+	else{
+		string funcName = quad->arg1;
+		symbolTableNode* funcNode = lookUp(st, funcName);
+		if(!funcNode){
+			//TODO: Error
+		}
+		if(funcNode->declSp && (funcNode->declSp->type[0] == TYPE_STRUCT)){
+			isStruct = 1;
+			string structName = funcNode->declSp->lexeme;
+			// structTableNode* struc = structLookUp(gSymTable, structName);
+			symbolTableNode* tempNode = new symbolTableNode();
+			tempNode->declSp->type.push_back(TYPE_STRUCT);
+			tempNode->declSp->lexeme = structName;
+			int size = getNodeSize(tempNode, gSymTable);
+			emitAsm("subq", {"$"+hexString(to_string(size)), REGISTER_RSP});
+			emitAsm("pushq", {REGISTER_RSP});
+		}
+	}
+
 	emitAsm("callq", {quad->arg1});
 	if (quad->result != EMPTY_STR)
 	{
