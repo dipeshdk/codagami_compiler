@@ -1,8 +1,8 @@
 #ifndef compile3ACHeader
 #define compile3ACHeader
 
-#include "constants.h"  
-#include "structures.h" 
+#include "constants.h"
+#include "structures.h"
 
 void emitAssemblyFrom3AC(string asmOutputFile);
 
@@ -108,7 +108,7 @@ bool isGlobal(string varName, symbolTable* st);
 
 int getGlobalAddress(string varName, symbolTable* st);
 
-string getVariableAddr(string varName, symbolTable* st) ;
+string getVariableAddr(string varName, symbolTable* st);
 
 void initializeRegs();
 
