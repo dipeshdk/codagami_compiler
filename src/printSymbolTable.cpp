@@ -252,7 +252,7 @@ int getArraySize(symbolTableNode* sym_node, symbolTable* st){
             }
             return size*(sym_node->arraySize);
         }
-        else getTypeSize(sym_node->declSp->type)*(sym_node->arraySize);
+        else return getTypeSize(sym_node->declSp->type)*(sym_node->arraySize);
     }
     return 0;
 }
