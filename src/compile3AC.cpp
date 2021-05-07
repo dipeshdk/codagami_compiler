@@ -258,6 +258,7 @@ void asmOpReturn(int quadNo) {
         useReg(eaxInd, quadNo, NO_VAR_VALUE_ASSIGNED);
 
         if (!isConstant(quad->result)) {
+            // location--copy the return struct to appropriate location here.
             regVec[eaxInd]->varValue = quad->result;
             string argAddr = getVariableAddr(quad->result, st);
             emitAsm("movq", {argAddr, eaxName});
@@ -282,12 +283,33 @@ void amsOpLCall(int quadNo) {
     //mov    %eax,-0x4(%rbp)
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+
+	int isStruct = 0;
     if (libraryFunctions.find(quad->arg1) != libraryFunctions.end()) {
         emitAsm("xor", {REGISTER_RAX, REGISTER_RAX});
     }
+    else{
+		string funcName = quad->arg1;
+		symbolTableNode* funcNode = lookUp(st, funcName);
+		if(!funcNode){
+			//TODO: Error
+		}
+		if(funcNode->declSp && (funcNode->declSp->type[0] == TYPE_STRUCT)){
+			isStruct = 1;
+			string structName = funcNode->declSp->lexeme;
+			// structTableNode* struc = structLookUp(gSymTable, structName);
+			symbolTableNode* tempNode = new symbolTableNode();
+			tempNode->declSp->type.push_back(TYPE_STRUCT);
+			tempNode->declSp->lexeme = structName;
+			int size = getNodeSize(tempNode, gSymTable);
+			emitAsm("subq", {"$"+hexString(to_string(size)), REGISTER_RSP});
+			emitAsm("pushq", {REGISTER_RSP});
+		}
+	}
     emitAsm("callq", {quad->arg1});
     if (quad->result != EMPTY_STR) {
         string resultAddr = getVariableAddr(quad->result, st);
+        //---location: return value movement here
         emitAsm("movq", {REGISTER_RAX, resultAddr});
     }
 }
@@ -683,7 +705,7 @@ int getOffset(string varName, symbolTable* st) {
     }
     int offset = sym_node->offset;
     offset += getOffsettedSize(sym_node->size);
-    if (dot && sym_node->infoType == INFO_TYPE_STRUCT && sym_node->declSp->ptrLevel == 0) {
+    if (dot && (sym_node->infoType == INFO_TYPE_STRUCT || (sym_node->declSp && sym_node->declSp->type.size() > 0 && sym_node->declSp->type[0] == TYPE_STRUCT)) && sym_node->declSp->ptrLevel == 0) {
         offset -= getParameterOffset(sym_node->declSp->lexeme, param, st);
     }
     return -1 * offset;
@@ -924,18 +946,26 @@ void asmOpAssignment(int quadNo) {
 }
 
 void asmOpMod(int quadNo) {
+    //    8:	8b 45 f8             	mov    -0x8(%rbp),%eax (Move arg1)
+    //    b:	99                   	cltd
+    //    c:	f7 7d fc             	idivl  -0x4(%rbp) (arg2)
+    //    f:	89 55 f8             	mov    %edx,-0x8(%rbp) (result)
     quadruple* quad = gCode[quadNo];
     symbolTable* st = codeSTVec[quadNo];
 
     if (isConstant(quad->result))
-        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR); //does not print line number
 
     string resultAddr = getVariableAddr(quad->result, st);
+    freeRegAndMoveToStack(EAX_REGISTER_INDEX);
+    regVec[EAX_REGISTER_INDEX]->isFree = false;
+    string regName = regVec[EAX_REGISTER_INDEX]->regName;
+
     if (isConstant(quad->arg1)) {
-        emitAsm("movq", {"$" + hexString(quad->arg1), REGISTER_RAX});
+        emitAsm("movq", {"$" + hexString(quad->arg1), regName});
     } else {
         string argAddr = getVariableAddr(quad->arg1, st);
-        emitAsm("movq", {argAddr, REGISTER_RAX});
+        emitAsm("movq", {argAddr, regName});
     }
     emitAsm("cltd", {});
     string arg2Addr;
@@ -946,12 +976,18 @@ void asmOpMod(int quadNo) {
         arg2Addr = "$" + hexString(quad->arg2);
         emitAsm("movq", {arg2Addr, reg2Name});
         emitAsm("idivq", {reg2Name});
+        freeReg(reg2Ind);
     } else {
         arg2Addr = getVariableAddr(quad->arg2, st);
         emitAsm("idivq", {arg2Addr});
     }
 
-    emitAsm("movq", {REGISTER_RDX, resultAddr});
+    freeRegAndMoveToStack(EDX_REGISTER_INDEX);
+    regVec[EDX_REGISTER_INDEX]->isFree = false;
+    string regNamerdx = regVec[EDX_REGISTER_INDEX]->regName;
+    emitAsm("movq", {regNamerdx, resultAddr});
+    freeReg(EAX_REGISTER_INDEX);
+    freeReg(EDX_REGISTER_INDEX);
     return;
 }
 
@@ -1273,8 +1309,9 @@ void copyStruct(string from, string to, int quadNo) {
 
     structTableNode* fromStructNode = nullptr;
     fromStructNode = structLookUp(st, fromNode->declSp->lexeme);
-    if (!fromStructNode)
+    if (!fromStructNode) {
         error(fromNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+    }
 
     symbolTableNode* toNode = lookUp(st, toNoPtr);
     if (!toNode)
@@ -1284,8 +1321,9 @@ void copyStruct(string from, string to, int quadNo) {
 
     structTableNode* toStructNode = nullptr;
     toStructNode = structLookUp(st, toNode->declSp->lexeme);
-    if (!toStructNode)
+    if (!toStructNode) {
         error(toNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+    }
 
     for (structParam* p : fromStructNode->paramList) {
         string fromParam = from + "." + p->name;
