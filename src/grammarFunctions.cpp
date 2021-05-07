@@ -279,7 +279,6 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
             tempOffset += getOffsettedSize(sym_node->size);
         }
 	}
-
   funcNode->paramWidth = tempOffset - rbp_size;
 
   return;
