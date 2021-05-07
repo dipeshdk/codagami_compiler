@@ -338,6 +338,7 @@ unary_expression
 			constTemp->nextlist = cast_expression->nextlist;
 			constTemp->continuelist = cast_expression->continuelist;
 			constTemp->breaklist = cast_expression->breaklist;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			int opCode = -1;
@@ -468,6 +469,7 @@ multiplicative_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "*", errCode, errStr); 
@@ -502,6 +504,7 @@ multiplicative_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "/", errCode, errStr); 
@@ -541,6 +544,7 @@ multiplicative_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "%", errCode, errStr); 
@@ -577,6 +581,7 @@ additive_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		} else {
 			node* temp = makeNodeForExpressionNotStringForAddition($1, $3, "+", errCode, errStr); 
@@ -611,6 +616,7 @@ additive_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "-", errCode, errStr); 
@@ -654,6 +660,7 @@ shift_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		} else {	
 			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, "<<", errCode, errStr);
@@ -690,6 +697,7 @@ shift_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		} else {
 			node* temp = makeNodeForExpressionNotPointerNotString($1, $3, ">>", errCode, errStr);
@@ -825,6 +833,7 @@ and_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else{
 			node* temp = makeNode(strdup("&"), strdup("&"), 0, and_expression, equality_expression, (node*)NULL, (node*)NULL);
@@ -863,6 +872,7 @@ exclusive_or_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNode(strdup("^"), strdup("^"), 0, exclusive_or_expression, and_expression, (node*)NULL, (node*)NULL);
@@ -900,6 +910,7 @@ inclusive_or_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNode(strdup("|"), strdup("|"), 0, inclusive_or_expression1, exclusive_or_expression, (node*)NULL, (node*)NULL);
@@ -937,6 +948,7 @@ logical_and_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else {
 			node* temp = makeNode(strdup("AND_OP"), strdup("&&"), 0, $1, $4, (node*)NULL, (node*)NULL); 
@@ -976,6 +988,7 @@ logical_or_expression
 			constTemp->declSp->type.push_back(TYPE_INT);
 			constTemp->addr = resStr;
 			constTemp->isConstant = true;
+			constTemp->valType = TYPE_INT;
 			$$ = constTemp;
 		}else{
 			node* temp = makeNode(strdup("OR_OP"), strdup("||"), 0, $1, $4, (node*)NULL, (node*)NULL);  
