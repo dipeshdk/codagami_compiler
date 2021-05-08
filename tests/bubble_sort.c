@@ -7,14 +7,17 @@ void bubble_sort(int arr[6], int n){
         for(j = 0; j < n-i-1; ++j){
             if(arr[j] < arr[j+1]){
                 int temp = arr[j];
+                printf(str, temp);
                 arr[j] = arr[j+1];
+                printf(str, arr[j]);
                 arr[j+1] = temp;
+                printf(str, arr[j+1]);
             }
         }
     }
-    /* printf(str, arr[0]);
-    printf(str, arr[1]); 
-    printf(str, arr[2]); */
+    for(i = 0; i< 6; ++i){
+        printf(str, arr[i]);
+    }
     return;
 }
 

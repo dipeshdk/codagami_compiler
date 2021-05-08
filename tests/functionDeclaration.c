@@ -13,6 +13,7 @@ int foo(int *a) {
 
 int bar(int x){
     int y = 10;
+    printf(str, y+x);
     return y*x;
 }
 
