@@ -299,7 +299,7 @@ void amsOpLCall(int quadNo) {
         if (!funcNode) {
             //TODO: Error
         }
-        if (funcNode->declSp && funcNode->declSp->type.size() > 0 && (funcNode->declSp->type[0] == TYPE_STRUCT)) {
+        else if (funcNode->declSp && funcNode->declSp->type.size() > 0 && (funcNode->declSp->type[0] == TYPE_STRUCT)) {
             isStruct = 1;
             string structName = funcNode->declSp->lexeme;
             // structTableNode* struc = structLookUp(gSymTable, structName);
