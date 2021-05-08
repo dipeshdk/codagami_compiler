@@ -5,8 +5,9 @@
 %token XOR_ASSIGN OR_ASSIGN TYPE_NAME
 
 %token TYPEDEF EXTERN STATIC AUTO REGISTER
-%token CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
+%token CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID BOOL
 %token STRUCT UNION ENUM ELLIPSIS
+%token TRUE FALSE
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
@@ -153,6 +154,26 @@ constant
 		temp->declSp->type.push_back(TYPE_FLOAT);
 		addFVal(temp, yylval.id);
 		setAddr(temp, string(yylval.id));
+		temp->isConstant = true;
+		$$ = temp;
+	}
+	| TRUE {
+		string s("1");
+		node* temp = makeNode(strdup("CONSTANT"), strdup("1"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+		if(!temp->declSp) temp->declSp = new declSpec();
+		temp->declSp->type.push_back(TYPE_INT);
+		addIVal(temp, "1");
+		setAddr(temp, s);
+		temp->isConstant = true;
+		$$ = temp;
+	}
+	| FALSE {
+		string s("0");
+		node* temp = makeNode(strdup("CONSTANT"), strdup("0"), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
+		if(!temp->declSp) temp->declSp = new declSpec();
+		temp->declSp->type.push_back(TYPE_INT);
+		addIVal(temp, "0");
+		setAddr(temp, s);
 		temp->isConstant = true;
 		$$ = temp;
 	}
@@ -1455,6 +1476,7 @@ type_specifier
 	| UNSIGNED {$$ = NULL; error("UNSIGNED", UNSUPPORTED_FUNCTIONALITY);}
 	| enum_specifier {$$ = NULL;error("ENUM", UNSUPPORTED_FUNCTIONALITY);}
 	| TYPE_NAME { $$ = NULL;} //TODO: unknown use -- struct name
+	| BOOL {$$ = makeTypeNode(TYPE_INT);}
 	;
 
 inden_marker
