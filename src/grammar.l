@@ -52,9 +52,6 @@ char* previ;
 "void"			{ count();  return(VOID); }
 "volatile"		{ count();  return(VOLATILE); }
 "while"			{ count();  return(WHILE); }
-"true"			{ count();  return(TRUE); }
-"false"			{ count();  return(FALSE); }
-"bool"			{ count();  return(BOOL); }
 
 {L}({L}|{D})*		{ count(); previ = yylval.id; yylval.id = strdup(yytext); return(check_type()); }
 
@@ -264,9 +261,6 @@ void getTokenName(int ind, char c[]) {
         case CONTINUE: strcpy(c, "CONTINUE\0"); break;
         case BREAK: strcpy(c, "BREAK\0"); break;
         case RETURN: strcpy(c, "RETURN\0"); break;
-        case TRUE: strcpy(c, "TRUE\0"); break;
-        case FALSE: strcpy(c, "FALSE\0"); break;
-        case BOOL: strcpy(c, "BOOL\0"); break;
         default: c[0]=ind; c[1] = '\0';
     }
 }
