@@ -394,6 +394,8 @@ void asmOpBeginFunc(int quadNo) {
     vector<struct param*> paramList = funcNode->paramList;
     int numParams = paramList.size();
     for (int i = 0; i < min(6, numParams); i++) {
+        if ((paramList[i]->declSp->type.size() > 0 && paramList[i]->declSp->type[0] == TYPE_STRUCT))
+            continue;
         string argAddr = getVariableAddr(paramList[i]->paramName, st);
         emitAsm("movq", {gArgRegs[i], argAddr});
     }
@@ -711,10 +713,9 @@ int getOffset(string varName, symbolTable* st) {
         error(identifier, SYMBOL_NOT_FOUND);
     }
     int offset = sym_node->offset;
-    if (dot && sym_node->infoType == INFO_TYPE_STRUCT && sym_node->declSp->ptrLevel == 0) {
-        offset += getParameterOffset(sym_node->declSp->lexeme, param, st);
-    } else if (sym_node->infoType != INFO_TYPE_STRUCT) {
-        offset += getOffsettedSize(sym_node->size);
+    offset += getOffsettedSize(sym_node->size);
+    if (dot && (sym_node->infoType == INFO_TYPE_STRUCT || (sym_node->declSp && sym_node->declSp->type.size() > 0 && sym_node->declSp->type[0] == TYPE_STRUCT)) && sym_node->declSp->ptrLevel == 0) {
+        offset -= getParameterOffset(sym_node->declSp->lexeme, param, st);
     }
     return -1 * offset;
 }
@@ -802,7 +803,7 @@ string getVariableAddr(string varName, symbolTable* st) {
             error(identifier, SYMBOL_NOT_FOUND);
         }
         int paramOffset = getParameterOffset(sym_node->declSp->lexeme, param, st);
-        emitAsm("subq", {"$" + hexString(to_string(paramOffset)), regAddName});
+        emitAsm("addq", {"$" + hexString(to_string(paramOffset)), regAddName});
         emitAsm("movq", {regAddName, regName});
         // free regAddName
         ptrAssignedRegs.push(regInd);
@@ -810,9 +811,11 @@ string getVariableAddr(string varName, symbolTable* st) {
     }
 
     // f.a
+    bool dot = false;
     temp = varName;
     pos = temp.find(delim_dot);
     if (pos != string::npos) {
+        dot = true;
         identifier = temp.substr(0, pos);
         temp.erase(0, pos + delim_dot.length());
         param = temp;
@@ -828,8 +831,9 @@ string getVariableAddr(string varName, symbolTable* st) {
                     return g->varName + "(%rip)";
             }
         }
+        // error("non-string globals are unsupported", UNSUPPORTED_FUNCTIONALITY);
     }
-    if (isPointer(varName)) {
+    if (!dot && isPointer(varName)) {
         string name = stripPointer(varName);
         if (isConstant(name))
             errorAsm(name, DEREFERENCING_CONSTANT_ERROR);
@@ -840,6 +844,26 @@ string getVariableAddr(string varName, symbolTable* st) {
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
         return "(" + regName + ")";
+    } else if (dot && isPointer(identifier)) { //should be a struct array
+        string name = stripPointer(identifier);
+        if (isConstant(name))
+            errorAsm(name, DEREFERENCING_CONSTANT_ERROR);
+
+        symbolTableNode* sym_node = lookUp(st, name);
+        if (sym_node == nullptr) {
+            error(name, SYMBOL_NOT_FOUND);
+        } else if (sym_node->declSp->type[0] != TYPE_STRUCT) {
+            error("not a pointer to a valid struct", DEFAULT_ERROR);
+        }
+
+        int paramOffset = getParameterOffset(sym_node->declSp->lexeme, param, st);
+        offset = getOffset(name, st);
+        offsetStr = getOffsetStr(offset);
+        int regInd = getReg(gQuadNo, name); //TODO: Free this reg
+        string regName = regVec[regInd]->regName;
+        emitAsm("movq", {offsetStr, regName});
+        ptrAssignedRegs.push(regInd);
+        return to_string(paramOffset) + "(" + regName + ")";
     }
     offset = getOffset(varName, st);
     offsetStr = getOffsetStr(offset);
@@ -886,9 +910,10 @@ void useReg(int regInd, int quadNo, string varValue) {
 
 void freeRegAndMoveToStack(int regInd) {
     //TODO: free a reg by moving its data to a location and then
-    if (isConstant(regVec[regInd]->varValue))
-        return;
-    string resultAddr = getVariableAddr(regVec[regInd]->varValue, codeSTVec[regVec[regInd]->quadNo]);
+    // if (isConstant(regVec[regInd]->varValue) && regVec[regInd]->varValue == CONSTANT)
+    //     return;
+    // cout << 907 << regVec[regInd]->varValue << endl;
+    // string resultAddr = getVariableAddr(regVec[regInd]->varValue, codeSTVec[regVec[regInd]->quadNo]);
     // TODO: this line below has to be there after checking all registers are free
     // FLush register if contains useful variable
 
@@ -899,10 +924,24 @@ void asmOpAssignment(int quadNo) {
     quadruple* quad = gCode[quadNo];
     symbolTable* st = codeSTVec[quadNo];
 
+    //TODO: Verify
     if (isConstant(quad->result)) {
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
     }
 
+    string noPtrName = quad->result;
+    bool isPtr = isPointer(noPtrName);
+
+    if (isPtr) {
+        noPtrName = stripPointer(quad->result);
+    }
+
+    symbolTableNode* stNode = lookUp(st, noPtrName); //for struct and struct array ptrs
+
+    if (stNode && (stNode->infoType == INFO_TYPE_STRUCT || (isPtr && stNode->declSp->type[0] == TYPE_STRUCT))) {
+        copyStruct(quad->arg1, quad->result, quadNo);
+        return;
+    }
     string resultAddr = getVariableAddr(quad->result, st);
     if (isConstant(quad->arg1)) {
         emitAsm("movq", {"$" + hexString(quad->arg1), resultAddr});
@@ -1367,8 +1406,6 @@ void copyReturningStruct(string from, int quadNo) {
     string regPtrName = regVec[regIndPtr]->regName;
 
     emitAsm("movq", {hexString(to_string(16)) + "(" + REGISTER_RBP + ")", regPtrName});
-    // emitAsm("movq", {REGISTER_RBP, regPtrName});
-    // emitAsm("addq", {"$" + hexString(to_string(24)), regPtrName});
 
     for (structParam* p : fromStructNode->paramList) {
         string fromParam = from + "." + p->name;
@@ -1380,7 +1417,6 @@ void copyReturningStruct(string from, int quadNo) {
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {fromParamAddr, regName});
         emitAsm("movq", {regName, hexString(to_string(toOff)) + "(" + regPtrName + ")"});
-        // emitAsm("movq", {regName, hexString(to_string(24+toOff)) + "(" + REGISTER_RBP + ")"});
         freeReg(regInd);
     }
 

@@ -158,4 +158,6 @@ void copyReturnStruct(string to, int quadNo);
 
 void copyReturningStruct(string from, int quadNo);
 
+void copyStruct(string from, string to, int quadNo);
+
 #endif
