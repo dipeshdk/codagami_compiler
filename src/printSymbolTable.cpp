@@ -61,7 +61,6 @@ void printSymbolTable(symbolTable* st) {
 }
 
 void printElem(symbolTableNode* elem, string str, int printTemps) {
-
     // printf("%s", str.c_str());
     if (printTemps == 0) {
         if (isTempVar(elem->name)) {
@@ -116,7 +115,9 @@ void printElem(symbolTableNode* elem, string str, int printTemps) {
         printf("%s", str.c_str());
         printf("{\n");
         printf("%s", str.c_str());
-        printf("\"name\" : \"%s\"", t->paramName.c_str());
+        printf("\"name\" : \"%s\",\n", t->paramName.c_str());
+        printf("%s", str.c_str());
+        printf("\"infoType\" : \"%d\"", t->infoType);
         ds = t->declSp;
         if (ds) {
             // printf("%s", str.c_str());
@@ -208,7 +209,7 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st) {
         size += 8;
     } else if (elem->infoType == INFO_TYPE_FUNC) {
         size += 8;
-    } else if (elem->infoType == INFO_TYPE_STRUCT) {
+    } else if (elem->infoType == INFO_TYPE_STRUCT || (elem->declSp && elem->declSp->type.size() > 0 && elem->declSp->type[0] == TYPE_STRUCT)) {
         if (elem->declSp) {
             structTableNode* n = structLookUp(st, elem->declSp->lexeme);
             for (auto i : n->paramList) {
@@ -228,10 +229,22 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st) {
     return size;
 }
 
-int getArraySize(symbolTableNode* sym_node) {
+int getArraySize(symbolTableNode* sym_node, symbolTable* st) {
     if (sym_node->infoType == INFO_TYPE_ARRAY) {
         if (sym_node->declSp->ptrLevel > 1) {
             return 8 * (sym_node->arraySize);
+        } else if (sym_node->declSp->type[0] == TYPE_STRUCT) {
+            string structName = sym_node->declSp->lexeme;
+            structTableNode* structNode = structLookUp(st, structName);
+            if (structNode == nullptr) {
+                error(structName, STRUCT_NOT_DECLARED);
+                return -STRUCT_NOT_DECLARED;
+            }
+            int size = getStructSize(structNode);
+            if (size < 0) {
+                error(structName + " size error", DEFAULT_ERROR);
+            }
+            return size * (sym_node->arraySize);
         } else
             return getTypeSize(sym_node->declSp->type) * (sym_node->arraySize);
     }

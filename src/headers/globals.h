@@ -1,6 +1,8 @@
 #ifndef globalsHeader
 #define globalsHeader
 
+#include <bits/stdc++.h>
+
 #include "constants.h"
 #include "structures.h"
 #include <bits/stdc++.h>

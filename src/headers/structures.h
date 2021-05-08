@@ -1,6 +1,8 @@
 #ifndef structuresHeader
 #define structuresHeader
 
+#include <bits/stdc++.h>
+
 #include "constants.h"
 #include <bits/stdc++.h>
 

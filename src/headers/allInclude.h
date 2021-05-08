@@ -1,3 +1,5 @@
+#include <bits/stdc++.h>
+
 #include "AST.h"
 #include "TAC.h"
 #include "compile3AC.h"
@@ -10,5 +12,4 @@
 #include "symbolTable.h"
 #include "typecast.h"
 #include "utility.h"
-#include <bits/stdc++.h>
 using namespace std;

@@ -152,12 +152,11 @@ string stripTypeCastUtil(string name);
 
 int getParameterOffset(string structName, string param, symbolTable* st);
 
+void copyStruct(string from, string to, int quadNo);
 void asmOpBitwiseNot(int quadNo);
 
 void copyReturnStruct(string to, int quadNo);
 
 void copyReturningStruct(string from, int quadNo);
-
-void copyStruct(string from, string to, int quadNo);
 
 #endif

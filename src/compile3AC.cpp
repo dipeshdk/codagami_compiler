@@ -481,7 +481,6 @@ void asmOpDivI(int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     bool isConst1 = isConstant(quad->arg1), isConst2 = isConstant(quad->arg2);
 
@@ -534,7 +533,6 @@ void asmOpLeftShift(int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     bool isConst1 = isConstant(quad->arg1), isConst2 = isConstant(quad->arg2);
 
@@ -591,7 +589,6 @@ void asmOpRightShift(int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     bool isConst1 = isConstant(quad->arg1), isConst2 = isConstant(quad->arg2);
 
@@ -964,8 +961,7 @@ void asmOpMod(int quadNo) {
     symbolTable* st = codeSTVec[quadNo];
 
     if (isConstant(quad->result))
-        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR); //does not print line number
-
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
     string resultAddr = getVariableAddr(quad->result, st);
     freeRegAndMoveToStack(EAX_REGISTER_INDEX);
     regVec[EAX_REGISTER_INDEX]->isFree = false;
@@ -1043,7 +1039,6 @@ void asmOpComp(int quadNo, string asm_comp) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     if (isConstant(quad->arg1)) {
         emitAsm("movq", {"$" + hexString(quad->arg1), REGISTER_RAX});
@@ -1097,7 +1092,6 @@ void asmOpAndAnd(int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     if (isConstant(quad->arg1)) {
         emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg1)});
@@ -1128,7 +1122,6 @@ void asmOpOrOr(int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     if (isConstant(quad->arg1)) {
         emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg1)});
@@ -1223,7 +1216,6 @@ void emitAsmForBinaryOperator(string op, int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
     string resultAddr = getVariableAddr(quad->result, st);
     bool isConst1 = isConstant(quad->arg1), isConst2 = isConstant(quad->arg2);
 
@@ -1319,8 +1311,9 @@ void copyStruct(string from, string to, int quadNo) {
 
     structTableNode* fromStructNode = nullptr;
     fromStructNode = structLookUp(st, fromNode->declSp->lexeme);
-    if (!fromStructNode)
+    if (!fromStructNode) {
         error(fromNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+    }
 
     symbolTableNode* toNode = lookUp(st, toNoPtr);
     if (!toNode)
@@ -1330,8 +1323,9 @@ void copyStruct(string from, string to, int quadNo) {
 
     structTableNode* toStructNode = nullptr;
     toStructNode = structLookUp(st, toNode->declSp->lexeme);
-    if (!toStructNode)
+    if (!toStructNode) {
         error(toNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+    }
 
     for (structParam* p : fromStructNode->paramList) {
         string fromParam = from + "." + p->name;

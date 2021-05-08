@@ -221,6 +221,16 @@ postfix_expression
 
 	}
 	| postfix_expression '.' IDENTIFIER { 
+        // array of structs 
+        if($1->infoType == INFO_TYPE_ARRAY){
+			errCode = 0;
+			string arrayIndexStr = getArrayIndexWithEmit($1, errCode, errStr);
+			if(errCode)
+				error(errStr, errCode);
+			$1->addr = arrayIndexStr;
+			$1->declSp->ptrLevel--;
+		}
+
 		node * postfix_expression = $1;
 		structTableNode* structure = getRightMostStructFromPostfixExpression($1, false, errCode, errStr);
 		if(errCode) error(errStr, errCode);
@@ -235,7 +245,7 @@ postfix_expression
 		temp->addr = newAddr;
 		node *newNode = makeNode(strdup("."), strdup("."), 0, $1, temp , NULL, NULL);
 		newNode->declSp = declSpCopy(temp->declSp);
-		newNode->infoType = INFO_NESTED_STRUCT;
+		newNode->infoType = INFO_NESTED_STRUCT; //can come here even if it is an array.
 		newNode->addr = newAddr;
 		$$ = newNode;
 	}
@@ -1077,7 +1087,6 @@ conditional_marker:
 		temp->nextlist = makelist(nextQuad());
 		emit(OP_ASSIGNMENT, BLANK_STR, EMPTY_STR, ternaryTemp); 
 		$$ = temp;
-		
 	}
 	;
 
@@ -1378,7 +1387,7 @@ declaration
 			sym_node->size = getNodeSize(sym_node, gSymTable);
 			sym_node->offset = offset;
 			offset += getOffsettedSize(sym_node->size);
-			offset += getArraySize(sym_node);
+			offset += getArraySize(sym_node, gSymTable);
 			curr = curr->next;
 		}
 		makeSibling($2,$1);
@@ -1417,7 +1426,7 @@ declaration_specifiers
 	;
 
 init_declarator_list
-	: init_declarator {  $$ = $1;  }
+	: init_declarator { $$ = $1; }
 	| init_declarator_list ',' init_declarator { 
 		if($3->infoType == INFO_TYPE_FUNC || $1->infoType == INFO_TYPE_FUNC)
 			error("Cannot declare multiple functions in one line", UNSUPPORTED_FUNCTIONALITY);
@@ -1597,7 +1606,7 @@ struct_declarator
 	}
 	;
 
-// not to be handled
+/* Error is being thrown down in enum specifier as it is the starting production for enum*/
 enum_specifier
 	: ENUM '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup("enum"), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| ENUM IDENTIFIER '{' enumerator_list '}' { $$ = makeNode(strdup("ENUM"), strdup("enum"), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 0, $4, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
@@ -1613,6 +1622,7 @@ enumerator
 	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| IDENTIFIER '=' constant_expression {$$ = makeNode(strdup("="),strdup("="), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
 	;
+
 
 type_qualifier
 	: CONST {
@@ -1671,6 +1681,7 @@ direct_declarator
 	}
 	| '(' declarator ')' { $$ = $2;}
 	| direct_declarator '[' constant_expression ']' {
+
 		node* temp = $1;
 		int asize = getValueFromConstantExpression($3, errCode);
 		if(asize < 0){
@@ -1704,6 +1715,7 @@ direct_declarator
 	}
 	| direct_declarator '(' identifier_list ')' { 
 		// Not handled: Add to symbol table with appropriate type??, also add to function arguments
+		error("Function definition of this type is not supported.", UNSUPPORTED_FUNCTIONALITY);
 		$$ = $1;
 	}
 	| direct_declarator '(' ')' { 
@@ -2322,13 +2334,13 @@ int main(int ac, char **av) {
 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
 		// char * fileName = strdup("graph.dot");
 		// if(ac == 3) fileName = av[2];
-		// generateDot(root,fileName); 
+		// generateDot(root,fileName);
+        printCode((char*)TACFilename.c_str());
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-		printCode((char*)TACFilename.c_str());
 		
 		fclose(fd);
     }

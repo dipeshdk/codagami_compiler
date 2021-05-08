@@ -164,17 +164,10 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
     string func_name = postfix_expression->lexeme;
     string name = postfix_expression->lexeme;
     symbolTableNode* stNode = lookUp(gSymTable, name);
-
     if (!stNode || stNode->infoType != INFO_TYPE_FUNC || !stNode->declSp) {
         setErrorParams(errCode, SYMBOL_NOT_FOUND, errString, name);
         return EMPTY_STR;
     }
-
-    // if(!stNode->isDefined) {
-    //     setErrorParams(errCode, UNDEFINED_FUNCTION, errString, name);
-    //     return;
-    // }
-
     vector<struct param*> paramList = stNode->paramList;
     int maxSize = paramList.size();
     int idx = 0;
@@ -213,8 +206,6 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         }
         temp->infoType = paramList[idx]->infoType;
         arguments.push_back(temp);
-        // emit(OP_PUSHPARAM, BLANK_STR, BLANK_STR, temp->addr);
-        // paramSize+= getTypeSize(temp->declSp->type);
         idx++;
         curr = curr->next;
     }
@@ -226,17 +217,33 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         error(postfix_expression->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
     }
 
-    // Doing this in LCall
-    // Assuming no required value in regs
-    for (int i = 0; i < min(6, maxSize); i++) {
-        //mov to reg
-        emit(OP_MOV, gArgRegs[i], EMPTY_STR, arguments[i]->addr);
-    }
+    /* for(int i = 0; i < maxSize; i++) {
+        cout << "arg[" << i << "] = " << arguments[i]->addr << endl;
+    } */
 
     for (int i = maxSize - 1; i >= 6; i--) {
         //push param
-        emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, arguments[i]->addr);
-        paramSize += getTypeSize(arguments[i]->declSp->type);
+        if (!nodeIsStruct(arguments[i])) {
+            emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, arguments[i]->addr);
+            paramSize += getTypeSize(arguments[i]->declSp->type);
+        } else {
+            emitPushStruct(arguments[i]);
+            paramSize += getStructSizeFromAstNode(arguments[i]);
+        }
+    }
+
+    for (int i =  min(5, maxSize-1); i >= 0; i--) {
+        if(!nodeIsStruct(arguments[i])) continue;
+        emitPushStruct(arguments[i]);
+        paramSize += getStructSizeFromAstNode(arguments[i]);
+        
+    }
+
+    for (int i = 0; i < min(6, maxSize); i++) {
+        //mov to reg
+        if (nodeIsStruct(arguments[i])) continue;
+        emit(OP_MOV, gArgRegs[i], EMPTY_STR, arguments[i]->addr);
+        
     }
 
     if (postfix_expression->declSp->type[0] != TYPE_VOID) {
@@ -254,6 +261,43 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         emit(OP_POPPARAM, EMPTY_STR, EMPTY_STR, to_string(paramSize));
     stNode->callPopSize = paramSize;
     return newTemp;
+}
+
+bool nodeIsStruct(node* astNode) {
+    //TODO: Check for pointer structs
+    string varName = astNode->addr;
+    if (isConstantNode(astNode))
+        return false;
+    symbolTableNode* stNode = lookUp(gSymTable, varName);
+    if (!stNode)
+        return false;
+    if (stNode->infoType == INFO_TYPE_STRUCT)
+        return true;
+    return false;
+}
+
+void emitPushStruct(node* astNode) {
+    string varName = astNode->addr;
+    symbolTableNode* stNode = lookUp(gSymTable, varName);
+    if (!stNode)
+        error(varName, SYMBOL_NOT_FOUND);
+    if (stNode->infoType != INFO_TYPE_STRUCT)
+        error(varName, TYPE_ERROR);
+
+    structTableNode* structNode = nullptr;
+    structNode = structLookUp(gSymTable, stNode->declSp->lexeme);
+    if (!structNode) {
+        cout << "varName = " << varName << " scope = " << gSymTable->scope;
+        error(stNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+    }
+
+    vector<structParam*> structParamList = structNode->paramList;
+    int structParamListSize = structParamList.size();
+
+    for (int i = structParamListSize - 1; i >= 0; i--) {
+        string paramAddr = varName + "." + structParamList[i]->name;
+        emit(OP_PUSHPARAM, EMPTY_STR, EMPTY_STR, paramAddr);
+    }
 }
 
 void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode* funcNode) {
@@ -289,12 +333,11 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
         sym_node->declSp = declSpCopy(p->declSp);
         sym_node->infoType = p->infoType;
         sym_node->size = getNodeSize(sym_node, gSymTable);
-        if (param_num > 6) {
+        if ((p->declSp->type[0] == TYPE_STRUCT) || param_num > 6) {
             tempOffset += getOffsettedSize(sym_node->size);
             sym_node->offset = (-1 * tempOffset);
         }
     }
-
     funcNode->paramWidth = tempOffset - rbp_size; // -extra??
 
     return;
@@ -309,6 +352,8 @@ void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable) {
         param_num++;
         if (param_num > 6)
             break;
+        if (p->declSp->type.size() > 0 && p->declSp->type[0] == TYPE_STRUCT)
+            continue;
         string lex = p->paramName;
         struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
         if (!sym_node) {
@@ -372,7 +417,19 @@ int addArrayParamToStack(int& offset, string addr, int& errCode, string& errStri
     sym_node->declSp->ptrLevel++;
     offset += 8;
 
-    emit(OP_SUBI, newTmp, "8", newTmp1);
+    sym_node = lookUp(gSymTable, addr);
+    int size = 8;
+    if (sym_node->declSp->type[0] == TYPE_STRUCT) {
+        string structName = sym_node->declSp->lexeme;
+        structTableNode* structNode = structLookUp(gSymTable, structName);
+        if (structNode == nullptr) {
+            error(structName, STRUCT_NOT_DECLARED);
+            return -STRUCT_NOT_DECLARED;
+        }
+        size = getStructSize(structNode);
+    }
+
+    emit(OP_SUBI, newTmp, to_string(size), newTmp1);
     emit(OP_ASSIGNMENT, newTmp1, EMPTY_STR, addr);
     return 0;
 }

@@ -351,7 +351,6 @@ int implicitTypecastingNotPointerNotStringLiteral(node* n1, node* n2, string& va
 
 //TODO: check use in grammarOld.y
 int implicitTypecastingNotStringLiteral(node* n1, node* n2, string& var) {
-
     int rank = giveTypeCastRank(n1, n2);
     if (rank < 0) {
         var = "typecasting error rank";
