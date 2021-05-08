@@ -489,10 +489,12 @@ void asmOpDivI(int quadNo) {
         regVec[EAX_REGISTER_INDEX]->varValue = CONSTANT;
         arg1Addr = "$" + hexString(quad->arg1);
         emitAsm("movq", {arg1Addr, reg1Name});
+        emitAsm("cqo",{});
     } else {
         regVec[EAX_REGISTER_INDEX]->varValue = quad->arg1;
         arg1Addr = getVariableAddr(quad->arg1, st);
         emitAsm("movq", {arg1Addr, reg1Name});
+        emitAsm("cqo",{});
     }
 
     emitAsm("cltd", {});
@@ -504,10 +506,11 @@ void asmOpDivI(int quadNo) {
         string reg2Name = regVec[reg2Ind]->regName;
         arg2Addr = "$" + hexString(quad->arg2);
         emitAsm("movq", {arg2Addr, reg2Name});
+        emitAsm("cqo",{});
         emitAsm("idivq", {reg2Name});
     } else {
         arg2Addr = getVariableAddr(quad->arg2, st);
-        emitAsm("idivq", {arg2Addr});
+        emitAsm("idivl", {arg2Addr});
     }
 
     emitAsm("movq", {reg1Name, resultAddr});
