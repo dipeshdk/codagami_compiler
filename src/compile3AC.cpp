@@ -261,7 +261,7 @@ void asmOpReturn(int quadNo) {
             // location--copy the return struct to appropriate location here.
             regVec[eaxInd]->varValue = quad->result;
             symbolTableNode* sym_node = lookUp(st, quad->result);
-            if ((sym_node->infoType == INFO_TYPE_STRUCT) || (sym_node->declSp && sym_node->declSp->type.size() > 0 && sym_node->declSp->type[0] == TYPE_STRUCT)) {
+            if ((sym_node) && ((sym_node->infoType == INFO_TYPE_STRUCT) || (sym_node->declSp && sym_node->declSp->type.size() > 0 && sym_node->declSp->type[0] == TYPE_STRUCT))) {
                 copyReturningStruct(quad->result, quadNo);
             } else {
                 string argAddr = getVariableAddr(quad->result, st);

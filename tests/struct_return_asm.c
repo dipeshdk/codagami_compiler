@@ -1,3 +1,5 @@
+void printf(char* str, int x);
+char* str = "%d\n";
 struct foo{
     int a,b,c,d,e,f,g,h,i,j,k,l;
 };
@@ -26,7 +28,7 @@ int main(){
     f.a=3;
     x=5;
     x=6;
-    func(a);
-    printf("%d\n", f.f);
+    f = func(a);
+    printf(str, f.f);
     return 0;
 }
