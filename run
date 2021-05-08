@@ -6,14 +6,14 @@ make
 echo "----------------------building assembly bin/3AC --------------------------"
 bin/3AC ${testPath}
 echo "----------------------assembler gcc -no-pie ------------------------------"
-gcc -no-pie outputs/${fileName}/${fileName}.s
+gcc -no-pie outputs/${fileName}/${fileName}.s -o codagamiBinary.out
 echo "----------------------running my a.out ---------------------------------"
-./a.out > myOutput
+./codagamiBinary.out > myOutput
 
 echo "----------------------building using gcc...-------------------------------"
-gcc -ansi -pedantic ${testPath}
+gcc -ansi -pedantic ${testPath} -o gccBinary.out
 echo "----------------------running gcc a.out...--------------------------------"
-./a.out > gccOutput
+./gccBinary.out > gccOutput
 
 echo "----------------------printing diff---------------------------------------"
 diff -c gccOutput myOutput
