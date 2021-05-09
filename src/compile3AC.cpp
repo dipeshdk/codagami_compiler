@@ -798,7 +798,7 @@ string getVariableAddr(string varName, symbolTable* st) {
         emitAsm("movq", {regAddName, regName});
         
         ptrAssignedRegs.push(regInd);
-        regVec[regAddInd]->isFree = true;
+        freeReg(regAddInd);
         regVec[regInd]->isFree = false;
         return "(" + regName + ")";
     }
@@ -1341,11 +1341,11 @@ void copyStruct(string from, string to, int quadNo) {
         emitAsm("movq", {regName, toParamAddr});
         freeReg(regInd);
         if(isToPtr){
-            regVec[ptrAssignedRegs.top()]->isFree = true;
+            freeReg(ptrAssignedRegs.top());
             ptrAssignedRegs.pop();
         }
         if(isFromPtr){
-            regVec[ptrAssignedRegs.top()]->isFree = true;
+            freeReg(ptrAssignedRegs.top());
             ptrAssignedRegs.pop();
         }
     }
