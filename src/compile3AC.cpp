@@ -260,12 +260,17 @@ void asmOpReturn(int quadNo) {
         if (!isConstant(quad->result)) {
             // location--copy the return struct to appropriate location here.
             regVec[eaxInd]->varValue = quad->result;
-            string stripped_name = quad->result;
-            if (isPointer(stripped_name)) {
-                stripped_name = stripPointer(stripped_name);
-            }
-            symbolTableNode* sym_node = lookUp(st, stripped_name);
-            if ((sym_node) && ((sym_node->infoType == INFO_TYPE_STRUCT) || (sym_node->declSp && sym_node->declSp->type.size() > 0 && sym_node->declSp->type[0] == TYPE_STRUCT))) {
+            // string stripped_name = quad->result;
+            // if (isPointer(stripped_name)) {
+            //     stripped_name = stripPointer(stripped_name);
+            // }
+            // symbolTableNode* sym_node = lookUp(st, stripped_name);
+            // if ((sym_node) && ((sym_node->infoType == INFO_TYPE_STRUCT) || (sym_node->declSp && sym_node->declSp->type.size() > 0 && sym_node->declSp->type[0] == TYPE_STRUCT))) {
+            string funcName = funcNameStack.top();
+            symbolTableNode* funcNode = lookUp(st, funcName);
+            if (!funcNode) {
+                error(funcName, SYMBOL_NOT_FOUND);
+            } else if (funcNode->declSp && funcNode->declSp->type.size() > 0 && (funcNode->declSp->type[0] == TYPE_STRUCT) && (funcNode->declSp->ptrLevel == 0)) {
                 copyReturningStruct(quad->result, quadNo);
             } else {
                 string argAddr = getVariableAddr(quad->result, st);
@@ -304,8 +309,8 @@ void amsOpLCall(int quadNo) {
         string funcName = quad->arg1;
         symbolTableNode* funcNode = lookUp(st, funcName);
         if (!funcNode) {
-            //TODO: Error
-        } else if (funcNode->declSp && funcNode->declSp->type.size() > 0 && (funcNode->declSp->type[0] == TYPE_STRUCT)) {
+            error(funcName, SYMBOL_NOT_FOUND);
+        } else if (funcNode->declSp && funcNode->declSp->type.size() > 0 && (funcNode->declSp->type[0] == TYPE_STRUCT) && (funcNode->declSp->ptrLevel == 0)) {
             isStruct = 1;
             string structName = funcNode->declSp->lexeme;
             // structTableNode* struc = structLookUp(gSymTable, structName);

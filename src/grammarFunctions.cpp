@@ -307,7 +307,7 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
     int tempOffset = rbp_size;
     int param_num = 0;
     int extra = 0;
-    if (funcNode->declSp && (funcNode->declSp->type[0] == TYPE_STRUCT)) {
+    if (funcNode->declSp && (funcNode->declSp->type[0] == TYPE_STRUCT) && (funcNode->declSp->ptrLevel == 0)) {
         string structName = funcNode->declSp->lexeme;
         // structTableNode* struc = structLookUp(gSymTable, structName);
         symbolTableNode* tempNode = new symbolTableNode();
