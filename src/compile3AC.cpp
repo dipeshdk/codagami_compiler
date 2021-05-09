@@ -4,8 +4,8 @@ using namespace std;
 vector<reg*> regVec;
 vector<pair<string, vector<string>>> gAsm;
 vector<string> gArgRegs({REGISTER_RDI, REGISTER_RSI, REGISTER_RDX, REGISTER_RCX, REGISTER_R8, REGISTER_R9});
-vector<string> regNames({REGISTER_R10, REGISTER_R11, REGISTER_RCX, REGISTER_RAX, REGISTER_RDX, REGISTER_RBX, REGISTER_RSP, REGISTER_RBP, REGISTER_RSI, REGISTER_RDI});
-vector<string> regNamesOneByte({"%r10b", "%r11b", "%cl", "%al", "%dl", "%bl", REGISTER_RSP, "%bpl", "%sil", "%dil"});
+vector<string> regNames({REGISTER_R10, REGISTER_R11, REGISTER_RCX, REGISTER_RAX, REGISTER_RDX, REGISTER_RBX, REGISTER_RSI, REGISTER_RDI});
+vector<string> regNamesOneByte({"%r10b", "%r11b", "%cl", "%al", "%dl", "%bl", "%bpl", "%sil", "%dil"});
 stack<string> funcNameStack;
 stack<int> funcSizeStack;
 vector<globalData*> globalDataPair;
@@ -467,7 +467,7 @@ void asmOpUnaryLogicalNot(int quadNo) {
         emitAsm("movq", {resultAddr});
     } else {
         string argAddr = getVariableAddr(argString, st);
-        emitAsm("cmpl", {"$0x0", argAddr});
+        emitAsm("cmpl", {"$0", argAddr});
         emitAsm("sete", {"%al"});
         emitAsm("movzbl", {"%al", regNames[EAX_REGISTER_INDEX]});
         emitAsm("movq", {regNames[EAX_REGISTER_INDEX], resultAddr});
@@ -500,10 +500,12 @@ void asmOpDivI(int quadNo) {
         regVec[EAX_REGISTER_INDEX]->varValue = CONSTANT;
         arg1Addr = "$" + hexString(quad->arg1);
         emitAsm("movq", {arg1Addr, reg1Name});
+        emitAsm("cqo",{});
     } else {
         regVec[EAX_REGISTER_INDEX]->varValue = quad->arg1;
         arg1Addr = getVariableAddr(quad->arg1, st);
         emitAsm("movq", {arg1Addr, reg1Name});
+        emitAsm("cqo",{});
     }
 
     emitAsm("cltd", {});
@@ -515,10 +517,11 @@ void asmOpDivI(int quadNo) {
         string reg2Name = regVec[reg2Ind]->regName;
         arg2Addr = "$" + hexString(quad->arg2);
         emitAsm("movq", {arg2Addr, reg2Name});
+        emitAsm("cqo",{});
         emitAsm("idivq", {reg2Name});
     } else {
         arg2Addr = getVariableAddr(quad->arg2, st);
-        emitAsm("idivq", {arg2Addr});
+        emitAsm("idivl", {arg2Addr});
     }
 
     emitAsm("movq", {reg1Name, resultAddr});
@@ -1096,23 +1099,23 @@ void asmOpAndAnd(int quadNo) {
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
     string resultAddr = getVariableAddr(quad->result, st);
     if (isConstant(quad->arg1)) {
-        emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg1)});
+        emitAsm("cmp", {"$0", "$" + hexString(quad->arg1)});
     } else {
         string argAddr = getVariableAddr(quad->arg1, st);
-        emitAsm("cmp", {"$0x0", argAddr});
+        emitAsm("cmp", {"$0", argAddr});
     }
     emitAsm("je", {"1f"}); // Jump to mov 0x0
     if (isConstant(quad->arg2)) {
-        emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg2)});
+        emitAsm("cmp", {"$0", "$" + hexString(quad->arg2)});
     } else {
         string argAddr = getVariableAddr(quad->arg2, st);
-        emitAsm("cmp", {"$0x0", argAddr});
+        emitAsm("cmp", {"$0", argAddr});
     }
     emitAsm("je", {"1f"}); // Jump to mov 0x0
-    emitAsm("movq", {"$0x1", REGISTER_RAX});
+    emitAsm("movq", {"$1", REGISTER_RAX});
     emitAsm("jmp", {"2f"});
     emitAsm("\n1:", {});
-    emitAsm("movq", {"$0x0", REGISTER_RAX});
+    emitAsm("movq", {"$0", REGISTER_RAX});
     emitAsm("\n2:", {});
     emitAsm("movq", {REGISTER_RAX, resultAddr});
     return;
@@ -1126,24 +1129,24 @@ void asmOpOrOr(int quadNo) {
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
     string resultAddr = getVariableAddr(quad->result, st);
     if (isConstant(quad->arg1)) {
-        emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg1)});
+        emitAsm("cmp", {"$0", "$" + hexString(quad->arg1)});
     } else {
         string argAddr = getVariableAddr(quad->arg1, st);
-        emitAsm("cmp", {"$0x0", argAddr});
+        emitAsm("cmp", {"$0", argAddr});
     }
     emitAsm("jne", {"1f"}); // Jump to mov 0x0
     if (isConstant(quad->arg2)) {
-        emitAsm("cmp", {"$0x0", "$" + hexString(quad->arg2)});
+        emitAsm("cmp", {"$0", "$" + hexString(quad->arg2)});
     } else {
         string argAddr = getVariableAddr(quad->arg2, st);
-        emitAsm("cmp", {"$0x0", argAddr});
+        emitAsm("cmp", {"$0", argAddr});
     }
     emitAsm("je", {"2f"}); // Jump to mov 0x0
     emitAsm("\n1:", {});
-    emitAsm("movq", {"$0x1", REGISTER_RAX});
+    emitAsm("movq", {"$1", REGISTER_RAX});
     emitAsm("jmp", {"3f"});
     emitAsm("\n2:", {});
-    emitAsm("movq", {"$0x0", REGISTER_RAX});
+    emitAsm("movq", {"$0", REGISTER_RAX});
     emitAsm("\n3:", {});
     emitAsm("movq", {REGISTER_RAX, resultAddr});
     return;
@@ -1172,13 +1175,16 @@ void asmOpIfGoto(int quadNo) {
     }
 
     if (isConstant(quad->arg1)) {
-        emitAsm("cmpl", {"$0x0", "$" + hexString(quad->arg1)});
+        int regInd = getReg(quadNo, quad->arg1);
+        string regName = regVec[regInd]->regName;
+        emitAsm("mov", {"$" + hexString(quad->arg1), regName});
+        emitAsm("cmp", {"$0", regName});
     } else {
         string argAddr1 = getVariableAddr(quad->arg1, st);
         int regInd = getReg(quadNo, quad->arg1);
         string regName = regVec[regInd]->regName;
         emitAsm("mov", {argAddr1, regName});
-        emitAsm("cmp", {"$0x0", regName});
+        emitAsm("cmp", {"$0", regName});
         freeReg(regInd);
     }
     asmJump(quadNo, "jne");

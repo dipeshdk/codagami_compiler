@@ -7,4 +7,5 @@ int main(){
     int f['a' + '1'];
     int g['a'*2];
     int h['a'*'\n'];
+    int i['a'/'\n'];
 }

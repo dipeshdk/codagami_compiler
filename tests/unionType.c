@@ -5,7 +5,6 @@ union Data {
 };
  
 int main( ) {
-
    union Data data;
    return 0;
 }

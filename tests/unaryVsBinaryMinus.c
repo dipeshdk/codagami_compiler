@@ -21,10 +21,10 @@ int main(){
     printf(str,c);
     c = a + b;
     printf(str,c);
-    /* c = -a/b;
+    c = -a/b;
     printf(str,c);
     c = a/b;
-    printf(str,c); */
+    printf(str,c);
     c = a - b;
     printf(str,c);
     c = -a - b;
@@ -39,16 +39,26 @@ int main(){
     printf(str,z);
     z = x + y;
     printf(str,z);
-    /* z = -x/y;
+    z = -x/y;
     printf(str,z);
-    z = x/y; */
+    z = x/y;
+    printf(str,z);
+    z = 34/y;
+    printf(str,z);
+    z = x/34;
+    printf(str,z);
+    z = -x/34;
+    printf(str,z);
+    z = -34/y;
+    printf(str,z);
+    z = x/(-34);
     printf(str,z);
     z = x - y;
     printf(str,z);
     z = -x - y;
     printf(str,z);
 
-    /* garbage value is expected here from GCC as it overflows there*/
+    /* garbage value is expected here from GCC as it overflows there  */
     r = p * q;
     printf(str,r);
     r = -p * q;
@@ -57,14 +67,13 @@ int main(){
     printf(str,r);
     r = p + q;
     printf(str,r);
-    /* r = -p/q;
+    r = -p/q;
     printf(str,r);
     r = p/q;
-    printf(str,r); */
+    printf(str,r);
     r = p - q;
     printf(str,r);
     r = -p - q;
     printf(str,r);
-    
     return 0;
 }

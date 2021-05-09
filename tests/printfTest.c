@@ -1,4 +1,4 @@
-void printf(char *c, int d, int f);
+void printf(char *c, char* x, int f);
 char *p = "%s = %d\n";
 char *s = "sdafsdf";
 

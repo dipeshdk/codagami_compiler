@@ -1,3 +1,6 @@
+void printf(char* str, int x);
+char* str = "%d\n";
+
 void quicksort(int number[25],int first,int last){
    int i, j, pivot, temp;
 
@@ -37,6 +40,9 @@ int main(){
    number[4]=20;
 
    quicksort(number,0,count-1);
+   for(count = 0; count < 5 ; ++count){
+      printf(str,number[count]);
+   }
 
    return 0;
 }
