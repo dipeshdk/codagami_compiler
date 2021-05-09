@@ -1328,7 +1328,7 @@ void copyStruct(string from, string to, int quadNo) {
         error(toNode->declSp->lexeme, STRUCT_NOT_DECLARED);
     }
 
-    if((toNode->infoType == INFO_TYPE_STRUCT && toNode->declSp->ptrLevel == 1) && (fromNode->infoType == INFO_TYPE_STRUCT && fromNode->declSp->ptrLevel == 1) ){
+    if((toNode->infoType == INFO_TYPE_STRUCT && toNode->declSp->ptrLevel == 1) && !isToPtr){
         string fromParamAddr = getVariableAddr(from, st);
         string toParamAddr = getVariableAddr(to, st);
         int regInd = getReg(quadNo, from);
