@@ -1328,6 +1328,17 @@ void copyStruct(string from, string to, int quadNo) {
         error(toNode->declSp->lexeme, STRUCT_NOT_DECLARED);
     }
 
+    if((toNode->infoType == INFO_TYPE_STRUCT && toNode->declSp->ptrLevel == 1) && (fromNode->infoType == INFO_TYPE_STRUCT && fromNode->declSp->ptrLevel == 1) ){
+        string fromParamAddr = getVariableAddr(from, st);
+        string toParamAddr = getVariableAddr(to, st);
+        int regInd = getReg(quadNo, from);
+        string regName = regVec[regInd]->regName;
+        emitAsm("movq", {fromParamAddr, regName});
+        emitAsm("movq", {regName, toParamAddr});
+        freeReg(regInd);
+        return;
+    }
+
     for (structParam* p : fromStructNode->paramList) {
         string fromParam = from + "." + p->name;
         string fromParamAddr = getVariableAddr(fromParam, st);
