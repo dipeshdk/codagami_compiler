@@ -13,6 +13,7 @@ int foo(int *a) {
 
 int bar(int x){
     int y = 10;
+    printf(str, y+x);
     return y*x;
 }
 
@@ -21,4 +22,5 @@ int main() {
     a = foo(&a) * bar(23);
     printf(str, a);
     printf(str, foo(&a) * bar(23));
+    return 0;
 }

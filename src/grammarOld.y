@@ -1584,7 +1584,7 @@ struct_declarator
 	}
 	;
 
-// not to be handled
+/* Error is being thrown down in enum specifier as it is the starting production for enum*/
 enum_specifier
 	: ENUM '{' enumerator_list '}' {$$ = makeNode(strdup("ENUM"), strdup("enum"), 0, $3, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| ENUM IDENTIFIER '{' enumerator_list '}' { $$ = makeNode(strdup("ENUM"), strdup("enum"), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 0, $4, (node*)NULL, (node*)NULL, (node*)NULL), (node*)NULL, (node*)NULL, (node*)NULL);}
@@ -1600,6 +1600,7 @@ enumerator
 	: IDENTIFIER {$$ = makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);}
 	| IDENTIFIER '=' constant_expression {$$ = makeNode(strdup("="),strdup("="), 0, makeNode(strdup("IDENTIFIER"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL), $3, (node*)NULL, (node*)NULL);}
 	;
+
 
 type_qualifier
 	: CONST {
@@ -1692,6 +1693,7 @@ direct_declarator
 	}
 	| direct_declarator '(' identifier_list ')' { 
 		// Not handled: Add to symbol table with appropriate type??, also add to function arguments
+		error("Function definition of this type is not supported.", UNSUPPORTED_FUNCTIONALITY);
 		$$ = $1;
 	}
 	| direct_declarator '(' ')' { 

@@ -137,7 +137,7 @@
 #define CALLQ_PADDING 16
 
 #define NOT_CONSTANT_EXCEPTION 601
-#define NUM_REGISTER 10
+#define NUM_REGISTER 8
 #define CONSTANT "__constant__"
 #define NO_VAR_VALUE_ASSIGNED "__not_assigned__"
 #define EAX_REGISTER_INDEX 3

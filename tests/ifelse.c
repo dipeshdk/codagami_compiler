@@ -1,31 +1,34 @@
-void printf(char* s, int x);
+void printf(char* p, int d);
 char* str = "%d\n";
 
 int main() {
-    int a = 3, b = 2, c = 0;
+    int a = 3, b = 3, c = 0;
     char p, q, r;
 
     if (a == b) {
+        printf(str, 584654646);
         if (c == 0) {
-            printf(str, 890);
             p = 'a';
+            printf(str, p);
         } else if (c == 1) {
-            printf(str, 891);
             q = 'a';
+            printf(str, q);
         } else {
-            printf(str, 892);
             r = 'b';
+            printf(str, r);
         }
     }
 
     if (!c) {
+        printf(str, 679896);
         if (a) {
-            if (a == p * c + b) {
-                printf(str, 893);
+            printf(str, 587685);
+            if (a >= p * c + b) {
+                printf(str, 3490930);
                 return 0;
             } else {
-                printf(str, 894);
                 a == p* c + b + 1;
+                printf(str, a);
             }
         }
     }

@@ -28,7 +28,12 @@ node* makeDeadNode() {
 
 node* makeTypeNode(int tp) {
     node* newNode = makeDeadNode();
-    newNode->declSp->type.push_back(tp); //TODO: check validity of type
+    vector<int> typeTmp;
+    typeTmp.push_back(tp);
+    int retval = checkValidType(typeTmp);
+    if(retval)
+        error("This data type is INVALID.", DEFAULT_ERROR);
+    newNode->declSp->type.push_back(tp);
     return newNode;
 }
 
