@@ -20,8 +20,8 @@ main:
  # xor    %rax, %rax
   callq    printf
 
- # movq    $0x0, %rax
- # addq    $0x10, %rsp
+ movq    $0x0, %rax
+ addq    $0x10, %rsp
   nop
   pop    %rbp
   retq    
