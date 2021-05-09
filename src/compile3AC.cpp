@@ -260,7 +260,11 @@ void asmOpReturn(int quadNo) {
         if (!isConstant(quad->result)) {
             // location--copy the return struct to appropriate location here.
             regVec[eaxInd]->varValue = quad->result;
-            symbolTableNode* sym_node = lookUp(st, quad->result);
+            string stripped_name = quad->result;
+            if (isPointer(stripped_name)) {
+                stripped_name = stripPointer(stripped_name);
+            }
+            symbolTableNode* sym_node = lookUp(st, stripped_name);
             if ((sym_node) && ((sym_node->infoType == INFO_TYPE_STRUCT) || (sym_node->declSp && sym_node->declSp->type.size() > 0 && sym_node->declSp->type[0] == TYPE_STRUCT))) {
                 copyReturningStruct(quad->result, quadNo);
             } else {
@@ -500,12 +504,12 @@ void asmOpDivI(int quadNo) {
         regVec[EAX_REGISTER_INDEX]->varValue = CONSTANT;
         arg1Addr = "$" + hexString(quad->arg1);
         emitAsm("movq", {arg1Addr, reg1Name});
-        emitAsm("cqo",{});
+        emitAsm("cqo", {});
     } else {
         regVec[EAX_REGISTER_INDEX]->varValue = quad->arg1;
         arg1Addr = getVariableAddr(quad->arg1, st);
         emitAsm("movq", {arg1Addr, reg1Name});
-        emitAsm("cqo",{});
+        emitAsm("cqo", {});
     }
 
     emitAsm("cltd", {});
@@ -517,7 +521,7 @@ void asmOpDivI(int quadNo) {
         string reg2Name = regVec[reg2Ind]->regName;
         arg2Addr = "$" + hexString(quad->arg2);
         emitAsm("movq", {arg2Addr, reg2Name});
-        emitAsm("cqo",{});
+        emitAsm("cqo", {});
         emitAsm("idivq", {reg2Name});
     } else {
         arg2Addr = getVariableAddr(quad->arg2, st);
