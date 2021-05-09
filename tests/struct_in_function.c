@@ -31,8 +31,8 @@ struct coord foo1 (){
 /* struct coord* foo3 (){
     struct coord a;
     return a; 
-}
- */
+} */
+
 /*  struct1 - struct2 : not allowed 
 struct coord foo4 (){
     struct coord2 a;

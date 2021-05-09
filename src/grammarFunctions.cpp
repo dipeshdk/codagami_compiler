@@ -12,9 +12,10 @@ structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expressio
             break;
         else {
             curr = curr->childList;
-            if (curr->next)
+            if (curr && curr->next)
                 curr = curr->next;
-            else break;
+            else
+                break;
         }
     }
 
@@ -234,18 +235,18 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         }
     }
 
-    for (int i =  min(5, maxSize-1); i >= 0; i--) {
-        if(!nodeIsStruct(arguments[i])) continue;
+    for (int i = min(5, maxSize - 1); i >= 0; i--) {
+        if (!nodeIsStruct(arguments[i]))
+            continue;
         emitPushStruct(arguments[i]);
         paramSize += getStructSizeFromAstNode(arguments[i]);
-        
     }
 
     for (int i = 0; i < min(6, maxSize); i++) {
         //mov to reg
-        if (nodeIsStruct(arguments[i])) continue;
+        if (nodeIsStruct(arguments[i]))
+            continue;
         emit(OP_MOV, gArgRegs[i], EMPTY_STR, arguments[i]->addr);
-        
     }
 
     if (postfix_expression->declSp->type[0] != TYPE_VOID) {
@@ -306,7 +307,7 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
     int tempOffset = rbp_size;
     int param_num = 0;
     int extra = 0;
-    if (funcNode->declSp && (funcNode->declSp->type[0] == TYPE_STRUCT)) {
+    if (funcNode->declSp && (funcNode->declSp->type[0] == TYPE_STRUCT) && (funcNode->declSp->ptrLevel == 0)) {
         string structName = funcNode->declSp->lexeme;
         // structTableNode* struc = structLookUp(gSymTable, structName);
         symbolTableNode* tempNode = new symbolTableNode();
