@@ -207,8 +207,6 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st) {
         size = 8;
     else if (elem->infoType == INFO_TYPE_ARRAY) {
         size += 8;
-    } else if (elem->infoType == INFO_TYPE_FUNC) {
-        size += 8;
     } else if (elem->infoType == INFO_TYPE_STRUCT || (elem->declSp && elem->declSp->type.size() > 0 && elem->declSp->type[0] == TYPE_STRUCT)) {
         if (elem->declSp) {
             structTableNode* n = structLookUp(st, elem->declSp->lexeme);
@@ -221,6 +219,8 @@ int getNodeSize(symbolTableNode* elem, symbolTable* st) {
             }
         }
         size = getOffsettedSize(size);
+    } else if (elem->infoType == INFO_TYPE_FUNC) {
+        size += 8;
     } else if (elem->declSp && elem->declSp->ptrLevel) {
         size += 8;
     } else {
@@ -276,7 +276,10 @@ void addTempDetails(string name, symbolTable* symtab, node* node) {
     symbolTableNode* sym_node = lookUp(symtab, name);
     int size = 8;
     if (node->declSp->ptrLevel == 0) {
-        size = getTypeSize(node->declSp->type);
+        symbolTableNode* new_node = new symbolTableNode();
+        new_node->declSp = declSpCopy(node->declSp);
+        new_node->infoType = node->infoType;
+        size = getNodeSize(new_node, symtab);
     }
     sym_node->declSp = declSpCopy(node->declSp);
     sym_node->size = size;

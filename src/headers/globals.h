@@ -5,6 +5,7 @@
 
 #include "constants.h"
 #include "structures.h"
+#include <bits/stdc++.h>
 
 using namespace std;
 
