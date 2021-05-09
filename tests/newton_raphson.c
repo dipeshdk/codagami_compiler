@@ -1,4 +1,4 @@
-float EPSILON = 0.001;
+/* float EPSILON = 0.001;
 
 float abs(float h){
   return h;
@@ -21,15 +21,13 @@ void newtonRaphson(float x)
     while (abs(h) >= EPSILON)
     {
         h = func(x)/derivFunc(x);
-  
-        /* x(i+1) = x(i) - f(x) / f'(x) */
         x = x - h;
     }
 }
- 
+ */ 
 int main()
 {
-    float x0 = -20; 
-    newtonRaphson(x0);
+    /* float x0 = -20; 
+    newtonRaphson(x0); */
     return 0;
 }

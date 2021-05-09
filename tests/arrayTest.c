@@ -31,4 +31,5 @@ int main(){
             printf(str, arr2[i][j]);
         }
     }
+    return 0;
 }
