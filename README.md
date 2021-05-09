@@ -12,8 +12,8 @@ This project is aimed to make a compiler of our own as a group project of the co
 
 ## Implementation details
 
--   Implementation language: C
--   Target language: MIPS Assembly
+-   Implementation language: C++
+-   Target language: x86 64-bit
 -   Source language: C (fixed)
 
 ## Abstract Syntax Tree
