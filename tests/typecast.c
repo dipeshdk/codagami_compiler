@@ -25,6 +25,8 @@ int main(){
     x = a;
     a = a + c;
     b = z;
+    x = c;
+    c = z;
 
     a = func(a, x);
 
