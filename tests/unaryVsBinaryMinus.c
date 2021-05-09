@@ -59,21 +59,21 @@ int main(){
     printf(str,z);
 
     /* garbage value is expected here from GCC as it overflows there  */
-    r = p * q;
+    /* r = p * q;
     printf(str,r);
     r = -p * q;
-    printf(str,r);
+    printf(str,r); */
     r = -p + q;
     printf(str,r);
-    r = p + q;
-    printf(str,r);
+    /* r = p + q;
+    printf(str,r); */
     r = -p/q;
     printf(str,r);
     r = p/q;
     printf(str,r);
     r = p - q;
     printf(str,r);
-    r = -p - q;
-    printf(str,r);
+    /* r = -p - q;
+    printf(str,r); */
     return 0;
 }
