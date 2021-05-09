@@ -55,13 +55,13 @@
 *.ps
 temp
 code.txt
-*.s
+# *.s
 symbolTable.txt
 *.o
 *.asm
 .vscode/*
 .vscode/settings.json
-asmOut.s
+# asmOut.s
 outputs/*
 gccOutput
 myOutput

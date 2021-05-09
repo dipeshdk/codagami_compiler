@@ -61,3 +61,5 @@ clean:
 	$(RM) ./*.dot ./*.ps ./*.json ./code.txt symbolTableJson/*
 realclean: 
 	$(RM) $(OBJ)/* $(BIN)/* ./*.dot ./*.ps ./*.json ./code.txt symbolTableJson/*
+test:
+	./testScript.sh

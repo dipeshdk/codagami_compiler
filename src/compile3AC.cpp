@@ -104,16 +104,16 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_MULI:
         asmOpMulI(quadNo);
         break;
-    case OP_IFGOTO:
+    case OP_IFGOTO: // chinmaya
         asmOpIfGoto(quadNo);
         break;
     case OP_SUBI:
         asmOpSubI(quadNo);
         break;
-    case OP_ASSIGNMENT:
+    case OP_ASSIGNMENT: // sarthak
         asmOpAssignment(quadNo);
         break;
-    case OP_UNARY_MINUS:
+    case OP_UNARY_MINUS: // dipesh
         asmOpUnaryMinus(quadNo);
         break;
     case OP_DIVI:
@@ -137,57 +137,57 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_XOR:
         asmOpLogicalXor(quadNo);
         break;
-    case OP_EQ:
+    case OP_EQ: // sakshi
         asmOpEq(quadNo);
         break;
-    case OP_NEQ:
+    case OP_NEQ: // sakshi
         asmOpNeq(quadNo);
         break;
-    case OP_LEQ:
+    case OP_LEQ: // sakshi
         asmOpLeq(quadNo);
         break;
-    case OP_GREATER:
+    case OP_GREATER: // sakshi
         asmOpGreater(quadNo);
         break;
-    case OP_LESS:
+    case OP_LESS: // sakshi
         asmOpLess(quadNo);
         break;
     case OP_MOD:
         asmOpMod(quadNo);
         break;
-    /* case OP_ADDF: 
+    /* case OP_ADDF: // rythm
         break;
-    case OP_MULF: 
+    case OP_MULF: // rythm
         break;
-    case OP_SUBF: 
+    case OP_SUBF: // rythm
         break;
-    case OP_DIVF: 
+    case OP_DIVF: // dipesh
         break; */
-    case OP_GEQ:
+    case OP_GEQ: // sakshi
         asmOpGeq(quadNo);
         break;
-    case OP_ANDAND:
+    case OP_ANDAND: // chinmaya
         asmOpAndAnd(quadNo);
         break;
-    case OP_OROR:
+    case OP_OROR: // chinmaya
         asmOpOrOr(quadNo);
         break;
-    case OP_IFNEQGOTO:
+    case OP_IFNEQGOTO: // chinmaya
         asmOpIfNeqGoto(quadNo);
         break;
-    case OP_BEGINFUNC:
+    case OP_BEGINFUNC: // sarthak
         asmOpBeginFunc(quadNo);
         break;
     case OP_ENDFUNC:
         asmOpEndFunc(quadNo);
         break;
-    case OP_RETURN:
+    case OP_RETURN: // dipesh
         asmOpReturn(quadNo);
         break;
-    case OP_PUSHPARAM:
+    case OP_PUSHPARAM: // sarthak
         asmOpPushparam(quadNo);
         break;
-    case OP_POPPARAM:
+    case OP_POPPARAM: // dipesh
         asmOpPopparam(quadNo);
         break;
     case OP_LCALL:
@@ -202,7 +202,7 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_BITWISE_NOT:
         asmOpBitwiseNot(quadNo);
         break;
-    case OP_MOV:
+    case OP_MOV: // sarthak
         asmOPMoveFuncParam(quadNo);
         break;
     default:
