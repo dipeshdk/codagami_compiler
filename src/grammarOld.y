@@ -2313,6 +2313,7 @@ int main(int ac, char **av) {
 		// char * fileName = strdup("graph.dot");
 		// if(ac == 3) fileName = av[2];
 		// generateDot(root,fileName);
+		optimizeMultiGoto();
         printCode((char*)TACFilename.c_str());
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
