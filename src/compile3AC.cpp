@@ -798,6 +798,7 @@ string getVariableAddr(string varName, symbolTable* st) {
         emitAsm("movq", {regAddName, regName});
         // free regAddName
         ptrAssignedRegs.push(regInd);
+        regVec[regInd]->isFree = false;
         return "(" + regName + ")";
     }
 
@@ -834,6 +835,7 @@ string getVariableAddr(string varName, symbolTable* st) {
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
+        regVec[regInd]->isFree = false;
         return "(" + regName + ")";
     } else if (dot && isPointer(identifier)) { //should be a struct array
         string name = stripPointer(identifier);
@@ -854,6 +856,7 @@ string getVariableAddr(string varName, symbolTable* st) {
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
+        regVec[regInd]->isFree = false;
         return to_string(paramOffset) + "(" + regName + ")";
     }
     offset = getOffset(varName, st);
