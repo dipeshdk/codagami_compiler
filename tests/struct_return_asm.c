@@ -1,4 +1,6 @@
-/* struct foo{
+void printf(char* arr, int a);
+char* arr = "%d\n";
+struct foo{
     int a,b,c,d,e,f,g,h,i,j,k,l;
 };
 
@@ -18,15 +20,15 @@ struct foo func(int a) {
     f.l=12;
     return f;
 }
- */
+
 int main(){
-    /* int a = 69;
+    int a = 69;
     struct foo f;
     int x;
     f.a=3;
     x=5;
     x=6;
     f = func(a);
-    printf("%d\n", f.f); */
+    printf(arr, f.f);
     return 0;
 }
