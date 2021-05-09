@@ -10,4 +10,5 @@ int main() {
             printf(p,i,j);
         }
     }
+    return 0;
 }

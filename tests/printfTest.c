@@ -6,4 +6,5 @@ int main() {
     char *c;
     int x = 6;
     printf(p,s,x);
+    return 0;
 }

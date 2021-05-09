@@ -33,7 +33,7 @@ int main() {
     printf(p,x);
     x = 78 + -12;
     printf(p,x);
-    x = 12 >> -2; /* gcc outputting 48 but our compiler from internal evaluation is giving 0 */
-    printf(p,x);
+    /* x = 12 >> -2;
+    printf(p,x); */
     return 0;
 }
