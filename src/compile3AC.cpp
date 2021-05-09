@@ -818,7 +818,7 @@ string getVariableAddr(string varName, symbolTable* st) {
         emitAsm("movq", {regAddName, regName});
 
         ptrAssignedRegs.push(regInd);
-        regVec[regAddInd]->isFree = true;
+        freeReg(regAddInd);
         regVec[regInd]->isFree = false;
         return "(" + regName + ")";
     }
@@ -1346,6 +1346,17 @@ void copyStruct(string from, string to, int quadNo) {
     toStructNode = structLookUp(st, toNode->declSp->lexeme);
     if (!toStructNode) {
         error(toNode->declSp->lexeme, STRUCT_NOT_DECLARED);
+    }
+
+    if((toNode->infoType == INFO_TYPE_STRUCT && toNode->declSp->ptrLevel == 1) && !isToPtr){
+        string fromParamAddr = getVariableAddr(from, st);
+        string toParamAddr = getVariableAddr(to, st);
+        int regInd = getReg(quadNo, from);
+        string regName = regVec[regInd]->regName;
+        emitAsm("movq", {fromParamAddr, regName});
+        emitAsm("movq", {regName, toParamAddr});
+        freeReg(regInd);
+        return;
     }
 
     for (structParam* p : fromStructNode->paramList) {

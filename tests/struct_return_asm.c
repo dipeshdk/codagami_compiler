@@ -1,6 +1,9 @@
+
 void printf(char* arr, int a);
 char* arr = "%d\n";
+
 struct foo{
+
     int a,b,c,d,e,f,g,h,i,j,k,l;
 };
 
