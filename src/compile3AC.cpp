@@ -796,8 +796,10 @@ string getVariableAddr(string varName, symbolTable* st) {
         int paramOffset = getParameterOffset(sym_node->declSp->lexeme, param, st);
         emitAsm("addq", {"$" + hexString(to_string(paramOffset)), regAddName});
         emitAsm("movq", {regAddName, regName});
-        // free regAddName
+        
         ptrAssignedRegs.push(regInd);
+        freeReg(regAddInd);
+        regVec[regInd]->isFree = false;
         return "(" + regName + ")";
     }
 
@@ -834,6 +836,7 @@ string getVariableAddr(string varName, symbolTable* st) {
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
+        regVec[regInd]->isFree = false;
         return "(" + regName + ")";
     } else if (dot && isPointer(identifier)) { //should be a struct array
         string name = stripPointer(identifier);
@@ -854,6 +857,7 @@ string getVariableAddr(string varName, symbolTable* st) {
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
+        regVec[regInd]->isFree = false;
         return to_string(paramOffset) + "(" + regName + ")";
     }
     offset = getOffset(varName, st);
@@ -1324,6 +1328,17 @@ void copyStruct(string from, string to, int quadNo) {
         error(toNode->declSp->lexeme, STRUCT_NOT_DECLARED);
     }
 
+    if((toNode->infoType == INFO_TYPE_STRUCT && toNode->declSp->ptrLevel == 1) && !isToPtr){
+        string fromParamAddr = getVariableAddr(from, st);
+        string toParamAddr = getVariableAddr(to, st);
+        int regInd = getReg(quadNo, from);
+        string regName = regVec[regInd]->regName;
+        emitAsm("movq", {fromParamAddr, regName});
+        emitAsm("movq", {regName, toParamAddr});
+        freeReg(regInd);
+        return;
+    }
+
     for (structParam* p : fromStructNode->paramList) {
         string fromParam = from + "." + p->name;
         string fromParamAddr = getVariableAddr(fromParam, st);
@@ -1336,5 +1351,13 @@ void copyStruct(string from, string to, int quadNo) {
         emitAsm("movq", {fromParamAddr, regName});
         emitAsm("movq", {regName, toParamAddr});
         freeReg(regInd);
+        if(isToPtr){
+            freeReg(ptrAssignedRegs.top());
+            ptrAssignedRegs.pop();
+        }
+        if(isFromPtr){
+            freeReg(ptrAssignedRegs.top());
+            ptrAssignedRegs.pop();
+        }
     }
 }

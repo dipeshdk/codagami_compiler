@@ -12,8 +12,9 @@ structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expressio
             break;
         else {
             curr = curr->childList;
-            if (curr)
+            if (curr->next)
                 curr = curr->next;
+            else break;
         }
     }
 
@@ -54,8 +55,9 @@ structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expressio
             }
         }
     }
-    if (!structure)
+    if (!structure){
         setErrorParams(errCode, VARIABLE_NOT_A_STRUCT, errString, rightMostStructName);
+    }
     return structure;
 }
 
