@@ -11,8 +11,6 @@ struct foo1{
 };
 
 int main(){
-    int *a;
-    char *ch;
     struct foo f1,*f3,*f2;
     struct foo arr[2];
     int x,y;
