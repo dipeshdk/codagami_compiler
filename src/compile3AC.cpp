@@ -273,6 +273,9 @@ void asmOpReturn(int quadNo) {
             emitAsm("movq", {"$" + hexString(quad->result), eaxName});
         }
     }
+    emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
+    emitAsm("popq", {REGISTER_RBP});
+    emitAsm("retq", {});
 }
 
 void asmOpEndFunc(int quadNo) {
@@ -298,8 +301,7 @@ void amsOpLCall(int quadNo) {
         symbolTableNode* funcNode = lookUp(st, funcName);
         if (!funcNode) {
             //TODO: Error
-        }
-        else if (funcNode->declSp && funcNode->declSp->type.size() > 0 && (funcNode->declSp->type[0] == TYPE_STRUCT)) {
+        } else if (funcNode->declSp && funcNode->declSp->type.size() > 0 && (funcNode->declSp->type[0] == TYPE_STRUCT)) {
             isStruct = 1;
             string structName = funcNode->declSp->lexeme;
             // structTableNode* struc = structLookUp(gSymTable, structName);

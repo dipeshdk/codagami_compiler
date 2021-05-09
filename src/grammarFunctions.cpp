@@ -12,8 +12,10 @@ structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expressio
             break;
         else {
             curr = curr->childList;
-            if (curr)
+            if (curr && curr->next)
                 curr = curr->next;
+            else
+                break;
         }
     }
 
@@ -232,18 +234,18 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         }
     }
 
-    for (int i =  min(5, maxSize-1); i >= 0; i--) {
-        if(!nodeIsStruct(arguments[i])) continue;
+    for (int i = min(5, maxSize - 1); i >= 0; i--) {
+        if (!nodeIsStruct(arguments[i]))
+            continue;
         emitPushStruct(arguments[i]);
         paramSize += getStructSizeFromAstNode(arguments[i]);
-        
     }
 
     for (int i = 0; i < min(6, maxSize); i++) {
         //mov to reg
-        if (nodeIsStruct(arguments[i])) continue;
+        if (nodeIsStruct(arguments[i]))
+            continue;
         emit(OP_MOV, gArgRegs[i], EMPTY_STR, arguments[i]->addr);
-        
     }
 
     if (postfix_expression->declSp->type[0] != TYPE_VOID) {
