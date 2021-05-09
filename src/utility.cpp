@@ -56,6 +56,11 @@ void setErrorParams(int& errCode, int code, string& errString, string str) {
     return;
 }
 
+void typeCastWarning(string from, string to){
+   cout << "\nWARNING: implicit typecast from " << from << " to " << to << " on line number: " << line + 1 << endl;
+}
+
+
 void error(string var, int error_code) {
     string str;
     switch (error_code) {
