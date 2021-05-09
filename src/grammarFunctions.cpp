@@ -56,8 +56,9 @@ structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expressio
             }
         }
     }
-    if (!structure)
+    if (!structure){
         setErrorParams(errCode, VARIABLE_NOT_A_STRUCT, errString, rightMostStructName);
+    }
     return structure;
 }
 

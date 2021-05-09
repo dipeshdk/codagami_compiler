@@ -811,8 +811,10 @@ string getVariableAddr(string varName, symbolTable* st) {
         int paramOffset = getParameterOffset(sym_node->declSp->lexeme, param, st);
         emitAsm("addq", {"$" + hexString(to_string(paramOffset)), regAddName});
         emitAsm("movq", {regAddName, regName});
-        // free regAddName
+
         ptrAssignedRegs.push(regInd);
+        regVec[regAddInd]->isFree = true;
+        regVec[regInd]->isFree = false;
         return "(" + regName + ")";
     }
 
@@ -849,6 +851,7 @@ string getVariableAddr(string varName, symbolTable* st) {
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
+        regVec[regInd]->isFree = false;
         return "(" + regName + ")";
     } else if (dot && isPointer(identifier)) { //should be a struct array
         string name = stripPointer(identifier);
@@ -869,6 +872,7 @@ string getVariableAddr(string varName, symbolTable* st) {
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
+        regVec[regInd]->isFree = false;
         return to_string(paramOffset) + "(" + regName + ")";
     }
     offset = getOffset(varName, st);
@@ -1351,6 +1355,14 @@ void copyStruct(string from, string to, int quadNo) {
         emitAsm("movq", {fromParamAddr, regName});
         emitAsm("movq", {regName, toParamAddr});
         freeReg(regInd);
+        if (isToPtr) {
+            regVec[ptrAssignedRegs.top()]->isFree = true;
+            ptrAssignedRegs.pop();
+        }
+        if (isFromPtr) {
+            regVec[ptrAssignedRegs.top()]->isFree = true;
+            ptrAssignedRegs.pop();
+        }
     }
 }
 
@@ -1386,6 +1398,10 @@ void copyReturnStruct(string to, int quadNo) {
         emitAsm("movq", {hexString(to_string(fromOff)) + "(" + REGISTER_RAX + ")", regName});
         emitAsm("movq", {regName, toParamAddr});
         freeReg(regInd);
+        if (isToPtr) {
+            regVec[ptrAssignedRegs.top()]->isFree = true;
+            ptrAssignedRegs.pop();
+        }
     }
 }
 
@@ -1424,6 +1440,10 @@ void copyReturningStruct(string from, int quadNo) {
         emitAsm("movq", {fromParamAddr, regName});
         emitAsm("movq", {regName, hexString(to_string(toOff)) + "(" + regPtrName + ")"});
         freeReg(regInd);
+        if (isFromPtr) {
+            regVec[ptrAssignedRegs.top()]->isFree = true;
+            ptrAssignedRegs.pop();
+        }
     }
 
     emitAsm("movq", {regPtrName, REGISTER_RAX}); // Value to be returned, need to free RAX?
