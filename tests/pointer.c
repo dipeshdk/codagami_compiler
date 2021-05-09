@@ -13,4 +13,5 @@ int main(){
     printf(str, *b);
     a = *b;
     printf(str, a);
+    return 0;
 }

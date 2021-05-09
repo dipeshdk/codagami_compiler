@@ -33,4 +33,5 @@ int main(){
     printf(str, a);
     a = b + d + c  || a - b;
     printf(str, a);
+    return 0;
 }
