@@ -86,3 +86,29 @@ void asmOpReturnF(int quadNo) {
     emitAsm("popq", {REGISTER_RBP});
     emitAsm("retq", {});
 }
+
+
+void asmOpUnaryMinusF(int quadNo) {
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
+
+    if (isConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+
+    string resultAddr = getVariableAddr(quad->result, st);
+    string regIndDest = getRegFloat(quadNo, quad->result);
+    string regNameDest = regVecFloat[regIndDest]->regName;
+
+    string argAddr = getVariableAddr(quad->arg1, st);
+
+    string regIndsrc1 = getRegFloat(quadNo, quad->arg1);
+    string regNamesrc1 = regVecFloat[regIndsrc1]->regName;
+    emitAsm("xorpd", {regIndsrc1, regIndsrc1});
+    
+    // vsubsd dest, src1, src2 dest = src1-src2
+    emitAsm("vsubsd", {regNameDest, regNamesrc1, argAddr});
+    emitAsm("movsd", {regNameDest, resultAddr});
+
+    freeReg(regIndsrc1);
+    freeReg(regIndDest);
+}
