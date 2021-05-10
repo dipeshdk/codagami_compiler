@@ -35,3 +35,11 @@ vector<string> regNamesFloat ({REGISTER_XMM0,REGISTER_XMM1, REGISTER_XMM2, REGIS
 
 // freeRegFloat()
 // useRegFloat()
+
+bool isFloatConst(string name){
+
+}
+
+bool isFloat(string name){
+
+}
