@@ -224,7 +224,7 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         cout << "arg[" << i << "] = " << arguments[i]->addr << endl;
     } */
 
-    if(stNode->paramWidth % 16) {
+    if((stNode->paramWidth % 16) != 0) {
         emit(OP_DUMMYPUSH, EMPTY_STR, EMPTY_STR, EMPTY_STR);
     }
 
