@@ -139,6 +139,7 @@
 
 #define NOT_CONSTANT_EXCEPTION 601
 #define NUM_REGISTER 8
+#define NUM_REGISTER_FLOAT 16
 #define CONSTANT "__constant__"
 #define NO_VAR_VALUE_ASSIGNED "__not_assigned__"
 #define EAX_REGISTER_INDEX 3

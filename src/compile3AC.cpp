@@ -37,6 +37,7 @@ void stripTypeCastFromQuads() {
 void emitAssemblyFrom3AC(string asmOutputFile) {
     funcNameStack.push(GLOBAL);
     initializeRegs();
+    initializeRegsFloat();
     stripTypeCastFromQuads();
     vector<int> gotoLabels;
     for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
@@ -84,7 +85,9 @@ void printASMData() {
         cout << "   " << g->varName << ": ";
         if (g->valueType == TYPE_STRING_LITERAL) {
             cout << ".asciz ";
-        } else {
+        } else if (g->valueType == TYPE_FLOAT){
+            cout << ".double ";
+        }else{
             cout << ".long ";
         }
         cout << g->value << "\n";
@@ -426,7 +429,6 @@ void asmOpBeginFunc(int quadNo) {
 
     int funcSize = getNumberFromConstAddr(quad->result);
     funcSizeStack.push(funcSize);
-    //TODO: funcNameStack is the the stack containing active function names, starting with global
     symbolTableNode* funcNode = lookUp(st, funcNameStack.top());
     if (!funcNode) {
         error(funcNameStack.top(), SYMBOL_NOT_FOUND);
@@ -771,6 +773,7 @@ int getOffset(string varName, symbolTable* st) {
 }
 
 bool isGlobal(string varName, symbolTable* st) {
+    if(isFloatConstant(varName)) return true;
     if (isPointer(varName))
         varName = stripPointer(varName);
     string identifier = varName, param, name = varName, delim_dot = ".";
@@ -932,7 +935,6 @@ void initializeRegs() {
         regVec[i]->regName = regNames[i];
         regVec[i]->regNameOneByte = regNamesOneByte[i];
     }
-    // TODD: intialize floating point registers too
 }
 
 int getReg(int quadNo, string varValue) {
