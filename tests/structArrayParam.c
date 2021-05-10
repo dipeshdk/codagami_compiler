@@ -11,7 +11,7 @@ struct foo1{
 };
 
 
-void func(struct foo sarr[2], int c, struct foo1 f){
+void func(struct foo sarr[2] , int c, struct foo1 f){
     struct foo1 f1;
     f1.a = f.a;
     f1.b = f.b;
@@ -24,7 +24,8 @@ void func(struct foo sarr[2], int c, struct foo1 f){
     printf(str, sarr[1].y);
     printf(str, sarr[1].z);
     printf(str, f1.a);
-    printf(str, f1.b);
+    printf(str, f1.b); 
+    return;
 }
 
 int main(){
@@ -42,7 +43,7 @@ int main(){
     arr[1] = *f2;
     f3.a = 10;
     f3.b = 20;
-    func(arr, 100, f3);
+    func(arr , 100, f3);
     return 0;
 
 }

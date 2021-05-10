@@ -328,7 +328,7 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
         if (!sym_node) {
             error(lex, ALLOCATION_ERROR);
         }
-        if (p->declSp->type[0] == TYPE_STRUCT) {
+        if (p->declSp->type[0] == TYPE_STRUCT && p->declSp->ptrLevel == 0) {
             sym_node->infoType = INFO_TYPE_STRUCT;
         }
         sym_node->arraySize = p->arraySize;
@@ -336,7 +336,7 @@ void setOverSixParamOffset(node* declarator, symbolTable* curr, symbolTableNode*
         sym_node->declSp = declSpCopy(p->declSp);
         sym_node->infoType = p->infoType;
         sym_node->size = getNodeSize(sym_node, gSymTable);
-        if ((p->declSp->type[0] == TYPE_STRUCT) || param_num > 6) {
+        if ((p->declSp->type[0] == TYPE_STRUCT && p->declSp->ptrLevel == 0) || param_num > 6) {
             tempOffset += getOffsettedSize(sym_node->size);
             sym_node->offset = (-1 * tempOffset);
         }
@@ -350,13 +350,13 @@ void setFirstSixParamOffset(node* declarator, symbolTable* gSymTable) {
     offset += 8;
     int param_num = 0;
     symbolTable* curr = gSymTable->childList[(gSymTable->childList.size()) - 1];
-
     for (auto& p : declarator->paramList) {
         param_num++;
         if (param_num > 6)
             break;
-        if (p->declSp->type.size() > 0 && p->declSp->type[0] == TYPE_STRUCT)
+        if (p->declSp->type.size() > 0 && p->declSp->type[0] == TYPE_STRUCT && p->declSp->ptrLevel == 0) {
             continue;
+        }
         string lex = p->paramName;
         struct symbolTableNode* sym_node = curr->symbolTableMap[lex];
         if (!sym_node) {
