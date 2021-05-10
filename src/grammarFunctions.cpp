@@ -56,7 +56,7 @@ structTableNode* getRightMostStructFromPostfixExpression(node* postfix_expressio
             }
         }
     }
-    if (!structure){
+    if (!structure) {
         setErrorParams(errCode, VARIABLE_NOT_A_STRUCT, errString, rightMostStructName);
     }
     return structure;
@@ -241,12 +241,18 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         emitPushStruct(arguments[i]);
         paramSize += getStructSizeFromAstNode(arguments[i]);
     }
-
+    int intRegCnt = 0, floatRegCnt = 0;
     for (int i = 0; i < min(6, maxSize); i++) {
         //mov to reg
         if (nodeIsStruct(arguments[i]))
             continue;
-        emit(OP_MOV, gArgRegs[i], EMPTY_STR, arguments[i]->addr);
+        if (checkType(arguments[i]->declSp, TYPE_FLOAT, 0)) {
+            emit(OP_MOVF, gArgRegsFloat[floatRegCnt], EMPTY_STR, arguments[i]->addr);
+            floatRegCnt++;
+        } else {
+            emit(OP_MOV, gArgRegs[intRegCnt], EMPTY_STR, arguments[i]->addr);
+            intRegCnt++;
+        }
     }
 
     if (postfix_expression->declSp->type[0] != TYPE_VOID) {
