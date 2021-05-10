@@ -4,6 +4,7 @@ char* str = "%d\n";
 float f = 5.6;
  */
 int main() {
-    float g = 0.09 ? 5 : 7;
+    float f = 8.906453;
+    float g = -f;
     printf("%f", g);
 }

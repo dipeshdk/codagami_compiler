@@ -104,16 +104,29 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_MULI:
         asmOpMulI(quadNo);
         break;
-    case OP_IFGOTO: // chinmaya
+    case OP_IFGOTO: // chinmaya ***
+    // =======================================================================================================================
+    //  ucompss, float comparison, float comparison jump,all instructions are different from the int
+    // =======================================================================================================================
         asmOpIfGoto(quadNo);
         break;
     case OP_SUBI:
         asmOpSubI(quadNo);
         break;
-    case OP_ASSIGNMENT: // sarthak
+    case OP_ASSIGNMENT: // sarthak ***
+    // =======================================================================================================================
+    //  cvt for typecasting
+    // movss, register set for floating point
+    // =======================================================================================================================
         asmOpAssignment(quadNo);
         break;
-    case OP_UNARY_MINUS: // dipesh
+    case OP_UNARY_MINUS: // dipesh ***
+    // =======================================================================================================================
+    // https://groups.google.com/g/comp.lang.asm.x86/c/bqspF3wPQMY?pli=1
+    // Idea:1 & 2 given in above website
+    // Idea:3 multiply directly by -1
+    // final idea: subtract from 0
+    // =======================================================================================================================
         asmOpUnaryMinus(quadNo);
         break;
     case OP_DIVI:
@@ -137,57 +150,75 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_XOR:
         asmOpLogicalXor(quadNo);
         break;
-    case OP_EQ: // sakshi
+    case OP_EQ: // sakshi ***
+    // =======================================================================================================================
+    //  jb, jp, ucomss 
+    // =======================================================================================================================
         asmOpEq(quadNo);
         break;
-    case OP_NEQ: // sakshi
+    case OP_NEQ: // sakshi ***
         asmOpNeq(quadNo);
         break;
-    case OP_LEQ: // sakshi
+    case OP_LEQ: // sakshi ***
         asmOpLeq(quadNo);
         break;
-    case OP_GREATER: // sakshi
+    case OP_GREATER: // sakshi ***
         asmOpGreater(quadNo);
         break;
-    case OP_LESS: // sakshi
+    case OP_LESS: // sakshi ***
         asmOpLess(quadNo);
         break;
     case OP_MOD:
         asmOpMod(quadNo);
         break;
-    /* case OP_ADDF: // rythm
+        // binary operator standard function
+    /* case OP_ADDF: // rythm ***
         break;
-    case OP_MULF: // rythm
+    case OP_MULF: // rythm ***
         break;
-    case OP_SUBF: // rythm
+    case OP_SUBF: // rythm ***
         break;
-    case OP_DIVF: // dipesh
+    case OP_DIVF: // dipesh ***
+        // =======================================================================================================================
+        divsd dest, src         ; dest /= src (double)
+         change it
+        The dest and src operands must be xmm registers; src2 can be register or memory. Sizes of all operands must be the same.
+        // =======================================================================================================================
         break; */
-    case OP_GEQ: // sakshi
+    case OP_GEQ: // sakshi ***gArgRegsFloat
         asmOpGeq(quadNo);
         break;
-    case OP_ANDAND: // chinmaya
+    case OP_ANDAND: // chinmaya ***
         asmOpAndAnd(quadNo);
         break;
-    case OP_OROR: // chinmaya
+    case OP_OROR: // chinmaya ***
         asmOpOrOr(quadNo);
         break;
     case OP_IFNEQGOTO: // chinmaya
         asmOpIfNeqGoto(quadNo);
         break;
     case OP_BEGINFUNC: // sarthak
+    // =======================================================================================================================
+    //  choose registers according to data type
+    // =======================================================================================================================
         asmOpBeginFunc(quadNo);
         break;
     case OP_ENDFUNC:
         asmOpEndFunc(quadNo);
         break;
-    case OP_RETURN: // dipesh
+    case OP_RETURN: // dipesh ***
         asmOpReturn(quadNo);
+    /*  // =======================================================================================================================
+        check if the return value of function is float or int
+        if float then return the value in %xmm0
+        else return the value in %rax
+        in between calculations are not to be taken care of from your side, they are automatically handled.
+        // ======================================================================================================================= */
         break;
-    case OP_PUSHPARAM: // sarthak
+    case OP_PUSHPARAM:
         asmOpPushparam(quadNo);
         break;
-    case OP_POPPARAM: // dipesh
+    case OP_POPPARAM: 
         asmOpPopparam(quadNo);
         break;
     case OP_LCALL:
@@ -202,7 +233,10 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_BITWISE_NOT:
         asmOpBitwiseNot(quadNo);
         break;
-    case OP_MOV: // sarthak
+    case OP_MOV: // sarthak ***
+    // =======================================================================================================================
+    //  different movf in 3AC, register change, movsd
+    // =======================================================================================================================
         asmOPMoveFuncParam(quadNo);
         break;
     default:
@@ -252,7 +286,12 @@ void asmOpReturn(int quadNo) {
 
     int eaxInd = EAX_REGISTER_INDEX;
     string eaxName = regVec[EAX_REGISTER_INDEX]->regName;
-
+    /* 
+        check if the return value of function is float or int
+        if float then return the value in %xmm0
+        else return the value in %rax
+        in between calculations are not to be taken care of from your side, they are automatically handled.
+     */
     if (quad->result != EMPTY_STR) {
         freeRegAndMoveToStack(eaxInd);
         useReg(eaxInd, quadNo, NO_VAR_VALUE_ASSIGNED);
@@ -705,7 +744,7 @@ int getParameterOffset(string structName, string param, symbolTable* st) {
     }
     return paramOffset;
 }
-
+// TODO: This function might fail, verify this
 int getOffset(string varName, symbolTable* st) {
     if (isPointer(varName))
         varName = stripPointer(varName);
@@ -893,6 +932,7 @@ void initializeRegs() {
         regVec[i]->regName = regNames[i];
         regVec[i]->regNameOneByte = regNamesOneByte[i];
     }
+    // TODD: intialize floating point registers too
 }
 
 int getReg(int quadNo, string varValue) {
