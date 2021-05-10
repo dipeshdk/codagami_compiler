@@ -150,10 +150,17 @@ constant
 		string s = yylval.id;
 		node* temp = makeNode(strdup("CONSTANT"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
 		if(!temp->declSp) temp->declSp = new declSpec();
+
+		if(gSymTable->scope != GLOBAL_SCOPE_NUM) {
+			string globalFloatAddr = getGlobalFloatAddr();
+			sendFloatToGlobal(string(yylval.id), globalFloatAddr);
+			setAddr(temp, globalFloatAddr);
+		}else {
+			addFVal(temp, yylval.id);
+			setAddr(temp, string(yylval.id));
+			temp->isConstant = true;
+		}
 		temp->declSp->type.push_back(TYPE_FLOAT);
-		addFVal(temp, yylval.id);
-		setAddr(temp, string(yylval.id));
-		temp->isConstant = true;
 		$$ = temp;
 	}
 	;

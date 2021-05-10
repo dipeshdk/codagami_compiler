@@ -15,12 +15,14 @@ vector<globalData*> globalDataPair;
 int gQuadNo;
 stack<int> ptrAssignedRegs;
 set<string> libraryFunctions{"printf", "scanf", "malloc"};
- */
+*/
 
 vector<reg*> regVecFloat;
 vector<string> gArgRegsFloat({REGISTER_XMM0,REGISTER_XMM1, REGISTER_XMM2, REGISTER_XMM3, REGISTER_XMM4, REGISTER_XMM5, REGISTER_XMM6, REGISTER_XMM7});
 vector<string> regNamesFloat({REGISTER_XMM0,REGISTER_XMM1, REGISTER_XMM2, REGISTER_XMM3, REGISTER_XMM4, REGISTER_XMM5, REGISTER_XMM6, REGISTER_XMM7, REGISTER_XMM8,REGISTER_XMM9, REGISTER_XMM10, REGISTER_XMM11, REGISTER_XMM12, REGISTER_XMM13, REGISTER_XMM14, REGISTER_XMM15});
-
+int globalFloatTempCounter = 0;
+string globalTempNamePrefix("f");
+string globalTempNameSuffix("$");
 
 int getRegFloat(int quadNo, string varValue) {
     for (int i = 0; i < NUM_REGISTER_FLOAT; i++) {
@@ -49,10 +51,40 @@ void useRegFloat(int regInd, int quadNo, string varValue) {
     regVecFloat[regInd]->varValue = varValue;
 }
 
-void isFloatConstant(string varValue){
-        
+float getFloatFromAddr(string varValue) {
+    std::istringstream iss(varValue);
+    float f;
+    iss >> noskipws >> f;
+    return f;
 }
 
-void sendFloatToGlobal(string varValue){
+bool isFloatConstant(string varValue) {
+    int n = varValue.size();
+    if(varValue[n-1] == globalTempNameSuffix[0]) return true;
+    else return false;
+}
 
+string getGlobalFloatAddr() {
+    string globalTempName = globalTempNamePrefix + to_string(globalFloatTempCounter) + globalTempNameSuffix;
+    globalFloatTempCounter++;
+    return globalTempName;
+}
+
+void sendFloatToGlobal(string varValue, string globalTempName){
+    globalData *gData = new globalData();
+    gData->varName = globalTempName;
+    gData->value = varValue;
+    gData->valueType = TYPE_FLOAT;
+    globalDataPair.push_back(gData);
+    return;
+}
+
+void initializeRegsFloat() {
+    regVecFloat = vector<reg*>(NUM_REGISTER_FLOAT);
+    for (int i = 0; i < NUM_REGISTER_FLOAT; i++) {
+        regVecFloat[i] = new reg();
+        regVecFloat[i]->isFree = true;
+        regVecFloat[i]->regName = regNamesFloat[i];
+    }
+    return;
 }
