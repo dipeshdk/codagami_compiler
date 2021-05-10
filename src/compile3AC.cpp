@@ -773,6 +773,7 @@ int getOffset(string varName, symbolTable* st) {
 }
 
 bool isGlobal(string varName, symbolTable* st) {
+    if(isFloatConstant(varName)) return true;
     if (isPointer(varName))
         varName = stripPointer(varName);
     string identifier = varName, param, name = varName, delim_dot = ".";
