@@ -188,7 +188,7 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpSubF(quadNo);
         break;
     case OP_DIVF: // dipesh ***
-        asmOpDivF(quadNo);
+        // asmOpDivF(quadNo);
         // =======================================================================================================================
         // divsd dest, src         ; dest /= src (double)
         //  change it

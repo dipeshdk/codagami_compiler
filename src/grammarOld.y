@@ -370,7 +370,8 @@ unary_expression
 				unary_operator->declSp->ptrLevel++;
 			}
 			else if(name == "-") {
-				opCode = OP_UNARY_MINUS;
+				if(cast_expression->declSp && cast_expression->declSp->type[0]== TYPE_FLOAT) opCode = OP_UNARY_MINUSF;
+				else opCode = OP_UNARY_MINUS;
 			}
 			else if(name == "~") {
 				opCode = OP_BITWISE_NOT;

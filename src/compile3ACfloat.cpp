@@ -91,8 +91,8 @@ void emitAsmForFloatBinaryOperator(string asmOp, int quadNo) {
     emitAsm("movsd", {arg2Addr, reg2Name});
     emitAsm(asmOp, {reg2Name, reg1Name});
     emitAsm("movsd", {reg1Name, resultAddr});
-    freeReg(reg1Ind);
-    freeReg(reg2Ind);
+    freeRegFloat(reg1Ind);
+    freeRegFloat(reg2Ind);
     return;
 }
 
@@ -127,7 +127,7 @@ void asmOpReturnF(int quadNo) {
     quadruple* quad = gCode[quadNo];
     symbolTable* st = codeSTVec[quadNo];
 
-    string xmm0Ind = XMM0_REGISTER_INDEX;
+    int xmm0Ind = XMM0_REGISTER_INDEX;
     string xmm0reg = regVecFloat[xmm0Ind]->regName;
     if (quad->result != EMPTY_STR) {
         useReg(xmm0Ind, quadNo, NO_VAR_VALUE_ASSIGNED);
@@ -160,23 +160,23 @@ void asmOpUnaryMinusF(int quadNo) {
 
     if (isConstant(quad->result))
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-
-    string resultAddr = getVariableAddr(quad->result, st);
-    string regIndDest = getRegFloat(quadNo, quad->result);
-    string regNameDest = regVecFloat[regIndDest]->regName;
-
-    string argAddr = getVariableAddr(quad->arg1, st);
-
-    string regIndsrc1 = getRegFloat(quadNo, quad->arg1);
-    string regNamesrc1 = regVecFloat[regIndsrc1]->regName;
-    emitAsm("xorpd", {regIndsrc1, regIndsrc1});
     
-    // vsubsd dest, src1, src2 dest = src1-src2
-    emitAsm("vsubsd", {regNameDest, regNamesrc1, argAddr});
-    emitAsm("movsd", {regNameDest, resultAddr});
-
-    freeReg(regIndsrc1);
-    freeReg(regIndDest);
+    int reg1Ind = -1;
+    int reg2Ind = -1;
+    reg1Ind = getRegFloat(quadNo, quad->arg1);
+    reg2Ind = getRegFloat(quadNo, CONSTANT);
+    if (reg1Ind < 0 || reg2Ind < 0) {
+        errorAsm("For Float: ", REGISTER_ASSIGNMENT_ERROR);
+    }
+    string resultAddr = getVariableAddr(quad->result, st);
+    string reg1Name = regNamesFloat[reg1Ind], reg2Name = regNamesFloat[reg2Ind];
+    string arg1Addr =  getVariableAddr(quad->arg1, st);
+    emitAsm("movsd", {arg1Addr, reg1Name});
+    emitAsm("xorpd", {reg2Name, reg2Name});
+    emitAsm("subsd", {reg1Name, reg2Name});
+    emitAsm("movsd  ", {reg2Name, resultAddr});
+    freeRegFloat(reg1Ind);
+    freeRegFloat(reg2Ind);
 }
 
 void initializeRegsFloat() {
