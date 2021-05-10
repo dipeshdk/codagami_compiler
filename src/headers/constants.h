@@ -126,6 +126,7 @@
 #define OP_BITWISE_NOT 739
 #define OP_MOV 740
 #define OP_RETURNF 741
+#define OP_UNARY_MINUSF 742
 
 #define BLANK_STR "BLANK"
 #define EMPTY_STR "______"
