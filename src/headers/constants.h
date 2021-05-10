@@ -106,12 +106,18 @@
 #define OP_LEQ 719
 #define OP_GREATER 720
 #define OP_LESS 721
+#define OP_EQF 7170
+#define OP_NEQF 7180
+#define OP_LEQF 7190
+#define OP_GREATERF 7200
+#define OP_LESSF 7210
 #define OP_ADDF 723
 #define OP_MULF 724
 #define OP_SUBF 725
 #define OP_DIVF 726
 #define OP_MOD 722
 #define OP_GEQ 727
+#define OP_GEQF 7270
 #define OP_ANDAND 728
 #define OP_OROR 729
 #define OP_IFNEQGOTO 730 // {OP_IFNEQGOTO, operand1, operand2, gotoAddr if not equal}

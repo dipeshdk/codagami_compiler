@@ -88,3 +88,92 @@ void initializeRegsFloat() {
     }
     return;
 }
+
+void asmOpGeqFloat(int quadNo) {
+    asmOpCompFloat(quadNo, "setge");
+}
+
+void asmOpLeqFloat(int quadNo) {
+    asmOpCompFloat(quadNo, "setle");
+}
+
+void asmOpGreaterFloat(int quadNo) {
+    asmOpCompFloat(quadNo, "setg");
+}
+
+void asmOpLessFloat(int quadNo) {
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
+
+    if (isConstant(quad->result) || isFloatConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    string resultAddr = getVariableAddr(quad->result, st);
+  
+    if(isFloatConstant(quad->arg1)){
+        cout << "isFloat\n";
+        //emitAsm("movsd", {"$" + hexString(quad->arg1), REGISTER_XMM1});
+        if(isFloatConstant(quad->arg2)){
+            emitAsm("movsd", {"$" + hexString(quad->arg2), REGISTER_XMM1});
+        } else {
+            string argAddr = getVariableAddr(quad->arg2, st);
+            emitAsm("movsd", {argAddr, REGISTER_XMM1});
+        }
+        emitAsm("movsd", {"$" + hexString(quad->arg1), REGISTER_XMM0});
+        emitAsm("comisd", {REGISTER_XMM1, REGISTER_XMM0});
+    } else {
+        if(isFloatConstant(quad->arg2)){
+            emitAsm("movsd", {"$" + hexString(quad->arg2), REGISTER_XMM0});
+        } else {
+            string argAddr = getVariableAddr(quad->arg2, st);
+            emitAsm("movsd", {argAddr, REGISTER_XMM0});
+        }
+        string argAddr = getVariableAddr(quad->arg1, st);
+        emitAsm("comisd", {argAddr, REGISTER_XMM0});
+    }
+    int regInd = getReg(quadNo, quad->arg1);
+    string regName = regVec[regInd]->regName;
+    string regNameOneByte = regVec[regInd]->regNameOneByte;
+    emitAsm("seta", {regNameOneByte});
+    emitAsm("movzbl", {regNameOneByte, regName});
+    emitAsm("movq", {regName, resultAddr});
+    freeReg(regInd);
+    return;
+}
+
+void asmOpEqFloat(int quad) {
+    asmOpCompFloat(quad, "sete");
+}
+
+void asmOpNeqFloat(int quad) {
+    asmOpCompFloat(quad, "setne");
+}
+
+
+void asmOpCompFloat(int quadNo, string asm_comp) {
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
+
+    if (isConstant(quad->result) || isFloatConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    string resultAddr = getVariableAddr(quad->result, st);
+    if (isFloatConstant(quad->arg1)) {
+        emitAsm("movsd", {"$" + hexString(quad->arg1), REGISTER_XMM0});
+    } else {
+        string argAddr = getVariableAddr(quad->arg1, st);
+        emitAsm("movsd", {argAddr, REGISTER_XMM0});
+    }
+    if (isConstant(quad->arg2)) {
+        emitAsm("comisd", {"$" + hexString(quad->arg2), REGISTER_XMM0});
+    } else {
+        string argAddr = getVariableAddr(quad->arg2, st);
+        emitAsm("comisd", {argAddr, REGISTER_XMM0});
+    }
+    int regInd = getReg(quadNo, quad->arg1);
+    string regName = regVec[regInd]->regName;
+    string regNameOneByte = regVec[regInd]->regNameOneByte;
+    emitAsm("seta", {regNameOneByte});
+    emitAsm("movzbl", {regNameOneByte, regName});
+    emitAsm("movq", {regName, resultAddr});
+    freeReg(regInd);
+    return;
+}
