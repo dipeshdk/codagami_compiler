@@ -88,3 +88,21 @@ void initializeRegsFloat() {
     }
     return;
 }
+
+void asmOPMoveFloatFuncParam(int quadNo) {
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
+
+    string regName = quad->arg1;
+    string valToMove = quad->result;
+    if (find(gArgRegsFloat.begin(), gArgRegsFloat.end(), regName) == gArgRegsFloat.end()) {
+        errorAsm("", REGISTER_ASSIGNMENT_ERROR);
+    }
+
+    if (isConstant(valToMove)) {
+        emitAsm("movsd", {"$" + hexString(valToMove), regName});
+    } else {
+        string argAddr = getVariableAddr(valToMove, st);
+        emitAsm("movsd", {argAddr, regName});
+    }
+}

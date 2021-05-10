@@ -242,6 +242,9 @@ void emitAssemblyForQuad(int quadNo) {
     // =======================================================================================================================
         asmOPMoveFuncParam(quadNo);
         break;
+    case OP_MOVF:
+        asmOPMoveFloatFuncParam(quadNo);
+        break;
     default:
         break;
     }
@@ -346,7 +349,7 @@ void amsOpLCall(int quadNo) {
 
     int isStruct = 0;
     if (libraryFunctions.find(quad->arg1) != libraryFunctions.end()) {
-        emitAsm("xor", {REGISTER_RAX, REGISTER_RAX});
+        // emitAsm("xor", {REGISTER_RAX, REGISTER_RAX});
     } else {
         string funcName = quad->arg1;
         symbolTableNode* funcNode = lookUp(st, funcName);

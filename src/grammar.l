@@ -28,11 +28,11 @@ char* previ;
 "continue"		{ count();  return(CONTINUE); }
 "default"		{ count();  return(DEFAULT); }
 "do"			{ count();  return(DO); }
-"double"		{ count();  return(DOUBLE); }
+"float"		    { count();  return(FLOAT); }
 "else"			{ count();  return(ELSE); }
 "enum"			{ count();  return(ENUM); }
 "extern"		{ count();  return(EXTERN); }
-"float"			{ count();  return(FLOAT); }
+"double"			{ count();  return(FLOAT); } //TODO: Change before submission
 "for"			{ count();  return(FOR); }
 "goto"			{ count();  return(GOTO); }
 "if"			{ count();  return(IF); }
