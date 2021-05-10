@@ -107,6 +107,10 @@ void asmOpSubF(int quadNo) {
 void asmOpMulF(int quadNo) {
     emitAsmForFloatBinaryOperator("mulsd", quadNo);
 }
+
+void asmOpDivF(int quadNo) {
+    emitAsmForFloatBinaryOperator("divsd", quadNo);
+}
 string getGlobalFloatAddr() {
     string globalTempName = globalTempNamePrefix + to_string(globalFloatTempCounter) + globalTempNameSuffix;
     globalFloatTempCounter++;
