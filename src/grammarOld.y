@@ -150,10 +150,17 @@ constant
 		string s = yylval.id;
 		node* temp = makeNode(strdup("CONSTANT"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
 		if(!temp->declSp) temp->declSp = new declSpec();
+
+		if(gSymTable->scope != GLOBAL_SCOPE_NUM) {
+			string globalFloatAddr = getGlobalFloatAddr();
+			sendFloatToGlobal(string(yylval.id), globalFloatAddr);
+			setAddr(temp, globalFloatAddr);
+		}else {
+			addFVal(temp, yylval.id);
+			setAddr(temp, string(yylval.id));
+			temp->isConstant = true;
+		}
 		temp->declSp->type.push_back(TYPE_FLOAT);
-		addFVal(temp, yylval.id);
-		setAddr(temp, string(yylval.id));
-		temp->isConstant = true;
 		$$ = temp;
 	}
 	;
@@ -2313,13 +2320,13 @@ int main(int ac, char **av) {
 		// char * fileName = strdup("graph.dot");
 		// if(ac == 3) fileName = av[2];
 		// generateDot(root,fileName);
-        printCode((char*)TACFilename.c_str());
+        
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-		
+		printCode((char*)TACFilename.c_str());
 		fclose(fd);
     }
     else

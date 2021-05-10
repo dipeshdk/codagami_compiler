@@ -37,6 +37,7 @@ void stripTypeCastFromQuads() {
 void emitAssemblyFrom3AC(string asmOutputFile) {
     funcNameStack.push(GLOBAL);
     initializeRegs();
+    initializeRegsFloat();
     stripTypeCastFromQuads();
     vector<int> gotoLabels;
     for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
@@ -84,7 +85,9 @@ void printASMData() {
         cout << "   " << g->varName << ": ";
         if (g->valueType == TYPE_STRING_LITERAL) {
             cout << ".asciz ";
-        } else {
+        } else if (g->valueType == TYPE_FLOAT){
+            cout << ".double ";
+        }else{
             cout << ".long ";
         }
         cout << g->value << "\n";
@@ -172,13 +175,16 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpMod(quadNo);
         break;
         // binary operator standard function
-    /* case OP_ADDF: // rythm ***
+    case OP_ADDF: // rythm ***
+        asmOpAddF(quadNo);
         break;
     case OP_MULF: // rythm ***
+        asmOpMulF(quadNo);
         break;
     case OP_SUBF: // rythm ***
+        asmOpSubF(quadNo);
         break;
-    case OP_DIVF: // dipesh ***
+    /* case OP_DIVF: // dipesh ***
         // =======================================================================================================================
         divsd dest, src         ; dest /= src (double)
          change it
@@ -770,6 +776,7 @@ int getOffset(string varName, symbolTable* st) {
 }
 
 bool isGlobal(string varName, symbolTable* st) {
+    if(isFloatConstant(varName)) return true;
     if (isPointer(varName))
         varName = stripPointer(varName);
     string identifier = varName, param, name = varName, delim_dot = ".";
@@ -930,12 +937,6 @@ void initializeRegs() {
         regVec[i]->isFree = true;
         regVec[i]->regName = regNames[i];
         regVec[i]->regNameOneByte = regNamesOneByte[i];
-    }
-    regVecFloat = vector<reg*>(NUM_REGISTER_FLOAT);
-    for (int i = 0; i < NUM_REGISTER_FLOAT; i++) {
-        regVec[i] = new reg();
-        regVec[i]->isFree = true;
-        regVec[i]->regName = regNamesFloat[i];
     }
 }
 
