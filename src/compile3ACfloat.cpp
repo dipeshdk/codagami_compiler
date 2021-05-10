@@ -17,9 +17,9 @@ stack<int> ptrAssignedRegs;
 set<string> libraryFunctions{"printf", "scanf", "malloc"};
  */
 
-// vector<reg*> regVecFloat;
+vector<reg*> regVecFloat;
 vector<string> gArgRegsFloat({REGISTER_XMM0,REGISTER_XMM1, REGISTER_XMM2, REGISTER_XMM3, REGISTER_XMM4, REGISTER_XMM5, REGISTER_XMM6, REGISTER_XMM7});
-// vector<string> regNamesFloat ({REGISTER_XMM8,REGISTER_XMM9, REGISTER_XMM10, REGISTER_XMM11, REGISTER_XMM12, REGISTER_XMM13, REGISTER_XMM14, REGISTER_XMM15});
+vector<string> regNamesFloat ({REGISTER_XMM0,REGISTER_XMM1, REGISTER_XMM2, REGISTER_XMM3, REGISTER_XMM4, REGISTER_XMM5, REGISTER_XMM6, REGISTER_XMM7, REGISTER_XMM8,REGISTER_XMM9, REGISTER_XMM10, REGISTER_XMM11, REGISTER_XMM12, REGISTER_XMM13, REGISTER_XMM14, REGISTER_XMM15});
 
 // int getReg(int quadNo, string varValue) {
 //     for (int i = 0; i < NUM_REGISTER; i++) {
@@ -29,23 +29,9 @@ vector<string> gArgRegsFloat({REGISTER_XMM0,REGISTER_XMM1, REGISTER_XMM2, REGIST
 //         }
 //     }
 //     int ind = getRegToFree();
-//     freeRegAndMoveToStack(ind);
 //     useReg(ind, quadNo, varValue);
 //     return ind;
 // }
 
-// string evaluate(string op, string arg1, string arg2) {
-//     if (op == "addq") {
-//         int result = getNumberFromConstAddr(arg1) + getNumberFromConstAddr(arg2);
-//         return hexString(to_string(result));
-//     }
-//     if (op == "imulq") {
-//         int result = getNumberFromConstAddr(arg1) * getNumberFromConstAddr(arg2);
-//         return hexString(to_string(result));
-//     }
-//     if (op == "subq") {
-//         int result = getNumberFromConstAddr(arg1) - getNumberFromConstAddr(arg2);
-//         return hexString(to_string(result));
-//     }
-//     return EMPTY_STR;
-// }
+// freeRegFloat()
+// useRegFloat()
