@@ -163,10 +163,10 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpNeq(quadNo);
         break;
     case OP_LEQ: // sakshi ***
-        asmOpLeq(quadNo);
+        asmOpLeqFloat(quadNo);
         break;
     case OP_GREATER: // sakshi ***
-        asmOpGreater(quadNo);
+        asmOpGreaterFloat(quadNo);
         break;
     case OP_LESS: // sakshi ***
         asmOpLessFloat(quadNo);
