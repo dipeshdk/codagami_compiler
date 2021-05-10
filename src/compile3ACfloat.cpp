@@ -15,12 +15,14 @@ vector<globalData*> globalDataPair;
 int gQuadNo;
 stack<int> ptrAssignedRegs;
 set<string> libraryFunctions{"printf", "scanf", "malloc"};
- */
+*/
 
 vector<reg*> regVecFloat;
 vector<string> gArgRegsFloat({REGISTER_XMM0,REGISTER_XMM1, REGISTER_XMM2, REGISTER_XMM3, REGISTER_XMM4, REGISTER_XMM5, REGISTER_XMM6, REGISTER_XMM7});
 vector<string> regNamesFloat({REGISTER_XMM0,REGISTER_XMM1, REGISTER_XMM2, REGISTER_XMM3, REGISTER_XMM4, REGISTER_XMM5, REGISTER_XMM6, REGISTER_XMM7, REGISTER_XMM8,REGISTER_XMM9, REGISTER_XMM10, REGISTER_XMM11, REGISTER_XMM12, REGISTER_XMM13, REGISTER_XMM14, REGISTER_XMM15});
-
+int globalFloatTempCounter = 0;
+string globalTempNamePrefix("f");
+string globalTempNameSuffix("$");
 
 int getRegFloat(int quadNo, string varValue) {
     for (int i = 0; i < NUM_REGISTER_FLOAT; i++) {
@@ -49,12 +51,78 @@ void useRegFloat(int regInd, int quadNo, string varValue) {
     regVecFloat[regInd]->varValue = varValue;
 }
 
-void isFloatConstant(string varValue){
-        
+float getFloatFromAddr(string varValue) {
+    std::istringstream iss(varValue);
+    float f;
+    iss >> noskipws >> f;
+    return f;
 }
 
-void sendFloatToGlobal(string varValue){
+bool isFloatConstant(string varValue) {
+    int n = varValue.size();
+    if(varValue[n-1] == globalTempNameSuffix[0]) return true;
+    else return false;
+}
 
+void emitAsmForFloatBinaryOperator(string asmOp, int quadNo) {
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
+
+    if (isConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    string resultAddr = getVariableAddr(quad->result, st);
+
+    // Redundant:
+    // if (isConst1 && isConst2) {
+    //     string eval = evaluate(op, quad->arg1, quad->arg2);
+    // }
+
+    int reg1Ind = -1;
+    int reg2Ind = -1;
+    reg1Ind = getRegFloat(quadNo, quad->arg1);
+    reg2Ind = getRegFloat(quadNo, quad->arg2);
+    if (reg1Ind < 0 || reg2Ind < 0) {
+        errorAsm("For Float: ", REGISTER_ASSIGNMENT_ERROR);
+    }
+    string reg1Name = regNamesFloat[reg1Ind], reg2Name = regNamesFloat[reg2Ind];
+    string arg1Addr =  getVariableAddr(quad->arg1, st);
+    string arg2Addr =  getVariableAddr(quad->arg2, st);;
+    emitAsm("movsd", {arg1Addr, reg1Name});
+    emitAsm("movsd", {arg2Addr, reg2Name});
+    emitAsm(asmOp, {reg2Name, reg1Name});
+    emitAsm("movsd", {reg1Name, resultAddr});
+    freeReg(reg1Ind);
+    freeReg(reg2Ind);
+    return;
+}
+
+void asmOpAddF(int quadNo) {
+    emitAsmForFloatBinaryOperator("addsd", quadNo);
+}
+
+void asmOpSubF(int quadNo) {
+    emitAsmForFloatBinaryOperator("subsd", quadNo);
+}
+
+void asmOpMulF(int quadNo) {
+    emitAsmForFloatBinaryOperator("mulsd", quadNo);
+}
+string getGlobalFloatAddr() {
+    string globalTempName = globalTempNamePrefix + to_string(globalFloatTempCounter) + globalTempNameSuffix;
+    globalFloatTempCounter++;
+    return globalTempName;
+}
+
+void sendFloatToGlobal(string varValue, string globalTempName){
+    globalData *gData = new globalData();
+    gData->varName = globalTempName;
+    gData->value = varValue;
+    gData->valueType = TYPE_FLOAT;
+    globalDataPair.push_back(gData);
+    return;
+}
+
+<<<<<<< HEAD
 }
 
 void asmOpReturnF(int quadNo) {
@@ -111,4 +179,14 @@ void asmOpUnaryMinusF(int quadNo) {
 
     freeReg(regIndsrc1);
     freeReg(regIndDest);
+=======
+void initializeRegsFloat() {
+    regVecFloat = vector<reg*>(NUM_REGISTER_FLOAT);
+    for (int i = 0; i < NUM_REGISTER_FLOAT; i++) {
+        regVecFloat[i] = new reg();
+        regVecFloat[i]->isFree = true;
+        regVecFloat[i]->regName = regNamesFloat[i];
+    }
+    return;
+>>>>>>> a082da4c8b9db51035a64b064b632ec5e62f76f9
 }
