@@ -287,7 +287,6 @@ int typeCastByRank(node* n1, node* n2, int rank) {
     }
     int retval = canTypecast(to->declSp, from->declSp);
     if (retval) {
-        cout << "error in typeCastByRank\n";
         return retval;
     }
     typeCastLexemeWithEmit(from, to->declSp);
@@ -343,7 +342,6 @@ int implicitTypecastingNotPointerNotStringLiteral(node* n1, node* n2, string& va
     }
     int retval = typeCastByRank(n1, n2, rank);
     if (retval) {
-        cout << "error in implicitTypecastingNotPointerNotStringLiteral\n";
         return -retval;
     }
     return rank;
@@ -358,7 +356,6 @@ int implicitTypecastingNotStringLiteral(node* n1, node* n2, string& var) {
     }
     int retval = typeCastByRank(n1, n2, rank);
     if (retval) {
-        cout << "error in implicitTypecastingNotStringLiteral\n";
         return retval;
     }
     return rank;
