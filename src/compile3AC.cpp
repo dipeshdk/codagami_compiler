@@ -1241,14 +1241,14 @@ void asmOpIfGoto(int quadNo) {
         return;
     }
 
-    if (isFloat(quad->arg1)) {
-        if(isFloatConst(quad->arg1)){
+    if (isFloat(quad->arg1, st)) {
+        int regInd = getRegFloat(quadNo, CONSTANT);
+        string regName = regVecFloat[regInd]->regName;
+        emitAsm("pxor", {regName, regName});
+        string argAddr = getVariableAddr(quad->arg1, st);
+        emitAsm("ucomisd", {argAddr, regName});
+        asmJump(quadNo, "jp");
 
-        }
-        else{
-            string regName = getFloatReg(quadNo, quad->arg1);
-            
-        }
     } else {
         if (isConstant(quad->arg1)) {
             int regInd = getReg(quadNo, CONSTANT);
