@@ -114,6 +114,11 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpAssignment(quadNo);
         break;
     case OP_UNARY_MINUS: // dipesh
+    // =======================================================================================================================
+    // https://groups.google.com/g/comp.lang.asm.x86/c/bqspF3wPQMY?pli=1
+    // Idea:1 & 2 given in above website
+    // Idea:3 multiple directly by -1
+    // =======================================================================================================================
         asmOpUnaryMinus(quadNo);
         break;
     case OP_DIVI:
@@ -162,6 +167,10 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_SUBF: // rythm
         break;
     case OP_DIVF: // dipesh
+        // =======================================================================================================================
+        divsd dest, src         ; dest /= src (double)
+        The dest and src operands must be xmm registers; src2 can be register or memory. Sizes of all operands must be the same.
+        // =======================================================================================================================
         break; */
     case OP_GEQ: // sakshi
         asmOpGeq(quadNo);
@@ -183,11 +192,20 @@ void emitAssemblyForQuad(int quadNo) {
         break;
     case OP_RETURN: // dipesh
         asmOpReturn(quadNo);
+    /*  // =======================================================================================================================
+        check if the return value of function is float or int
+        if float then return the value in %xmm0
+        else return the value in %rax
+        in between calculations are not to be taken care of from your side, they are automatically handled.
+        // ======================================================================================================================= */
         break;
     case OP_PUSHPARAM: // sarthak
         asmOpPushparam(quadNo);
         break;
     case OP_POPPARAM: // dipesh
+    // =======================================================================================================================
+    // I think this needs no handling. Rest depends on how are we handling the 3AC of this portion.
+    // =======================================================================================================================
         asmOpPopparam(quadNo);
         break;
     case OP_LCALL:
@@ -252,7 +270,12 @@ void asmOpReturn(int quadNo) {
 
     int eaxInd = EAX_REGISTER_INDEX;
     string eaxName = regVec[EAX_REGISTER_INDEX]->regName;
-
+    /* 
+        check if the return value of function is float or int
+        if float then return the value in %xmm0
+        else return the value in %rax
+        in between calculations are not to be taken care of from your side, they are automatically handled.
+     */
     if (quad->result != EMPTY_STR) {
         freeRegAndMoveToStack(eaxInd);
         useReg(eaxInd, quadNo, NO_VAR_VALUE_ASSIGNED);
