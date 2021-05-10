@@ -426,7 +426,6 @@ void asmOpBeginFunc(int quadNo) {
 
     int funcSize = getNumberFromConstAddr(quad->result);
     funcSizeStack.push(funcSize);
-    //TODO: funcNameStack is the the stack containing active function names, starting with global
     symbolTableNode* funcNode = lookUp(st, funcNameStack.top());
     if (!funcNode) {
         error(funcNameStack.top(), SYMBOL_NOT_FOUND);
@@ -932,7 +931,12 @@ void initializeRegs() {
         regVec[i]->regName = regNames[i];
         regVec[i]->regNameOneByte = regNamesOneByte[i];
     }
-    // TODD: intialize floating point registers too
+    regVecFloat = vector<reg*>(NUM_REGISTER_FLOAT);
+    for (int i = 0; i < NUM_REGISTER_FLOAT; i++) {
+        regVec[i] = new reg();
+        regVec[i]->isFree = true;
+        regVec[i]->regName = regNamesFloat[i];
+    }
 }
 
 int getReg(int quadNo, string varValue) {

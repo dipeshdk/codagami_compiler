@@ -40,4 +40,9 @@ extern stack<int> funcSizeStack;
 extern vector<globalData*> globalDataPair;
 extern symbolTable* globalScopeSymTable;
 extern set<string> libraryFunctions;
+
+vector<reg*> regVecFloat;
+vector<string> gArgRegsFloat;
+vector<string> regNamesFloat;
+
 #endif

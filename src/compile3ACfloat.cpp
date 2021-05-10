@@ -19,19 +19,40 @@ set<string> libraryFunctions{"printf", "scanf", "malloc"};
 
 vector<reg*> regVecFloat;
 vector<string> gArgRegsFloat({REGISTER_XMM0,REGISTER_XMM1, REGISTER_XMM2, REGISTER_XMM3, REGISTER_XMM4, REGISTER_XMM5, REGISTER_XMM6, REGISTER_XMM7});
-vector<string> regNamesFloat ({REGISTER_XMM0,REGISTER_XMM1, REGISTER_XMM2, REGISTER_XMM3, REGISTER_XMM4, REGISTER_XMM5, REGISTER_XMM6, REGISTER_XMM7, REGISTER_XMM8,REGISTER_XMM9, REGISTER_XMM10, REGISTER_XMM11, REGISTER_XMM12, REGISTER_XMM13, REGISTER_XMM14, REGISTER_XMM15});
+vector<string> regNamesFloat({REGISTER_XMM0,REGISTER_XMM1, REGISTER_XMM2, REGISTER_XMM3, REGISTER_XMM4, REGISTER_XMM5, REGISTER_XMM6, REGISTER_XMM7, REGISTER_XMM8,REGISTER_XMM9, REGISTER_XMM10, REGISTER_XMM11, REGISTER_XMM12, REGISTER_XMM13, REGISTER_XMM14, REGISTER_XMM15});
 
-// int getReg(int quadNo, string varValue) {
-//     for (int i = 0; i < NUM_REGISTER; i++) {
-//         if (regVec[i]->isFree) {
-//             useReg(i, quadNo, varValue);
-//             return i;
-//         }
-//     }
-//     int ind = getRegToFree();
-//     useReg(ind, quadNo, varValue);
-//     return ind;
-// }
 
-// freeRegFloat()
-// useRegFloat()
+int getRegFloat(int quadNo, string varValue) {
+    for (int i = 0; i < NUM_REGISTER_FLOAT; i++) {
+        if (regVecFloat[i]->isFree) {
+            useRegFloat(i, quadNo, varValue);
+            return i;
+        }
+    }
+    int ind = getRegToFreeFloat();
+    useRegFloat(ind, quadNo, varValue);
+    return ind;
+}
+
+int getRegToFreeFloat() {
+    // TODO: returns index of reg to free if all regs are used
+    return 0;
+}
+
+void freeRegFloat(int regInd) {
+    regVecFloat[regInd]->isFree = true;
+}
+
+void useRegFloat(int regInd, int quadNo, string varValue) {
+    regVecFloat[regInd]->isFree = false;
+    regVecFloat[regInd]->quadNo = quadNo;
+    regVecFloat[regInd]->varValue = varValue;
+}
+
+void isFloatConstant(string varValue){
+        
+}
+
+void sendFloatToGlobal(string varValue){
+
+}
