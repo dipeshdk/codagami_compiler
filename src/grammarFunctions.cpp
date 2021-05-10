@@ -224,6 +224,10 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         cout << "arg[" << i << "] = " << arguments[i]->addr << endl;
     } */
 
+    if(stNode->paramWidth % 16) {
+        emit(OP_DUMMYPUSH, EMPTY_STR, EMPTY_STR, EMPTY_STR);
+    }
+
     for (int i = maxSize - 1; i >= 6; i--) {
         //push param
         if (!nodeIsStruct(arguments[i])) {
@@ -254,7 +258,7 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
             intRegCnt++;
         }
     }
-
+    
     if (postfix_expression->declSp->type[0] != TYPE_VOID) {
         newTemp = generateTemp(errCode);
         if (errCode)
@@ -267,7 +271,7 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
 
     paramSize = stNode->paramWidth;
     if (paramSize)
-        emit(OP_POPPARAM, EMPTY_STR, EMPTY_STR, to_string(paramSize));
+        emit(OP_POPPARAM, EMPTY_STR, EMPTY_STR, to_string(alignSixteenByte(paramSize)));
     stNode->callPopSize = paramSize;
     return newTemp;
 }

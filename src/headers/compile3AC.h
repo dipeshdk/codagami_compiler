@@ -159,4 +159,7 @@ void copyReturnStruct(string to, int quadNo);
 
 void copyReturningStruct(string from, int quadNo);
 
+int alignSixteenByte(int x);
+
+void asmOPDummyPush(int quadNo);
 #endif

@@ -375,6 +375,8 @@ string getOpName(int opCode) {
         return "RETURN";
     case OP_PUSHPARAM:
         return "PUSHPARAM";
+    case OP_DUMMYPUSH:
+        return "DUMMYPUSH";
     case OP_POPPARAM:
         return "POPPARAM";
     case OP_LCALL:
@@ -445,6 +447,9 @@ void printQuad(quadruple* quad, int line) {
         break;
     case OP_SUBI:
         printf("    %s = %s %s %s\n", quad->result.c_str(), quad->arg2.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str());
+        break;
+    case OP_DUMMYPUSH:
+        printf("    DUMMY_PUSH\n");
         break;
     default:
         printf("    %s = %s %s %s\n", quad->result.c_str(), quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());

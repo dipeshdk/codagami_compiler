@@ -221,6 +221,9 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_PUSHPARAM:
         asmOpPushparam(quadNo);
         break;
+    case OP_DUMMYPUSH:
+        asmOPDummyPush(quadNo);
+        break;
     case OP_POPPARAM:
         asmOpPopparam(quadNo);
         break;
@@ -248,6 +251,10 @@ void emitAssemblyForQuad(int quadNo) {
     default:
         break;
     }
+}
+
+void asmOPDummyPush(int quadNo){
+     emitAsm("pushq", {REGISTER_RBP});
 }
 
 void asmOpBitwiseNot(int quadNo) {
@@ -327,13 +334,15 @@ void asmOpReturn(int quadNo) {
             emitAsm("movq", {"$" + hexString(quad->result), eaxName});
         }
     }
-    emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
+    int subqVal = alignSixteenByte(funcSizeStack.top());
+    emitAsm("addq", {"$" + hexString(to_string(subqVal)), REGISTER_RSP});
     emitAsm("popq", {REGISTER_RBP});
     emitAsm("retq", {});
 }
 
 void asmOpEndFunc(int quadNo) {
-    emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
+    int subqVal = alignSixteenByte(funcSizeStack.top());
+    emitAsm("addq", {"$" + hexString(to_string(subqVal)), REGISTER_RSP});
     emitAsm("popq", {REGISTER_RBP});
     emitAsm("retq", {});
     funcNameStack.pop();
@@ -416,9 +425,15 @@ void asmOpPopparam(int quadNo) {
     string resultAddr = quad->result;
 
     if (!isConstant(resultAddr)) {
+        cout << "error here " << resultAddr << endl;
         errorAsm("", POPPARAM_ARG_NOT_CONSTANT);
     }
     emitAsm("addq", {"$" + hexString(quad->result), REGISTER_RSP});
+}
+
+int alignSixteenByte(int x) {
+    if(!(x%16)) return x;
+    return ((x/16)+1)*16;
 }
 
 void asmOpBeginFunc(int quadNo) {
@@ -443,7 +458,8 @@ void asmOpBeginFunc(int quadNo) {
     emitFuncStart();
 
     //sub stack pointer
-    emitAsm("subq", {"$" + hexString(quad->result), REGISTER_RSP});
+    int subqVal = alignSixteenByte(getNumberFromConstAddr(quad->result));
+    emitAsm("subq", {"$" + to_string(subqVal), REGISTER_RSP});
 
     //move first 6 arguments from register to stack
     vector<struct param*> paramList = funcNode->paramList;
