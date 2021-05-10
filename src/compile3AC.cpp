@@ -206,7 +206,10 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_ENDFUNC:
         asmOpEndFunc(quadNo);
         break;
-    case OP_RETURN: // dipesh ***
+    case OP_RETURN:
+        asmOpReturn(quadNo);
+        break;
+    case OP_RETURNF: // dipesh ***
         asmOpReturn(quadNo);
     /*  // =======================================================================================================================
         check if the return value of function is float or int

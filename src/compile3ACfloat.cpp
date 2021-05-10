@@ -56,3 +56,33 @@ void isFloatConstant(string varValue){
 void sendFloatToGlobal(string varValue){
 
 }
+
+void asmOpReturnF(int quadNo) {
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
+
+    string xmm0Ind = XMM0_REGISTER_INDEX;
+    string xmm0reg = regVecFloat[xmm0Ind]->regName;
+    if (quad->result != EMPTY_STR) {
+        useReg(xmm0Ind, quadNo, NO_VAR_VALUE_ASSIGNED);
+        if (!isConstant(quad->result)) {
+            regVecFloat[xmm0Ind]->varValue = quad->result;
+            string funcName = funcNameStack.top();
+            symbolTableNode* funcNode = lookUp(st, funcName);
+            if (!funcNode) {
+                error(funcName, SYMBOL_NOT_FOUND);
+            } else if (funcNode->declSp && funcNode->declSp->type.size() > 0 && (funcNode->declSp->type[0] == TYPE_STRUCT) && (funcNode->declSp->ptrLevel == 0)) {
+                copyReturningStruct(quad->result, quadNo);
+            } else {
+                string argAddr = getVariableAddr(quad->result, st);
+                emitAsm("movsd", {argAddr, xmm0reg});
+            }
+        } else {
+            regVecFloat[xmm0Ind]->varValue = CONSTANT;
+            emitAsm("movsd", {"$" + hexString(quad->result), xmm0reg});
+        }
+    }
+    emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
+    emitAsm("popq", {REGISTER_RBP});
+    emitAsm("retq", {});
+}
