@@ -56,3 +56,47 @@ void isFloatConstant(string varValue){
 void sendFloatToGlobal(string varValue){
 
 }
+
+void emitAsmForFloatBinaryOperator(string asmOp, int quadNo) {
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
+
+    if (isConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    string resultAddr = getVariableAddr(quad->result, st);
+
+    // Redundant:
+    // if (isConst1 && isConst2) {
+    //     string eval = evaluate(op, quad->arg1, quad->arg2);
+    // }
+
+    int reg1Ind = -1;
+    int reg2Ind = -1;
+    reg1Ind = getRegFloat(quadNo, quad->arg1);
+    reg2Ind = getRegFloat(quadNo, quad->arg2);
+    if (reg1Ind < 0 || reg2Ind < 0) {
+        errorAsm("For Float: ", REGISTER_ASSIGNMENT_ERROR);
+    }
+    string reg1Name = regNamesFloat[reg1Ind], reg2Name = regNames[reg2Ind];
+    string arg1Addr =  getVariableAddr(quad->arg1, st);
+    string arg2Addr =  getVariableAddr(quad->arg2, st);;
+    emitAsm("movsd", {arg1Addr, reg1Name});
+    emitAsm("movsd", {arg2Addr, reg2Name});
+    emitAsm(asmOp, {reg1Name, reg2Name});
+    emitAsm("movsd", {reg2Name, resultAddr});
+    freeReg(reg1Ind);
+    freeReg(reg2Ind);
+    return;
+}
+
+void asmOpAddF(int quadNo){
+    emitAsmForFloatBinaryOperator("addsd", quadNo);
+}
+
+void asmOpSubF(int quadNo){
+    emitAsmForFloatBinaryOperator("subsd", quadNo);
+}
+
+void asmOpAddF(int quadNo){
+    emitAsmForFloatBinaryOperator("mulsd", quadNo);
+}
