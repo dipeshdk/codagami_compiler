@@ -108,9 +108,6 @@ void asmOpMulF(int quadNo) {
     emitAsmForFloatBinaryOperator("mulsd", quadNo);
 }
 
-void asmOpDivF(int quadNo) {
-    emitAsmForFloatBinaryOperator("divsd", quadNo);
-}
 string getGlobalFloatAddr() {
     string globalTempName = globalTempNamePrefix + to_string(globalFloatTempCounter) + globalTempNameSuffix;
     globalFloatTempCounter++;
@@ -124,9 +121,6 @@ void sendFloatToGlobal(string varValue, string globalTempName){
     gData->valueType = TYPE_FLOAT;
     globalDataPair.push_back(gData);
     return;
-}
-
-<<<<<<< HEAD
 }
 
 void asmOpReturnF(int quadNo) {
@@ -183,7 +177,8 @@ void asmOpUnaryMinusF(int quadNo) {
 
     freeReg(regIndsrc1);
     freeReg(regIndDest);
-=======
+}
+
 void initializeRegsFloat() {
     regVecFloat = vector<reg*>(NUM_REGISTER_FLOAT);
     for (int i = 0; i < NUM_REGISTER_FLOAT; i++) {
@@ -192,5 +187,4 @@ void initializeRegsFloat() {
         regVecFloat[i]->regName = regNamesFloat[i];
     }
     return;
->>>>>>> a082da4c8b9db51035a64b064b632ec5e62f76f9
 }
