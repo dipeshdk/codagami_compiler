@@ -1,60 +1,60 @@
 void printf(char* str, double x);
-char* str = "%f\n";
+char* str = "%lf\n";
 
 int main(){
     double a = 3.0, b = 0.0, c, d= 8293.792, e = 0.00037;
-    int d = 5, e = 2;
+    int dd = 5, ee = 2;
     if((c  = (a || b))){
-        printf(str, c);
+        printf("8: %f\n", c);
         c = 10.198;
-        printf(str, c);
+        printf("10: %f\n", c);
     }
     else{
-        printf(str, c);
+        printf("13: %f\n", c);
         c = 1879.72;
-        printf(str, c);
+        printf("15: %f\n", c);
     }
 
     if((c  = (a && b))){
-        printf(str, c);
+        printf("19: %f\n", c);
         c = 10.198;
-        printf(str, c);
+        printf("21: %f\n", c);
     }
     else{
-        printf(str, c);
+        printf("24: %f\n", c);
         c = 1879.72;
-        printf(str, c);
+        printf("26: %f\n", c);
     }
     
     if((c  = (b || e))){
-        printf(str, c);
+        printf("30: %f\n", c);
         c = 10.198;
-        printf(str, c);
+        printf("32: %f\n", c);
     }
     else{
-        printf(str, c);
+        printf("35: %f\n", c);
         c = 1879.72;
-        printf(str, c);
+        printf("37: %f\n", c);
     }
     if((c  = (e && b))){
-        printf(str, c);
+        printf("40: %f\n", c);
         c = 10.198;
-        printf(str, c);
+        printf("42: %f\n", c);
     }
     else{
-        printf(str, c);
+        printf("45: %f\n", c);
         c = 1879.72;
-        printf(str, c);
+        printf("47: %f\n", c);
     }
     if((c  = (a || e))){
-        printf(str, c);
+        printf("50: %f\n", c);
         c = 10.198;
-        printf(str, c);
+        printf("52: %f\n", c);
     }
     else{
-        printf(str, c);
+        printf("55: %f\n", c);
         c = 1879.72;
-        printf(str, c);
+        printf("57: %f\n", c);
     }
     return 0;
 
