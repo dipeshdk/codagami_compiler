@@ -1102,10 +1102,19 @@ void asmOpAssignment(int quadNo) {
         return;
     }
     string resultAddr = getVariableAddr(quad->result, st);
-    if (isConstant(quad->arg1)) {
+    if (isConstant(quad->arg1) && !isTypecasted(quadWithTypecast->arg1)) {
         emitAsm("movq", {"$" + hexString(quad->arg1), resultAddr});
     } else {
-        string argAddr = getVariableAddr(quad->arg1, st);
+        string argAddr;
+        int tempRegInd=-1;
+        if(isConstant(quad->arg1)) {
+            tempRegInd = getReg(quadNo, quad->arg1);
+            string regName = regVec[tempRegInd]->regName;
+            emitAsm("movq", {"$" + hexString(quad->arg1), regName});
+            argAddr = regName;
+        }else {
+            argAddr = getVariableAddr(quad->arg1, st);
+        }
         if (stNode && stNode->declSp && stNode->declSp->type.size() > 0 && checkType(stNode->declSp, TYPE_FLOAT, 0)) {
             int regInd = getRegFloat(quadNo, quad->arg1);
             string regName = regVecFloat[regInd]->regName;
@@ -1126,6 +1135,9 @@ void asmOpAssignment(int quadNo) {
             }
             emitAsm("movq", {regName, resultAddr});
             freeReg(regInd);
+        }
+        if(tempRegInd != -1) {
+            freeReg(tempRegInd);
         }
     }
 }
