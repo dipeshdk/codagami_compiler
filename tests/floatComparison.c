@@ -5,6 +5,7 @@ char* str = "%f\n";
 double f1 = 8.906453;
 double f2 = 8.906453;
 int main() {
+    int xxxx;
     double pp = 66.6;
     double pq = 90.77;
     double a,b,c,d;

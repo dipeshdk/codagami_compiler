@@ -2354,10 +2354,11 @@ int main(int ac, char **av) {
         
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
+		printCode((char*)TACFilename.c_str());
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-		printCode((char*)TACFilename.c_str());
+		
 		fclose(fd);
     }
     else

@@ -12,6 +12,14 @@ vector<globalData*> globalDataPair;
 int gQuadNo;
 stack<int> ptrAssignedRegs;
 set<string> libraryFunctions{"printf", "scanf", "malloc"};
+vector<quadruple*> gCodeWithTypecast;
+
+bool isTypecasted(string name) {
+    size_t pos = name.find(" ) ");
+    if (pos == string::npos)
+        return false;
+    return true;
+}
 
 string stripTypeCastUtil(string name) {
     size_t pos = name.find(" ) ");
@@ -34,10 +42,22 @@ void stripTypeCastFromQuads() {
     }
 }
 
+void copyQuads() {
+    gCodeWithTypecast = vector<quadruple*>(gCode.size());
+    for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
+        gCodeWithTypecast[quadNo] = new quadruple();
+        gCodeWithTypecast[quadNo]->opCode = gCode[quadNo]->opCode;
+        gCodeWithTypecast[quadNo]->result = gCode[quadNo]->result;
+        gCodeWithTypecast[quadNo]->arg1 = gCode[quadNo]->arg1;
+        gCodeWithTypecast[quadNo]->arg2 = gCode[quadNo]->arg2;
+    }
+}
+
 void emitAssemblyFrom3AC(string asmOutputFile) {
     funcNameStack.push(GLOBAL);
     initializeRegs();
     initializeRegsFloat();
+    copyQuads();
     stripTypeCastFromQuads();
     vector<int> gotoLabels;
     for (int quadNo = 0; quadNo < gCode.size(); quadNo++) {
@@ -277,7 +297,6 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_MOVF:
         asmOPMoveFloatFuncParam(quadNo);
         break;
-    //NEW
     case OP_DUMMYPUSH:
         asmOPDummyPush(quadNo);
         break;
@@ -285,7 +304,7 @@ void emitAssemblyForQuad(int quadNo) {
         break;
     }
 }
-//NEW
+
 void asmOPDummyPush(int quadNo) {
     emitAsm("pushq", {REGISTER_RBP});
 }
@@ -375,7 +394,7 @@ void asmOpReturn(int quadNo) {
 
 void asmOpEndFunc(int quadNo) {
     emitAsm("\n9:", {});
-    emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
+    emitAsm("addq", {"$" + alignedFunctionSize(to_string(funcSizeStack.top())), REGISTER_RSP});
     emitAsm("popq", {REGISTER_RBP});
     emitAsm("retq", {});
     funcNameStack.pop();
@@ -508,7 +527,7 @@ void asmOpBeginFunc(int quadNo) {
     emitFuncStart();
 
     //sub stack pointer
-    emitAsm("subq", {"$" + hexString(quad->result), REGISTER_RSP});
+    emitAsm("subq", {"$" + alignedFunctionSize(quad->result), REGISTER_RSP});
 
     //move first 6 arguments from register to stack
     vector<struct param*> paramList = funcNode->paramList;
@@ -527,6 +546,14 @@ void asmOpBeginFunc(int quadNo) {
         }
     }
     return;
+}
+
+string alignedFunctionSize(string str){
+    int x = getNumberFromConstAddr(str);
+    if(!(x%16)){
+        return to_string(x);
+    }
+    return to_string((x/16 + 1)*16);
 }
 
 void asmOpPushparam(int quadNo) {
@@ -800,6 +827,9 @@ void errorAsm(string str, int errCode) {
     case DEREFERENCING_CONSTANT_ERROR:
         errStr = "Derefrencing a constant not allowed.";
         break;
+    case INVALID_TYPECAST_IN_3AC:
+        str = "Invalid typecast in 3AC.";
+        break;
     default:
         break;
     }
@@ -1055,7 +1085,7 @@ void freeRegAndMoveToStack(int regInd) {
 void asmOpAssignment(int quadNo) {
     quadruple* quad = gCode[quadNo];
     symbolTable* st = codeSTVec[quadNo];
-
+    quadruple* quadWithTypecast = gCodeWithTypecast[quadNo];
     //TODO: Verify
     if (isConstant(quad->result)) {
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
@@ -1075,32 +1105,102 @@ void asmOpAssignment(int quadNo) {
         return;
     }
     string resultAddr = getVariableAddr(quad->result, st);
-    if (isConstant(quad->arg1)) {
+    if (isConstant(quad->arg1) && !isTypecasted(quadWithTypecast->arg1)) {
         emitAsm("movq", {"$" + hexString(quad->arg1), resultAddr});
     } else {
-        //NEW
-        string argAddr = getVariableAddr(quad->arg1, st);
+        string argAddr;
+        int tempRegInd=-1;
+        if(isConstant(quad->arg1)) {
+            tempRegInd = getReg(quadNo, quad->arg1);
+            string regName = regVec[tempRegInd]->regName;
+            emitAsm("movq", {"$" + hexString(quad->arg1), regName});
+            argAddr = regName;
+        }else {
+            argAddr = getVariableAddr(quad->arg1, st);
+        }
         if (stNode && stNode->declSp && stNode->declSp->type.size() > 0 && checkType(stNode->declSp, TYPE_FLOAT, 0)) {
-            //TODO: Typecasting not added
             int regInd = getRegFloat(quadNo, quad->arg1);
             string regName = regVecFloat[regInd]->regName;
-            emitAsm("movsd", {argAddr, regName});
+            if(isTypecasted(quadWithTypecast->arg1)) {
+                emitAsm(getTypeCastOp(quadWithTypecast->arg1), {argAddr, regName});
+            } else {
+                emitAsm("movsd", {argAddr, regName});
+            }
             emitAsm("movsd", {regName, resultAddr});
             freeRegFloat(regInd);
         } else {
             int regInd = getReg(quadNo, quad->arg1);
             string regName = regVec[regInd]->regName;
-            emitAsm("movq", {argAddr, regName});
+            if(isTypecasted(quadWithTypecast->arg1)) {
+                emitAsm(getTypeCastOp(quadWithTypecast->arg1), {argAddr, regName});
+            } else {
+                emitAsm("movq", {argAddr, regName});
+            }
             emitAsm("movq", {regName, resultAddr});
             freeReg(regInd);
         }
-        // OLD
-        // int regInd = getReg(quadNo, quad->arg1);
-        // string regName = regVec[regInd]->regName;
-        // emitAsm("movq", {argAddr, regName});
-        // emitAsm("movq", {regName, resultAddr});
-        // freeReg(regInd);
+        if(tempRegInd != -1) {
+            freeReg(tempRegInd);
+        }
     }
+}
+
+string getTypeString(string typeCast){
+    int len = typeCast.length();
+    string retStr = "";
+    int i = 0;
+    while(i < len && typeCast[i] != '(') i++;
+    i++;
+    i++;
+    while(i < len && typeCast[i] != ' ') {
+        retStr = retStr + typeCast[i];
+        i++;
+    }
+    return retStr;
+}
+
+int getTypeFromSting(string typeStr) {
+    int n = typeStr.size();
+    if(typeStr == "FLOAT") {
+        return TYPE_FLOAT;
+    }
+    //return int for char, int and all pointers
+    return TYPE_INT;
+}
+
+string getFromString(string str){
+    size_t found = str.find("_TO");
+    if(found == string::npos){
+        errorAsm(str, INVALID_TYPECAST_IN_3AC);
+    }
+    string retStr = str.substr(0, found);
+    return retStr; 
+}
+
+string getToString(string str){
+    size_t found = str.find("TO_");
+    if(found == string::npos){
+        errorAsm(str, INVALID_TYPECAST_IN_3AC);
+    }
+    string retStr = str.substr(found+3, str.length()-found-3);
+    return retStr;
+}
+
+string getTypeCastOp(string name) {
+    string typeString = getTypeString(name);
+    int toType = getTypeFromSting(getToString(typeString));
+    int fromType = getTypeFromSting(getFromString(typeString));
+    if(fromType == TYPE_FLOAT && toType == TYPE_INT) {
+        return "cvttsd2si";
+    }else if(fromType == TYPE_INT && toType == TYPE_FLOAT) {
+        return "cvtsi2sd";
+    }else if(fromType == TYPE_INT && toType == TYPE_INT) {
+        return "movq";
+    }else if(fromType == TYPE_FLOAT && toType == TYPE_FLOAT) {
+        return "movsd";
+    }
+    errorAsm(name, INVALID_TYPECAST_IN_3AC);
+    return EMPTY_STR;
 }
 
 void asmOpAssignmentF(int quadNo){

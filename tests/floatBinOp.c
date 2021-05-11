@@ -1,7 +1,8 @@
 void printf(char* str, double f);
-char* str = "%f\n";
+char* str = "%lf\n";
 
 int main(){
+    int x = 90;
     double a = 236789.137, b = 19672349.928, c = 58492.83821, d, e, f, g;
     printf(str, a);
     printf(str, b);

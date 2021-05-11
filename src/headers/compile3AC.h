@@ -161,6 +161,21 @@ void copyReturnStruct(string to, int quadNo);
 
 void copyReturningStruct(string from, int quadNo);
 
-//NEW
+string alignedFunctionSize(string str);
+
 void asmOPDummyPush(int quadNo);
+
+bool isTypecasted(string name);
+
+void copyQuads();
+
+string getTypeCastOp(string name);
+
+string getToString(string str);
+
+string getFromString(string str);
+
+int getTypeFromSting(string typeStr);
+
+string getTypeString(string typeCast);
 #endif
