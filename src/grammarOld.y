@@ -1099,6 +1099,11 @@ assignment_expression
 		if(unary_expression->name == "CONSTANT"){
 			error(unary_expression->lexeme, ASSIGNMENT_TO_CONSTANT_ERROR);
 		}
+        symbolTableNode* sym_node = lookUp(gSymTable, $1->lexeme);
+        if(sym_node != nullptr && sym_node->infoType == INFO_TYPE_ARRAY && $1->childList == nullptr){
+            error(unary_expression->lexeme, ASSIGNMENT_TO_ARRAY);
+        }
+        
 		if(assignment_expression->addr != EMPTY_STR) {
 			if (!unary_expression->declSp) 
 			{
