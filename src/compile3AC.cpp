@@ -264,9 +264,21 @@ void emitAssemblyForQuad(int quadNo) {
                  // =======================================================================================================================
         asmOPMoveFuncParam(quadNo);
         break;
+    //NEW
+    case OP_MOVF:
+        asmOPMoveFloatFuncParam(quadNo);
+        break;
+    //NEW
+    case OP_DUMMYPUSH:
+        asmOPDummyPush(quadNo);
+        break;
     default:
         break;
     }
+}
+//NEW
+void asmOPDummyPush(int quadNo) {
+    emitAsm("pushq", {REGISTER_RBP});
 }
 
 void asmOpBitwiseNot(int quadNo) {
@@ -370,7 +382,7 @@ void amsOpLCall(int quadNo) {
 
     int isStruct = 0;
     if (libraryFunctions.find(quad->arg1) != libraryFunctions.end()) {
-        emitAsm("xor", {REGISTER_RAX, REGISTER_RAX});
+        emitAsm("xor", {REGISTER_RAX, REGISTER_RAX}); //TODO: for float printf
     } else {
         string funcName = quad->arg1;
         symbolTableNode* funcNode = lookUp(st, funcName);
@@ -1027,12 +1039,28 @@ void asmOpAssignment(int quadNo) {
     if (isConstant(quad->arg1)) {
         emitAsm("movq", {"$" + hexString(quad->arg1), resultAddr});
     } else {
+        //NEW
         string argAddr = getVariableAddr(quad->arg1, st);
-        int regInd = getReg(quadNo, quad->arg1);
-        string regName = regVec[regInd]->regName;
-        emitAsm("movq", {argAddr, regName});
-        emitAsm("movq", {regName, resultAddr});
-        freeReg(regInd);
+        if (stNode && stNode->declSp && stNode->declSp->type.size() > 0 && checkType(stNode->declSp, TYPE_FLOAT, 0)) {
+            //TODO: Typecasting not added
+            int regInd = getRegFloat(quadNo, quad->arg1);
+            string regName = regVecFloat[regInd]->regName;
+            emitAsm("movsd", {argAddr, regName});
+            emitAsm("movsd", {regName, resultAddr});
+            freeRegFloat(regInd);
+        } else {
+            int regInd = getReg(quadNo, quad->arg1);
+            string regName = regVec[regInd]->regName;
+            emitAsm("movq", {argAddr, regName});
+            emitAsm("movq", {regName, resultAddr});
+            freeReg(regInd);
+        }
+        // OLD
+        // int regInd = getReg(quadNo, quad->arg1);
+        // string regName = regVec[regInd]->regName;
+        // emitAsm("movq", {argAddr, regName});
+        // emitAsm("movq", {regName, resultAddr});
+        // freeReg(regInd);
     }
 }
 
