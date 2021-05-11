@@ -1023,8 +1023,8 @@ void asmOpAssignment(int quadNo) {
         emitAsm("movq", {"$" + hexString(quad->arg1), resultAddr});
     } else {
         string argAddr = getVariableAddr(quad->arg1, st);
-        if (checkType(stNode->declSp, TYPE_FLOAT, 0)) {
-            //TODO: Typecasting not added   
+        if (stNode && stNode->declSp && stNode->declSp->type.size() > 0 && checkType(stNode->declSp, TYPE_FLOAT, 0)) {
+            //TODO: Typecasting not added
             int regInd = getRegFloat(quadNo, quad->arg1);
             string regName = regVecFloat[regInd]->regName;
             emitAsm("movsd", {argAddr, regName});
