@@ -91,8 +91,8 @@ void emitAsmForFloatBinaryOperator(string asmOp, int quadNo) {
     emitAsm("movsd", {arg2Addr, reg2Name});
     emitAsm(asmOp, {reg2Name, reg1Name});
     emitAsm("movsd", {reg1Name, resultAddr});
-    freeReg(reg1Ind);
-    freeReg(reg2Ind);
+    freeRegFloat(reg1Ind);
+    freeRegFloat(reg2Ind);
     return;
 }
 
