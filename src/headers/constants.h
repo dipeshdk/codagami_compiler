@@ -74,6 +74,7 @@
 #define INVALID_STRING_LITERAL_ASSIGNMENT 141
 #define INVALID_POINTER_ADDR 142
 #define INVALID_GLOBAL_INITIALIZER 143
+#define CASE_SHOULD_BE_INT 144
 
 #define NOT_CONSTANT_EXCEPTION 601
 
@@ -106,12 +107,18 @@
 #define OP_LEQ 719
 #define OP_GREATER 720
 #define OP_LESS 721
+#define OP_EQF 7170
+#define OP_NEQF 7180
+#define OP_LEQF 7190
+#define OP_GREATERF 7200
+#define OP_LESSF 7210
 #define OP_ADDF 723
 #define OP_MULF 724
 #define OP_SUBF 725
 #define OP_DIVF 726
 #define OP_MOD 722
 #define OP_GEQ 727
+#define OP_GEQF 7270
 #define OP_ANDAND 728
 #define OP_OROR 729
 #define OP_IFNEQGOTO 730 // {OP_IFNEQGOTO, operand1, operand2, gotoAddr if not equal}
@@ -163,17 +170,16 @@
 #define REGISTER_R8 "%r8"
 #define REGISTER_R9 "%r9"
 
-
-#define REGISTER_XMM0  "%xmm0"
-#define REGISTER_XMM1  "%xmm1"
-#define REGISTER_XMM2  "%xmm2"
-#define REGISTER_XMM3  "%xmm3"
-#define REGISTER_XMM4  "%xmm4"
-#define REGISTER_XMM5  "%xmm5"
-#define REGISTER_XMM6  "%xmm6"
-#define REGISTER_XMM7  "%xmm7"
-#define REGISTER_XMM8  "%xmm8"
-#define REGISTER_XMM9  "%xmm9"
+#define REGISTER_XMM0 "%xmm0"
+#define REGISTER_XMM1 "%xmm1"
+#define REGISTER_XMM2 "%xmm2"
+#define REGISTER_XMM3 "%xmm3"
+#define REGISTER_XMM4 "%xmm4"
+#define REGISTER_XMM5 "%xmm5"
+#define REGISTER_XMM6 "%xmm6"
+#define REGISTER_XMM7 "%xmm7"
+#define REGISTER_XMM8 "%xmm8"
+#define REGISTER_XMM9 "%xmm9"
 #define REGISTER_XMM10 "%xmm10"
 #define REGISTER_XMM11 "%xmm11"
 #define REGISTER_XMM12 "%xmm12"

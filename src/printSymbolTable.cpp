@@ -349,6 +349,16 @@ string getOpName(int opCode) {
         return "GREATER";
     case OP_LESS:
         return "LESS";
+    case OP_EQF:
+        return "EQF";
+    case OP_NEQF:
+        return "NEQF";
+    case OP_LEQF:
+        return "LEQF";
+    case OP_GREATERF:
+        return "GREATERF";
+    case OP_LESSF:
+        return "LESSF";
     case OP_MOD:
         return "MOD";
     case OP_ADDF:
@@ -361,6 +371,8 @@ string getOpName(int opCode) {
         return "DIVF";
     case OP_GEQ:
         return "GEQ";
+    case OP_GEQF:
+        return "GEQF";
     case OP_ANDAND:
         return "ANDAND";
     case OP_OROR:
