@@ -132,6 +132,9 @@
 #define OP_ADDR 738
 #define OP_BITWISE_NOT 739
 #define OP_MOV 740
+#define OP_MOVF 741
+#define OP_DUMMYPUSH 742
+
 
 #define BLANK_STR "BLANK"
 #define EMPTY_STR "______"

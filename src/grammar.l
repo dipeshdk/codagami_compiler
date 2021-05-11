@@ -28,7 +28,7 @@ char* previ;
 "continue"		{ count();  return(CONTINUE); }
 "default"		{ count();  return(DEFAULT); }
 "do"			{ count();  return(DO); }
-"double"		{ count();  return(DOUBLE); }
+"double"		{ count();  return(FLOAT); } //TODO: change before submission
 "else"			{ count();  return(ELSE); }
 "enum"			{ count();  return(ENUM); }
 "extern"		{ count();  return(EXTERN); }
