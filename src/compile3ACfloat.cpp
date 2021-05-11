@@ -173,7 +173,8 @@ void asmOpLessFloat(int quadNo) {
     return;
 }
 
-void asmOpEqFloat(int quadNo) {
+void asmOpCompEqFloat(int quadNo, string cmov) {
+
     quadruple* quad = gCode[quadNo];
     symbolTable* st = codeSTVec[quadNo];
 
@@ -230,7 +231,7 @@ void asmOpEqFloat(int quadNo) {
         emitAsm("ucomisd", {argAddr, REGISTER_XMM0});
     }
 
-    emitAsm("cmovne", {regName2, REGISTER_RAX});
+    emitAsm(cmov, {regName2, REGISTER_RAX});
     emitAsm("movzbl", {"%al", REGISTER_RAX});
     emitAsm("movq", {REGISTER_RAX, resultAddr});
     freeReg(regInd);
@@ -238,8 +239,12 @@ void asmOpEqFloat(int quadNo) {
     return;
 }
 
+void asmOpEqFloat(int quad) {
+    asmOpCompEqFloat(quad, "cmovne");
+}
+
 void asmOpNeqFloat(int quad) {
-    asmOpCompFloat(quad, "setne");
+    asmOpCompEqFloat(quad, "cmove");
 }
 
 

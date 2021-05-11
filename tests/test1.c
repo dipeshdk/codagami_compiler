@@ -13,15 +13,31 @@ int main() {
     if(a) printf(str, 901);
     else printf(str, 900);
 
-    a = pq == f1;
+    a = pp != pq;
     if(a) printf(str, 901);
     else printf(str, 900);
 
-    a = f1 == pq;
+    a = pp == f1;
+    if(a) printf(str, 901);
+    else printf(str, 900);
+
+    a = pp != f1;
+    if(a) printf(str, 901);
+    else printf(str, 900);
+
+    a = f1 == pp;
+    if(a) printf(str, 901);
+    else printf(str, 900);
+
+    a = f1 != pp;
     if(a) printf(str, 901);
     else printf(str, 900);
 
     a = f1 == f2;
+    if(a) printf(str, 901);
+    else printf(str, 900);
+
+    a = f1 != f2;
     if(a) printf(str, 901);
     else printf(str, 900);
 
