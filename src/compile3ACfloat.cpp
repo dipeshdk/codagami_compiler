@@ -121,6 +121,15 @@ string getGlobalFloatAddr() {
     return globalTempName;
 }
 
+void sendStringLiteralToGlobal(string varValue, string globalTempName) {
+    globalData* gData = new globalData();
+    gData->varName = globalTempName;
+    gData->value = varValue;
+    gData->valueType = TYPE_STRING_LITERAL;
+    globalDataPair.push_back(gData);
+    return;
+}
+
 void sendFloatToGlobal(string varValue, string globalTempName) {
     globalData* gData = new globalData();
     gData->varName = globalTempName;
