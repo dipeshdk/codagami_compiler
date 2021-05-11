@@ -10,7 +10,7 @@ int main(){
         scanf(str, &arr[i]);
     }
 
-    for(i =0; i<4;++i ){
+    /* for(i =0; i<4;++i ){
         printf(str, arr[i]);
     }
 
@@ -20,7 +20,7 @@ int main(){
 
     for(i =0; i<4;++i ){
         printf(str, arr[i]);
-    }
+    } */
 
     return 0;
 }
