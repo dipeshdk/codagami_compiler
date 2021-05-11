@@ -12,6 +12,7 @@ void freeRegFloat(int regInd);
 int getRegToFreeFloat();
 int getRegFloat(int quadNo, string varValue);
 void initializeRegsFloat();
+void asmOPMoveFloatFuncParam(int quadNo);
 void asmOpGeqFloat(int quad);
 void asmOpLeqFloat(int quad);
 void asmOpGreaterFloat(int quad);
@@ -29,5 +30,4 @@ void emitAsmForFloatBinaryOperator(string asmOp, int quadNo);
 void asmOpReturnF(int quadNo);
 void asmOpUnaryMinusF(int quadNo);
 bool isFloat(string name, symbolTable* st);
-
 #endif

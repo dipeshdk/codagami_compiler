@@ -134,6 +134,9 @@
 #define OP_MOV 740
 #define OP_RETURNF 741
 #define OP_UNARY_MINUSF 742
+#define OP_MOVF 743
+#define OP_DUMMYPUSH 744
+
 
 #define BLANK_STR "BLANK"
 #define EMPTY_STR "______"
