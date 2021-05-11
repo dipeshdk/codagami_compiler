@@ -334,12 +334,14 @@ void asmOpReturn(int quadNo) {
             emitAsm("movq", {"$" + hexString(quad->result), eaxName});
         }
     }
-    emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
-    emitAsm("popq", {REGISTER_RBP});
-    emitAsm("retq", {});
+    emitAsm("jmp", {"9f"});
+    // emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
+    // emitAsm("popq", {REGISTER_RBP});
+    // emitAsm("retq", {});
 }
 
 void asmOpEndFunc(int quadNo) {
+    emitAsm("\n9:", {});
     emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
     emitAsm("popq", {REGISTER_RBP});
     emitAsm("retq", {});
