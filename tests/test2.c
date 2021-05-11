@@ -1,4 +1,4 @@
-void printf(char* str, double x);
+void printf(char* str, int x);
 char* str = "%d\n";
 
 struct foo{
@@ -12,6 +12,7 @@ void func(struct foo f) {
 
 int main(){
     struct foo f;
+    struct foo arr[2];
     f.x=5;
     func(f);
     return 0;

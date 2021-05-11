@@ -358,7 +358,6 @@ void amsOpLCall(int quadNo) {
 
     int isStruct = 0;
     if (libraryFunctions.find(quad->arg1) != libraryFunctions.end()) {
-        //NEW
         emitAsm("xor", {REGISTER_RAX, REGISTER_RAX}); //TODO: for float printf
     } else {
         string funcName = quad->arg1;
@@ -1018,7 +1017,7 @@ void asmOpAssignment(int quadNo) {
     } else {
         //NEW
         string argAddr = getVariableAddr(quad->arg1, st);
-        if (checkType(stNode->declSp, TYPE_FLOAT, 0)) {
+        if (stNode && stNode->declSp && stNode->declSp->type.size() > 0 && checkType(stNode->declSp, TYPE_FLOAT, 0)) {
             //TODO: Typecasting not added
             int regInd = getRegFloat(quadNo, quad->arg1);
             string regName = regVecFloat[regInd]->regName;
