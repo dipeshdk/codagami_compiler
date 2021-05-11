@@ -1,11 +1,29 @@
-/* void printf(char* str, int x);
+void printf(char* str, int x);
 char* str = "%d\n";
 
-float f = 5.6;
- */
 /* int g = 6; */
-float f = 8.906453;
+float q = 91.5;
+float p = 91.0;
 int main() {
-    float pp = 66.6;
+    float pp = 90.0;
+    float pq = 91.0;
+    int a;
+
+    
+
+    a = 6.0 < pp;
+    if(a) printf(str, 901);
+    else printf(str, 900);
+ 
+    a = pp < 6.0;
+    if(a) printf(str, 901);
+    else printf(str, 900);
+ 
+
+    /* a = pp < 6.0; */
+    /* a = 6.0 < pp;
+    /* a = 6.0 < 7.0; */
+    /* if(a) printf(str, 901);
+    else printf(str, 900); */
     return 0;
 }
