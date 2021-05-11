@@ -172,6 +172,9 @@ void error(string var, int error_code) {
     case INVALID_GLOBAL_INITIALIZER:
         str = "Invalid global initialization. RHS must be constant.";
         break;
+    case CASE_SHOULD_BE_INT:
+        str = "Case should be integer constant";
+        break;
     default:
         break;
     }

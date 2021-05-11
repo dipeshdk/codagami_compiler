@@ -349,6 +349,16 @@ string getOpName(int opCode) {
         return "GREATER";
     case OP_LESS:
         return "LESS";
+    case OP_EQF:
+        return "EQF";
+    case OP_NEQF:
+        return "NEQF";
+    case OP_LEQF:
+        return "LEQF";
+    case OP_GREATERF:
+        return "GREATERF";
+    case OP_LESSF:
+        return "LESSF";
     case OP_MOD:
         return "MOD";
     case OP_ADDF:
@@ -361,6 +371,8 @@ string getOpName(int opCode) {
         return "DIVF";
     case OP_GEQ:
         return "GEQ";
+    case OP_GEQF:
+        return "GEQF";
     case OP_ANDAND:
         return "ANDAND";
     case OP_OROR:
@@ -389,6 +401,8 @@ string getOpName(int opCode) {
         return "ADDR";
     case OP_MOV:
         return "MOV";
+    case OP_DUMMYPUSH:
+        return "DUMMYPUSH";
     }
     return "INVALID OPCODE";
 }
@@ -440,8 +454,14 @@ void printQuad(quadruple* quad, int line) {
     case OP_MOV:
         printf("    MOV %s -> %s\n", quad->result.c_str(), quad->arg1.c_str());
         break;
+    case OP_MOVF:
+        printf("    MOVF %s -> %s\n", quad->result.c_str(), quad->arg1.c_str());
+        break;
     case OP_SUBI:
         printf("    %s = %s %s %s\n", quad->result.c_str(), quad->arg2.c_str(), getOpName(quad->opCode).c_str(), quad->arg1.c_str());
+        break;
+    case OP_DUMMYPUSH:
+        printf("    DUMMY_PUSH\n");
         break;
     default:
         printf("    %s = %s %s %s\n", quad->result.c_str(), quad->arg1.c_str(), getOpName(quad->opCode).c_str(), quad->arg2.c_str());

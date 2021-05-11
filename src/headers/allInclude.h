@@ -12,4 +12,5 @@
 #include "symbolTable.h"
 #include "typecast.h"
 #include "utility.h"
+#include "compile3ACfloat.h"
 using namespace std;
