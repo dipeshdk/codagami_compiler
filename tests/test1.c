@@ -32,8 +32,10 @@ int main(){
     printf(format, y);
     y = f.y;
     arr[0] = f;
-    y = arr[0].y;
+    y += arr[0].y;
+    arr[0].y *= y;
     printf(format, y);
+    printf(format, arr[0].y);
     /* y = arr[0].x;
     printf(format, y); */
     
