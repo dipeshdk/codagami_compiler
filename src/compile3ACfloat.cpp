@@ -136,7 +136,6 @@ void initializeRegsFloat() {
     return;
 }
 
-<<<<<<< HEAD
 void asmOpGreaterFloat(int quadNo) {
     asmOpCompGreaterFloat(quadNo, "seta");
 }
@@ -242,7 +241,8 @@ void asmOpCompEqFloat(int quadNo, string cmov) {
     freeReg(regInd);
     freeRegFloat(regInd1);
     return;
-=======
+}
+
 bool isFloat(string name, symbolTable* st){
     if(isFloatConstant(name)){
         return true;
@@ -255,5 +255,4 @@ bool isFloat(string name, symbolTable* st){
         return true;
     }
     return false;
->>>>>>> 92ce24bcf375cc5894ff12d018783a7ad25926e3
 }
