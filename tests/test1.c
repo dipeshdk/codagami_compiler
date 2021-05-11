@@ -1,17 +1,10 @@
-void printf(const char* str, double d);
+void printf(char* str, double d);
 char *str = "%lf\n";
 
-struct foo{
-    int x, y;
-};
-
-void func(struct foo f) {
-    printf(str, 5.6);
-    return;
-}
-
 int main() {
-    struct foo f;
-    func(f);
+    double d = 5.5;
+    int a=d;
+    double dd = a;
+    printf(str,dd);
     return 0;
 }
