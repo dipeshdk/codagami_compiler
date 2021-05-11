@@ -389,7 +389,7 @@ void amsOpLCall(int quadNo) {
     int isStruct = 0;
     int isFloat = 0;   
     if (libraryFunctions.find(quad->arg1) != libraryFunctions.end()) {
-        // emitAsm("xor", {REGISTER_RAX, REGISTER_RAX}); //TODO: for float printf
+        emitAsm("xor", {REGISTER_RAX, REGISTER_RAX}); //TODO: for float printf
     } else {
         string funcName = quad->arg1;
         symbolTableNode* funcNode = lookUp(st, funcName);
