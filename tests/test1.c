@@ -2,61 +2,29 @@ void printf(char* str, int x);
 char* str = "%d\n";
 
 /* int g = 6; */
-float f1 = 8.906453;
-float f2 = 9088.77;
+float f1 = 90.0;
+float f2 = 91.0;
 int main() {
-    float pp = 66.6;
-    float pq = 90.0;
+    float pp = 90.0;
+    float pq = 91.0;
     int a;
 
-    a =  pp < pq;
+    a = pp == pq;
     if(a) printf(str, 901);
     else printf(str, 900);
 
-    a =  pp < f1;
+    a = pq == f1;
     if(a) printf(str, 901);
     else printf(str, 900);
 
-    a =  f1 < pq;
+    a = f1 == pq;
     if(a) printf(str, 901);
     else printf(str, 900);
 
-    a = f1 < f2;
+    a = f1 == f2;
     if(a) printf(str, 901);
     else printf(str, 900);
 
-    a =  pp <= pq;
-    if(a) printf(str, 901);
-    else printf(str, 900);
-
-    a =  pp <= f1;
-    if(a) printf(str, 901);
-    else printf(str, 900);
-
-    a =  f1 <= pq;
-    if(a) printf(str, 901);
-    else printf(str, 900);
-
-    a = f1 <= f2;
-    if(a) printf(str, 901);
-    else printf(str, 900);
-
-    a =  pp > pq;
-    if(a) printf(str, 901);
-    else printf(str, 900);
-
-    a =  pp > f1;
-    if(a) printf(str, 901);
-    else printf(str, 900);
-
-    a =  f1 > pq;
-    if(a) printf(str, 901);
-    else printf(str, 900);
-
-    a = f1 > f2;
-    if(a) printf(str, 901);
-    else printf(str, 900);
- 
     /* a = 6.0 < pp;
     if(a) printf(str, 901);
     else printf(str, 900);
