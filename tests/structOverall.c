@@ -2,7 +2,7 @@ void printf(char *c, int a);
 int* malloc(int x);
 char *str = "%d\n";
 
-/* struct foo{
+ struct foo{
     int x,y,z;
 };
 
@@ -10,7 +10,7 @@ struct foo1{
     int a,b;
 };
 
-/* void func(struct foo sarr[2], int c){
+void func(struct foo sarr[2], int c){
     struct foo1 f1;
     f1.a = 10;
     f1.b = 11;
@@ -25,9 +25,9 @@ struct foo1{
     printf(str, f1.a);
     printf(str, f1.b);
 }
- */
+
 int main(){
-    /* struct foo f1,*f2;
+    struct foo f1,*f2;
     struct foo arr[2];
     int x,y;
     f2 = malloc(24);
@@ -49,8 +49,8 @@ int main(){
 
     arr[0].x = 70;
 
- */
-    /* arr[0].x = 70;
+
+    arr[0].x = 70;
 
     arr[0].y = 71;
     arr[0].z = 72;
@@ -68,7 +68,7 @@ int main(){
 
     func(arr, x + (*(f2)).z);
 
-    func(arr, x + (*(f2)).z); */
+    func(arr, x + (*(f2)).z);
 
 
     return 0;

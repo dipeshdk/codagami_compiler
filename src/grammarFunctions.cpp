@@ -220,10 +220,6 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         error(postfix_expression->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
     }
 
-    /* for(int i = 0; i < maxSize; i++) {
-        cout << "arg[" << i << "] = " << arguments[i]->addr << endl;
-    } */
-
     for (int i = maxSize - 1; i >= 6; i--) {
         //push param
         if (!nodeIsStruct(arguments[i])) {
@@ -290,7 +286,6 @@ void emitPushStruct(node* astNode) {
     structTableNode* structNode = nullptr;
     structNode = structLookUp(gSymTable, stNode->declSp->lexeme);
     if (!structNode) {
-        cout << "varName = " << varName << " scope = " << gSymTable->scope;
         error(stNode->declSp->lexeme, STRUCT_NOT_DECLARED);
     }
 
