@@ -175,19 +175,23 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpMod(quadNo);
         break;
         // binary operator standard function
-    /* case OP_ADDF: // rythm ***
+    case OP_ADDF: // rythm ***
+        asmOpAddF(quadNo);
         break;
     case OP_MULF: // rythm ***
+        asmOpMulF(quadNo);
         break;
     case OP_SUBF: // rythm ***
+        asmOpSubF(quadNo);
         break;
     case OP_DIVF: // dipesh ***
+        asmOpDivF(quadNo);
         // =======================================================================================================================
-        divsd dest, src         ; dest /= src (double)
-         change it
-        The dest and src operands must be xmm registers; src2 can be register or memory. Sizes of all operands must be the same.
+        // divsd dest, src         ; dest /= src (double)
+        //  change it
+        // The dest and src operands must be xmm registers; src2 can be register or memory. Sizes of all operands must be the same.
         // =======================================================================================================================
-        break; */
+        break;
     case OP_GEQ: // sakshi ***gArgRegsFloat
         asmOpGeq(quadNo);
         break;

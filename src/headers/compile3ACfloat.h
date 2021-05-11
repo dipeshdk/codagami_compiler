@@ -12,6 +12,11 @@ void freeRegFloat(int regInd);
 int getRegToFreeFloat();
 int getRegFloat(int quadNo, string varValue);
 void initializeRegsFloat();
+void asmOpAddF(int quadNo);
+void asmOpSubF(int quadNo);
+void asmOpMulF(int quadNo);
+void asmOpDivF(int quadNo);
+void emitAsmForFloatBinaryOperator(string asmOp, int quadNo);
 bool isFloat(string name, symbolTable* st);
 
 #endif
