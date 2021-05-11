@@ -742,7 +742,9 @@ relational_expression
 			if(retval < 0)
 				error(errStr,-retval);			
 			node* temp = makeNode(strdup("<"), strdup("<"), 0, $1, $3, (node*)NULL, (node*)NULL); 
-			emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
+            if($1->declSp->type[0]  == TYPE_FLOAT || $3->declSp->type[0]  == TYPE_FLOAT ) {
+                emitRelop($1, $3, temp, OP_LESSF, errCode, errStr);
+            } else emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
 			$$ = temp;
@@ -752,7 +754,9 @@ relational_expression
 			if(retval < 0)
 				error(errStr,-retval);
 			node* temp = makeNode(strdup(">"), strdup(">"), 0, $1, $3, (node*)NULL, (node*)NULL); 
-			emitRelop($1, $3, temp, OP_GREATER, errCode, errStr);
+			if($1->declSp->type[0]  == TYPE_FLOAT || $3->declSp->type[0]  == TYPE_FLOAT ) {
+                emitRelop($1, $3, temp, OP_GREATERF, errCode, errStr);
+            } else emitRelop($1, $3, temp, OP_GREATER, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
 			$$ = temp;
@@ -762,7 +766,9 @@ relational_expression
 		if(retval < 0)
 			error(errStr,-retval);
 		node* temp = makeNode(strdup("LE_OP"), strdup("<="), 0, $1, $3, (node*)NULL, (node*)NULL);
-		emitRelop($1, $3, temp, OP_LEQ, errCode, errStr);
+		if($1->declSp->type[0]  == TYPE_FLOAT || $3->declSp->type[0]  == TYPE_FLOAT ) {
+            emitRelop($1, $3, temp, OP_LEQF, errCode, errStr);
+        } else emitRelop($1, $3, temp, OP_LEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		$$ = temp;
@@ -772,7 +778,9 @@ relational_expression
 		if(retval < 0)
 			error(errStr,-retval);
 		node* temp = makeNode(strdup("GE_OP"), strdup(">="), 0, $1, $3, (node*)NULL, (node*)NULL);
-		emitRelop($1, $3, temp, OP_GEQ, errCode, errStr);
+		if($1->declSp->type[0]  == TYPE_FLOAT || $3->declSp->type[0]  == TYPE_FLOAT ) {
+            emitRelop($1, $3, temp, OP_GEQF, errCode, errStr);
+        } else emitRelop($1, $3, temp, OP_GEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		$$ = temp;
@@ -799,7 +807,9 @@ equality_expression
 		node* temp = makeNodeForExpressionByRank(equality_expression, relational_expression, "EQ_OP", "==", rank, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
-		emitRelop(equality_expression, relational_expression, temp, OP_EQ, errCode, errStr);
+		if($1->declSp->type[0]  == TYPE_FLOAT || $3->declSp->type[0]  == TYPE_FLOAT ) {
+            emitRelop(equality_expression, relational_expression, temp, OP_EQF, errCode, errStr);
+        } else emitRelop(equality_expression, relational_expression, temp, OP_EQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		$$ = temp;
@@ -822,7 +832,9 @@ equality_expression
 		node* temp = makeNodeForExpressionByRank(equality_expression, relational_expression, "NE_OP", "!=", rank, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
-		emitRelop(equality_expression, relational_expression, temp, OP_NEQ, errCode, errStr);
+		if($1->declSp->type[0]  == TYPE_FLOAT || $3->declSp->type[0]  == TYPE_FLOAT ) {
+            emitRelop(equality_expression, relational_expression, temp, OP_NEQF, errCode, errStr);
+        } else emitRelop(equality_expression, relational_expression, temp, OP_NEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		$$ = temp;

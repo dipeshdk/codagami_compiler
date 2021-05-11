@@ -174,6 +174,21 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_LESS: // sakshi ***
         asmOpLess(quadNo);
         break;
+    case OP_EQF: // sakshi ***
+        asmOpEqFloat(quadNo);
+        break;
+    case OP_NEQF: // sakshi ***
+        asmOpNeqFloat(quadNo);
+        break;
+    case OP_LEQF: // sakshi ***
+        asmOpLeqFloat(quadNo);
+        break;
+    case OP_GREATERF: // sakshi ***
+        asmOpGreaterFloat(quadNo);
+        break;
+    case OP_LESSF: // sakshi ***
+        asmOpLessFloat(quadNo);
+        break;
     case OP_MOD:
         asmOpMod(quadNo);
         break;
@@ -188,7 +203,7 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpSubF(quadNo);
         break;
     case OP_DIVF: // dipesh ***
-        // asmOpDivF(quadNo);
+        asmOpDivF(quadNo);
         // =======================================================================================================================
         // divsd dest, src         ; dest /= src (double)
         //  change it
@@ -197,6 +212,9 @@ void emitAssemblyForQuad(int quadNo) {
         break;
     case OP_GEQ: // sakshi ***gArgRegsFloat
         asmOpGeq(quadNo);
+        break;
+    case OP_GEQF: // sakshi ***gArgRegsFloat
+        asmOpGeqFloat(quadNo);
         break;
     case OP_ANDAND: // chinmaya ***
         asmOpAndAnd(quadNo);

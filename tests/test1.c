@@ -1,8 +1,6 @@
-/* void printf(char* str, int x);
+void printf(char* str, int x);
 char* str = "%d\n";
 
-float f = 5.6;
- */
 /* int g = 6; */
 char* format = "%f\n";
 float foo(){
