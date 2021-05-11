@@ -342,12 +342,14 @@ void asmOpReturn(int quadNo) {
             emitAsm("movq", {"$" + hexString(quad->result), eaxName});
         }
     }
-    emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
-    emitAsm("popq", {REGISTER_RBP});
-    emitAsm("retq", {});
+    emitAsm("jmp", {"9f"});
+    // emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
+    // emitAsm("popq", {REGISTER_RBP});
+    // emitAsm("retq", {});
 }
 
 void asmOpEndFunc(int quadNo) {
+    emitAsm("\n9:", {});
     emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
     emitAsm("popq", {REGISTER_RBP});
     emitAsm("retq", {});
@@ -464,7 +466,7 @@ void asmOpBeginFunc(int quadNo) {
     vector<struct param*> paramList = funcNode->paramList;
     int numParams = paramList.size();
     for (int i = 0; i < min(6, numParams); i++) {
-        if ((paramList[i]->declSp->type.size() > 0 && paramList[i]->declSp->type[0] == TYPE_STRUCT))
+        if ((paramList[i]->declSp->type.size() > 0 && paramList[i]->declSp->type[0] == TYPE_STRUCT && paramList[i]->declSp->ptrLevel == 0))
             continue;
         string argAddr = getVariableAddr(paramList[i]->paramName, st);
         emitAsm("movq", {gArgRegs[i], argAddr});
@@ -987,7 +989,6 @@ void freeRegAndMoveToStack(int regInd) {
     //TODO: free a reg by moving its data to a location and then
     // if (isConstant(regVec[regInd]->varValue) && regVec[regInd]->varValue == CONSTANT)
     //     return;
-    // cout << 907 << regVec[regInd]->varValue << endl;
     // string resultAddr = getVariableAddr(regVec[regInd]->varValue, codeSTVec[regVec[regInd]->quadNo]);
     // TODO: this line below has to be there after checking all registers are free
     // FLush register if contains useful variable
@@ -1014,7 +1015,7 @@ void asmOpAssignment(int quadNo) {
     symbolTableNode* stNode = lookUp(st, noPtrName); //for struct and struct array ptrs
 
     if (stNode && (stNode->infoType == INFO_TYPE_STRUCT || (isPtr && stNode->declSp->type[0] == TYPE_STRUCT))) {
-        copyStruct(quad->arg1, quad->result, quadNo);
+        copyStruct(quad->arg1, quad->result, quadNo); //TODO: Check all valid cases
         return;
     }
     string resultAddr = getVariableAddr(quad->result, st);

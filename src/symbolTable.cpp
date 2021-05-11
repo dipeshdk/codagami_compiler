@@ -97,7 +97,9 @@ int addFunctionSymbol(node* declaration_specifiers, node* declarator) {
         if (declarator->paramList.size() != funcNode->paramList.size())
             error("different number of parameters in function " + name, MISMATCH_DEFINITION_DECLARATION);
         for (int i = 0; i < funcNode->paramList.size(); i++) {
-            if (funcNode->paramList[i]->declSp->type != declarator->paramList[i]->declSp->type || funcNode->paramList[i]->declSp->ptrLevel != declarator->paramList[i]->declSp->ptrLevel || (funcNode->paramList[i]->declSp->type[0] == TYPE_STRUCT && funcNode->paramList[i]->declSp->lexeme != declarator->paramList[i]->declSp->lexeme))
+            if (funcNode->paramList[i]->declSp->type != declarator->paramList[i]->declSp->type 
+                || funcNode->paramList[i]->declSp->ptrLevel != declarator->paramList[i]->declSp->ptrLevel 
+                || (funcNode->paramList[i]->declSp->type[0] == TYPE_STRUCT && funcNode->paramList[i]->declSp->lexeme != declarator->paramList[i]->declSp->lexeme))
                 error("different parameter types in function " + name, MISMATCH_DEFINITION_DECLARATION);
             funcNode->paramList[i]->paramName = declarator->paramList[i]->paramName;
         }
