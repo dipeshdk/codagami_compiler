@@ -493,14 +493,18 @@ void asmOpBeginFunc(int quadNo) {
     //move first 6 arguments from register to stack
     vector<struct param*> paramList = funcNode->paramList;
     int numParams = paramList.size();
+    int floatInd=0, intInd=0;
     for (int i = 0; i < min(6, numParams); i++) {
         if ((paramList[i]->declSp->type.size() > 0 && paramList[i]->declSp->type[0] == TYPE_STRUCT && paramList[i]->declSp->ptrLevel == 0))
             continue;
         string argAddr = getVariableAddr(paramList[i]->paramName, st);
-        if ((paramList[i]->declSp->type.size() > 0 && paramList[i]->declSp->type[0] == TYPE_FLOAT && paramList[i]->declSp->ptrLevel == 0))
-            emitAsm("movsd", {gArgRegsFloat[i], argAddr});
-        else
-            emitAsm("movq", {gArgRegs[i], argAddr});
+        if ((paramList[i]->declSp->type.size() > 0 && paramList[i]->declSp->type[0] == TYPE_FLOAT && paramList[i]->declSp->ptrLevel == 0)) {
+            emitAsm("movsd", {gArgRegsFloat[floatInd], argAddr});
+            floatInd++;
+        } else{
+            emitAsm("movq", {gArgRegs[intInd], argAddr});
+            intInd++;
+        }
     }
     return;
 }
