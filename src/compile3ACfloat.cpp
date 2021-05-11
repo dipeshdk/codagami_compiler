@@ -188,3 +188,17 @@ void initializeRegsFloat() {
     }
     return;
 }
+
+bool isFloat(string name, symbolTable* st){
+    if(isFloatConstant(name)){
+        return true;
+    }
+    if(isPointer(name)){
+        name = stripPointer(name);
+    }
+    symbolTableNode* sym_node = lookUp(st, name);
+    if ((sym_node) && ((sym_node->declSp && sym_node->declSp->type.size() > 0 && sym_node->declSp->type[0] == TYPE_FLOAT))){
+        return true;
+    }
+    return false;
+}
