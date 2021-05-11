@@ -17,4 +17,6 @@ void asmOpSubF(int quadNo);
 void asmOpMulF(int quadNo);
 void asmOpDivF(int quadNo);
 void emitAsmForFloatBinaryOperator(string asmOp, int quadNo);
+bool isFloat(string name, symbolTable* st);
+
 #endif

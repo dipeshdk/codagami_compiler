@@ -1907,6 +1907,9 @@ labeled_statement
 	| CASE constant_expression {
 		// ifgoto
 		vector<int> next = makelist(nextQuad());
+		if($2->declSp && $2->declSp->type.size() > 0 && (($2->declSp->type[0] != TYPE_INT) && ($2->declSp->type[0] != TYPE_CHAR))){
+			error($2->lexeme, CASE_SHOULD_BE_INT);
+		}
 		emit(OP_IFNEQGOTO, case_consts[case_consts.size()-1]->addr, $2->addr, BLANK_STR);
 		// This should go to next case
 		$2->nextlist = mergelist($2->nextlist, next);
