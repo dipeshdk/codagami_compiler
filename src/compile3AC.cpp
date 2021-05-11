@@ -1213,24 +1213,7 @@ void asmOpAndAnd(int quadNo) {
 }
 
 void asmOpOrOr(int quadNo) {
-//         c = a || b;
-//   30:	66 0f ef c0          	pxor   %xmm0,%xmm0
-//   34:	0f 2e 45 ec          	ucomiss -0x14(%rbp),%xmm0
-//   38:	7a 1e                	jp     58 <main+0x58>
-//   3a:	66 0f ef c0          	pxor   %xmm0,%xmm0
-//   3e:	0f 2e 45 ec          	ucomiss -0x14(%rbp),%xmm0
-//   42:	75 14                	jne    58 <main+0x58>
-//   44:	66 0f ef c0          	pxor   %xmm0,%xmm0
-//   48:	0f 2e 45 f0          	ucomiss -0x10(%rbp),%xmm0
-//   4c:	7a 0a                	jp     58 <main+0x58>
-//   4e:	66 0f ef c0          	pxor   %xmm0,%xmm0
-//   52:	0f 2e 45 f0          	ucomiss -0x10(%rbp),%xmm0
-//   56:	74 07                	je     5f <main+0x5f>
-//   58:	b8 01 00 00 00       	mov    $0x1,%eax
-//   5d:	eb 05                	jmp    64 <main+0x64>
-//   5f:	b8 00 00 00 00       	mov    $0x0,%eax
-//   64:	f3 0f 2a c0          	cvtsi2ss %eax,%xmm0
-//   68:	f3 0f 11 45 fc       	movss  %xmm0,-0x4(%rbp)
+
     quadruple* quad = gCode[quadNo];
     symbolTable* st = codeSTVec[quadNo];
 
@@ -1336,6 +1319,8 @@ void asmOpIfGoto(int quadNo) {
         string argAddr = getVariableAddr(quad->arg1, st);
         emitAsm("ucomisd", {argAddr, regName});
         asmJump(quadNo, "jp");
+        emitAsm("pxor", {regName, regName});
+        emitAsm("ucomisd", {argAddr, regName});
 
     } else {
         if (isConstant(quad->arg1)) {
@@ -1351,8 +1336,8 @@ void asmOpIfGoto(int quadNo) {
             emitAsm("cmp", {"$0", regName});
             freeReg(regInd);
         }
-        asmJump(quadNo, "jne");
     }
+    asmJump(quadNo, "jne");
 }
 
 void asmOpIfNeqGoto(int quadNo) {
