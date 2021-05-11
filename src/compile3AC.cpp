@@ -123,14 +123,17 @@ void emitAssemblyForQuad(int quadNo) {
                         // =======================================================================================================================
         asmOpAssignment(quadNo);
         break;
-    case OP_UNARY_MINUS: // dipesh ***
-                         // =======================================================================================================================
-                         // https://groups.google.com/g/comp.lang.asm.x86/c/bqspF3wPQMY?pli=1
-                         // Idea:1 & 2 given in above website
-                         // Idea:3 multiply directly by -1
-                         // final idea: subtract from 0
-                         // =======================================================================================================================
+    case OP_UNARY_MINUS:
         asmOpUnaryMinus(quadNo);
+        break;
+    case OP_UNARY_MINUSF: // dipesh ***
+    // =======================================================================================================================
+    // https://groups.google.com/g/comp.lang.asm.x86/c/bqspF3wPQMY?pli=1
+    // Idea:1 & 2 given in above website
+    // Idea:3 multiply directly by -1
+    // final idea: subtract from 0
+    // =======================================================================================================================
+        asmOpUnaryMinusF(quadNo);
         break;
     case OP_DIVI:
         asmOpDivI(quadNo);
@@ -231,9 +234,12 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_ENDFUNC:
         asmOpEndFunc(quadNo);
         break;
-    case OP_RETURN: // dipesh ***
+    case OP_RETURN:
         asmOpReturn(quadNo);
-        /*  // =======================================================================================================================
+        break;
+    case OP_RETURNF: // dipesh ***
+        asmOpReturnF(quadNo);
+    /*  // =======================================================================================================================
         check if the return value of function is float or int
         if float then return the value in %xmm0
         else return the value in %rax

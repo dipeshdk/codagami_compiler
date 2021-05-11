@@ -370,7 +370,8 @@ unary_expression
 				unary_operator->declSp->ptrLevel++;
 			}
 			else if(name == "-") {
-				opCode = OP_UNARY_MINUS;
+				if(cast_expression->declSp && cast_expression->declSp->type[0]== TYPE_FLOAT) opCode = OP_UNARY_MINUSF;
+				else opCode = OP_UNARY_MINUS;
 			}
 			else if(name == "~") {
 				opCode = OP_BITWISE_NOT;
@@ -2163,8 +2164,11 @@ jump_statement
 		n1->addr = temp->addr;
 		err = giveTypeCastRankUnary(n1, temp);
 		if(err) error("error in typecasting", DEFAULT_ERROR);
+		if(temp->declSp && temp->declSp->type[0] == TYPE_FLOAT)
+			emit(OP_RETURNF, EMPTY_STR, EMPTY_STR, temp->addr);	
+		else emit(OP_RETURN, EMPTY_STR, EMPTY_STR, temp->addr);
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 0, temp, (node*)NULL, (node*)NULL, (node*)NULL);
-		emit(OP_RETURN, EMPTY_STR, EMPTY_STR, temp->addr);
+		
     }
 	;
 

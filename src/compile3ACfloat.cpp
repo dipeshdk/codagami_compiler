@@ -114,6 +114,7 @@ void asmOpMulF(int quadNo) {
 void asmOpDivF(int quadNo) {
     emitAsmForFloatBinaryOperator("divsd", quadNo);
 }
+
 string getGlobalFloatAddr() {
     string globalTempName = globalTempNamePrefix + to_string(globalFloatTempCounter) + globalTempNameSuffix;
     globalFloatTempCounter++;
@@ -127,6 +128,62 @@ void sendFloatToGlobal(string varValue, string globalTempName) {
     gData->valueType = TYPE_FLOAT;
     globalDataPair.push_back(gData);
     return;
+}
+
+void asmOpReturnF(int quadNo) {
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
+
+    int xmm0Ind = XMM0_REGISTER_INDEX;
+    string xmm0reg = regVecFloat[xmm0Ind]->regName;
+    if (quad->result != EMPTY_STR) {
+        useReg(xmm0Ind, quadNo, NO_VAR_VALUE_ASSIGNED);
+        if (!isConstant(quad->result)) {
+            regVecFloat[xmm0Ind]->varValue = quad->result;
+            string funcName = funcNameStack.top();
+            symbolTableNode* funcNode = lookUp(st, funcName);
+            if (!funcNode) {
+                error(funcName, SYMBOL_NOT_FOUND);
+            } else if (funcNode->declSp && funcNode->declSp->type.size() > 0 && (funcNode->declSp->type[0] == TYPE_STRUCT) && (funcNode->declSp->ptrLevel == 0)) {
+                copyReturningStruct(quad->result, quadNo);
+            } else {
+                string argAddr = getVariableAddr(quad->result, st);
+                emitAsm("movsd", {argAddr, xmm0reg});
+            }
+        } else {
+            regVecFloat[xmm0Ind]->varValue = CONSTANT;
+            emitAsm("movsd", {"$" + hexString(quad->result), xmm0reg});
+        }
+    }
+    emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
+    emitAsm("popq", {REGISTER_RBP});
+    emitAsm("retq", {});
+}
+
+
+void asmOpUnaryMinusF(int quadNo) {
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
+
+    if (isConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    
+    int reg1Ind = -1;
+    int reg2Ind = -1;
+    reg1Ind = getRegFloat(quadNo, quad->arg1);
+    reg2Ind = getRegFloat(quadNo, CONSTANT);
+    if (reg1Ind < 0 || reg2Ind < 0) {
+        errorAsm("For Float: ", REGISTER_ASSIGNMENT_ERROR);
+    }
+    string resultAddr = getVariableAddr(quad->result, st);
+    string reg1Name = regNamesFloat[reg1Ind], reg2Name = regNamesFloat[reg2Ind];
+    string arg1Addr =  getVariableAddr(quad->arg1, st);
+    emitAsm("movsd", {arg1Addr, reg1Name});
+    emitAsm("xorpd", {reg2Name, reg2Name});
+    emitAsm("subsd", {reg1Name, reg2Name});
+    emitAsm("movsd  ", {reg2Name, resultAddr});
+    freeRegFloat(reg1Ind);
+    freeRegFloat(reg2Ind);
 }
 
 void initializeRegsFloat() {
