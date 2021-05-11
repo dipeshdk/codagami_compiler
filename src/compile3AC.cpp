@@ -274,7 +274,6 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_MOVF:
         asmOPMoveFloatFuncParam(quadNo);
         break;
-    //NEW
     case OP_DUMMYPUSH:
         asmOPDummyPush(quadNo);
         break;
@@ -282,7 +281,7 @@ void emitAssemblyForQuad(int quadNo) {
         break;
     }
 }
-//NEW
+
 void asmOPDummyPush(int quadNo) {
     emitAsm("pushq", {REGISTER_RBP});
 }
@@ -372,7 +371,7 @@ void asmOpReturn(int quadNo) {
 
 void asmOpEndFunc(int quadNo) {
     emitAsm("\n9:", {});
-    emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
+    emitAsm("addq", {"$" + alignedFunctionSize(to_string(funcSizeStack.top())), REGISTER_RSP});
     emitAsm("popq", {REGISTER_RBP});
     emitAsm("retq", {});
     funcNameStack.pop();
@@ -505,7 +504,7 @@ void asmOpBeginFunc(int quadNo) {
     emitFuncStart();
 
     //sub stack pointer
-    emitAsm("subq", {"$" + hexString(quad->result), REGISTER_RSP});
+    emitAsm("subq", {"$" + alignedFunctionSize(quad->result), REGISTER_RSP});
 
     //move first 6 arguments from register to stack
     vector<struct param*> paramList = funcNode->paramList;
@@ -524,6 +523,14 @@ void asmOpBeginFunc(int quadNo) {
         }
     }
     return;
+}
+
+string alignedFunctionSize(string str){
+    int x = getNumberFromConstAddr(str);
+    if(!(x%16)){
+        return to_string(x);
+    }
+    return to_string((x/16 + 1)*16);
 }
 
 void asmOpPushparam(int quadNo) {

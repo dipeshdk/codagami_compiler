@@ -1,12 +1,17 @@
-void printf(char* str, double x);
-void scanf(char* str, double* x);
-double* malloc(int x);
-char* format = "%lf\n";
+void printf(const char* str, double d);
+char *str = "%lf\n";
+
+struct foo{
+    int x, y;
+};
+
+void func(struct foo f) {
+    printf(str, 5.6);
+    return;
+}
+
 int main() {
-    double x = 90.89;
-    double *g = malloc(8);
-    printf(format, x);
-    scanf(format, &x);
-    printf(format, x);
+    struct foo f;
+    func(f);
     return 0;
 }
