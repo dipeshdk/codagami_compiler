@@ -85,9 +85,9 @@ void printASMData() {
         cout << "   " << g->varName << ": ";
         if (g->valueType == TYPE_STRING_LITERAL) {
             cout << ".asciz ";
-        } else if (g->valueType == TYPE_FLOAT){
+        } else if (g->valueType == TYPE_FLOAT) {
             cout << ".double ";
-        }else{
+        } else {
             cout << ".long ";
         }
         cout << g->value << "\n";
@@ -797,7 +797,8 @@ int getOffset(string varName, symbolTable* st) {
 }
 
 bool isGlobal(string varName, symbolTable* st) {
-    if(isFloatConstant(varName)) return true;
+    if (isFloatConstant(varName))
+        return true;
     if (isPointer(varName))
         varName = stripPointer(varName);
     string identifier = varName, param, name = varName, delim_dot = ".";
@@ -1177,7 +1178,7 @@ void asmOpAndAnd(int quadNo) {
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
     string resultAddr = getVariableAddr(quad->result, st);
 
-    if(isFloat(quad->arg1, st)){
+    if (isFloat(quad->arg1, st)) {
         int regInd = getRegFloat(quadNo, CONSTANT);
         string regName = regVecFloat[regInd]->regName;
         emitAsm("pxor", {regName, regName});
@@ -1187,8 +1188,7 @@ void asmOpAndAnd(int quadNo) {
         emitAsm("pxor", {regName, regName});
         emitAsm("ucomisd", {argAddr, regName});
         freeRegFloat(regInd);
-    }
-    else{
+    } else {
         if (isConstant(quad->arg1)) {
             emitAsm("cmp", {"$0", "$" + hexString(quad->arg1)});
         } else {
@@ -1199,7 +1199,7 @@ void asmOpAndAnd(int quadNo) {
     emitAsm("je", {"1f"}); // Jump to mov 0x0
 
     emitAsm("\n3:", {});
-    if(isFloat(quad->arg2, st)){
+    if (isFloat(quad->arg2, st)) {
         int regInd = getRegFloat(quadNo, CONSTANT);
         string regName = regVecFloat[regInd]->regName;
         emitAsm("pxor", {regName, regName});
@@ -1209,8 +1209,7 @@ void asmOpAndAnd(int quadNo) {
         emitAsm("pxor", {regName, regName});
         emitAsm("ucomisd", {argAddr, regName});
         freeRegFloat(regInd);
-    }
-    else if (isConstant(quad->arg2)) {
+    } else if (isConstant(quad->arg2)) {
         emitAsm("cmp", {"$0", "$" + hexString(quad->arg2)});
     } else {
         string argAddr = getVariableAddr(quad->arg2, st);
@@ -1225,14 +1224,14 @@ void asmOpAndAnd(int quadNo) {
     emitAsm("movq", {"$0", REGISTER_RAX});
     emitAsm("\n2:", {});
 
-    if(isFloat(quad->result, st)){
+    if (isFloat(quad->result, st)) {
         int regInd = getRegFloat(quadNo, CONSTANT);
         string regName = regVecFloat[regInd]->regName;
         emitAsm("cvtsi2sd", {REGISTER_RAX, regName});
         emitAsm("movsd", {regName, resultAddr});
         freeRegFloat(regInd);
-    }
-    else emitAsm("movq", {REGISTER_RAX, resultAddr});
+    } else
+        emitAsm("movq", {REGISTER_RAX, resultAddr});
     return;
 }
 
@@ -1245,7 +1244,7 @@ void asmOpOrOr(int quadNo) {
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
     string resultAddr = getVariableAddr(quad->result, st);
 
-    if(isFloat(quad->arg1, st)){
+    if (isFloat(quad->arg1, st)) {
         int regInd = getRegFloat(quadNo, CONSTANT);
         string regName = regVecFloat[regInd]->regName;
         emitAsm("pxor", {regName, regName});
@@ -1255,8 +1254,7 @@ void asmOpOrOr(int quadNo) {
         emitAsm("pxor", {regName, regName});
         emitAsm("ucomisd", {argAddr, regName});
         freeRegFloat(regInd);
-    }
-    else if (isConstant(quad->arg1)) {
+    } else if (isConstant(quad->arg1)) {
         emitAsm("cmp", {"$0", "$" + hexString(quad->arg1)});
     } else {
         string argAddr = getVariableAddr(quad->arg1, st);
@@ -1264,7 +1262,7 @@ void asmOpOrOr(int quadNo) {
     }
     emitAsm("jne", {"1f"}); // Jump to mov 0x0
 
-    if(isFloat(quad->arg2, st)){
+    if (isFloat(quad->arg2, st)) {
         int regInd = getRegFloat(quadNo, CONSTANT);
         string regName = regVecFloat[regInd]->regName;
         emitAsm("pxor", {regName, regName});
@@ -1274,15 +1272,13 @@ void asmOpOrOr(int quadNo) {
         emitAsm("pxor", {regName, regName});
         emitAsm("ucomisd", {argAddr, regName});
         freeRegFloat(regInd);
-    }
-    else if (isConstant(quad->arg2)) {
+    } else if (isConstant(quad->arg2)) {
         emitAsm("cmp", {"$0", "$" + hexString(quad->arg2)});
     } else {
         string argAddr = getVariableAddr(quad->arg2, st);
         emitAsm("cmp", {"$0", argAddr});
     }
     emitAsm("je", {"2f"}); // Jump to mov 0x0
-
 
     emitAsm("\n1:", {});
     emitAsm("movq", {"$1", REGISTER_RAX});
@@ -1291,14 +1287,14 @@ void asmOpOrOr(int quadNo) {
     emitAsm("movq", {"$0", REGISTER_RAX});
     emitAsm("\n3:", {});
 
-    if(isFloat(quad->result, st)){
+    if (isFloat(quad->result, st)) {
         int regInd = getRegFloat(quadNo, CONSTANT);
         string regName = regVecFloat[regInd]->regName;
         emitAsm("cvtsi2sd", {REGISTER_RAX, regName});
         emitAsm("movsd", {regName, resultAddr});
         freeRegFloat(regInd);
-    }
-    else emitAsm("movq", {REGISTER_RAX, resultAddr});
+    } else
+        emitAsm("movq", {REGISTER_RAX, resultAddr});
     return;
 }
 
@@ -1317,18 +1313,6 @@ void asmOpGoto(int quadNo) {
 }
 
 void asmOpIfGoto(int quadNo) {
-    //         if(a){
-    //   29:	66 0f ef c0          	pxor   %xmm0,%xmm0
-    //   2d:	0f 2e 45 f0          	ucomiss -0x10(%rbp),%xmm0
-    //   31:	7a 0a                	jp     3d <main+0x3d>
-    //   33:	66 0f ef c0          	pxor   %xmm0,%xmm0
-    //   37:	0f 2e 45 f0          	ucomiss -0x10(%rbp),%xmm0
-    //   3b:	74 0a                	je     47 <main+0x47>
-    //         b = c;
-    //   3d:	f3 0f 10 45 fc       	movss  -0x4(%rbp),%xmm0
-    //   42:	f3 0f 11 45 f4       	movss  %xmm0,-0xc(%rbp)
-    //     }
-    //     return 0;
     quadruple* quad = gCode[quadNo];
     symbolTable* st = codeSTVec[quadNo];
 
