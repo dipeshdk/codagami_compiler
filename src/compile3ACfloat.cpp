@@ -64,6 +64,53 @@ bool isFloatConstant(string varValue) {
     else return false;
 }
 
+void emitAsmForFloatBinaryOperator(string asmOp, int quadNo) {
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
+
+    if (isConstant(quad->result))
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    string resultAddr = getVariableAddr(quad->result, st);
+
+    // Redundant:
+    // if (isConst1 && isConst2) {
+    //     string eval = evaluate(op, quad->arg1, quad->arg2);
+    // }
+
+    int reg1Ind = -1;
+    int reg2Ind = -1;
+    reg1Ind = getRegFloat(quadNo, quad->arg1);
+    reg2Ind = getRegFloat(quadNo, quad->arg2);
+    if (reg1Ind < 0 || reg2Ind < 0) {
+        errorAsm("For Float: ", REGISTER_ASSIGNMENT_ERROR);
+    }
+    string reg1Name = regNamesFloat[reg1Ind], reg2Name = regNamesFloat[reg2Ind];
+    string arg1Addr =  getVariableAddr(quad->arg1, st);
+    string arg2Addr =  getVariableAddr(quad->arg2, st);;
+    emitAsm("movsd", {arg1Addr, reg1Name});
+    emitAsm("movsd", {arg2Addr, reg2Name});
+    emitAsm(asmOp, {reg2Name, reg1Name});
+    emitAsm("movsd", {reg1Name, resultAddr});
+    freeRegFloat(reg1Ind);
+    freeRegFloat(reg2Ind);
+    return;
+}
+
+void asmOpAddF(int quadNo) {
+    emitAsmForFloatBinaryOperator("addsd", quadNo);
+}
+
+void asmOpSubF(int quadNo) {
+    emitAsmForFloatBinaryOperator("subsd", quadNo);
+}
+
+void asmOpMulF(int quadNo) {
+    emitAsmForFloatBinaryOperator("mulsd", quadNo);
+}
+
+void asmOpDivF(int quadNo) {
+    emitAsmForFloatBinaryOperator("divsd", quadNo);
+}
 string getGlobalFloatAddr() {
     string globalTempName = globalTempNamePrefix + to_string(globalFloatTempCounter) + globalTempNameSuffix;
     globalFloatTempCounter++;
@@ -89,6 +136,7 @@ void initializeRegsFloat() {
     return;
 }
 
+<<<<<<< HEAD
 void asmOpGreaterFloat(int quadNo) {
     asmOpCompGreaterFloat(quadNo, "seta");
 }
@@ -194,4 +242,18 @@ void asmOpCompEqFloat(int quadNo, string cmov) {
     freeReg(regInd);
     freeRegFloat(regInd1);
     return;
+=======
+bool isFloat(string name, symbolTable* st){
+    if(isFloatConstant(name)){
+        return true;
+    }
+    if(isPointer(name)){
+        name = stripPointer(name);
+    }
+    symbolTableNode* sym_node = lookUp(st, name);
+    if ((sym_node) && ((sym_node->declSp && sym_node->declSp->type.size() > 0 && sym_node->declSp->type[0] == TYPE_FLOAT))){
+        return true;
+    }
+    return false;
+>>>>>>> 92ce24bcf375cc5894ff12d018783a7ad25926e3
 }

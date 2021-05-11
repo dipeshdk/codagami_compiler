@@ -21,4 +21,11 @@ void asmOpNeqFloat(int quad);
 void asmOpCompGreaterFloat(int quadNo, string set);
 void asmOpCompLessFloat(int quadNo, string set);
 void asmOpCompEqFloat(int quadNo, string set);
+void asmOpAddF(int quadNo);
+void asmOpSubF(int quadNo);
+void asmOpMulF(int quadNo);
+void asmOpDivF(int quadNo);
+void emitAsmForFloatBinaryOperator(string asmOp, int quadNo);
+bool isFloat(string name, symbolTable* st);
+
 #endif
