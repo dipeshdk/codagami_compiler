@@ -297,7 +297,6 @@ string getIndexStr(node* root, int& errCode, string& errStr) {
     }
     int countSymNode = symNode->arrayIndices.size();
     if (countSymNode != countRoot) {
-        cout << "countSymNode : " << countSymNode << " countRoot : " << countRoot << endl;
         setErrorParams(errCode, INVALID_REFERENCE, errStr, root->lexeme);
         return EMPTY_STR;
     }
@@ -372,7 +371,7 @@ string getArrayIndexWithEmit(node* postfix_expression, int& errCode, string& err
         setErrorParams(errCode, SYMBOL_NOT_FOUND, errStr, "symbol for array");
         return EMPTY_STR;
     }
-    if (sym_node->declSp->type[0] == TYPE_STRUCT) {
+    if (sym_node->declSp->type[0] == TYPE_STRUCT && sym_node->declSp->ptrLevel < 2) { 
         string structName = sym_node->declSp->lexeme;
         structTableNode* structNode = structLookUp(gSymTable, structName);
         if (structNode == nullptr) {
@@ -386,7 +385,6 @@ string getArrayIndexWithEmit(node* postfix_expression, int& errCode, string& err
         return EMPTY_STR;
     }
     //_t1 = 4;
-    // cout << postfix_expression->lexeme <<" offset " << offset << endl;
     string sizeTmp = generateTemp(errCode);
     if (errCode) {
         setErrorParams(errCode, errCode, errStr, "error in temp generation");
