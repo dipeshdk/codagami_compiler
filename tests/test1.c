@@ -1,14 +1,15 @@
-void printf(char* str, int x);
-char* str = "%d\n";
+void printf(char* str, double x);
+char* str = "%lf\n";
 
 /* int g = 6; */
-char* format = "%f\n";
-float foo(){
+double foo(){
     return 45.56;
 }
+
 int main() {
-    foo();
-    /* float f = -8.906453; */
+    double f = -8.906453;
+    double g = foo();
+    printf(str, g);
     /* float pp = 66.6; */
     return 0;
 }
