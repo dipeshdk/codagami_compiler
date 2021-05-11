@@ -1,14 +1,12 @@
-void printf(char* str, int x);
-char* str = "%d\n";
-
-/* int g = 6; */
-char* format = "%f\n";
-float foo(){
-    return 45.56;
-}
+void printf(char* str, double x);
+void scanf(char* str, double* x);
+double* malloc(int x);
+char* format = "%lf\n";
 int main() {
-    foo();
-    /* float f = -8.906453; */
-    /* float pp = 66.6; */
+    double x = 90.89;
+    double *g = malloc(8);
+    printf(format, x);
+    scanf(format, &x);
+    printf(format, x);
     return 0;
 }
