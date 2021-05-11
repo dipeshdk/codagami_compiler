@@ -64,6 +64,6 @@ $(BIN)/3AC: $(OBJ)/lex.yy.o $(OBJ)/y.tab.c $(OBJ)/AST.o  $(OBJ)/generateDot.o  $
 clean:
 	$(RM) ./*.dot ./*.ps ./*.json ./code.txt symbolTableJson/*
 realclean: 
-	$(RM) $(OBJ)/* $(BIN)/* ./*.dot ./*.ps ./*.json ./code.txt symbolTableJson/*
+	$(RM) -rf $(OBJ)/* $(BIN)/* ./*.dot ./*.ps ./*.json ./code.txt symbolTableJson/* ./gccOutput ./myOutput ./gccBinary.out ./codagamiBinary.out ./outputs/* ./a.out
 test:
 	bash testScript.sh
