@@ -30,4 +30,5 @@ void emitAsmForFloatBinaryOperator(string asmOp, int quadNo);
 void asmOpReturnF(int quadNo);
 void asmOpUnaryMinusF(int quadNo);
 bool isFloat(string name, symbolTable* st);
+void sendStringLiteralToGlobal(string varValue, string globalTempName);
 #endif

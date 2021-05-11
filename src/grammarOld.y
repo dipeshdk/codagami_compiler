@@ -75,16 +75,20 @@ primary_expression
 	}
 	| constant	{$$ = $1;}
 	| STRING_LITERAL {
-		if(gSymTable->scope != GLOBAL_SCOPE_NUM)
-			error(yylval.id, NON_GLOBAL_STRING_LITERAL);
 		node* temp = makeNode(strdup("STRING_LITERAL"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
 		if(!temp->declSp) temp->declSp = new declSpec();
 		temp->declSp->type.push_back(TYPE_STRING_LITERAL);
-		temp->addr = string(yylval.id);
-		temp->isConstant = true;
+		if(gSymTable->scope != GLOBAL_SCOPE_NUM) {
+			string globalFloatAddr = getGlobalFloatAddr();
+			sendStringLiteralToGlobal(string(yylval.id), globalFloatAddr);
+			setAddr(temp, globalFloatAddr);
+			// error(yylval.id, NON_GLOBAL_STRING_LITERAL);
+		}else {
+			temp->addr = string(yylval.id);
+			temp->isConstant = true;
+		}
 		temp->isStringLiteral=true;
 		$$ = temp;
-		;
 	}
 	| CHAR_LITERAL {
 		string name = yylval.id;
