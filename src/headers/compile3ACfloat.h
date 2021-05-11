@@ -18,5 +18,7 @@ void asmOpGreaterFloat(int quad);
 void asmOpLessFloat(int quad);
 void asmOpEqFloat(int quad);
 void asmOpNeqFloat(int quad);
+void asmOpCompGreaterFloat(int quadNo, string set);
+void asmOpCompLessFloat(int quadNo, string set);
 void asmOpCompEqFloat(int quadNo, string set);
 #endif

@@ -157,19 +157,19 @@ void emitAssemblyForQuad(int quadNo) {
     // =======================================================================================================================
     //  jb, jp, ucomss 
     // =======================================================================================================================
-        asmOpEqFloat(quadNo);
+        asmOpEq(quadNo);
         break;
     case OP_NEQ: // sakshi ***
-        asmOpNeqFloat(quadNo);
+        asmOpNeq(quadNo);
         break;
     case OP_LEQ: // sakshi ***
-        asmOpLeqFloat(quadNo);
+        asmOpLeq(quadNo);
         break;
     case OP_GREATER: // sakshi ***
-        asmOpGreaterFloat(quadNo);
+        asmOpGreater(quadNo);
         break;
     case OP_LESS: // sakshi ***
-        asmOpLessFloat(quadNo);
+        asmOpLess(quadNo);
         break;
     case OP_EQF: // sakshi ***
         asmOpEqFloat(quadNo);

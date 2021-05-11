@@ -89,11 +89,15 @@ void initializeRegsFloat() {
     return;
 }
 
-void asmOpGeqFloat(int quadNo) {
-    asmOpGreaterFloat(quadNo);
+void asmOpGreaterFloat(int quadNo) {
+    asmOpCompGreaterFloat(quadNo, "seta");
 }
 
-void asmOpGreaterFloat(int quadNo) {
+void asmOpGeqFloat(int quadNo) {
+    asmOpCompGreaterFloat(quadNo, "setae");
+}
+
+void asmOpCompGreaterFloat(int quadNo, string set) {
     quadruple* quad = gCode[quadNo];
     symbolTable* st = codeSTVec[quadNo];
 
@@ -124,18 +128,22 @@ void asmOpGreaterFloat(int quadNo) {
     int regInd = getReg(quadNo, quad->arg1);
     string regName = regVec[regInd]->regName;
     string regNameOneByte = regVec[regInd]->regNameOneByte;
-    emitAsm("seta", {regNameOneByte});
+    emitAsm(set, {regNameOneByte});
     emitAsm("movzbl", {regNameOneByte, regName});
     emitAsm("movq", {regName, resultAddr});
     freeReg(regInd);
     return;
 }
 
-void asmOpLeqFloat(int quadNo) {
-    asmOpLessFloat(quadNo);
+void asmOpLessFloat(int quadNo) {
+    asmOpCompLessFloat(quadNo, "seta");
 }
 
-void asmOpLessFloat(int quadNo) {
+void asmOpLeqFloat(int quadNo) {
+    asmOpCompLessFloat(quadNo, "setae");
+}
+
+void asmOpCompLessFloat(int quadNo, string set) {
     quadruple* quad = gCode[quadNo];
     symbolTable* st = codeSTVec[quadNo];
 
@@ -166,7 +174,7 @@ void asmOpLessFloat(int quadNo) {
     int regInd = getReg(quadNo, quad->arg1);
     string regName = regVec[regInd]->regName;
     string regNameOneByte = regVec[regInd]->regNameOneByte;
-    emitAsm("seta", {regNameOneByte});
+    emitAsm(set, {regNameOneByte});
     emitAsm("movzbl", {regNameOneByte, regName});
     emitAsm("movq", {regName, resultAddr});
     freeReg(regInd);

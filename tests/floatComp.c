@@ -3,7 +3,7 @@ char* str = "%d\n";
 
 /* int g = 6; */
 float f1 = 8.906453;
-float f2 = 90.77;
+float f2 = 8.906453;
 int main() {
     float pp = 66.6;
     float pq = 90.77;

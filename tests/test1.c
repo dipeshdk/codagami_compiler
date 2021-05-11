@@ -9,9 +9,14 @@ int main() {
     float pq = 91.0;
     int a;
 
-    a = pp == pq;
+    a = pp >= pq;
     if(a) printf(str, 901);
     else printf(str, 900);
+
+    a = pp > pq;
+    if(a) printf(str, 901);
+    else printf(str, 900);
+    
 
     a = pp != pq;
     if(a) printf(str, 901);
