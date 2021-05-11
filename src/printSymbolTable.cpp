@@ -445,7 +445,7 @@ void printQuad(quadruple* quad, int line) {
         printf("    %s = %s\n", quad->result.c_str(), quad->arg1.c_str());
         break;
     case OP_ASSIGNMENTF:
-        printf("    %s =F %s\n", quad->result.c_str(), quad->arg1.c_str());
+        printf("    %s = %s\n", quad->result.c_str(), quad->arg1.c_str());
         break;
     case OP_IFNEQGOTO:
         printf("    IF %s <> %s GOTO %s\n", quad->arg1.c_str(), quad->arg2.c_str(), quad->result.c_str());

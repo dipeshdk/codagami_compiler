@@ -1145,6 +1145,37 @@ void asmOpAssignment(int quadNo) {
     }
 }
 
+void asmOpAssignmentF(int quadNo){
+    quadruple* quad = gCode[quadNo];
+    symbolTable* st = codeSTVec[quadNo];
+
+    //TODO: Verify
+    if (isConstant(quad->result)) {
+        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
+    }
+
+    string noPtrName = quad->result;
+    bool isPtr = isPointer(noPtrName);
+
+    if (isPtr) {
+        noPtrName = stripPointer(quad->result);
+    }
+
+    symbolTableNode* stNode = lookUp(st, noPtrName); //for struct and struct array ptrs
+
+    if (stNode && (stNode->infoType == INFO_TYPE_STRUCT || (isPtr && stNode->declSp->type[0] == TYPE_STRUCT))) {
+        copyStruct(quad->arg1, quad->result, quadNo); //TODO: Check all valid cases
+        return;
+    }
+    string resultAddr = getVariableAddr(quad->result, st);
+    string argAddr = getVariableAddr(quad->arg1, st);
+    int regInd = getRegFloat(quadNo, quad->arg1);
+    string regName = regVecFloat[regInd]->regName;
+    emitAsm("movsd", {argAddr, regName});
+    emitAsm("movsd", {regName, resultAddr});
+    freeRegFloat(regInd);
+}
+
 string getTypeString(string typeCast){
     int len = typeCast.length();
     string retStr = "";
@@ -1201,37 +1232,6 @@ string getTypeCastOp(string name) {
     }
     errorAsm(name, INVALID_TYPECAST_IN_3AC);
     return EMPTY_STR;
-}
-
-void asmOpAssignmentF(int quadNo){
-    quadruple* quad = gCode[quadNo];
-    symbolTable* st = codeSTVec[quadNo];
-
-    //TODO: Verify
-    if (isConstant(quad->result)) {
-        errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
-    }
-
-    string noPtrName = quad->result;
-    bool isPtr = isPointer(noPtrName);
-
-    if (isPtr) {
-        noPtrName = stripPointer(quad->result);
-    }
-
-    symbolTableNode* stNode = lookUp(st, noPtrName); //for struct and struct array ptrs
-
-    if (stNode && (stNode->infoType == INFO_TYPE_STRUCT || (isPtr && stNode->declSp->type[0] == TYPE_STRUCT))) {
-        copyStruct(quad->arg1, quad->result, quadNo); //TODO: Check all valid cases
-        return;
-    }
-    string resultAddr = getVariableAddr(quad->result, st);
-    string argAddr = getVariableAddr(quad->arg1, st);
-    int regInd = getRegFloat(quadNo, quad->arg1);
-    string regName = regVecFloat[regInd]->regName;
-    emitAsm("movsd", {argAddr, regName});
-    emitAsm("movsd", {regName, resultAddr});
-    freeRegFloat(regInd);
 }
 
 void asmOpMod(int quadNo) {
