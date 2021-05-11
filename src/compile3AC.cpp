@@ -127,12 +127,12 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpUnaryMinus(quadNo);
         break;
     case OP_UNARY_MINUSF: // dipesh ***
-    // =======================================================================================================================
-    // https://groups.google.com/g/comp.lang.asm.x86/c/bqspF3wPQMY?pli=1
-    // Idea:1 & 2 given in above website
-    // Idea:3 multiply directly by -1
-    // final idea: subtract from 0
-    // =======================================================================================================================
+                          // =======================================================================================================================
+                          // https://groups.google.com/g/comp.lang.asm.x86/c/bqspF3wPQMY?pli=1
+                          // Idea:1 & 2 given in above website
+                          // Idea:3 multiply directly by -1
+                          // final idea: subtract from 0
+                          // =======================================================================================================================
         asmOpUnaryMinusF(quadNo);
         break;
     case OP_DIVI:
@@ -239,7 +239,7 @@ void emitAssemblyForQuad(int quadNo) {
         break;
     case OP_RETURNF: // dipesh ***
         asmOpReturnF(quadNo);
-    /*  // =======================================================================================================================
+        /*  // =======================================================================================================================
         check if the return value of function is float or int
         if float then return the value in %xmm0
         else return the value in %rax
@@ -387,6 +387,7 @@ void amsOpLCall(int quadNo) {
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
 
     int isStruct = 0;
+    int isFloat = 0;   
     if (libraryFunctions.find(quad->arg1) != libraryFunctions.end()) {
         emitAsm("xor", {REGISTER_RAX, REGISTER_RAX}); //TODO: for float printf
     } else {
@@ -404,6 +405,8 @@ void amsOpLCall(int quadNo) {
             int size = getNodeSize(tempNode, gSymTable);
             emitAsm("subq", {"$" + hexString(to_string(size)), REGISTER_RSP});
             emitAsm("pushq", {REGISTER_RSP});
+        } else if(funcNode->declSp && funcNode->declSp->type.size() > 0 && (funcNode->declSp->type[0] == TYPE_FLOAT) && (funcNode->declSp->ptrLevel == 0)) {
+            isFloat = 1;
         }
     }
 
@@ -413,8 +416,11 @@ void amsOpLCall(int quadNo) {
         //---location: return value movement here
         if (isStruct) {
             copyReturnStruct(quad->result, quadNo);
-        } else
+        } else if(isFloat) {
+            emitAsm("movsd", {REGISTER_XMM0, resultAddr});
+        } else {
             emitAsm("movq", {REGISTER_RAX, resultAddr});
+        }
     }
 }
 
@@ -487,11 +493,18 @@ void asmOpBeginFunc(int quadNo) {
     //move first 6 arguments from register to stack
     vector<struct param*> paramList = funcNode->paramList;
     int numParams = paramList.size();
+    int floatInd=0, intInd=0;
     for (int i = 0; i < min(6, numParams); i++) {
         if ((paramList[i]->declSp->type.size() > 0 && paramList[i]->declSp->type[0] == TYPE_STRUCT && paramList[i]->declSp->ptrLevel == 0))
             continue;
         string argAddr = getVariableAddr(paramList[i]->paramName, st);
-        emitAsm("movq", {gArgRegs[i], argAddr});
+        if ((paramList[i]->declSp->type.size() > 0 && paramList[i]->declSp->type[0] == TYPE_FLOAT && paramList[i]->declSp->ptrLevel == 0)) {
+            emitAsm("movsd", {gArgRegsFloat[floatInd], argAddr});
+            floatInd++;
+        } else{
+            emitAsm("movq", {gArgRegs[intInd], argAddr});
+            intInd++;
+        }
     }
     return;
 }
