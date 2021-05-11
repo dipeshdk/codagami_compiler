@@ -2,7 +2,7 @@ void printf(char* str, int x);
 char* str = "%d\n";
 
 /* int g = 6; */
-float f1 = 90.0;
+float f1 = 91.5;
 float f2 = 91.0;
 int main() {
     float pp = 90.0;

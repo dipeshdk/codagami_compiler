@@ -12,7 +12,6 @@ void freeRegFloat(int regInd);
 int getRegToFreeFloat();
 int getRegFloat(int quadNo, string varValue);
 void initializeRegsFloat();
-void asmOpCompFloat(int quadNo, string asm_comp);
 void asmOpGeqFloat(int quad);
 void asmOpLeqFloat(int quad);
 void asmOpGreaterFloat(int quad);
