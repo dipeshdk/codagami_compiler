@@ -282,11 +282,6 @@ void emitAssemblyForQuad(int quadNo) {
     }
 }
 
-int alignSixteenByte(int x) {
-    if(!(x%16)) return x;
-    return ((x/16)+1)*16;
-}
-
 void asmOPDummyPush(int quadNo) {
     emitAsm("pushq", {REGISTER_RBP});
 }
@@ -532,7 +527,6 @@ void asmOpBeginFunc(int quadNo) {
 
 string alignedFunctionSize(string str){
     int x = getNumberFromConstAddr(str);
-    cout << "x = " << x << endl;
     if(!(x%16)){
         return to_string(x);
     }

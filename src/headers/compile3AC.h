@@ -161,7 +161,5 @@ void copyReturningStruct(string from, int quadNo);
 
 string alignedFunctionSize(string str);
 
-int alignSixteenByte(int x);
-
 void asmOPDummyPush(int quadNo);
 #endif
