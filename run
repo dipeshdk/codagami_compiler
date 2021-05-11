@@ -20,7 +20,7 @@ fi
 
 
 echo -e "${BLUE}----------------------assembler gcc -no-pie ------------------------------${NC}"
-gcc -no-pie outputs/${fileName}/${fileName}.s -o codagamiBinary.out
+gcc -no-pie outputs/${fileName}/${fileName}.s -o codagamiBinary.out -lm
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error running codagami assembly${NC}";
     exit 1
@@ -36,7 +36,7 @@ fi
 
 
 echo -e "${BLUE}----------------------building using gcc...-------------------------------${NC}"
-gcc -ansi -pedantic ${testPath} -o gccBinary.out
+gcc -ansi -pedantic ${testPath} -o gccBinary.out -lm
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error building gcc assembly${NC}";
     exit 1
