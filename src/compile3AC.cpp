@@ -393,7 +393,24 @@ void amsOpLCall(int quadNo) {
     int isStruct = 0;
     int isFloat = 0;   
     if (libraryFunctions.find(quad->arg1) != libraryFunctions.end()) {
-        emitAsm("xor", {REGISTER_RAX, REGISTER_RAX}); //TODO: for float printf
+        string funcName = quad->arg1;
+        symbolTableNode* funcNode = lookUp(st, funcName);
+        if (!funcNode) {
+            error(funcName, SYMBOL_NOT_FOUND);
+        }else{
+            bool isFloat = false;
+            for( auto paramTmp : funcNode->paramList){
+                if(paramTmp->declSp->type[0] == TYPE_FLOAT){
+                    isFloat = true;
+                    break;
+                }
+            }
+            if(isFloat){
+                emitAsm("movq", {"$1", REGISTER_RAX});
+            }else{
+                emitAsm("movq", {"$0", REGISTER_RAX});
+            }
+        }
     } else {
         string funcName = quad->arg1;
         symbolTableNode* funcNode = lookUp(st, funcName);
