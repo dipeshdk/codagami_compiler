@@ -13,7 +13,7 @@ int main() {
     if(a) printf(str, 901);
     else printf(str, 900);
 
-    b =  pp < f1;
+    b =  pp < 9.089;
     if(b) printf(str, 901);
     else printf(str, 900);
 
@@ -21,7 +21,7 @@ int main() {
     if(c) printf(str, 901);
     else printf(str, 900);
 
-    d = f1 < f2;
+    d = 78.090 < f2;
     if(d) printf(str, 901);
     else printf(str, 900);
 
@@ -41,7 +41,7 @@ int main() {
     if(d) printf(str, 901);
     else printf(str, 900);
 
-    a =  pp > pq;
+    a =  90.890 > pq;
     if(a) printf(str, 901);
     else printf(str, 900);
 
@@ -49,11 +49,15 @@ int main() {
     if(b) printf(str, 901);
     else printf(str, 900);
 
-    c =  f1 > pq;
+    c =  f1 > 90.009;
     if(c) printf(str, 901);
     else printf(str, 900);
 
     d = f1 > f2;
+    if(d) printf(str, 901);
+    else printf(str, 900);
+
+    d = 9.088 > 78.099;
     if(d) printf(str, 901);
     else printf(str, 900);
 
@@ -97,7 +101,7 @@ int main() {
     if(b) printf(str, 901);
     else printf(str, 900);
 
-    c = f1 == f2;
+    c = 0.00 == 0.0012;
     if(c) printf(str, 901);
     else printf(str, 900);
 
@@ -105,19 +109,5 @@ int main() {
     if(d) printf(str, 901);
     else printf(str, 900);
  
-    /* a = 6.0 < pp;
-    if(a) printf(str, 901);
-    else printf(str, 900);
- 
-    a = pp < 6.0;
-    if(a) printf(str, 901);
-    else printf(str, 900); */
- 
-
-    /* a = pp < 6.0; */
-    /* a = 6.0 < pp;
-    /* a = 6.0 < 7.0; */
-    /* if(a) printf(str, 901);
-    else printf(str, 900); */
     return 0;
 }
