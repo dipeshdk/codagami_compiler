@@ -16,14 +16,14 @@ double* malloc(int x);
 
 struct foo{
     int x;
-    float y;
+    double y;
 };
 
 int main(){
     struct foo f, *p;
     struct foo arr[3];
     int x = 9;
-    float y,z,w;
+    double y,z,w;
     p = malloc(sizeof(p));
     p->y = 78.90;
     f.x = x;

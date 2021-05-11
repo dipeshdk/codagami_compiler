@@ -4,14 +4,14 @@ double* malloc(int x);
 
 struct foo{
     int x;
-    float y;
+    double y;
 };
 
 int main(){
     struct foo f, *p1, *p2;
     struct foo arr[3];
     int x = 9;
-    float y,z,w;
+    double y,z,w;
     y = 90.789;
     z = 0.0;
     w = 45.789;
