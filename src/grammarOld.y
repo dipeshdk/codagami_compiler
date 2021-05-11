@@ -1157,7 +1157,10 @@ assignment_expression
 				if(retval){
 					typeCastLexemeWithEmit(assignment_expression, unary_expression->declSp);
 				}
-				emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
+                if(unary_expression->declSp->type[0] == TYPE_FLOAT || assignment_expression->declSp->type[0] == TYPE_FLOAT){
+                     emit(OP_ASSIGNMENTF, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
+                }
+				else emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
 			}
 			else
 			{

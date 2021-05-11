@@ -95,6 +95,7 @@
 #define OP_IFGOTO 704 //{OP_IFGOTO, relop->addr, "", gotoAddr}
 #define OP_SUBI 705
 #define OP_ASSIGNMENT 706
+#define OP_ASSIGNMENTF 7060
 #define OP_UNARY_MINUS 707
 #define OP_DIVI 708
 #define OP_CALL 709
