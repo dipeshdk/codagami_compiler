@@ -12,6 +12,7 @@ vector<globalData*> globalDataPair;
 int gQuadNo;
 stack<int> ptrAssignedRegs;
 set<string> libraryFunctions{"printf", "scanf", "malloc"};
+set<string> varArgFunctions{"printf", "scanf"};
 
 string stripTypeCastUtil(string name) {
     size_t pos = name.find(" ) ");
@@ -390,21 +391,14 @@ void amsOpLCall(int quadNo) {
     if (libraryFunctions.find(quad->arg1) != libraryFunctions.end()) {
         string funcName = quad->arg1;
         symbolTableNode* funcNode = lookUp(st, funcName);
-        if (!funcNode) {
+        if (!funcNode)
             error(funcName, SYMBOL_NOT_FOUND);
-        }else{
-            bool isFloat = false;
-            for( auto paramTmp : funcNode->paramList){
-                if(paramTmp->declSp->type[0] == TYPE_FLOAT){
-                    isFloat = true;
-                    break;
-                }
-            }
-            if(isFloat){
-                emitAsm("movq", {"$1", REGISTER_RAX});
-            }else{
-                emitAsm("movq", {"$0", REGISTER_RAX});
-            }
+        
+        if(varArgFunctions.find(quad->arg1) != varArgFunctions.end()){
+            emitAsm("movq", {"$"+quad->arg2, REGISTER_RAX});
+        }
+        else{
+            emitAsm("movq", {"$0", REGISTER_RAX});
         }
     } else {
         string funcName = quad->arg1;

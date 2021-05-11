@@ -167,6 +167,72 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
     string func_name = postfix_expression->lexeme;
     string name = postfix_expression->lexeme;
     symbolTableNode* stNode = lookUp(gSymTable, name);
+    if(varArgFunctions.find(name) != varArgFunctions.end()){
+        int maxSize = ARGUMENTS_IN_REGISTER_FOR_FUNCTION;
+        int idx = 0;
+        node* curr = argument_expression_list;
+        int paramSize = 0;
+        string newTemp = EMPTY_STR;
+        vector<node*> arguments;
+        while (curr) {
+            node* temp = curr;
+            string s = curr->name;
+            if (s == "=")
+                temp = curr->childList;
+            if (!temp)
+                continue;
+            if (idx >= maxSize) {
+                setErrorParams(errCode, INVALID_ARGS_IN_FUNC_CALL, errString, temp->lexeme);
+                return EMPTY_STR;
+            }
+            if (!temp->declSp) {
+                setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errString, temp->lexeme);
+                return EMPTY_STR;
+            }
+            arguments.push_back(temp);
+            idx++;
+            curr = curr->next;
+        }
+        
+        if (!postfix_expression->declSp) {
+            error(postfix_expression->lexeme, INTERNAL_ERROR_DECL_SP_NOT_DEFINED);
+        }
+
+        for (int i = min(5, (int)(arguments.size() -1)); i >= 0; i--) {
+            if (nodeIsStruct(arguments[i]))
+                error("", CANT_PRINT_STRUCT);
+        }
+        int intRegCnt = 0, floatRegCnt = 0;
+        for (int i = 0; i < min(6, (int)(arguments.size())); i++) {
+            //mov to reg
+            if(i == 0){
+                if(!checkType(arguments[i]->declSp, TYPE_STRING_LITERAL, 0)){
+                    error("First argument to printf or scanf should be string", DEFAULT_ERROR);
+                }
+            }
+            if (checkType(arguments[i]->declSp, TYPE_FLOAT, 0)) {
+                emit(OP_MOVF, gArgRegsFloat[floatRegCnt], EMPTY_STR, arguments[i]->addr);
+                floatRegCnt++;
+            } else {
+                emit(OP_MOV, gArgRegs[intRegCnt], EMPTY_STR, arguments[i]->addr);
+                intRegCnt++;
+            }
+        }
+
+        if (postfix_expression->declSp->type[0] != TYPE_VOID) {
+            newTemp = generateTemp(errCode);
+            if (errCode)
+                error("Internal Error: Cannot generate Temp", DEFAULT_ERROR);
+            emit(OP_LCALL, func_name, BLANK_STR, newTemp);
+            addTempDetails(newTemp, gSymTable, postfix_expression);
+        } else {
+            emit(OP_LCALL, func_name, to_string(floatRegCnt), EMPTY_STR);
+        }
+
+        return newTemp;    
+    }
+    
+    
     if (!stNode || stNode->infoType != INFO_TYPE_FUNC || !stNode->declSp) {
         setErrorParams(errCode, SYMBOL_NOT_FOUND, errString, name);
         return EMPTY_STR;
@@ -439,4 +505,36 @@ int addArrayParamToStack(int& offset, string addr, int& errCode, string& errStri
     emit(OP_SUBI, newTmp, to_string(size), newTmp1);
     emit(OP_ASSIGNMENT, newTmp1, EMPTY_STR, addr);
     return 0;
+}
+
+void initialiseSymbolTable(symbolTable* gSymTable){
+    for(auto func: libraryFunctions){
+        int retval = insertSymbol(gSymTable, 0, func);
+        if(retval){
+            error(func, retval);
+        }
+        
+        symbolTableNode* funcNode = lookUp(gSymTable, func);
+        if(!funcNode){
+            error(func, SYMBOL_NOT_FOUND);
+        }
+        funcNode->infoType = INFO_TYPE_FUNC;
+        funcNode->isDefined = true;
+        funcNode->size = 8;
+        funcNode->offset = 0;
+        if(func == "malloc"){
+            struct param* paramTmp = new param();
+            paramTmp->paramName = "size_for_malloc";
+            paramTmp->declSp->type.push_back(TYPE_INT);
+            funcNode->paramList.push_back(paramTmp);
+            funcNode->paramSize = 1;    
+            funcNode->declSp->type.push_back(TYPE_INT);
+            funcNode->declSp->ptrLevel = 1;
+        }
+        if(func == "printf" || func == "scanf"){
+            funcNode->declSp->type.push_back(TYPE_VOID);
+        }
+        
+    }
+    
 }

@@ -2335,7 +2335,7 @@ int main(int ac, char **av) {
 			printf("ERROR: Cannot allocate global symbol table\n");
 			return 1;
 		}
-
+		initialiseSymbolTable(gSymTable);
 		if(!gTempSymbolMap) {
 			printf("ERROR: Cannot allocate global temp symbol table\n");
 			return 1;
