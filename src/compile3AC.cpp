@@ -85,9 +85,9 @@ void printASMData() {
         cout << "   " << g->varName << ": ";
         if (g->valueType == TYPE_STRING_LITERAL) {
             cout << ".asciz ";
-        } else if (g->valueType == TYPE_FLOAT){
+        } else if (g->valueType == TYPE_FLOAT) {
             cout << ".double ";
-        }else{
+        } else {
             cout << ".long ";
         }
         cout << g->value << "\n";
@@ -108,28 +108,28 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpMulI(quadNo);
         break;
     case OP_IFGOTO: // chinmaya ***
-    // =======================================================================================================================
-    //  ucompss, float comparison, float comparison jump,all instructions are different from the int
-    // =======================================================================================================================
+                    // =======================================================================================================================
+                    //  ucompss, float comparison, float comparison jump,all instructions are different from the int
+                    // =======================================================================================================================
         asmOpIfGoto(quadNo);
         break;
     case OP_SUBI:
         asmOpSubI(quadNo);
         break;
     case OP_ASSIGNMENT: // sarthak ***
-    // =======================================================================================================================
-    //  cvt for typecasting
-    // movss, register set for floating point
-    // =======================================================================================================================
+                        // =======================================================================================================================
+                        //  cvt for typecasting
+                        // movss, register set for floating point
+                        // =======================================================================================================================
         asmOpAssignment(quadNo);
         break;
     case OP_UNARY_MINUS: // dipesh ***
-    // =======================================================================================================================
-    // https://groups.google.com/g/comp.lang.asm.x86/c/bqspF3wPQMY?pli=1
-    // Idea:1 & 2 given in above website
-    // Idea:3 multiply directly by -1
-    // final idea: subtract from 0
-    // =======================================================================================================================
+                         // =======================================================================================================================
+                         // https://groups.google.com/g/comp.lang.asm.x86/c/bqspF3wPQMY?pli=1
+                         // Idea:1 & 2 given in above website
+                         // Idea:3 multiply directly by -1
+                         // final idea: subtract from 0
+                         // =======================================================================================================================
         asmOpUnaryMinus(quadNo);
         break;
     case OP_DIVI:
@@ -154,9 +154,9 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpLogicalXor(quadNo);
         break;
     case OP_EQ: // sakshi ***
-    // =======================================================================================================================
-    //  jb, jp, ucomss 
-    // =======================================================================================================================
+                // =======================================================================================================================
+                //  jb, jp, ucomss
+                // =======================================================================================================================
         asmOpEq(quadNo);
         break;
     case OP_NEQ: // sakshi ***
@@ -201,9 +201,9 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpIfNeqGoto(quadNo);
         break;
     case OP_BEGINFUNC: // sarthak
-    // =======================================================================================================================
-    //  choose registers according to data type
-    // =======================================================================================================================
+                       // =======================================================================================================================
+                       //  choose registers according to data type
+                       // =======================================================================================================================
         asmOpBeginFunc(quadNo);
         break;
     case OP_ENDFUNC:
@@ -211,7 +211,7 @@ void emitAssemblyForQuad(int quadNo) {
         break;
     case OP_RETURN: // dipesh ***
         asmOpReturn(quadNo);
-    /*  // =======================================================================================================================
+        /*  // =======================================================================================================================
         check if the return value of function is float or int
         if float then return the value in %xmm0
         else return the value in %rax
@@ -221,7 +221,7 @@ void emitAssemblyForQuad(int quadNo) {
     case OP_PUSHPARAM:
         asmOpPushparam(quadNo);
         break;
-    case OP_POPPARAM: 
+    case OP_POPPARAM:
         asmOpPopparam(quadNo);
         break;
     case OP_LCALL:
@@ -237,14 +237,26 @@ void emitAssemblyForQuad(int quadNo) {
         asmOpBitwiseNot(quadNo);
         break;
     case OP_MOV: // sarthak ***
-    // =======================================================================================================================
-    //  different movf in 3AC, register change, movsd
-    // =======================================================================================================================
+                 // =======================================================================================================================
+                 //  different movf in 3AC, register change, movsd
+                 // =======================================================================================================================
         asmOPMoveFuncParam(quadNo);
+        break;
+    //NEW
+    case OP_MOVF:
+        asmOPMoveFloatFuncParam(quadNo);
+        break;
+    //NEW
+    case OP_DUMMYPUSH:
+        asmOPDummyPush(quadNo);
         break;
     default:
         break;
     }
+}
+//NEW
+void asmOPDummyPush(int quadNo) {
+    emitAsm("pushq", {REGISTER_RBP});
 }
 
 void asmOpBitwiseNot(int quadNo) {
@@ -346,7 +358,8 @@ void amsOpLCall(int quadNo) {
 
     int isStruct = 0;
     if (libraryFunctions.find(quad->arg1) != libraryFunctions.end()) {
-        emitAsm("xor", {REGISTER_RAX, REGISTER_RAX});
+        //NEW
+        emitAsm("xor", {REGISTER_RAX, REGISTER_RAX}); //TODO: for float printf
     } else {
         string funcName = quad->arg1;
         symbolTableNode* funcNode = lookUp(st, funcName);
@@ -773,7 +786,8 @@ int getOffset(string varName, symbolTable* st) {
 }
 
 bool isGlobal(string varName, symbolTable* st) {
-    if(isFloatConstant(varName)) return true;
+    if (isFloatConstant(varName))
+        return true;
     if (isPointer(varName))
         varName = stripPointer(varName);
     string identifier = varName, param, name = varName, delim_dot = ".";
@@ -1002,12 +1016,28 @@ void asmOpAssignment(int quadNo) {
     if (isConstant(quad->arg1)) {
         emitAsm("movq", {"$" + hexString(quad->arg1), resultAddr});
     } else {
+        //NEW
         string argAddr = getVariableAddr(quad->arg1, st);
-        int regInd = getReg(quadNo, quad->arg1);
-        string regName = regVec[regInd]->regName;
-        emitAsm("movq", {argAddr, regName});
-        emitAsm("movq", {regName, resultAddr});
-        freeReg(regInd);
+        if (checkType(stNode->declSp, TYPE_FLOAT, 0)) {
+            //TODO: Typecasting not added
+            int regInd = getRegFloat(quadNo, quad->arg1);
+            string regName = regVecFloat[regInd]->regName;
+            emitAsm("movsd", {argAddr, regName});
+            emitAsm("movsd", {regName, resultAddr});
+            freeRegFloat(regInd);
+        } else {
+            int regInd = getReg(quadNo, quad->arg1);
+            string regName = regVec[regInd]->regName;
+            emitAsm("movq", {argAddr, regName});
+            emitAsm("movq", {regName, resultAddr});
+            freeReg(regInd);
+        }
+        // OLD
+        // int regInd = getReg(quadNo, quad->arg1);
+        // string regName = regVec[regInd]->regName;
+        // emitAsm("movq", {argAddr, regName});
+        // emitAsm("movq", {regName, resultAddr});
+        // freeReg(regInd);
     }
 }
 
@@ -1389,7 +1419,7 @@ void copyStruct(string from, string to, int quadNo) {
         error(toNode->declSp->lexeme, STRUCT_NOT_DECLARED);
     }
 
-    if((toNode->infoType == INFO_TYPE_STRUCT && toNode->declSp->ptrLevel == 1) && !isToPtr){
+    if ((toNode->infoType == INFO_TYPE_STRUCT && toNode->declSp->ptrLevel == 1) && !isToPtr) {
         string fromParamAddr = getVariableAddr(from, st);
         string toParamAddr = getVariableAddr(to, st);
         int regInd = getReg(quadNo, from);

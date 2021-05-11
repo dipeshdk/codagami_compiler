@@ -12,5 +12,6 @@ void freeRegFloat(int regInd);
 int getRegToFreeFloat();
 int getRegFloat(int quadNo, string varValue);
 void initializeRegsFloat();
-
+//NEW
+void asmOPMoveFloatFuncParam(int quadNo);
 #endif
