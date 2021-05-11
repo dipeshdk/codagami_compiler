@@ -1,4 +1,4 @@
-void printf(char* str, int x, int y, int z);
+void printf(char* str, double d);
 char* str = "%d\n";
 char *malloc(int size);
 /* int g = 6; */
@@ -9,7 +9,7 @@ char *malloc(int size);
 int main() {
 /*     double f = -8.906453;
     double g = foo(f, 5, 600.78, 555); */
-    printf("%d %d %d\n", 10, 5, 1);
+    printf("%lf", 5.5);
     /* float pp = 66.6; */
     return 0;
 }
