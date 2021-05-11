@@ -151,6 +151,9 @@ void error(string var, int error_code) {
     case ASSIGNMENT_TO_CONSTANT_ERROR:
         str = "Assignment to a constant not allowed";
         break;
+    case ASSIGNMENT_TO_ARRAY:
+        str = "Assignment to array not allowed.";
+        break;
     case ARRAY_SIZE_SHOULD_BE_POSITIVE:
         str = "Array size should be positive integer constant";
         break;
