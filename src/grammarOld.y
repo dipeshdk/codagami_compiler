@@ -150,17 +150,10 @@ constant
 		string s = yylval.id;
 		node* temp = makeNode(strdup("CONSTANT"), strdup(yylval.id), 1, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL); 
 		if(!temp->declSp) temp->declSp = new declSpec();
-
-		if(gSymTable->scope != GLOBAL_SCOPE_NUM) {
-			string globalFloatAddr = getGlobalFloatAddr();
-			sendFloatToGlobal(string(yylval.id), globalFloatAddr);
-			setAddr(temp, globalFloatAddr);
-		}else {
-			addFVal(temp, yylval.id);
-			setAddr(temp, string(yylval.id));
-			temp->isConstant = true;
-		}
 		temp->declSp->type.push_back(TYPE_FLOAT);
+		addFVal(temp, yylval.id);
+		setAddr(temp, string(yylval.id));
+		temp->isConstant = true;
 		$$ = temp;
 	}
 	;
@@ -370,8 +363,7 @@ unary_expression
 				unary_operator->declSp->ptrLevel++;
 			}
 			else if(name == "-") {
-				if(cast_expression->declSp && cast_expression->declSp->type[0]== TYPE_FLOAT) opCode = OP_UNARY_MINUSF;
-				else opCode = OP_UNARY_MINUS;
+				opCode = OP_UNARY_MINUS;
 			}
 			else if(name == "~") {
 				opCode = OP_BITWISE_NOT;
@@ -742,9 +734,7 @@ relational_expression
 			if(retval < 0)
 				error(errStr,-retval);			
 			node* temp = makeNode(strdup("<"), strdup("<"), 0, $1, $3, (node*)NULL, (node*)NULL); 
-            if($1->declSp->type[0]  == TYPE_FLOAT || $3->declSp->type[0]  == TYPE_FLOAT ) {
-                emitRelop($1, $3, temp, OP_LESSF, errCode, errStr);
-            } else emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
+			emitRelop($1, $3, temp, OP_LESS, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
 			$$ = temp;
@@ -754,9 +744,7 @@ relational_expression
 			if(retval < 0)
 				error(errStr,-retval);
 			node* temp = makeNode(strdup(">"), strdup(">"), 0, $1, $3, (node*)NULL, (node*)NULL); 
-			if($1->declSp->type[0]  == TYPE_FLOAT || $3->declSp->type[0]  == TYPE_FLOAT ) {
-                emitRelop($1, $3, temp, OP_GREATERF, errCode, errStr);
-            } else emitRelop($1, $3, temp, OP_GREATER, errCode, errStr);
+			emitRelop($1, $3, temp, OP_GREATER, errCode, errStr);
 			if(errCode)
 				error(errStr, errCode);
 			$$ = temp;
@@ -766,9 +754,7 @@ relational_expression
 		if(retval < 0)
 			error(errStr,-retval);
 		node* temp = makeNode(strdup("LE_OP"), strdup("<="), 0, $1, $3, (node*)NULL, (node*)NULL);
-		if($1->declSp->type[0]  == TYPE_FLOAT || $3->declSp->type[0]  == TYPE_FLOAT ) {
-            emitRelop($1, $3, temp, OP_LEQF, errCode, errStr);
-        } else emitRelop($1, $3, temp, OP_LEQ, errCode, errStr);
+		emitRelop($1, $3, temp, OP_LEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		$$ = temp;
@@ -778,9 +764,7 @@ relational_expression
 		if(retval < 0)
 			error(errStr,-retval);
 		node* temp = makeNode(strdup("GE_OP"), strdup(">="), 0, $1, $3, (node*)NULL, (node*)NULL);
-		if($1->declSp->type[0]  == TYPE_FLOAT || $3->declSp->type[0]  == TYPE_FLOAT ) {
-            emitRelop($1, $3, temp, OP_GEQF, errCode, errStr);
-        } else emitRelop($1, $3, temp, OP_GEQ, errCode, errStr);
+		emitRelop($1, $3, temp, OP_GEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		$$ = temp;
@@ -807,9 +791,7 @@ equality_expression
 		node* temp = makeNodeForExpressionByRank(equality_expression, relational_expression, "EQ_OP", "==", rank, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
-		if($1->declSp->type[0]  == TYPE_FLOAT || $3->declSp->type[0]  == TYPE_FLOAT ) {
-            emitRelop(equality_expression, relational_expression, temp, OP_EQF, errCode, errStr);
-        } else emitRelop(equality_expression, relational_expression, temp, OP_EQ, errCode, errStr);
+		emitRelop(equality_expression, relational_expression, temp, OP_EQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		$$ = temp;
@@ -832,9 +814,7 @@ equality_expression
 		node* temp = makeNodeForExpressionByRank(equality_expression, relational_expression, "NE_OP", "!=", rank, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
-		if($1->declSp->type[0]  == TYPE_FLOAT || $3->declSp->type[0]  == TYPE_FLOAT ) {
-            emitRelop(equality_expression, relational_expression, temp, OP_NEQF, errCode, errStr);
-        } else emitRelop(equality_expression, relational_expression, temp, OP_NEQ, errCode, errStr);
+		emitRelop(equality_expression, relational_expression, temp, OP_NEQ, errCode, errStr);
 		if(errCode)
 			error(errStr, errCode);
 		$$ = temp;
@@ -1920,9 +1900,6 @@ labeled_statement
 	| CASE constant_expression {
 		// ifgoto
 		vector<int> next = makelist(nextQuad());
-		if($2->declSp && $2->declSp->type.size() > 0 && (($2->declSp->type[0] != TYPE_INT) && ($2->declSp->type[0] != TYPE_CHAR))){
-			error($2->lexeme, CASE_SHOULD_BE_INT);
-		}
 		emit(OP_IFNEQGOTO, case_consts[case_consts.size()-1]->addr, $2->addr, BLANK_STR);
 		// This should go to next case
 		$2->nextlist = mergelist($2->nextlist, next);
@@ -2164,11 +2141,8 @@ jump_statement
 		n1->addr = temp->addr;
 		err = giveTypeCastRankUnary(n1, temp);
 		if(err) error("error in typecasting", DEFAULT_ERROR);
-		if(temp->declSp && temp->declSp->type[0] == TYPE_FLOAT)
-			emit(OP_RETURNF, EMPTY_STR, EMPTY_STR, temp->addr);	
-		else emit(OP_RETURN, EMPTY_STR, EMPTY_STR, temp->addr);
 		$$ = makeNode(strdup("RETURN"), strdup("return"), 0, temp, (node*)NULL, (node*)NULL, (node*)NULL);
-		
+		emit(OP_RETURN, EMPTY_STR, EMPTY_STR, temp->addr);
     }
 	;
 
@@ -2339,13 +2313,13 @@ int main(int ac, char **av) {
 		// char * fileName = strdup("graph.dot");
 		// if(ac == 3) fileName = av[2];
 		// generateDot(root,fileName);
-        
+        printCode((char*)TACFilename.c_str());
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-		printCode((char*)TACFilename.c_str());
+		
 		fclose(fd);
     }
     else

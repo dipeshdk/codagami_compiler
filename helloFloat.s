@@ -14,10 +14,6 @@ main:
   mov    %rsp, %rbp
  # subq    $0x10, %rsp
   movsd a(%rip), %xmm0
-  fld a(%rip)
-  fabs
-  fchs 
-  fstp a(%rip)
   cvttsd2si %xmm0,%eax
   mov %eax, %esi
   lea  format(%rip), %rdi
