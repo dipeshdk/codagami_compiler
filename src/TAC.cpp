@@ -299,7 +299,9 @@ string getIndexStr(node* root, int& errCode, string& errStr) {
         return EMPTY_STR;
     }
     int countSymNode = symNode->arrayIndices.size();
-    if (countSymNode != countRoot) {
+    if ((symNode->infoType == INFO_TYPE_ARRAY && root->infoType == INFO_TYPE_ARRAY && countSymNode != countRoot) ||
+        (symNode->declSp->ptrLevel == 1 && symNode->infoType != INFO_TYPE_ARRAY && root->infoType == INFO_TYPE_ARRAY && countRoot > 1)
+    ) {
         setErrorParams(errCode, INVALID_REFERENCE, errStr, root->lexeme);
         return EMPTY_STR;
     }
@@ -313,9 +315,6 @@ string getIndexStr(node* root, int& errCode, string& errStr) {
     string newTmp;
 
     for (int i = 0; i < countRoot - 1; i++) {
-        // 1tn+1 = tn muli sai[i+1]
-        // 2tn+1 = 1tn+1 addi rai[i+1];
-        // var = RAi[i] * SAi[i+1] + RAi[i+1];
         newTmp = generateTemp(errCode);
         addIntTemp(newTmp, gSymTable);
         if (errCode) {
