@@ -206,8 +206,22 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         for (int i = 0; i < min(6, (int)(arguments.size())); i++) {
             //mov to reg
             if(i == 0){
-                if((!checkType(arguments[i]->declSp, TYPE_STRING_LITERAL, 0)) && (!checkType(arguments[i]->declSp, TYPE_CHAR, 1))){
-                    error("First argument to printf or scanf should be string", DEFAULT_ERROR);
+                if((func_name == "printf") || (func_name == "scanf")){
+                    if((!checkType(arguments[i]->declSp, TYPE_STRING_LITERAL, 0)) && (!checkType(arguments[i]->declSp, TYPE_CHAR, 1))){
+                        error("First argument to printf or scanf should be string", DEFAULT_ERROR);
+                    }
+                }
+            }
+            if((func_name == "fprintf") || (func_name == "fscanf")){
+                if(i == 0){
+                    if((arguments[i]->declSp) && (arguments[i]->declSp->ptrLevel == 0)){
+                        error("First argument to fprintf or fscanf should be pointer", DEFAULT_ERROR);
+                    }
+                }
+                if(i == 1){
+                    if((!checkType(arguments[i]->declSp, TYPE_STRING_LITERAL, 0)) && (!checkType(arguments[i]->declSp, TYPE_CHAR, 1))){
+                        error("First argument to fprintf or fscanf should be string", DEFAULT_ERROR);
+                    }
                 }
             }
             if (checkType(arguments[i]->declSp, TYPE_FLOAT, 0)) {
@@ -542,7 +556,7 @@ void initialiseSymbolTable(symbolTable* gSymTable){
             funcNode->declSp->type.push_back(TYPE_VOID);
             funcNode->declSp->ptrLevel = 0;
         }
-        if(func == "printf" || func == "scanf"){
+        if(varArgFunctions.find(func) != varArgFunctions.end()){
             funcNode->declSp->type.push_back(TYPE_VOID);
         }
         if(singleFloatLibFunc.find(func) != singleFloatLibFunc.end()){
@@ -621,7 +635,20 @@ void initialiseSymbolTable(symbolTable* gSymTable){
 
 
             funcNode->paramSize = 2;    
-            funcNode->declSp->type.push_back(TYPE_VOID);
+            funcNode->declSp->type.push_back(TYPE_INT);
+            funcNode->declSp->ptrLevel = 1;
+        }
+
+        if(func == "fclose"){
+            struct param* paramTmp = new param();
+            paramTmp->paramName = "filerptr";
+            paramTmp->declSp->type.push_back(TYPE_INT);
+            paramTmp->declSp->ptrLevel = 1;
+            funcNode->paramList.push_back(paramTmp);
+
+
+            funcNode->paramSize = 2;    
+            funcNode->declSp->type.push_back(TYPE_INT);
             funcNode->declSp->ptrLevel = 1;
         }
         

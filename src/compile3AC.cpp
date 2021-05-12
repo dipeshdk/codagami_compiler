@@ -11,7 +11,7 @@ stack<int> funcSizeStack;
 vector<globalData*> globalDataPair;
 int gQuadNo;
 stack<int> ptrAssignedRegs;
-set<string> libraryFunctions{"fopen", "printf", "scanf", "malloc", "free", "fabs", "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "logb", "sqrt", "cbrt", "round",
+set<string> libraryFunctions{"fopen", "fprintf", "fscanf", "fclose", "printf", "scanf", "malloc", "free", "fabs", "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "logb", "sqrt", "cbrt", "round",
                                 "sin", "cos", "tan", "asin", "acos", "atan", "trunc", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "floor", "ceil", "erf", "erfc", "tgamma", "lgamma"
                                 "abs", "labs", "fmod", "remainder", "nextafter", "copysign", "fmax", "fmin", "fdim", "hypot", "pow", "round", "atan2"
                                 "signbit", "isnormal", "isnan","isinf","isfinite", "ilogb", "lround", "fma"};
@@ -20,7 +20,7 @@ set<string> mathFuncs{"fabs", "exp", "exp2", "expm1", "log", "log2", "log10", "l
                                 "sin", "cos", "tan", "asin", "acos", "atan", "trunc", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "floor", "ceil", "erf", "erfc", "tgamma", "lgamma"
                                 "abs", "labs", "fmod", "remainder", "nextafter", "copysign", "fmax", "fmin", "fdim", "hypot", "pow", "round", "atan2"
                                 "signbit", "isnormal", "isnan","isinf","isfinite", "ilogb", "lround", "fma"};
-set<string> varArgFunctions{"printf", "scanf"};
+set<string> varArgFunctions{"printf", "scanf", "fprintf", "fscanf"};
 vector<quadruple*> gCodeWithTypecast;
 set<string> singleFloatLibFunc{"fabs", "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "logb", "sqrt", "cbrt", "round",
                                 "sin", "cos", "tan", "asin", "acos", "atan", "trunc", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "floor", "ceil", "erf", "erfc", "tgamma", "lgamma"}; // 1 double arguments, returns double
@@ -442,9 +442,9 @@ void amsOpLCall(int quadNo) {
             emitAsm("movq", {"$"+quad->arg2, REGISTER_RAX});
         }
         else{
-            if(mathFuncs.find(funcName) == mathFuncs.end()){
-                emitAsm("movq", {"$0", REGISTER_RAX});
-            }
+            // if(mathFuncs.find(funcName) == mathFuncs.end()){
+            //     emitAsm("movq", {"$0", REGISTER_RAX});
+            // }
             isFloat = 0;
             for( auto paramTmp : funcNode->paramList){
                 if((paramTmp->declSp->type[0] == TYPE_FLOAT) && (paramTmp->declSp->ptrLevel == 0)){
