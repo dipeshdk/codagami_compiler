@@ -92,7 +92,7 @@ void error(string var, int error_code) {
         str = "index of array has non-integer type.";
         break;
     case INVALID_ARGS_IN_FUNC_CALL:
-        str = "Invalid aruments in function call ";
+        str = "Invalid arguments in function call ";
         break;
     case INVALID_STORAGE_CLASS:
         str = "Conflicting type of storage class ";
