@@ -54,4 +54,5 @@ extern set<string> singleIntLibFunc;
 extern set<string> doubleFloatLibFunc;
 extern set<string> singleIntFloatLibFunc;
 extern set<string> TripleFloatLibFunc;
+extern map<string, libFunc *> gLibParamMap;
 #endif

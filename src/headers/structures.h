@@ -155,4 +155,24 @@ struct reg {
     }
 };
 
+struct libParam{
+
+    string paramName;
+    int type, ptrLevel;
+
+    libParam(string paramName, int type, int ptrLevel) : paramName(paramName), type(type), ptrLevel(ptrLevel) {
+        
+    }
+};
+
+struct libFunc{
+    vector<libParam*> libParamVec;
+    int type;
+    int ptrLevel;
+
+    libFunc(vector<libParam*> libParamVec,int type, int ptrLevel) : libParamVec(libParamVec), type(type), ptrLevel(ptrLevel)  {
+        
+    }
+};
+
 #endif

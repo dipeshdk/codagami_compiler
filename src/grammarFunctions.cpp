@@ -621,37 +621,23 @@ void initialiseSymbolTable(symbolTable* gSymTable){
             funcNode->declSp->ptrLevel = 0;
         }
 
-        if(func == "fopen"){
-            struct param* paramTmp = new param();
-            paramTmp->paramName = "filename";
-            paramTmp->declSp->type.push_back(TYPE_CHAR);
-            paramTmp->declSp->ptrLevel = 1;
-            funcNode->paramList.push_back(paramTmp);
-            struct param* paramTmp2 = new param();
-            paramTmp2->paramName = "mode";
-            paramTmp2->declSp->type.push_back(TYPE_CHAR);
-            paramTmp2->declSp->ptrLevel = 1;
-            funcNode->paramList.push_back(paramTmp2);
-
-
-            funcNode->paramSize = 2;    
-            funcNode->declSp->type.push_back(TYPE_INT);
-            funcNode->declSp->ptrLevel = 1;
+        if(gLibParamMap.find(func) != gLibParamMap.end()) {
+            libFunc *libF = gLibParamMap[func];
+            vector<libParam*> libParamVec = libF->libParamVec; 
+            for(libParam* lp : libParamVec) {
+                struct param* paramTmp = new param();
+                paramTmp->paramName = lp->paramName;
+                paramTmp->declSp->type.push_back(lp->type);
+                paramTmp->declSp->ptrLevel = lp->ptrLevel;
+                funcNode->paramList.push_back(paramTmp);
+            }
+            funcNode->paramSize = libParamVec.size();    
+            funcNode->declSp->type.push_back(libF->type);
+            funcNode->declSp->ptrLevel = libF->ptrLevel;
         }
-
-        if(func == "fclose"){
-            struct param* paramTmp = new param();
-            paramTmp->paramName = "filerptr";
-            paramTmp->declSp->type.push_back(TYPE_INT);
-            paramTmp->declSp->ptrLevel = 1;
-            funcNode->paramList.push_back(paramTmp);
-
-
-            funcNode->paramSize = 2;    
-            funcNode->declSp->type.push_back(TYPE_INT);
-            funcNode->declSp->ptrLevel = 1;
-        }
-        
     }
-    
 }
+
+
+
+
