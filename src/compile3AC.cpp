@@ -990,7 +990,7 @@ string getVariableAddr(string varName, symbolTable* st) {
         param = temp;
         offset = getOffset(identifier, st);
         offsetStr = getOffsetStr(offset);
-        int regAddInd = getReg(gQuadNo, identifier); //TODO: Free this reg
+        int regAddInd = getReg(gQuadNo, identifier); 
         string regAddName = regVec[regAddInd]->regName;
         emitAsm("movq", {offsetStr, regAddName});
         int regInd = getReg(gQuadNo, identifier);
@@ -1039,7 +1039,7 @@ string getVariableAddr(string varName, symbolTable* st) {
             errorAsm(name, DEREFERENCING_CONSTANT_ERROR);
         offset = getOffset(name, st);
         offsetStr = getOffsetStr(offset);
-        int regInd = getReg(gQuadNo, name); //TODO: Free this reg
+        int regInd = getReg(gQuadNo, name); 
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
@@ -1060,7 +1060,7 @@ string getVariableAddr(string varName, symbolTable* st) {
         int paramOffset = getParameterOffset(sym_node->declSp->lexeme, param, st);
         offset = getOffset(name, st);
         offsetStr = getOffsetStr(offset);
-        int regInd = getReg(gQuadNo, name); //TODO: Free this reg
+        int regInd = getReg(gQuadNo, name); 
         string regName = regVec[regInd]->regName;
         emitAsm("movq", {offsetStr, regName});
         ptrAssignedRegs.push(regInd);
@@ -1566,6 +1566,7 @@ void asmOpIfGoto(int quadNo) {
         asmJump(quadNo, "jp");
         emitAsm("pxor", {regName, regName});
         emitAsm("ucomisd", {argAddr, regName});
+        freeRegFloat(regInd);
 
     } else {
         if (isConstant(quad->arg1)) {
@@ -1573,6 +1574,7 @@ void asmOpIfGoto(int quadNo) {
             string regName = regVec[regInd]->regName;
             emitAsm("mov", {"$" + hexString(quad->arg1), regName});
             emitAsm("cmp", {"$0", regName});
+            freeReg(regInd);
         } else {
             string argAddr1 = getVariableAddr(quad->arg1, st);
             int regInd = getReg(quadNo, quad->arg1);

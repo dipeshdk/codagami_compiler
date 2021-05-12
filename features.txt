@@ -77,4 +77,6 @@ TODO: not tested
     struct declaration inside functions
     switch case
 
+Malloc for arrays : int *intArr = malloc(sz * sizeof(int)) + (sz-1) * sizeof(int);
+Because array grows in different size.
 
