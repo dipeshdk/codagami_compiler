@@ -531,6 +531,17 @@ void initialiseSymbolTable(symbolTable* gSymTable){
             funcNode->declSp->type.push_back(TYPE_INT);
             funcNode->declSp->ptrLevel = 1;
         }
+
+        if(func == "free"){
+            struct param* paramTmp = new param();
+            paramTmp->paramName = "freePtr";
+            paramTmp->declSp->type.push_back(TYPE_VOID);
+            paramTmp->declSp->ptrLevel = 1;
+            funcNode->paramList.push_back(paramTmp);
+            funcNode->paramSize = 1;    
+            funcNode->declSp->type.push_back(TYPE_VOID);
+            funcNode->declSp->ptrLevel = 0;
+        }
         if(func == "printf" || func == "scanf"){
             funcNode->declSp->type.push_back(TYPE_VOID);
         }

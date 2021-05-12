@@ -11,7 +11,7 @@ stack<int> funcSizeStack;
 vector<globalData*> globalDataPair;
 int gQuadNo;
 stack<int> ptrAssignedRegs;
-set<string> libraryFunctions{"printf", "scanf", "malloc", "fabs", "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "logb", "sqrt", "cbrt", "round",
+set<string> libraryFunctions{"printf", "scanf", "malloc", "free", "fabs", "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "logb", "sqrt", "cbrt", "round",
                                 "sin", "cos", "tan", "asin", "acos", "atan", "trunc", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "floor", "ceil", "erf", "erfc", "tgamma", "lgamma"
                                 "abs", "labs", "fmod", "remainder", "nextafter", "copysign", "fmax", "fmin", "fdim", "hypot", "pow", "round", "atan2"
                                 "signbit", "isnormal", "isnan","isinf","isfinite", "ilogb", "lround", "fma"};
