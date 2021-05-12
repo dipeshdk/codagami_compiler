@@ -1,6 +1,4 @@
-void printf(char* str, double x);
 char* format = "%lf\n";
-double* malloc(int x);
 
 struct foo{
     int x;

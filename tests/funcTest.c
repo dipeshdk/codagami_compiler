@@ -1,4 +1,3 @@
-void printf(char* str, int x);
 char* str = "%d\n";
 
 int foo(int a, char b){

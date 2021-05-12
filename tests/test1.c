@@ -1,18 +1,4 @@
-/* void printf(char* str, double x);
-void scanf(char* str, double* x);
-double* malloc(int x);
-char* format = "%lf\n";
-int main() {
-    double d = 5.5;
-    int a=d;
-    double dd = a;
-    printf(str,dd);
-    return 0;
-} */
-
-void printf(char* str, double x);
-char* format = "%lf\n";
-double* malloc(int x);
+char *format = "%lf\n";
 
 struct foo{
     int x;

@@ -1,4 +1,3 @@
-void printf(char* p, int d);
 char* str = "%d\n";
 
 int binaryScr(int a[5], int low, int high, int m)
