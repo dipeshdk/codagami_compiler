@@ -7,7 +7,7 @@ YACC=yacc
 GPP=g++
 HEADER=$(SRC)/headers
 
-all: $(BIN)/3AC
+all: $(BIN)/codagami
 
 $(OBJ)/lex.yy.c : $(SRC)/grammar.l $(OBJ)/y.tab.h $(OBJ)/y.tab.c
 	$(LEX) -o $(OBJ)/lex.yy.c $(SRC)/grammar.l
@@ -56,8 +56,8 @@ $(OBJ)/compile3ACfloat.o: $(SRC)/compile3ACfloat.cpp $(HEADER)/compile3ACfloat.h
 $(OBJ)/lex.yy.o: $(OBJ)/lex.yy.c
 	$(CC) -o $(OBJ)/lex.yy.o -c $(OBJ)/lex.yy.c
 
-$(BIN)/3AC: $(OBJ)/lex.yy.o $(OBJ)/y.tab.c $(OBJ)/AST.o  $(OBJ)/generateDot.o  $(OBJ)/grammarFunctions.o  $(OBJ)/printSymbolTable.o  $(OBJ)/symbolTable.o $(OBJ)/TAC.o $(OBJ)/typecast.o $(OBJ)/utility.o $(OBJ)/compile3AC.o  $(OBJ)/compile3ACfloat.o
-	$(GPP) -o $(BIN)/3AC $(OBJ)/lex.yy.o $(OBJ)/y.tab.c  $(OBJ)/AST.o  $(OBJ)/generateDot.o  $(OBJ)/grammarFunctions.o  $(OBJ)/printSymbolTable.o  $(OBJ)/symbolTable.o $(OBJ)/TAC.o $(OBJ)/typecast.o $(OBJ)/utility.o $(OBJ)/compile3AC.o $(OBJ)/compile3ACfloat.o
+$(BIN)/codagami: $(OBJ)/lex.yy.o $(OBJ)/y.tab.c $(OBJ)/AST.o  $(OBJ)/generateDot.o  $(OBJ)/grammarFunctions.o  $(OBJ)/printSymbolTable.o  $(OBJ)/symbolTable.o $(OBJ)/TAC.o $(OBJ)/typecast.o $(OBJ)/utility.o $(OBJ)/compile3AC.o  $(OBJ)/compile3ACfloat.o
+	$(GPP) -o $(BIN)/codagami $(OBJ)/lex.yy.o $(OBJ)/y.tab.c  $(OBJ)/AST.o  $(OBJ)/generateDot.o  $(OBJ)/grammarFunctions.o  $(OBJ)/printSymbolTable.o  $(OBJ)/symbolTable.o $(OBJ)/TAC.o $(OBJ)/typecast.o $(OBJ)/utility.o $(OBJ)/compile3AC.o $(OBJ)/compile3ACfloat.o
 
 
 

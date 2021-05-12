@@ -327,6 +327,8 @@ string getOpName(int opCode) {
         return "ASSIGNMENTF";
     case OP_UNARY_MINUS:
         return "UNARY_MINUS";
+    case OP_UNARY_MINUSF:
+        return "UNARY_MINUSF";
     case OP_DIVI:
         return "DIVI";
     case OP_CALL:
@@ -387,6 +389,8 @@ string getOpName(int opCode) {
         return "ENDFUNC";
     case OP_RETURN:
         return "RETURN";
+    case OP_RETURNF:
+        return "RETURNF";
     case OP_PUSHPARAM:
         return "PUSHPARAM";
     case OP_POPPARAM:
@@ -424,6 +428,13 @@ void printQuad(quadruple* quad, int line) {
     case OP_ENDFUNC:
         printf("    END_FUNCTION\n\n");
         break;
+    case OP_RETURNF:
+        if (quad->result == EMPTY_STR) {
+            printf("    ReturnF \n");
+        } else {
+            printf("    ReturnF %s\n", quad->result.c_str());
+        }
+        break;
     case OP_RETURN:
         if (quad->result == EMPTY_STR) {
             printf("    Return \n");
@@ -451,6 +462,7 @@ void printQuad(quadruple* quad, int line) {
         printf("    IF %s <> %s GOTO %s\n", quad->arg1.c_str(), quad->arg2.c_str(), quad->result.c_str());
         break;
     case OP_UNARY_MINUS:
+    case OP_UNARY_MINUSF:
     case OP_BITWISE_NOT:
     case OP_LOGICAL_NOT:
     case OP_ADDR:
