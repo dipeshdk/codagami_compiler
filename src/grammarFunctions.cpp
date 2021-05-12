@@ -531,8 +531,80 @@ void initialiseSymbolTable(symbolTable* gSymTable){
             funcNode->declSp->type.push_back(TYPE_INT);
             funcNode->declSp->ptrLevel = 1;
         }
+
+        if(func == "free"){
+            struct param* paramTmp = new param();
+            paramTmp->paramName = "freePtr";
+            paramTmp->declSp->type.push_back(TYPE_VOID);
+            paramTmp->declSp->ptrLevel = 1;
+            funcNode->paramList.push_back(paramTmp);
+            funcNode->paramSize = 1;    
+            funcNode->declSp->type.push_back(TYPE_VOID);
+            funcNode->declSp->ptrLevel = 0;
+        }
         if(func == "printf" || func == "scanf"){
             funcNode->declSp->type.push_back(TYPE_VOID);
+        }
+        if(singleFloatLibFunc.find(func) != singleFloatLibFunc.end()){
+            struct param* paramTmp = new param();
+            paramTmp->paramName = "floatVal";
+            paramTmp->declSp->type.push_back(TYPE_FLOAT);
+            funcNode->paramList.push_back(paramTmp);
+            funcNode->paramSize = 1;    
+            funcNode->declSp->type.push_back(TYPE_FLOAT);
+            funcNode->declSp->ptrLevel = 0;
+        }
+
+        if(singleIntLibFunc.find(func) != singleIntLibFunc.end()){
+            struct param* paramTmp = new param();
+            paramTmp->paramName = "intVal";
+            paramTmp->declSp->type.push_back(TYPE_INT);
+            funcNode->paramList.push_back(paramTmp);
+            funcNode->paramSize = 1;    
+            funcNode->declSp->type.push_back(TYPE_INT);
+            funcNode->declSp->ptrLevel = 0;
+        }
+
+        if(doubleFloatLibFunc.find(func) != doubleFloatLibFunc.end()){
+            struct param* paramTmp1 = new param();
+            struct param* paramTmp2 = new param();
+            paramTmp1->paramName = "floatVal1";
+            paramTmp1->declSp->type.push_back(TYPE_FLOAT);
+            funcNode->paramList.push_back(paramTmp1);
+            paramTmp2->paramName = "floatVal2";
+            paramTmp2->declSp->type.push_back(TYPE_FLOAT);
+            funcNode->paramList.push_back(paramTmp2);
+            funcNode->paramSize = 2;    
+            funcNode->declSp->type.push_back(TYPE_FLOAT);
+            funcNode->declSp->ptrLevel = 0;
+        }
+
+        if(singleIntFloatLibFunc.find(func) != singleIntFloatLibFunc.end()){
+            struct param* paramTmp = new param();
+            paramTmp->paramName = "floatVal";
+            paramTmp->declSp->type.push_back(TYPE_FLOAT);
+            funcNode->paramList.push_back(paramTmp);
+            funcNode->paramSize = 1;    
+            funcNode->declSp->type.push_back(TYPE_INT);
+            funcNode->declSp->ptrLevel = 0;
+        }
+        
+        if(TripleFloatLibFunc.find(func) != TripleFloatLibFunc.end()){
+            struct param* paramTmp1 = new param();
+            struct param* paramTmp2 = new param();
+            struct param* paramTmp3 = new param();
+            paramTmp1->paramName = "floatVal1";
+            paramTmp1->declSp->type.push_back(TYPE_FLOAT);
+            funcNode->paramList.push_back(paramTmp1);
+            paramTmp2->paramName = "floatVal2";
+            paramTmp2->declSp->type.push_back(TYPE_FLOAT);
+            funcNode->paramList.push_back(paramTmp2);
+            paramTmp3->paramName = "floatVal3";
+            paramTmp3->declSp->type.push_back(TYPE_FLOAT);
+            funcNode->paramList.push_back(paramTmp3);
+            funcNode->paramSize = 3;    
+            funcNode->declSp->type.push_back(TYPE_FLOAT);
+            funcNode->declSp->ptrLevel = 0;
         }
         
     }

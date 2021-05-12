@@ -48,4 +48,10 @@ extern vector<string> regNamesFloat;
 extern int globalFloatTempCounter;
 extern string globalTempNamePrefix;
 extern string globalTempNameSuffix;
+
+extern set<string> singleFloatLibFunc;
+extern set<string> singleIntLibFunc;
+extern set<string> doubleFloatLibFunc;
+extern set<string> singleIntFloatLibFunc;
+extern set<string> TripleFloatLibFunc;
 #endif
