@@ -638,6 +638,16 @@ void initialiseSymbolTable(symbolTable* gSymTable){
     }
 }
 
-
+void optimizeMultiGoto(){
+    for(quadruple* node : gCode){
+        if(node->opCode == OP_GOTO || node->opCode == OP_IFGOTO){
+            int nextQuad = stoi(node->result);
+            while(gCode[nextQuad]->opCode == OP_GOTO){
+                node->result = gCode[nextQuad]->result;
+                nextQuad = stoi(node->result);
+            }
+        }
+    }
+}
 
 
