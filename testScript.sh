@@ -13,7 +13,7 @@ if [ $? -ne 0 ]; then
     echo -e "${RED}Error in make${NC}";
     exit 1
 fi
-
+scriptRet=0
 for file in $format;
 do
  if [[ "$file" == "$format" ]]
@@ -24,12 +24,32 @@ do
     fileName=$(basename "${file%.*}")
     echo -e "${BLUE}Running $fileName ${NC}"
     ./run $file &> testcase_temp
-    if [ $? -ne 0 ]; then
-        echo -e "TESTCASE ${RED}FAILED${NC}";
-        cat testcase_temp >> failed_logs
+    retVal=$?
+    if [[ "$fileName" =~ fail_* ]]; then
+        if [ $retVal -ne 0 ]; then
+            echo -e "TESTCASE ${GREEN}PASSED${NC}"
+        else
+            echo -e "TESTCASE ${RED}FAILED${NC}"
+            cat testcase_temp >> failed_logs
+            scriptRet=1
+        fi
     else
-        echo -e "TESTCASE ${GREEN}PASSED${NC}"
+        if [ $retVal -ne 0 ]; then
+            echo -e "TESTCASE ${RED}FAILED${NC}"
+            cat testcase_temp >> failed_logs
+            scriptRet=1
+        else
+            echo -e "TESTCASE ${GREEN}PASSED${NC}"
+        fi
     fi
+    
     rm testcase_temp
  fi
 done
+
+if [ $scriptRet -ne 0 ]; then
+    echo -e "${RED}===========================TESTS FAILED===========================${NC}"
+    exit 1
+else
+    echo -e "${GREEN}===========================TESTS PASSED===========================${NC}"
+fi

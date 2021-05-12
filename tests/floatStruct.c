@@ -1,4 +1,3 @@
-void printf(char* str, double x);
 char* str = "%f\n";
 
 struct foo{

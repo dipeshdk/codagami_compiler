@@ -15,6 +15,7 @@ bool requiresTypeCasting(declSpec* n1, declSpec* n2);
 
 int checkIntOrCharOrPointer(node* root);
 int checkIntOrChar(node* root);
+int checkIntorCharorFloat(node* root);
 
 int checkPointer(node* root);
 

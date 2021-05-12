@@ -155,7 +155,7 @@ int main() {
     return 0;
 } */
 
-void printf(char *c, int d);
+/* void printf(char *c, int d);
 int* malloc(int a);
 char* arr = "x = %d\n";
 
@@ -190,5 +190,14 @@ int main() {
     printf(arr, (*x).b);
     printf(arr, (*x).c);
     printf(arr, (*x).d);
+    return 0;
+} */
+/* void printf(char* str, int a, int b, float c); */
+int main(){
+    int a = 5;
+    double b = 12.0;
+    double x = 90.56;
+    scanf("%d %f %f\n", &a, &b, &x);
+    printf("a = %d, b = %f, c = %f\n", a, b, x);
     return 0;
 }

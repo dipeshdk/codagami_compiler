@@ -1,4 +1,3 @@
-void printf(char *c, int a);
 char *arr = "y = %d\n";
 
 int main(){

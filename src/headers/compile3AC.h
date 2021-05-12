@@ -76,6 +76,8 @@ void freeRegAndMoveToStack(int regInd);
 
 void asmOpAssignment(int quadNo);
 
+void asmOpAssignmentF(int quadNo);
+
 string evaluate(string op, string arg1, string arg2);
 
 void emitAsmForBinaryOperator(string op, int quadNo);

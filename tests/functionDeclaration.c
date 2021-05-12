@@ -1,5 +1,3 @@
-void printf(char* c, int x);
-int* malloc(int x);
 
 char* str = "%d\n";
 int foo(int *x);

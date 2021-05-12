@@ -13,6 +13,7 @@ extern int temp_num;
 extern int gScope;
 extern int id;
 
+extern set<string> varArgFunctions;
 extern int line;
 
 extern symbolTable* gTempSymbolMap;

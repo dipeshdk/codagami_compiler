@@ -1,5 +1,3 @@
-void printf(char* str, double f);
-void scanf(char* str, double* f1, double* f2, double* f3, double* f4);
 char* str = "%lf\n";
 
 int main(){
