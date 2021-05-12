@@ -2423,6 +2423,7 @@ int main(int ac, char **av) {
         
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
+		optimizeMultiGoto();
 		printCode((char*)TACFilename.c_str());
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
