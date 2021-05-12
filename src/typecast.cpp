@@ -141,6 +141,17 @@ string getTypeString(vector<int> type) {
     return s;
 }
 
+int checkIntorCharorFloat(node* root) {
+    if (!root->declSp) {
+        return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
+    }
+    if (checkType(root->declSp, TYPE_INT, 0) || checkType(root->declSp, TYPE_CHAR, 0) || checkType(root->declSp, TYPE_FLOAT, 0))
+        return 0;
+
+    return TYPE_ERROR;
+}
+
+
 int checkIntOrCharOrPointer(node* root) {
     if (!root->declSp) {
         return INTERNAL_ERROR_DECL_SP_NOT_DEFINED;
