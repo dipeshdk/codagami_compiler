@@ -1,3 +1,5 @@
+#!/bin/bash
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -23,7 +25,7 @@ do
  else
     fileName=$(basename "${file%.*}")
     echo -e "${BLUE}Running $fileName ${NC}"
-    ./run $file &> testcase_temp
+    ./runTest.sh $file &> testcase_temp
     retVal=$?
     if [[ "$fileName" =~ fail_* ]]; then
         if [ $retVal -ne 0 ]; then
