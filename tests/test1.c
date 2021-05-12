@@ -1,4 +1,3 @@
-void printf(const char* str, double d);
 char *str = "%lf\n";
 
 struct foo{

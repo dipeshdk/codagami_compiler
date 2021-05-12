@@ -1,5 +1,3 @@
-void printf(char *c, int a);
-int* malloc(int x);
 char *str = "%d\n";
 
 struct foo{

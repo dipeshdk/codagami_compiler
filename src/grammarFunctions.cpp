@@ -206,7 +206,7 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         for (int i = 0; i < min(6, (int)(arguments.size())); i++) {
             //mov to reg
             if(i == 0){
-                if((!checkType(arguments[i]->declSp, TYPE_STRING_LITERAL, 0)) && (!checkType(arguments[i]->declSp, TYPE_STRING_LITERAL, 1))){
+                if((!checkType(arguments[i]->declSp, TYPE_STRING_LITERAL, 0)) && (!checkType(arguments[i]->declSp, TYPE_CHAR, 1))){
                     error("First argument to printf or scanf should be string", DEFAULT_ERROR);
                 }
             }

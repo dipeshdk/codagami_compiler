@@ -1,5 +1,3 @@
-void scanf(char *c, int* d);
-void printf(char *c, int d); 
 char *p = "%d \n";
 
 int main() {
