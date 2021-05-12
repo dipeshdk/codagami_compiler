@@ -178,4 +178,6 @@ string getFromString(string str);
 int getTypeFromSting(string typeStr);
 
 string getTypeString(string typeCast);
+
+void initLibParamMap();
 #endif

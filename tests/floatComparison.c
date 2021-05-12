@@ -80,25 +80,25 @@ int main() {
     if(a) printf(str, a);
     else printf(str, 900.0);
 
-   /*  b = pp != pq;
+    b = pp != pq;
     if(b) printf(str, b);
-    else printf(str, 900.0); */
+    else printf(str, 900.0);
 
     c = pp == f1;
     if(c) printf(str, c);
     else printf(str, 900.0);
 
-   /*  d = pp != f1;
+    d = pp != pp;
     if(d) printf(str, d);
-    else printf(str, 900.0); */
+    else printf(str, 900.0);
 
-    a = f2 == pq;
+    a = f2 == f2;
     if(a) printf(str, a);
     else printf(str, 900.0);
 
-   /*  b = f2 != pq;
+    b = f2 != pq;
     if(b) printf(str, b);
-    else printf(str, 900.0); */
+    else printf(str, 900.0);
 
     c = 0.00 == 0.0012;
     if(c) printf(str, c);

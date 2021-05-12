@@ -2,8 +2,8 @@ Native Data types :integer, float, character, (void*)
 Variables and Expressions:
 
 Control structures:
-    Conditionals: if, if-else, ternary
-    Loops: for, while, do-while, switch case (maybe)
+    Conditionals: if, if-else, ternary, switch case
+    Loops: for, while, do-while
 Input/Output statements:
     scanf, printf
 Arrays:
@@ -50,10 +50,10 @@ Specifications:
     ellipsis operator not supported
     global data supported
     string literals are const
-    struct declaration inside functions (maybe)
+    struct declaration inside functions
     Nested scopes
     Global variables initialization with constants only
-    switch case (maybe)
+    switch case - no fall through except default
 
 compiler extra features:
     print symbol table scope wise in json format

@@ -28,4 +28,5 @@ int addArrayParamToStack(int& offset, string addr, int& errCode, string& errStri
 void emitPushStruct(node* astNode);
 bool nodeIsStruct(node* astNode);
 void initialiseSymbolTable(symbolTable* gSymTable);
+void optimizeMultiGoto();
 #endif

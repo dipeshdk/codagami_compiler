@@ -1997,6 +1997,9 @@ labeled_statement
 		if($2->declSp && $2->declSp->type.size() > 0 && (($2->declSp->type[0] != TYPE_INT) && ($2->declSp->type[0] != TYPE_CHAR))){
 			error($2->lexeme, CASE_SHOULD_BE_INT);
 		}
+		if(!($2->isConstant)){
+			error($2->lexeme, CASE_SHOULD_BE_INT);
+		}
 		emit(OP_IFNEQGOTO, case_consts[case_consts.size()-1]->addr, $2->addr, BLANK_STR);
 		// This should go to next case
 		$2->nextlist = mergelist($2->nextlist, next);
@@ -2115,6 +2118,9 @@ selection_statement
 		$$ = temp;
 	}
 	| SWITCH '(' expressionJump {case_consts.push_back($3);} ')' statement {
+		if($3->declSp && $3->declSp->type.size() > 0 && (($3->declSp->type[0] != TYPE_INT) && ($3->declSp->type[0] != TYPE_CHAR))){
+			error("Switch expression should be integer", DEFAULT_ERROR);
+		}
 		$6->addr = $3->addr;
 		$$ = makeNode(strdup("SWITCH"), strdup("switch"),0, $3, $6, (node*)NULL, (node*)NULL);
 		$$->nextlist = mergelist($6->breaklist, $6->nextlist);
@@ -2232,7 +2238,7 @@ jump_statement
 		
 		node* temp = $2;
 		int err = canTypecast(funcNode->declSp, temp->declSp);;
-		if(err) error("return type isnt valid", DEFAULT_ERROR);
+		if(err) error("return type is not valid", DEFAULT_ERROR);
 		node* n1 = new node();
 		n1->declSp = declSpCopy(funcNode->declSp);
 		n1->addr = temp->addr;
@@ -2400,6 +2406,7 @@ int main(int ac, char **av) {
 			printf("ERROR: Cannot allocate global symbol table\n");
 			return 1;
 		}
+		initLibParamMap();
 		initialiseSymbolTable(gSymTable);
 		if(!gTempSymbolMap) {
 			printf("ERROR: Cannot allocate global temp symbol table\n");
@@ -2416,6 +2423,7 @@ int main(int ac, char **av) {
         
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
+		optimizeMultiGoto();
 		printCode((char*)TACFilename.c_str());
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;

@@ -206,8 +206,22 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
         for (int i = 0; i < min(6, (int)(arguments.size())); i++) {
             //mov to reg
             if(i == 0){
-                if((!checkType(arguments[i]->declSp, TYPE_STRING_LITERAL, 0)) && (!checkType(arguments[i]->declSp, TYPE_CHAR, 1))){
-                    error("First argument to printf or scanf should be string", DEFAULT_ERROR);
+                if((func_name == "printf") || (func_name == "scanf")){
+                    if((!checkType(arguments[i]->declSp, TYPE_STRING_LITERAL, 0)) && (!checkType(arguments[i]->declSp, TYPE_CHAR, 1))){
+                        error("First argument to printf or scanf should be string", DEFAULT_ERROR);
+                    }
+                }
+            }
+            if((func_name == "fprintf") || (func_name == "fscanf")){
+                if(i == 0){
+                    if((arguments[i]->declSp) && (arguments[i]->declSp->ptrLevel == 0)){
+                        error("First argument to fprintf or fscanf should be pointer", DEFAULT_ERROR);
+                    }
+                }
+                if(i == 1){
+                    if((!checkType(arguments[i]->declSp, TYPE_STRING_LITERAL, 0)) && (!checkType(arguments[i]->declSp, TYPE_CHAR, 1))){
+                        error("First argument to fprintf or fscanf should be string", DEFAULT_ERROR);
+                    }
                 }
             }
             if (checkType(arguments[i]->declSp, TYPE_FLOAT, 0)) {
@@ -556,7 +570,7 @@ void initialiseSymbolTable(symbolTable* gSymTable){
             funcNode->declSp->type.push_back(TYPE_VOID);
             funcNode->declSp->ptrLevel = 0;
         }
-        if(func == "printf" || func == "scanf"){
+        if(varArgFunctions.find(func) != varArgFunctions.end()){
             funcNode->declSp->type.push_back(TYPE_VOID);
         }
         if(singleFloatLibFunc.find(func) != singleFloatLibFunc.end()){
@@ -620,7 +634,38 @@ void initialiseSymbolTable(symbolTable* gSymTable){
             funcNode->declSp->type.push_back(TYPE_FLOAT);
             funcNode->declSp->ptrLevel = 0;
         }
-        
+
+        if(gLibParamMap.find(func) != gLibParamMap.end()) {
+            libFunc *libF = gLibParamMap[func];
+            vector<libParam*> libParamVec = libF->libParamVec; 
+            for(libParam* lp : libParamVec) {
+                struct param* paramTmp = new param();
+                paramTmp->paramName = lp->paramName;
+                paramTmp->declSp->type.push_back(lp->type);
+                paramTmp->declSp->ptrLevel = lp->ptrLevel;
+                funcNode->paramList.push_back(paramTmp);
+            }
+            funcNode->paramSize = libParamVec.size();    
+            funcNode->declSp->type.push_back(libF->type);
+            funcNode->declSp->ptrLevel = libF->ptrLevel;
+        }
     }
-    
 }
+
+void optimizeMultiGoto(){
+    for(quadruple* node : gCode){
+        if(node->opCode == OP_GOTO || node->opCode == OP_IFGOTO){
+            if(node->result == BLANK_STR)
+                continue;
+            int nextQuad = stoi(node->result);
+            while(gCode[nextQuad]->opCode == OP_GOTO){
+                if(gCode[nextQuad]->result == BLANK_STR)
+                    break;
+                node->result = gCode[nextQuad]->result;
+                nextQuad = stoi(node->result);
+            }
+        }
+    }
+}
+
+
