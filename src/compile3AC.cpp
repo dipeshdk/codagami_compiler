@@ -11,9 +11,30 @@ stack<int> funcSizeStack;
 vector<globalData*> globalDataPair;
 int gQuadNo;
 stack<int> ptrAssignedRegs;
-set<string> libraryFunctions{"printf", "scanf", "malloc"};
+set<string> libraryFunctions{"printf", "scanf", "malloc", "fabs", "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "logb", "sqrt", "cbrt", "round",
+                                "sin", "cos", "tan", "asin", "acos", "atan", "trunc", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "floor", "ceil", "erf", "erfc", "tgamma", "lgamma"
+                                "abs", "labs", "fmod", "remainder", "nextafter", "copysign", "fmax", "fmin", "fdim", "hypot", "pow", "round", "atan2"
+                                "signbit", "isnormal", "isnan","isinf","isfinite", "ilogb", "lround", "fma"};
+
+set<string> mathFuncs{"fabs", "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "logb", "sqrt", "cbrt", "round",
+                                "sin", "cos", "tan", "asin", "acos", "atan", "trunc", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "floor", "ceil", "erf", "erfc", "tgamma", "lgamma"
+                                "abs", "labs", "fmod", "remainder", "nextafter", "copysign", "fmax", "fmin", "fdim", "hypot", "pow", "round", "atan2"
+                                "signbit", "isnormal", "isnan","isinf","isfinite", "ilogb", "lround", "fma"};
 set<string> varArgFunctions{"printf", "scanf"};
 vector<quadruple*> gCodeWithTypecast;
+set<string> singleFloatLibFunc{"fabs", "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "logb", "sqrt", "cbrt", "round",
+                                "sin", "cos", "tan", "asin", "acos", "atan", "trunc", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "floor", "ceil", "erf", "erfc", "tgamma", "lgamma"}; // 1 double arguments, returns double
+set<string> singleIntLibFunc{"abs", "labs"}; // 1 int arguments, returns int
+set<string> doubleFloatLibFunc{"fmod", "remainder", "nextafter", "copysign", "fmax", "fmin", "fdim", "hypot", "pow", "round", "atan2"}; // 2 double arguments, returns double
+// set<string> doubleIntLibFunc{}; // 2 int arguments, returns int
+set<string> singleIntFloatLibFunc{"signbit", "isnormal", "isnan","isinf","isfinite", "ilogb", "lround",  /* "fpclassify", */ }; //arg - float; returns int. 
+set<string> TripleFloatLibFunc{"fma"}; // 3 double arguments, returns double
+// set<string> UnusualFunc{"modf", "ldexp", "frexp", "rint", "lrint", "nearbyint", }; // Unusual functions
+
+// div returns struct
+// remquo return double, takes 2 double, 1 int*
+// nan
+// fpclassify : takes 1 float, returns 
 
 bool isTypecasted(string name) {
     size_t pos = name.find(" ) ");
@@ -421,7 +442,25 @@ void amsOpLCall(int quadNo) {
             emitAsm("movq", {"$"+quad->arg2, REGISTER_RAX});
         }
         else{
-            emitAsm("movq", {"$0", REGISTER_RAX});
+            if(mathFuncs.find(funcName) == mathFuncs.end()){
+                emitAsm("movq", {"$0", REGISTER_RAX});
+            }
+            isFloat = 0;
+            for( auto paramTmp : funcNode->paramList){
+                if((paramTmp->declSp->type[0] == TYPE_FLOAT) && (paramTmp->declSp->ptrLevel == 0)){
+                    isFloat = 1;
+                    break;
+                }
+            }
+            if(isFloat){
+                emitAsm("movq", {"$1", REGISTER_RAX});
+            }else{
+                emitAsm("movq", {"$0", REGISTER_RAX});
+            }
+            isFloat = 0;
+            if(funcNode->declSp && funcNode->declSp->type.size() > 0 && (funcNode->declSp->type[0] == TYPE_FLOAT) && (funcNode->declSp->ptrLevel == 0)) {
+                isFloat = 1;
+            }
         }
     } else {
         string funcName = quad->arg1;

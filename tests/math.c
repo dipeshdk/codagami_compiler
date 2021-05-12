@@ -1,11 +1,11 @@
-void printf(char* str, double d);
+/* void printf(char* str, double f);
 double sin(double x);
 double cos(double x);
 double tan(double x);
 double sqrt(double x);
 double fabs(double x);
 double fmax( double x, double y );
-double fmin( double x, double y );
+double fmin( double x, double y ); */
 char *str = "%lf\n";
 
 int main() {
