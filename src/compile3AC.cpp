@@ -1760,11 +1760,20 @@ void copyReturnStruct(string to, int quadNo) {
         string toParam = to + "." + p->name;
         string toParamAddr = getVariableAddr(toParam, st);
 
-        int regInd = getReg(quadNo, CONSTANT);
-        string regName = regVec[regInd]->regName;
-        emitAsm("movq", {hexString(to_string(fromOff)) + "(" + REGISTER_RAX + ")", regName});
-        emitAsm("movq", {regName, toParamAddr});
-        freeReg(regInd);
+        if(p->declSp->type[0] == TYPE_FLOAT){
+            int regIndF = getRegFloat(quadNo, CONSTANT);
+            string regNameF = regVecFloat[regIndF]->regName;
+            emitAsm("movsd", {hexString(to_string(fromOff)) + "(" + REGISTER_RAX + ")", regNameF});
+            emitAsm("movsd", {regNameF, toParamAddr});
+            freeRegFloat(regIndF);
+        } else {
+            int regInd = getReg(quadNo, CONSTANT);
+            string regName = regVec[regInd]->regName;
+            emitAsm("movq", {hexString(to_string(fromOff)) + "(" + REGISTER_RAX + ")", regName});
+            emitAsm("movq", {regName, toParamAddr});
+            freeReg(regInd);
+        }
+
         if (isToPtr) {
             regVec[ptrAssignedRegs.top()]->isFree = true;
             ptrAssignedRegs.pop();
@@ -1802,11 +1811,20 @@ void copyReturningStruct(string from, int quadNo) {
 
         int toOff = getParameterOffset(fromNode->declSp->lexeme, p->name, st);
 
-        int regInd = getReg(quadNo, fromParam);
-        string regName = regVec[regInd]->regName;
-        emitAsm("movq", {fromParamAddr, regName});
-        emitAsm("movq", {regName, hexString(to_string(toOff)) + "(" + regPtrName + ")"});
-        freeReg(regInd);
+
+        if(p->declSp->type[0] == TYPE_FLOAT){
+            int regIndF = getRegFloat(quadNo, CONSTANT);
+            string regNameF = regVecFloat[regIndF]->regName;
+            emitAsm("movsd", {fromParamAddr, regNameF}); //return register for struct ??
+            emitAsm("movsd", {regNameF, hexString(to_string(toOff)) + "(" + regPtrName + ")"});
+            freeRegFloat(regIndF);
+        } else {
+            int regInd = getReg(quadNo, fromParam);
+            string regName = regVec[regInd]->regName;
+            emitAsm("movq", {fromParamAddr, regName});
+            emitAsm("movq", {regName, hexString(to_string(toOff)) + "(" + regPtrName + ")"});
+            freeReg(regInd);
+        }
         if (isFromPtr) {
             regVec[ptrAssignedRegs.top()]->isFree = true;
             ptrAssignedRegs.pop();
