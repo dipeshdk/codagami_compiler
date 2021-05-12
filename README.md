@@ -24,14 +24,14 @@ The project parses input C file and outputs an abstract syntax tree as a DOT scr
 The steps to compile and run an ANSI code are as follows:
 ```console
 $ make
-$ bin/codagami <filename>
+$ bin/codagami <filename>.c
 $ gcc -no-pie outputs/<fileName>/<fileName>.s -o codagamiBinary.out -lm
 $ bash codagamiBinary.out
 ```
 To compare the output given by codagami and GCC, you can use the run script as follows:
 ```console
 $ make
-$ bash run <filename.c>
+$ bash run <filename>.c
 ```
 This will show you the diff of the output given by GCC and output given by codagami under the section "printing diff".
 
