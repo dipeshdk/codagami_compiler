@@ -24,12 +24,23 @@ do
     fileName=$(basename "${file%.*}")
     echo -e "${BLUE}Running $fileName ${NC}"
     ./run $file &> testcase_temp
-    if [ $? -ne 0 ]; then
-        echo -e "TESTCASE ${RED}FAILED${NC}";
-        cat testcase_temp >> failed_logs
+    retVal=$?
+    if [[ "$fileName" =~ fail_* ]]; then
+        if [ $retVal -ne 0 ]; then
+            echo -e "TESTCASE ${GREEN}PASSED${NC}"
+            cat testcase_temp >> failed_logs
+        else
+            echo -e "TESTCASE ${RED}FAILED${NC}"
+        fi
     else
-        echo -e "TESTCASE ${GREEN}PASSED${NC}"
+        if [ $retVal -ne 0 ]; then
+            echo -e "TESTCASE ${RED}FAILED${NC}"
+            cat testcase_temp >> failed_logs
+        else
+            echo -e "TESTCASE ${GREEN}PASSED${NC}"
+        fi
     fi
+    
     rm testcase_temp
  fi
 done
