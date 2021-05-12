@@ -66,4 +66,5 @@ outputs/*
 gccOutput
 myOutput
 temp*
+sample2.txt
 failed_logs

@@ -1,33 +1,34 @@
-/* float EPSILON = 0.001;
+double EPSILON = 0.001;
 
-float abs(float h){
+double myAbs(double h){
   return h;
 }
 
-
-float func(float x)
+double func(double x)
 {
-    return x*x*x - x*x + 2;
+    return x*x*x - x*x + 2.0;
 }
 
-float derivFunc(float x)
+double derivFunc(double x)
 {
-    return 3*x*x - 2*x;
+    return 3.0*x*x - 2.0*x;
 }
 
-void newtonRaphson(float x)
+void newtonRaphson(double x)
 {
-    float h = func(x) / derivFunc(x);
-    while (abs(h) >= EPSILON)
+    double f = func(x), df = derivFunc(x);
+    double h = f/df;
+    while (myAbs(h) >= EPSILON)
     {
-        h = func(x)/derivFunc(x);
+        double f = func(x), df = derivFunc(x);
+        h = f/df;
         x = x - h;
     }
 }
- */ 
+ 
 int main()
 {
-    /* float x0 = -20; 
-    newtonRaphson(x0); */
+    double x0 = -20.0; 
+    newtonRaphson(x0);
     return 0;
 }

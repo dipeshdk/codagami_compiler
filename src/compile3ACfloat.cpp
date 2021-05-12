@@ -164,9 +164,10 @@ void asmOpReturnF(int quadNo) {
             emitAsm("movsd", {"$" + hexString(quad->result), xmm0reg});
         }
     }
-    emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
-    emitAsm("popq", {REGISTER_RBP});
-    emitAsm("retq", {});
+    emitAsm("jmp", {"9f"});
+    // emitAsm("addq", {"$" + hexString(to_string(funcSizeStack.top())), REGISTER_RSP});
+    // emitAsm("popq", {REGISTER_RBP});
+    // emitAsm("retq", {});
 }
 
 
