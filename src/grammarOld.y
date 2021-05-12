@@ -2238,7 +2238,7 @@ jump_statement
 		
 		node* temp = $2;
 		int err = canTypecast(funcNode->declSp, temp->declSp);;
-		if(err) error("return type isnt valid", DEFAULT_ERROR);
+		if(err) error("return type is not valid", DEFAULT_ERROR);
 		node* n1 = new node();
 		n1->declSp = declSpCopy(funcNode->declSp);
 		n1->addr = temp->addr;
