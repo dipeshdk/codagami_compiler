@@ -259,6 +259,20 @@ string checkFuncArgValidityWithParamEmit(node* postfix_expression, node* argumen
             setErrorParams(errCode, INTERNAL_ERROR_DECL_SP_NOT_DEFINED, errString, temp->lexeme);
             return EMPTY_STR;
         }
+        symbolTableNode* symNode = lookUp(gSymTable, temp->lexeme);
+        if(symNode && symNode->infoType==INFO_TYPE_ARRAY && symNode->arrayIndices.size()>1 && paramList[idx]->declSp->ptrLevel==1 && paramList[idx]->infoType!=INFO_TYPE_ARRAY){
+            setErrorParams(errCode, INVALID_ARGS_IN_FUNC_CALL, errString, temp->lexeme);
+            return EMPTY_STR;
+        }
+        if(symNode && symNode->infoType==INFO_TYPE_ARRAY && paramList[idx]->infoType==INFO_TYPE_ARRAY){
+            for(int i = 0 ; i < symNode->arrayIndices.size(); i++){
+                if(symNode->arrayIndices[i]!=paramList[idx]->arrayIndices[i]){
+                    setErrorParams(errCode, INVALID_ARGS_IN_FUNC_CALL, errString, temp->lexeme);
+                    return EMPTY_STR;    
+                }
+            }
+        }
+        
         int retval = canTypecast(temp->declSp, paramList[idx]->declSp);
         if (retval) {
             setErrorParams(errCode, INVALID_ARGS_IN_FUNC_CALL, errString, temp->lexeme);

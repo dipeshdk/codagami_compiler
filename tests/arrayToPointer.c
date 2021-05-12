@@ -14,13 +14,6 @@ void foo(int *a) {
 void foob(int a[90]) {
     a[40] = 90;
     printf(str, a[40]);
-    /* int b=a[2];
-    a[0] = 99;
-    printf(str, a[2]);
-    printf(str, b);
-    a = malloc(4*sizeof(int));
-    a[0] = 5;
-    printf(str, a[0]); */
     return;
 }
 
