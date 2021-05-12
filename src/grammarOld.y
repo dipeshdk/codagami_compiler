@@ -1157,7 +1157,10 @@ assignment_expression
 				if(retval){
 					typeCastLexemeWithEmit(assignment_expression, unary_expression->declSp);
 				}
-				emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
+                if(unary_expression->declSp->type[0] == TYPE_FLOAT || assignment_expression->declSp->type[0] == TYPE_FLOAT){
+                     emit(OP_ASSIGNMENTF, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
+                }
+				else emit(OP_ASSIGNMENT, assignment_expression->addr, EMPTY_STR, unary_expression->addr);
 			}
 			else
 			{
@@ -2351,10 +2354,11 @@ int main(int ac, char **av) {
         
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";
+		printCode((char*)TACFilename.c_str());
 		emitAssemblyFrom3AC(asmFileName);
 		string jsonFileNamePrefix = directoryName + filePrefix;
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-		printCode((char*)TACFilename.c_str());
+		
 		fclose(fd);
     }
     else

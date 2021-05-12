@@ -76,6 +76,8 @@ void freeRegAndMoveToStack(int regInd);
 
 void asmOpAssignment(int quadNo);
 
+void asmOpAssignmentF(int quadNo);
+
 string evaluate(string op, string arg1, string arg2);
 
 void emitAsmForBinaryOperator(string op, int quadNo);
@@ -162,4 +164,18 @@ void copyReturningStruct(string from, int quadNo);
 string alignedFunctionSize(string str);
 
 void asmOPDummyPush(int quadNo);
+
+bool isTypecasted(string name);
+
+void copyQuads();
+
+string getTypeCastOp(string name);
+
+string getToString(string str);
+
+string getFromString(string str);
+
+int getTypeFromSting(string typeStr);
+
+string getTypeString(string typeCast);
 #endif

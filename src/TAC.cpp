@@ -220,7 +220,10 @@ void emitOperationAssignment(node* unary_expression, node* assignment_expression
     }
 
     emit(opCode, unary_expression->addr, assignment_expression->addr, newTmp);
-    emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, resultAddr);
+    if(tempNode->declSp->type[0] == TYPE_FLOAT){
+        emit(OP_ASSIGNMENTF, newTmp, EMPTY_STR, resultAddr);
+    }
+    else emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, resultAddr);
     tempNode->size = getNodeSize(tempNode, gSymTable);
     tempNode->offset = offset;
     offset += tempNode->size;
