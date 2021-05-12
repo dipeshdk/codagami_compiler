@@ -900,7 +900,9 @@ equality_expression
 			error(errStr, errCode);
 		if($1->declSp->type[0]  == TYPE_FLOAT || $3->declSp->type[0]  == TYPE_FLOAT ) {
             emitRelop(equality_expression, relational_expression, temp, OP_NEQF, errCode, errStr);
-        } else emitRelop(equality_expression, relational_expression, temp, OP_NEQ, errCode, errStr);
+        } else {
+			emitRelop(equality_expression, relational_expression, temp, OP_NEQ, errCode, errStr);
+		}
 		if(errCode)
 			error(errStr, errCode);
 		$$ = temp;
@@ -1056,7 +1058,9 @@ logical_and_expression
 			}
 			emit(OP_ANDAND, $1->addr, $4->addr, newTmp);
 			temp->addr = newTmp;
-			temp->declSp = declSpCopy($1->declSp);
+			// temp->declSp = declSpCopy($1->declSp);
+			temp->declSp = new declSpec();
+			temp->declSp->type.push_back(TYPE_INT);
 			addIntTemp(newTmp, gSymTable);
 			$$ = temp;
 		}
@@ -1096,7 +1100,9 @@ logical_or_expression
 			}
 			emit(OP_OROR, $1->addr, $4->addr, newTmp);
 			temp->addr = newTmp;
-			temp->declSp = declSpCopy($1->declSp);
+			// temp->declSp = declSpCopy($1->declSp);
+			temp->declSp = new declSpec();
+			temp->declSp->type.push_back(TYPE_INT);
 			addIntTemp(newTmp, gSymTable);
 			$$ = temp;
 		}
@@ -1698,16 +1704,10 @@ enumerator
 
 type_qualifier
 	: CONST {
-		node* temp = makeNode(strdup("CONST"), strdup("const"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		temp->declSp = new declSpec();
-		temp->declSp->isConst = true;
-		$$ = temp;
+		error("const", UNSUPPORTED_FUNCTIONALITY);
 	}
 	| VOLATILE {
-		node* temp = makeNode(strdup("VOLATILE"), strdup("volatile"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		temp->declSp = new declSpec();
-		temp->declSp->isVolatile = true;
-		$$ = temp;
+		error("const", UNSUPPORTED_FUNCTIONALITY);
 	}
 	;
 
@@ -2410,9 +2410,9 @@ int main(int ac, char **av) {
 		gTempSymbolMap->parent = nullptr;
         yyparse();
 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
-		// char * fileName = strdup("graph.dot");
+		char * fileName = strdup("graph.dot");
 		// if(ac == 3) fileName = av[2];
-		// generateDot(root,fileName);
+		generateDot(root,fileName);
         
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";

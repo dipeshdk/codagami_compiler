@@ -1,0 +1,80 @@
+Native Data types :integer, float, character, (void*)
+Variables and Expressions:
+
+Control structures:
+    Conditionals: if, if-else, ternary
+    Loops: for, while, do-while, switch case (maybe)
+Input/Output statements:
+    scanf, printf
+Arrays:
+    array of native data types, mutlidimension array, 
+    array of structs, array initialization while declaration
+Functions:
+    Recursion, mutual resursion, function declaration, 
+    function with return type as struct, function with parameter type as struct
+
+Structs:
+    function with return type as struct, function with parameter type as struct
+    Struct dereference with both dot(.) operator and arrow(->) operator
+User defined types (struct):
+    no constructor
+Pointers (single level / stack pointers):
+    single level pointers allowed
+Simple library functions:
+    math functions: 
+
+
+Extra: 
+Dynamic memory allocation/management:
+    malloc, 
+    TODO: free
+Code optimizations:
+    First six parameters of functions in registers
+    Short circuit eval in 3ac // maybe: and asm
+    TODO: Check optimized goto's
+    Constant evaluation (except float)
+    Functions with more than 6 parameters
+    basic features mentioned above supported for float as well
+
+
+Specifications:
+    All data types are 8 bytes (Padding ?)
+    Explicit typecasting 
+    Implicit typecasting with warning
+    Function parameter check before calling
+    Nested structs not supported
+    only double precision floating point
+    Prefix and postfix imcrement and decrement supported
+    Sizeof function supported for identifiers and type name
+    pointer arthimetic is absolute: int *a, *a = *a + 1 increments value by 1 not 8
+    ellipsis operator not supported
+    global data supported
+    string literals are const
+    struct declaration inside functions (maybe)
+    Nested scopes
+    Global variables initialization with constants only
+    switch case (maybe)
+
+compiler extra features:
+    print symbol table scope wise in json format
+    .s assembly generated
+    .tac contains corresponding 3AC Code
+    .dot to view ast
+
+NOT supported:
+    unsigned
+    enum
+    union
+    type qualifier: const volatile
+    storage classes specifiers
+    not constants string literals
+
+
+TODO: not tested
+    Opmod 
+    assignment expression
+    relop
+    struct declaration inside functions
+    switch case
+
+
