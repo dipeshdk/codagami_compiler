@@ -1,4 +1,3 @@
-void printf(char* str, double d);
 char *str = "%lf\n";
 
 int main() {

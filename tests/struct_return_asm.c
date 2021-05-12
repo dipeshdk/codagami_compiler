@@ -1,5 +1,4 @@
 
-void printf(char* arr, int a);
 char* arr = "%d\n";
 
 struct foo{

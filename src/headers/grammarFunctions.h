@@ -27,4 +27,5 @@ bool checkGlobalInitializer(node* initializer);
 int addArrayParamToStack(int& offset, string addr, int& errCode, string& errString);
 void emitPushStruct(node* astNode);
 bool nodeIsStruct(node* astNode);
+void initialiseSymbolTable(symbolTable* gSymTable);
 #endif

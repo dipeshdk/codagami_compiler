@@ -1,6 +1,4 @@
 
-void scanf(char *c, int* d);
-void printf(char *c, int d);
 char *p = "%d\n";
 
 void func(int arrfunc[4], int c, int b){

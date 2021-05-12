@@ -1,4 +1,3 @@
-void printf(char* str, int x);
 char* str = "%d\n";
 
 void bubble_sort(int arr[6], int n){

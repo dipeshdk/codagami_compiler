@@ -1,5 +1,3 @@
-int* malloc(int x);
-void printf(char* str, int x);
 char* str = "%d\n";
 
 int main(){

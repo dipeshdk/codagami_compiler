@@ -1,5 +1,4 @@
-void printf(char* str, int d);
-char *str = "%d\n";
+char *str = "%ld\n";
 
 int main() {
     int x=1;

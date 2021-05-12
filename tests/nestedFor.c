@@ -1,4 +1,3 @@
-void printf(char *c, int a, int b);
 char * p = "i=%d, j = %d\n";
 
 

@@ -175,6 +175,9 @@ void error(string var, int error_code) {
     case CASE_SHOULD_BE_INT:
         str = "Case should be integer constant";
         break;
+    case CANT_PRINT_STRUCT:
+        str = "Can't print or scan struct";
+        break;
     default:
         break;
     }

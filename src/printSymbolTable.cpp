@@ -323,6 +323,8 @@ string getOpName(int opCode) {
         return "SUBI";
     case OP_ASSIGNMENT:
         return "ASSIGNMENT";
+    case OP_ASSIGNMENTF:
+        return "ASSIGNMENTF";
     case OP_UNARY_MINUS:
         return "UNARY_MINUS";
     case OP_DIVI:
@@ -440,6 +442,9 @@ void printQuad(quadruple* quad, int line) {
         printf("%s:\n", quad->result.c_str());
         break;
     case OP_ASSIGNMENT:
+        printf("    %s = %s\n", quad->result.c_str(), quad->arg1.c_str());
+        break;
+    case OP_ASSIGNMENTF:
         printf("    %s = %s\n", quad->result.c_str(), quad->arg1.c_str());
         break;
     case OP_IFNEQGOTO:
