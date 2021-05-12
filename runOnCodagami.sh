@@ -20,7 +20,7 @@ echo -e "${BLUE}----------------------file name $fileName-----------------------
 
 
 echo -e "${BLUE}----------------------building assembly bin/3AC --------------------------${NC}"
-bin/3AC ${testPath}
+bin/codagami ${testPath}
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error building codagami assembly${NC}";
     exit 1
