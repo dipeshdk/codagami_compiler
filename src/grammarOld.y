@@ -1997,7 +1997,7 @@ labeled_statement
 		if($2->declSp && $2->declSp->type.size() > 0 && (($2->declSp->type[0] != TYPE_INT) && ($2->declSp->type[0] != TYPE_CHAR))){
 			error($2->lexeme, CASE_SHOULD_BE_INT);
 		}
-		if(!(strcmp($2->name, "IDENTIFIER"))){
+		if(!($2->isConstant)){
 			error($2->lexeme, CASE_SHOULD_BE_INT);
 		}
 		emit(OP_IFNEQGOTO, case_consts[case_consts.size()-1]->addr, $2->addr, BLANK_STR);
