@@ -1585,7 +1585,11 @@ void asmOpIfNeqGoto(int quadNo) {
 
     if (isConstant(quad->arg1)) {
         if (isConstant(quad->arg2)) {
-            emitAsm("cmp", {"$" + hexString(quad->arg1), "$" + hexString(quad->arg2)});
+            int regInd = getReg(quadNo, quad->arg1);
+            string regName = regVec[regInd]->regName;
+            emitAsm("movq", {"$" + hexString(quad->arg2), regName});
+            emitAsm("cmp", {"$" + hexString(quad->arg1), regName});
+            freeReg(regInd);
         } else {
             string argAddr = getVariableAddr(quad->arg2, st);
             emitAsm("cmp", {"$" + hexString(quad->arg1), argAddr});

@@ -1997,6 +1997,9 @@ labeled_statement
 		if($2->declSp && $2->declSp->type.size() > 0 && (($2->declSp->type[0] != TYPE_INT) && ($2->declSp->type[0] != TYPE_CHAR))){
 			error($2->lexeme, CASE_SHOULD_BE_INT);
 		}
+		if(!($2->isConstant)){
+			error($2->lexeme, CASE_SHOULD_BE_INT);
+		}
 		emit(OP_IFNEQGOTO, case_consts[case_consts.size()-1]->addr, $2->addr, BLANK_STR);
 		// This should go to next case
 		$2->nextlist = mergelist($2->nextlist, next);
@@ -2115,6 +2118,9 @@ selection_statement
 		$$ = temp;
 	}
 	| SWITCH '(' expressionJump {case_consts.push_back($3);} ')' statement {
+		if($3->declSp && $3->declSp->type.size() > 0 && (($3->declSp->type[0] != TYPE_INT) && ($3->declSp->type[0] != TYPE_CHAR))){
+			error("Switch expression should be integer", DEFAULT_ERROR);
+		}
 		$6->addr = $3->addr;
 		$$ = makeNode(strdup("SWITCH"), strdup("switch"),0, $3, $6, (node*)NULL, (node*)NULL);
 		$$->nextlist = mergelist($6->breaklist, $6->nextlist);

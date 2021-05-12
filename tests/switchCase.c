@@ -5,12 +5,15 @@ int main(){
     switch(a){
         case 10:{
             printf("10: val = %d\n", a);
+            break;
         }
         case 12:{
             printf("12: val = %d\n", a);
+            break;
         }
         case 13:{
             printf("13: val = %d\n", b);
+            break;
         }
         default:
             printf("default case: val = %d\n", a);
