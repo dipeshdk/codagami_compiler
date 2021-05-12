@@ -606,6 +606,24 @@ void initialiseSymbolTable(symbolTable* gSymTable){
             funcNode->declSp->type.push_back(TYPE_FLOAT);
             funcNode->declSp->ptrLevel = 0;
         }
+
+        if(func == "fopen"){
+            struct param* paramTmp = new param();
+            paramTmp->paramName = "filename";
+            paramTmp->declSp->type.push_back(TYPE_CHAR);
+            paramTmp->declSp->ptrLevel = 1;
+            funcNode->paramList.push_back(paramTmp);
+            struct param* paramTmp2 = new param();
+            paramTmp2->paramName = "mode";
+            paramTmp2->declSp->type.push_back(TYPE_CHAR);
+            paramTmp2->declSp->ptrLevel = 1;
+            funcNode->paramList.push_back(paramTmp2);
+
+
+            funcNode->paramSize = 2;    
+            funcNode->declSp->type.push_back(TYPE_VOID);
+            funcNode->declSp->ptrLevel = 1;
+        }
         
     }
     
