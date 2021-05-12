@@ -19,7 +19,7 @@ int foo(int a, int x, int y, int z) {
 
    a = 1 ? x : 3;
    printf(str, a);
-   /*a = 0 ? x : 3;
+   a = 0 ? x : 3;
    printf(str, a);
    a = 1==9 ? x : 3;
    printf(str, a);
@@ -32,8 +32,8 @@ int foo(int a, int x, int y, int z) {
    printf(str, a);
    a = 1!=1 ? x : 3;
    printf(str, a);
-   */
-   /* a = 1 ? x : y;
+  
+   a = 1 ? x : y;
    printf(str, a); 
 
    a = 0 ? x : y;
@@ -62,7 +62,7 @@ int foo(int a, int x, int y, int z) {
    a = b!=9 ? x : y;
    printf(str, a);
    a = b!=1 ? x : y;
-   printf(str, a); */
+   printf(str, a);
 
    a = b ? x : y;
    printf(str, a);
