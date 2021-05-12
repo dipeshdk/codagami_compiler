@@ -17,7 +17,7 @@ struct globalData {
 struct declSpec {
     vector<int> type;                  // check validity of vector short double
     int ptrLevel;                      // **a =2
-    string lexeme;                     // union or struct or enum
+    string lexeme;                     // struct
     vector<int> storageClassSpecifier; // int or vector<int> ? check later
     bool isConst;                      //bool
     bool isVolatile;                   //bool
