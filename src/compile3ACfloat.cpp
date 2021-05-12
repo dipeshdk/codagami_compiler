@@ -310,23 +310,33 @@ void asmOpCompEqFloat(int quadNo, string cmov) {
         errorAsm(quad->result, ASSIGNMENT_TO_CONSTANT_ERROR);
     string resultAddr = getVariableAddr(quad->result, st);
 
-    int regInd = getReg(quadNo, quad->arg1);
-    string regName = regVec[regInd]->regName;
-    emitAsm("movq", {"$0", regName});
-
-    int regInd1 = getRegFloat(quadNo, quad->arg1);
-    string regName1 = regVecFloat[regInd1]->regName;
+    int regInd = getRegFloat(quadNo, quad->arg1);
+    string regName = regVecFloat[regInd]->regName;
 
     string argAddr2 = getVariableAddr(quad->arg2, st);
-    emitAsm("movsd", {argAddr2, regName1});
+    emitAsm("movsd", {argAddr2, regName});
     string argAddr1 = getVariableAddr(quad->arg1, st);
-    emitAsm("ucomisd", {argAddr1, regName1});
+    emitAsm("ucomisd", {argAddr1, regName});
 
-    emitAsm(cmov, {regName, REGISTER_RAX});
+    emitAsm("setnp", {"%al"});
+    emitAsm("movq", {"$0", REGISTER_RDX});
+
+    emitAsm("movsd", {argAddr2, regName});
+    emitAsm("ucomisd", {argAddr1, regName});
+
+    emitAsm(cmov, {REGISTER_RDX, REGISTER_RAX});
     emitAsm("movzbl", {"%al", REGISTER_RAX});
-    emitAsm("movq", {REGISTER_RAX, resultAddr});
+
+    if (isFloat(quad->result, st)) {
+        int regInd1 = getRegFloat(quadNo, CONSTANT);
+        string regName1 = regVecFloat[regInd1]->regName;
+        emitAsm("cvtsi2sd", {REGISTER_RAX, regName1});
+        emitAsm("movsd", {regName1, resultAddr});
+        freeRegFloat(regInd1);
+    } else
+        emitAsm("movq", {REGISTER_RAX, resultAddr});
+        
     freeReg(regInd);
-    freeRegFloat(regInd1);
     return;
 }
 
