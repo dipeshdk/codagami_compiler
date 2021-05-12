@@ -240,7 +240,6 @@ postfix_expression
 		$$ = newNode;
 	}
 	| postfix_expression PTR_OP IDENTIFIER {
-		
         structTableNode* structure = getRightMostStructFromPostfixExpression($1, true, errCode, errStr);
 		if(errCode) error(errStr, errCode);
 		
@@ -260,14 +259,64 @@ postfix_expression
 		$$ = newNode;
 	}
 	| postfix_expression INC_OP {
-		errStr = "use ++" + string($1->lexeme)+ " instead of " + string($1->lexeme) + "++";
-		error(errStr.c_str(), UNSUPPORTED_FUNCTIONALITY);
-		$$ = $1;
+		int retval  = checkIntorCharorFloat($1);
+		if(retval) error($1->lexeme, retval);
+		string newTmp = generateTemp(errCode);
+    	if(errCode)
+        	error("Cannot generate Temp",DEFAULT_ERROR);
+		
+		string oldValTemp = generateTemp(errCode);
+    	if(errCode)
+        	error("Cannot generate Temp",DEFAULT_ERROR);
+
+		int opCode = getOpAddType($1, errCode, errStr);
+		if(errCode)
+			error($1->lexeme,errCode);
+		if(opCode == OP_ADDF) {
+			string globalFloatAddr = getGlobalFloatAddr();
+			sendFloatToGlobal("1.0", globalFloatAddr);
+			emit(opCode, $1->addr, globalFloatAddr, newTmp);
+		}
+		else {
+			emit(opCode, $1->addr, "1", newTmp);
+		}
+    	emit(OP_ASSIGNMENT, $1->addr, EMPTY_STR, oldValTemp);
+    	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $1->addr);
+		addTempDetails(newTmp, gSymTable, $1);
+		addTempDetails(oldValTemp, gSymTable, $1);
+		$$ = makeNode(strdup("INC_OP"), strdup("++"), 0, $1, (node*)NULL, (node*)NULL, (node*)NULL);
+		$$->declSp = declSpCopy($1->declSp);
+		$$->addr = oldValTemp;
 	}
 	| postfix_expression DEC_OP {
-		errStr = "use --" + string($1->lexeme)+ " instead of " + string($1->lexeme) + "--";
-		error(errStr.c_str(), UNSUPPORTED_FUNCTIONALITY);
-		$$ = $1;
+		int retval  = checkIntorCharorFloat($1);
+		if(retval) error($1->lexeme, retval);
+		string newTmp = generateTemp(errCode);
+    	if(errCode)
+        	error("Cannot generate Temp",DEFAULT_ERROR);
+		
+		string oldValTemp = generateTemp(errCode);
+    	if(errCode)
+        	error("Cannot generate Temp",DEFAULT_ERROR);
+
+		int opCode = getOpSubType($1, errCode, errStr);
+		if(errCode)
+			error($1->lexeme,errCode);
+		if(opCode == OP_SUBF) {
+			string globalFloatAddr = getGlobalFloatAddr();
+			sendFloatToGlobal("1.0", globalFloatAddr);
+			emit(opCode, $1->addr, globalFloatAddr, newTmp);
+		}
+		else {
+			emit(opCode, $1->addr, "1", newTmp);
+		}
+    	emit(OP_ASSIGNMENT, $1->addr, EMPTY_STR, oldValTemp);
+    	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $1->addr);
+		addTempDetails(newTmp, gSymTable, $1);
+		addTempDetails(oldValTemp, gSymTable, $1);
+		$$ = makeNode(strdup("INC_OP"), strdup("++"), 0, $1, (node*)NULL, (node*)NULL, (node*)NULL);
+		$$->declSp = declSpCopy($1->declSp);
+		$$->addr = oldValTemp;
 	}
 	;
 
@@ -289,7 +338,7 @@ unary_expression
 		$$ = $1;
 	}
 	| INC_OP unary_expression {
-		int retval  = checkIntOrCharOrPointer($2);
+		int retval  = checkIntorCharorFloat($2);
 		if(retval) error($2->lexeme, retval);
 		string newTmp = generateTemp(errCode);
     	if(errCode)
@@ -297,7 +346,13 @@ unary_expression
 		int opCode = getOpAddType($2, errCode, errStr);
 		if(errCode)
 			error($2->lexeme,errCode);
-        emit(opCode, $2->addr, "1", newTmp);
+		if(opCode == OP_ADDF) {
+			string globalFloatAddr = getGlobalFloatAddr();
+			sendFloatToGlobal("1.0", globalFloatAddr);
+			emit(opCode, $2->addr, globalFloatAddr, newTmp);
+		}else {
+			emit(opCode, $2->addr, "1", newTmp);
+		}
     	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $2->addr);
 		addTempDetails(newTmp, gSymTable, $2);
 		$$ = makeNode(strdup("INC_OP"), strdup("++"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
@@ -305,7 +360,7 @@ unary_expression
 		$$->addr = $2->addr;
 	}
 	| DEC_OP unary_expression {
-		int retval  = checkIntOrCharOrPointer($2);
+		int retval  = checkIntorCharorFloat($2);
 		if(retval) error($2->lexeme, retval);
 		string newTmp = generateTemp(errCode);
     	if(errCode)
@@ -313,7 +368,14 @@ unary_expression
 		int opCode = getOpSubType($2, errCode, errStr);
 		if(errCode)
 			error($2->lexeme,errCode);
-        emit(opCode, $2->addr, "1", newTmp);
+		if(opCode == OP_SUBF) {
+			string globalFloatAddr = getGlobalFloatAddr();
+			sendFloatToGlobal("1.0", globalFloatAddr);
+			emit(opCode, $2->addr, globalFloatAddr, newTmp);
+		}
+		else {
+			emit(opCode, $2->addr, "1", newTmp);
+		}
     	emit(OP_ASSIGNMENT, newTmp, EMPTY_STR, $2->addr);
 		addTempDetails(newTmp, gSymTable, $2);
 		$$ = makeNode(strdup("DEC_OP"), strdup("--"), 0, $2, (node*)NULL, (node*)NULL, (node*)NULL);
