@@ -53,7 +53,7 @@ Specifications:
     struct declaration inside functions
     Nested scopes
     Global variables initialization with constants only
-    switch case
+    switch case - no fall through except default
 
 compiler extra features:
     print symbol table scope wise in json format
