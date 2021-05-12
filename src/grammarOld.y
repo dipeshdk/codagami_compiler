@@ -1704,16 +1704,10 @@ enumerator
 
 type_qualifier
 	: CONST {
-		node* temp = makeNode(strdup("CONST"), strdup("const"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		temp->declSp = new declSpec();
-		temp->declSp->isConst = true;
-		$$ = temp;
+		error("const", UNSUPPORTED_FUNCTIONALITY);
 	}
 	| VOLATILE {
-		node* temp = makeNode(strdup("VOLATILE"), strdup("volatile"), 0, (node*)NULL, (node*)NULL, (node*)NULL, (node*)NULL);
-		temp->declSp = new declSpec();
-		temp->declSp->isVolatile = true;
-		$$ = temp;
+		error("const", UNSUPPORTED_FUNCTIONALITY);
 	}
 	;
 
@@ -2416,9 +2410,9 @@ int main(int ac, char **av) {
 		gTempSymbolMap->parent = nullptr;
         yyparse();
 		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
-		// char * fileName = strdup("graph.dot");
+		char * fileName = strdup("graph.dot");
 		// if(ac == 3) fileName = av[2];
-		// generateDot(root,fileName);
+		generateDot(root,fileName);
         
 		// printSymbolTable(gSymTable);
 		string asmFileName = directoryName + filePrefix +".s";

@@ -1,0 +1,20 @@
+Native Data types :integer, float, character  
+Variables and Expressions:
+
+Control structures:
+    Conditionals: if, if-else
+    Loops: for, while, do-while  
+Input/Output statements:
+    scanf, printf
+Arrays:
+    array of native data types, mutlidimension array, 
+    array of structs, array initialization while declaration
+Functions:
+    Recursion, mutual resursion, function declaration, 
+    function with return type as struct, function with parameter type as struct
+User defined types (struct):
+    no constructor
+Pointers (single level / stack pointers):
+    single level pointers allowed
+Simple library functions:
+    math functions: 
