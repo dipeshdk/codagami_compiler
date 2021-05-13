@@ -1,6 +1,6 @@
 struct foo{
     int a;
-    float b;
+    double b;
     char c;
 };
 
@@ -9,7 +9,7 @@ int main(){
     int b, c, d;
     struct foo e, f;
     char ff;
-    float xx;
+    double xx;
 
 
     a = sizeof(int);

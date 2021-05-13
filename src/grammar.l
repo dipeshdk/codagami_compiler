@@ -32,7 +32,7 @@ char* previ;
 "else"			{ count();  return(ELSE); }
 "enum"			{ count();  return(ENUM); }
 "extern"		{ count();  return(EXTERN); }
-"float"			{ count();  return(FLOAT); }
+"float"			{ count();  return(DOUBLE); }
 "for"			{ count();  return(FOR); }
 "goto"			{ count();  return(GOTO); }
 "if"			{ count();  return(IF); }
