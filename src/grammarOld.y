@@ -2372,70 +2372,125 @@ N_marker:
 #include <stdio.h>
 #include <unistd.h>
 
+#include <algorithm>
+#include <bits/stdc++.h>
 using namespace std;
 
-int main(int ac, char **av) {
-	int val;
-    FILE    *fd;
-    if (ac >= 2)
-    {
-		string inputFileName = string(av[1]); 
-        if (!(fd = fopen(inputFileName.c_str(), "r")))
-        {
-            perror(" Error: ");
-            return (-1);
+class InputParser{
+    public:
+        InputParser (int &argc, char **argv){
+            for (int i=1; i < argc; ++i)
+                this->tokens.push_back(std::string(argv[i]));
         }
-		string filePrefix = extractFileName(inputFileName);
-		string currDir = get_current_dir_name();
-		string directoryName = "outputs/" + filePrefix; 
-		int dir = mkdir(directoryName.c_str(), 0777);
-		if(dir == -1 && errno != EEXIST) {
-			cerr << "Error :  " << strerror(errno) << endl;
-			directoryName = currDir + "/outputs/";
-		} else {
-			directoryName.push_back('/');
-		}
-		string TACFilename =  directoryName + filePrefix +".tac"; 
-        yyset_in(fd);
-        
-        // Make the first symbol table with global scope
-		gSymTable = new symbolTable();
-		gTempSymbolMap = new symbolTable();
-		globalScopeSymTable = gSymTable;
-		if(!gSymTable) {
-			printf("ERROR: Cannot allocate global symbol table\n");
-			return 1;
-		}
-		initLibParamMap();
-		initialiseSymbolTable(gSymTable);
-		if(!gTempSymbolMap) {
-			printf("ERROR: Cannot allocate global temp symbol table\n");
-			return 1;
-		}
-		gSymTable->scope = gScope++;
-		gSymTable->parent = nullptr;
-		gTempSymbolMap->parent = nullptr;
-        yyparse();
-		root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
-		char * fileName = strdup("graph.dot");
-		// if(ac == 3) fileName = av[2];
-		generateDot(root,fileName);
-        
-		// printSymbolTable(gSymTable);
-		string asmFileName = directoryName + filePrefix +".s";
-		optimizeMultiGoto();
-		printCode((char*)TACFilename.c_str());
-		emitAssemblyFrom3AC(asmFileName);
-		string jsonFileNamePrefix = directoryName + filePrefix;
-		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
-		
-		fclose(fd);
-    }
-    else
-        printf("Usage: a.out input_filename [optional]ouput.dot \n");
-	return 0; 
-}
+        /// @author iain
+        const std::string& getCmdOption(const std::string &option) const{
+            std::vector<std::string>::const_iterator itr;
+            itr =  std::find(this->tokens.begin(), this->tokens.end(), option);
+            if (itr != this->tokens.end() && ++itr != this->tokens.end()){
+                return *itr;
+            }
+            static const std::string empty_string("");
+            return empty_string;
+        }
+        /// @author iain
+        bool cmdOptionExists(const std::string &option) const{
+            return std::find(this->tokens.begin(), this->tokens.end(), option)
+                   != this->tokens.end();
+        }
+    private:
+        std::vector <std::string> tokens;
+};
 
+int main(int argc, char **argv){
+    string inputFilename, asmFilename, tacFilename, symbolTableDir, dotFilename;
+    InputParser input(argc, argv);
+    int val;
+    FILE    *fd;
+    if(input.cmdOptionExists("-h")){
+        cout << "Usage: bin/codagami -i [input_file])(compulsory) -all [output_dir](outputs everything except ast in output dir) -o [output_file.s](default=input_file.s) -ast [dot_file.dot] -tac [tac_file.tac] -st [symbol_table_dir] -h(for help)" << endl;
+        return 0;
+    }
+    inputFilename = input.getCmdOption("-i");
+    if (inputFilename.empty()){
+        cout << "No input file" << endl;
+        cout << "Usage: bin/codagami -i [input_file])(compulsory) -o [output_file.s](default=codagamiAsm.s) -ast [dot_file.dot] -tac [tac_file.tac] -st [symbol_table_dir]" << endl;
+        return 1;
+    }
+    //input file fetch
+    string filePrefix = extractFileName(inputFilename);
+    if (!(fd = fopen(inputFilename.c_str(), "r")))
+    {
+        perror(" Error: ");
+        return (-1);
+    }
+    yyset_in(fd);
+
+    //parser code
+    // Make the first symbol table with global scope
+    gSymTable = new symbolTable();
+    gTempSymbolMap = new symbolTable();
+    globalScopeSymTable = gSymTable;
+    if(!gSymTable) {
+        printf("ERROR: Cannot allocate global symbol table\n");
+        return 1;
+    }
+    initLibParamMap();
+    initialiseSymbolTable(gSymTable);
+    if(!gTempSymbolMap) {
+        printf("ERROR: Cannot allocate global temp symbol table\n");
+        return 1;
+    }
+    gSymTable->scope = gScope++;
+    gSymTable->parent = nullptr;
+    gTempSymbolMap->parent = nullptr;
+    yyparse();
+    root = makeNode(strdup("ROOT"), strdup("root"), 0 ,root,  (node*) NULL,  (node*) NULL, (node*) NULL);
+    optimizeMultiGoto();
+
+	if(input.cmdOptionExists("-all")) {
+		string outputDir = input.getCmdOption("-all");
+        asmFilename = outputDir + filePrefix + ".s";
+		emitAssemblyFrom3AC(asmFilename);
+
+		tacFilename = outputDir + filePrefix + ".tac";
+        printCode((char*)tacFilename.c_str());
+
+		symbolTableDir = outputDir;
+        string jsonFileNamePrefix = symbolTableDir + filePrefix;
+		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
+
+		fclose(fd);
+    	return 0;
+    } 
+
+    asmFilename = filePrefix + ".s";
+    if(input.cmdOptionExists("-o")){
+        asmFilename = input.getCmdOption("-o");
+    }
+    //asm output
+    emitAssemblyFrom3AC(asmFilename);
+
+    if(input.cmdOptionExists("-ast")){
+        dotFilename = input.getCmdOption("-ast");
+        //gen dot code
+        generateDot(root,(char*)dotFilename.c_str());
+    }
+
+    if(input.cmdOptionExists("-tac")){
+        tacFilename = input.getCmdOption("-tac");
+        //tac code
+        printCode((char*)tacFilename.c_str());
+    }
+
+    if(input.cmdOptionExists("-st")){
+        symbolTableDir = input.getCmdOption("-st");
+        //symbol table code
+        string jsonFileNamePrefix = symbolTableDir + filePrefix;
+		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
+    }
+    fclose(fd);
+    return 0;
+}
 
 extern int column;
 void yyerror(const char* s)
