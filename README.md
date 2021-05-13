@@ -26,3 +26,14 @@ The project parses input C file and outputs an abstract syntax tree as a DOT scr
 $ cd src
 $ ./run && ./a.out ../tests/test1.c && ./genDot
 ```
+## Usage Documentation
+```console
+Brief Usage: bin/codagami -i [input_file](compulsory) -o [output_file.s](default=input_file.s)
+Details:
+        -all [output_dir]       :   outputs everything except ast in output dir
+        -ast [dot_file.dot]     :   outputs ast a .dot file 
+        -tac [tac_file.tac]     :   outputs 3AC 
+        -st [symbol_table_dir]  :   outputs symbol tables for each scope as a .json file 
+        -E                      :   Applies gcc preprocessor on input file before processing 
+        -h                      :   help 
+```
