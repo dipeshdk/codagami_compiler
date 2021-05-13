@@ -1,6 +1,6 @@
 int main(){
     int a, b, c;
-    float x, y, z;
+    double x, y, z;
     char p,q,r;
 
     a = -9;
@@ -20,7 +20,7 @@ int main(){
     c = a - b;
     c = -a - b;
 
-    /* float = float op float*/
+    /* double = double op double*/
     z = x * y;
     z = -x * y;
     z = -x + y;
@@ -40,7 +40,7 @@ int main(){
     r = p - q;
     r = -p - q;
 
-    /* float = int op float */
+    /* double = int op double */
     z = a * y;
     z = -a * y;
     z = -a + y;
@@ -50,7 +50,7 @@ int main(){
     z = a - y;
     z = -a - y;
 
-    /* char = int op float */
+    /* char = int op double */
     r = a * y;
     r = -a * y;
     r = -a + y;
@@ -60,7 +60,7 @@ int main(){
     r = a - y;
     r = -a - y;
 
-    /* float = char op float */
+    /* double = char op double */
     z = p * y;
     z = -p * y;
     z = -p + y;
@@ -70,7 +70,7 @@ int main(){
     z = p - y;
     z = -p - y;
 
-    /*int = char op float */
+    /*int = char op double */
     c = p * y;
     c = -p * y;
     c = -p + y;

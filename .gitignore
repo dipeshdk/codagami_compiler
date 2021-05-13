@@ -61,7 +61,7 @@ symbolTable.txt
 *.asm
 .vscode/*
 .vscode/settings.json
-# asmOut.s
+asmOut.s
 outputs/*
 gccOutput
 myOutput

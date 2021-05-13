@@ -1,7 +1,7 @@
 char* str = "%d\n";
 
 int main(){
-    float a = 3.0, b = 0.0, c;
+    double a = 3.0, b = 0.0, c;
     int d = 5, e = 2;
     if((c  = (0.0 || 1.0))){
         d = 10;

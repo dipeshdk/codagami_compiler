@@ -4,7 +4,7 @@ This project is aimed to make a compiler of our own as a group project of the co
 
 ## Members
 
--   [Chimaya Singal (180207)](https://github.com/https://github.com/chinmaya-s)
+-   [Chinmaya Singal (180207)](https://github.com/chinmaya-s)
 -   [Dipesh Khandelwal (180249)](https://github.com/dipeshdk)
 -   [Rythm Agarwal (180636)](https://github.com/Rythmag)
 -   [Sakshi (180653)](https://github.com/Sakshisak)
@@ -33,6 +33,7 @@ $  bash codagamiBinary.out
 ```
 For detailed use of codagami binary, refer to Documentation section of README.md.
 ### 
+
 
 ### Build everything and diff the output with gcc
 To compare the output given by codagami and GCC, you can use the run script as follows:
@@ -70,4 +71,3 @@ Details:
         -st [symbol_table_dir]  :   outputs symbol tables for each scope as a .json file 
         -E                      :   Applies gcc preprocessor on input file before processing 
         -h                      :   help 
-```
