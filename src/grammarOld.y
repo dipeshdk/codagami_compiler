@@ -2407,17 +2407,33 @@ int main(int argc, char **argv){
     int val;
     FILE    *fd;
     if(input.cmdOptionExists("-h")){
-        cout << "Usage: bin/codagami -i [input_file])(compulsory) -all [output_dir](outputs everything except ast in output dir) -o [output_file.s](default=input_file.s) -ast [dot_file.dot] -tac [tac_file.tac] -st [symbol_table_dir] -h(for help)" << endl;
+        cout << "Brief Usage: bin/codagami -i [input_file](compulsory) -o [output_file.s](default=input_file.s)" << endl;
+		cout <<	"Details:" << endl;
+		cout <<	"	-all [output_dir]       :   outputs everything except ast in output dir" << endl;
+		cout <<	"	-ast [dot_file.dot]     :   outputs ast a .dot file " << endl;
+		cout <<	"	-tac [tac_file.tac]     :   outputs 3AC " << endl;
+		cout <<	"	-st [symbol_table_dir]  :   outputs symbol tables for each scope as a .json file " << endl;
+		cout <<	"	-E                      :   Applies gcc preprocessor on input file before processing " << endl;
+		cout <<	"	-h                      :   help " << endl;
         return 0;
     }
+
     inputFilename = input.getCmdOption("-i");
     if (inputFilename.empty()){
         cout << "No input file" << endl;
-        cout << "Usage: bin/codagami -i [input_file])(compulsory) -o [output_file.s](default=codagamiAsm.s) -ast [dot_file.dot] -tac [tac_file.tac] -st [symbol_table_dir]" << endl;
+		cout << "Brief Usage: bin/codagami -i [input_file]() -o [output_file.s](default=input_file.s)" << endl;
+		cout << "Use -h for help" << endl;
         return 1;
     }
     //input file fetch
     string filePrefix = extractFileName(inputFilename);
+	if(input.cmdOptionExists("-E")){
+		string commandStr = "gcc -E " + inputFilename + " -o codagamiPreTemp.c";
+        system(commandStr.c_str());
+		system("sed '/^#/ d' < codagamiPreTemp.c > codagamiPre.c");
+		inputFilename = "codagamiPre.c";
+    }
+	
     if (!(fd = fopen(inputFilename.c_str(), "r")))
     {
         perror(" Error: ");
@@ -2489,6 +2505,10 @@ int main(int argc, char **argv){
 		printSymbolTableJSON(jsonFileNamePrefix,gSymTable,0,1);
     }
     fclose(fd);
+	if(input.cmdOptionExists("-E")) {
+		system("rm codagamiPre.c");
+		system("rm codagamiPreTemp.c");
+	} 
     return 0;
 }
 

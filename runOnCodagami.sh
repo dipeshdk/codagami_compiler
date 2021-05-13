@@ -22,7 +22,7 @@ echo -e "${BLUE}----------------------file name $fileName-----------------------
 echo -e "${BLUE}----------------------building assembly bin/3AC --------------------------${NC}"
 rm -f outputs/${fileName}
 mkdir outputs/${fileName}
-bin/codagami -i ${testPath} -all outputs/${fileName}/
+bin/codagami -i ${testPath} -all outputs/${fileName}/ -E
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error building codagami assembly${NC}";
     exit 1
