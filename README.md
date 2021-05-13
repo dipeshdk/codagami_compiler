@@ -20,13 +20,34 @@ This project is aimed to make a compiler of our own as a group project of the co
 
 The project parses input C file and outputs an abstract syntax tree as a DOT script. This DOT script can be processed to view the AST in graphical form.
 
-## Usage example
+## Usage
 
+### Build everything 
 ```console
-$ cd src
-$ ./run && ./a.out ../tests/test1.c && ./genDot
+$  cd src
+$  cd ./runOnCodagami [test_file]
 ```
-## Usage Documentation
+
+### Build everything and diff the output with gcc
+```console
+$  cd src
+$  cd ./runTest [test_file]
+```
+
+### Build and Run all testcases
+```console
+$  make test
+```
+
+## Documentation
+### MakeFile
+```console
+make    :       Build codagami binariy
+make clean   :  Removes temporaries
+make realclean   :  Removes temporaries and outputs
+make test   :  Build and test on all testcases
+```
+### Codagami binary
 ```console
 Brief Usage: bin/codagami -i [input_file](compulsory) -o [output_file.s](default=input_file.s)
 Details:
