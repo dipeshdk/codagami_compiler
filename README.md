@@ -29,7 +29,7 @@ Or you can manually run the commands:
 $  make
 $  bin/codagami -i [input_file] -all
 $  gcc -no-pie outputs/[input_file]/[input_file].s -o codagamiBinary.out -lm
-$ bash codagamiBinary.out
+$  bash codagamiBinary.out
 ```
 For detailed use of codagami binary, refer to Documentation section of README.md.
 ### 
