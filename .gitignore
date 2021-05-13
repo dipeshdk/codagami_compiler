@@ -68,3 +68,6 @@ myOutput
 temp*
 sample2.txt
 failed_logs
+codagamiPre.c
+codagamiPreTemp.c
+gccTemp.c
