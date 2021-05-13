@@ -15,7 +15,8 @@ stack<int> ptrAssignedRegs;
 set<string> libraryFunctions{"fopen", "fprintf", "fscanf", "fclose", "printf", "scanf", "malloc", "free", "fabs", "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "logb", "sqrt", "cbrt", "round",
                                 "sin", "cos", "tan", "asin", "acos", "atan", "trunc", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "floor", "ceil", "erf", "erfc", "tgamma", "lgamma"
                                 "abs", "labs", "fmod", "remainder", "nextafter", "copysign", "fmax", "fmin", "fdim", "hypot", "pow", "round", "atan2"
-                                "signbit", "isnormal", "isnan","isinf","isfinite", "ilogb", "lround", "fma"};
+                                "signbit", "isnormal", "isnan","isinf","isfinite", "ilogb", "lround", "fma", "difftime", "clock", "ctime", "calloc", "raise", "rand", "rand_r", "realloc","time64",
+                                "toascii", "tolower", "toupper", "sleep", "exit", "abort"};
 
 set<string> mathFuncs{"fabs", "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "logb", "sqrt", "cbrt", "round",
                                 "sin", "cos", "tan", "asin", "acos", "atan", "trunc", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "floor", "ceil", "erf", "erfc", "tgamma", "lgamma"
@@ -40,6 +41,21 @@ set<string> TripleFloatLibFunc{"fma"}; // 3 double arguments, returns double
 void initLibParamMap() {
     gLibParamMap.insert({"fopen", new libFunc({ new libParam("filename", TYPE_CHAR, 1), new libParam("mode", TYPE_CHAR, 1) }, TYPE_INT, 1)});
     gLibParamMap.insert({"fclose", new libFunc({ new libParam("fp", TYPE_INT, 1) }, TYPE_INT, 0)});
+    gLibParamMap.insert({"difftime", new libFunc({ new libParam("time_1", TYPE_INT, 0), new libParam("time_2", TYPE_INT, 0) }, TYPE_FLOAT, 0)});
+    gLibParamMap.insert({"clock", new libFunc({}, TYPE_INT, 0)});
+    gLibParamMap.insert({"ctime", new libFunc({new libParam("time", TYPE_INT, 1)}, TYPE_CHAR, 1)});
+    gLibParamMap.insert({"calloc", new libFunc({new libParam("num", TYPE_INT, 0), new libParam("size", TYPE_INT, 0)}, TYPE_INT, 1)});
+    gLibParamMap.insert({"raise", new libFunc({new libParam("sig", TYPE_INT, 0)}, TYPE_INT, 0)});
+    gLibParamMap.insert({"rand", new libFunc({}, TYPE_INT, 0)});
+    gLibParamMap.insert({"rand_r", new libFunc({}, TYPE_INT, 0)});
+    gLibParamMap.insert({"realloc", new libFunc({new libParam("ptr", TYPE_INT, 1), new libParam("size", TYPE_INT, 0)}, TYPE_INT, 1)});
+    gLibParamMap.insert({"time64", new libFunc({new libParam("time_ptr", TYPE_INT, 1)}, TYPE_INT, 0)});
+    gLibParamMap.insert({"toascii", new libFunc({new libParam("c", TYPE_INT, 0)}, TYPE_INT, 0)});
+    gLibParamMap.insert({"toupper", new libFunc({new libParam("c", TYPE_INT, 0)}, TYPE_INT, 0)});
+    gLibParamMap.insert({"tolower", new libFunc({new libParam("c", TYPE_INT, 0)}, TYPE_INT, 0)});
+    gLibParamMap.insert({"sleep", new libFunc({new libParam("seconds", TYPE_INT, 0)}, TYPE_INT, 0)});
+    gLibParamMap.insert({"exit", new libFunc({new libParam("status", TYPE_INT, 0)}, TYPE_VOID, 0)});
+    gLibParamMap.insert({"abort", new libFunc({new libParam("abort", TYPE_VOID, 0)}, TYPE_VOID, 0)});
 }
 
 bool isTypecasted(string name) {
