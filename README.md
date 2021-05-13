@@ -19,21 +19,38 @@ This project is aimed to make a compiler of our own as a group project of the co
 ## Usage
 
 ### Build everything 
+To build codagami binary and compile a C file, and output assembly, 3AC and symbol table, you can use the bash script runOnCodagami as:
 ```console
-$  cd src
-$  cd ./runOnCodagami [test_file]
+$  bash runOnCodagami.sh [input_file.c]
 ```
+runOnCodagami stores the outputs in ./outputs/[input_file] directory \
+Or you can manually run the commands:
+```console
+$  make
+$  bin/codagami -i [input_file] -all
+$  gcc -no-pie outputs/[input_file]/[input_file].s -o codagamiBinary.out -lm
+$ bash codagamiBinary.out
+```
+For detailed use of codagami binary, refer to Documentation section of README.md.
+### 
 
 ### Build everything and diff the output with gcc
+To compare the output given by codagami and GCC, you can use the run script as follows:
 ```console
-$  cd src
-$  cd ./runTest [test_file]
+$  bash runTest.sh [input_file.c]
 ```
+This will show you the diff of the output given by GCC and output given by codagami under the section "printing diff".
 
 ### Build and Run all testcases
+We have made some test cases which are contained in the directory tests/ and these all testcases can be run through testScript.sh script as follows:
 ```console
 $  make test
 ```
+or
+```console
+$  bash testScript.sh
+```
+This will show you on the console which test cases are passing and which are failing. For the test cases which fail you can refer to failed_logs for finding the error information thrown by codagami.
 
 ## Documentation
 ### MakeFile
