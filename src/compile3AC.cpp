@@ -15,7 +15,7 @@ stack<int> ptrAssignedRegs;
 set<string> libraryFunctions{"fopen", "fprintf", "fscanf", "fclose", "printf", "scanf", "malloc", "free", "fabs", "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "logb", "sqrt", "cbrt", "round",
                                 "sin", "cos", "tan", "asin", "acos", "atan", "trunc", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "floor", "ceil", "erf", "erfc", "tgamma", "lgamma"
                                 "abs", "labs", "fmod", "remainder", "nextafter", "copysign", "fmax", "fmin", "fdim", "hypot", "pow", "round", "atan2"
-                                "signbit", "isnormal", "isnan","isinf","isfinite", "ilogb", "lround", "fma", "difftime", "clock", "ctime", "calloc", "raise", "rand", "rand_r", "realloc","time64",
+                                "signbit", "isnormal", "isnan","isinf","isfinite", "ilogb", "lround", "fma", "difftime", "clock", "ctime", "calloc", "raise", "rand", "rand_r", "realloc","time",
                                 "toascii", "tolower", "toupper", "sleep", "exit", "abort"};
 
 set<string> mathFuncs{"fabs", "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "logb", "sqrt", "cbrt", "round",
@@ -48,8 +48,7 @@ void initLibParamMap() {
     gLibParamMap.insert({"raise", new libFunc({new libParam("sig", TYPE_INT, 0)}, TYPE_INT, 0)});
     gLibParamMap.insert({"rand", new libFunc({}, TYPE_INT, 0)});
     gLibParamMap.insert({"rand_r", new libFunc({}, TYPE_INT, 0)});
-    gLibParamMap.insert({"realloc", new libFunc({new libParam("ptr", TYPE_INT, 1), new libParam("size", TYPE_INT, 0)}, TYPE_INT, 1)});
-    gLibParamMap.insert({"time64", new libFunc({new libParam("time_ptr", TYPE_INT, 1)}, TYPE_INT, 0)});
+    gLibParamMap.insert({"time", new libFunc({new libParam("time_ptr", TYPE_INT, 1)}, TYPE_VOID, 0)});
     gLibParamMap.insert({"toascii", new libFunc({new libParam("c", TYPE_INT, 0)}, TYPE_INT, 0)});
     gLibParamMap.insert({"toupper", new libFunc({new libParam("c", TYPE_INT, 0)}, TYPE_INT, 0)});
     gLibParamMap.insert({"tolower", new libFunc({new libParam("c", TYPE_INT, 0)}, TYPE_INT, 0)});

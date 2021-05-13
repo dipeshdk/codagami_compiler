@@ -16,12 +16,6 @@ int main(){
         printf("%d, ", ptr[i]);
     }
     printf("\n");
-    /* ptr = realloc(ptr, n*2);
-    for(i = 0; i<n*2; i++){
-        ptr[i] = i*2;
-        printf("%d, ", ptr[i]);
-    }
-    printf("\n"); */
 
     return 0;
 }

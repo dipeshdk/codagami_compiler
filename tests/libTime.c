@@ -1,6 +1,6 @@
 int main(){
     int sec;
-    int start_time, end_time, total_t;
+    int start_time, end_time, total_t, currTime;
     int i;
     char* charTime;
     int j = 0;
@@ -13,7 +13,10 @@ int main(){
     end_time = clock();
     printf("End of the big loop, end_time = %d\n", end_time);
     printf("Difference is  %d seconds\n", difftime(end_time, start_time));
-    charTime = ctime(&end_time);
+    time(&currTime);
+    charTime = ctime(&currTime);
+
+    
     printf("Time in characters = %s\n", charTime);
     return 0;
 }
